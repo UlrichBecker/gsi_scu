@@ -1,3 +1,15 @@
 [submodule "makefiles/DoxygenMakefile"]
 	path = makefiles/DoxygenMakefile
 	url = https://github.com/UlrichBecker/DoxygenMakefile.git
+[submodule "srclib/linux/command_line_option_parser_cpp11"]
+	path = srclib/linux/command_line_option_parser_cpp11
+	url = https://github.com/UlrichBecker/command_line_option_parser_cpp11.git
+[submodule "srclib/linux/gnu-plotstream"]
+	path = srclib/linux/gnu-plotstream
+	url = https://github.com/UlrichBecker/gnu-plotstream.git
+[submodule "srclib/linux/get_linux_process_id"]
+	path = srclib/linux/get_linux_process_id
+	url = https://github.com/UlrichBecker/get_linux_process_id.git
+[submodule "srclib/lm32/FreeRTOS-Kernel"]
+	path = srclib/lm32/FreeRTOS-Kernel
+	url = https://github.com/UlrichBecker/FreeRTOS-Kernel.git
