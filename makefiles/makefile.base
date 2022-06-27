@@ -1,0 +1,345 @@
+###############################################################################
+##                                                                           ##
+##         General base include makefile for C, C++ and Assembler            ##
+##                                                                           ##
+##---------------------------------------------------------------------------##
+## File:    makefile.base                                                    ##
+## (c):     GSI Helmholtz Centre for Heavy Ion Research GmbH                 ##
+## Author:  Ulrich Becker                                                    ##
+## Date:    22.01.2019                                                       ##
+###############################################################################
+ifndef IS_LIBRARY
+  ifndef MIAN_MODULE
+    $(error No main module defined in variable MIAN_MODULE !)
+  endif
+endif
+ifndef CPU
+  $(error No target CPU defined in variable CPU !)
+endif
+ifndef CC
+  $(error No C-compiler defined in variable CC !)
+endif
+ifndef CXX
+  $(error No C++-compiler defined in variable CXX !)
+endif
+ifndef AS
+  $(error No assembler defined in variable AS !)
+endif
+ifndef LD
+  $(error No linker defined in variable LD !)
+endif
+ifndef CPP
+  $(error No C-PreProcessor defined in variable CPP !)
+endif
+
+GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $$1}' )
+
+GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "453" ] && echo "1" )
+
+DEFINES += TARGET_NAME=$(TARGET)
+DEFINES += CONFIG_GSI
+DEFINES += CONFIG_GSI_FE
+
+ifndef NO_COLORED
+   ESC_FG_CYAN    := "\\e[36m"
+   ESC_FG_MAGENTA := "\\e[35m"
+   ESC_FG_RED     := "\\e[31m"
+   ESC_FG_GREEN   := "\\e[32m"
+   ESC_BOLD       := "\\e[1m"
+   ESC_NORMAL     := "\\e[0m"
+   ESC_ERROR      := "$(ESC_BOLD)$(ESC_FG_RED)"
+endif
+
+ifeq ($(V), 1)
+   CC_F      = $(CC)
+   CXX_F     = $(CXX)
+   CPP_F     = $(CPP)
+   CXXCPP_F  = $(CXXCPP)
+   LD_F      = $(LD)
+   AS_F      = $(AS)
+   AR_F      = $(AR)
+   OBJCPY_F  = $(OBJCPY)
+   OBJDUMP_F = $(OBJDUMP)
+else
+   CXX_MSG     := "CXX"
+   CC_MSG      := "CC"
+   CPP_MSG     := "CPP"
+   LD_MSG      := "LD"
+   LDSH_MSG    := "LD SH-LIB"
+   AR_MSG      := "AR"
+   AS_MSG      := "AS"
+   OBJCPY_MSG  := "OBJCPY"
+   OBJDUMP_MSG := "OBJDUMP"
+   STRIP_MSG   := "STRIP"
+   FORMAT      := @printf "[ %s %s ]\t%s\n"
+ ifdef NO_COLORED
+   FORMAT_L    := $(FORMAT)
+   FORMAT_R    := $(FORMAT)
+ else
+   FORMAT_L    := @printf "[ %s %s ]\t$(ESC_FG_MAGENTA)%s$(ESC_NORMAL)\n"
+   FORMAT_R    := @printf "[ %s %s ]\t$(ESC_FG_CYAN)$(ESC_BOLD)%s$(ESC_NORMAL)\n"
+ endif
+   CC_F        = $(FORMAT)   $(CPU) $(CC_MSG)      $(@); $(CC)
+   CXX_F       = $(FORMAT)   $(CPU) $(CXX_MSG)     $(@); $(CXX)
+   CPP_F       = $(FORMAT)   $(CPU) $(CPP_MSG)     $(@); $(CPP)
+   CXXCPP_F    = $(FORMAT)   $(CPU) $(CPP_MSG)     $(@); $(CXXCPP)
+   LD_F        = $(FORMAT_L) $(CPU) $(LD_MSG)      $(@); $(LD)
+   AS_F        = $(FORMAT)   $(CPU) $(AS_MSG)      $(@); $(AS)
+   AR_F        = $(FORMAT_L) $(CPU) $(AR_MSG)      $(@); $(AR)
+   OBJCPY_F    = $(FORMAT_R) $(CPU) $(OBJCPY_MSG)  $(@); $(OBJCPY)
+   OBJDUMP_F   = $(FORMAT)   $(CPU) $(OBJDUMP_MSG) $(@); $(OBJDUMP)
+   QUIET       = @
+endif
+
+
+LTO_ABILITY := $(shell [ "$(GCC_VERSION)" -gt "469" ] && echo "1" )
+ifeq ($(DEBUG), 1)
+  NO_LTO = 1
+endif
+ifdef LTO_ABILITY
+ ifndef NO_LTO
+   LTO = -flto
+   DEFINES += CONFIG_LTO_SUPPORT
+ endif
+else
+ ifndef NO_LTO
+   $(warning "WARNING: Compiler is obsolete, therefore no link time optimization (LTO) support!" )
+ endif
+endif
+LD_FLAGS += $(LTO)
+ifdef LTO
+   LTO_INFO = "Yes"
+else
+   LTO_INFO = "No"
+endif
+
+RESULT_FILE  ?= $(BIN_FILE)
+SOURCE       += $(MIAN_MODULE)
+INCLUDE_DIRS += $(dir $(MIAN_MODULE))
+
+_SOURCE       = $(strip $(SOURCE))
+
+ifeq (.cpp, $(findstring .cpp,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifeq (.CPP, $(findstring .CPP,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifeq (.cxx, $(findstring .cxx,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifeq (.CXX, $(findstring .CXX,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifeq (.cc, $(findstring .cc,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifeq (.CC, $(findstring .CC,$(_SOURCE) ))
+   CPLUSPLUS_MODULE_PRESENT := 1
+endif
+ifdef CPLUSPLUS_MODULE_PRESENT
+   DEFINES += CONFIG_CPLUSPLUS_MODULE_PRESENT
+endif
+
+
+ifdef LIBS
+   ARG_LIBS := $(addprefix -l,$(LIBS) )
+endif
+ifdef LIB_DIRS
+   ARG_LIBS += $(addprefix -L,$(LIB_DIRS))
+endif
+
+
+GENERATED_DIR ?= $(dir $(MIAN_MODULE))generated
+INCLUDE_DIRS  += $(GENERATED_DIR)
+DEPLOY_DIR    ?= ./deploy_$(CPU)
+WORK_DIR      ?= $(DEPLOY_DIR)/work
+TARGET_DIR    ?= $(DEPLOY_DIR)/result
+
+OPT_INCLUDE := $(addprefix -I,$(strip $(INCLUDE_DIRS)))
+OPT_DEFINES := $(addprefix -D,$(DEFINES) )
+OPT_DEFINES += -DGIT_REVISION="$(shell git --git-dir=$(REPOSITORY_DIR)/.git log -n1 --pretty='format:%h (%ci)')"
+
+OBJ_FILES   := $(addprefix $(WORK_DIR)/,$(addsuffix .o,$(notdir $(_SOURCE))))
+DEPENDFILE  = $(WORK_DIR)/$(TARGET).dep
+
+ifeq ($(DEBUG), 1)
+  CFLAGS = -g -O0
+else
+  CODE_OPTIMIZATION ?= s
+  CFLAGS += -O$(CODE_OPTIMIZATION)
+endif
+
+CFLAGS += $(LTO)
+CFLAGS += -Wfatal-errors
+CFLAGS += -Wall
+CFLAGS += -Wno-strict-aliasing
+# CFLAGS += -Wmaybe-uninitialized
+ifdef GCC_LEGACY
+  CFLAGS += -Wno-unused-variable
+  #CFLAGS += -Wmaybe-uninitialized
+endif
+
+CC_ARG = $(CFLAGS) $(OPT_INCLUDE) $(OPT_DEFINES)
+CXX_ARG ?= $(CC_ARG)
+AS_ARG ?= $(CC_ARG)
+
+ALL += check_src $(WORK_DIR) $(TARGET_DIR) $(RESULT_FILE)
+#ifndef IS_LIBRARY
+  ALL += size
+#endif
+ALL += version
+
+.PHONY: all
+all: $(ALL)
+
+.PHONY: version
+version:
+ifeq ($(V), 1)
+	$(CC) --version
+else
+	@echo "Compiler: $$($(CC) --version | head -n1)"
+endif
+
+CHECK_SOURCE += $(SOURCE)
+
+.PHONY: check_src
+check_src:
+	$(QUIET)(for i in $(CHECK_SOURCE); do \
+		[ -f "$$i" ] || echo -e $(ESC_FG_RED)"ERROR: Sourcefile \"$$i\" not found!"$(ESC_NORMAL) 1>&2; \
+	done)
+
+$(GENERATED_DIR):
+	$(QUIET)mkdir -p $(GENERATED_DIR)
+
+$(WORK_DIR):
+	$(QUIET)mkdir -p $(WORK_DIR)
+
+$(TARGET_DIR):
+	$(QUIET)mkdir -p $(TARGET_DIR)
+
+ifdef FREE_RTOS_CONFIG_STANDARD_FILE
+$(FREE_RTOS_CONFIG_STANDARD_FILE):
+	ln -s $(FREE_RTOS_CONFIG_FILE) $(FREE_RTOS_CONFIG_STANDARD_FILE)
+endif
+
+#
+# TODO Following rule could be made a bit better...
+#
+$(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
+	$(QUIET)(for i in $(_SOURCE); do                                       \
+		printf "$(WORK_DIR)/";                                         \
+		case "$${i##*.}" in                                            \
+		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                             \
+			x=$$($(CXX) -MM $(CC_ARG) "$$i");                      \
+			if [ "$$?" != "0" ];                                   \
+			then                                                   \
+			   echo :;  # prevents a makefile syntax error         \
+			else                                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
+			fi;                                                    \
+			printf '\t$$(CXX_F) -c -o $$@ $$< $$(CXX_ARG)\n\n';    \
+		;;                                                             \
+		"c"|"C")                                                       \
+			x=$$($(CC) -MM $(CC_ARG) "$$i");                       \
+			if [ "$$?" != "0" ];                                   \
+			then                                                   \
+			   echo :;  # prevents a makefile syntax error         \
+			else                                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
+			fi;                                                    \
+			printf '\t$$(CC_F) -c -o $$@ $$< $$(CC_ARG)\n\n';      \
+		;;                                                             \
+		"s"|"S")                                                       \
+			x=$$($(AS) -MM $(CC_ARG) "$$i");                       \
+			if [ "$$?" != "0" ];                                   \
+			then                                                   \
+			   echo :;  # prevents a makefile syntax error         \
+			else                                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
+			fi;                                                    \
+			printf '\t$$(AS_F) -c -o $$@ $$< $$(AS_ARG)\n\n';      \
+		;;                                                             \
+		esac;                                                          \
+	done) > $(DEPENDFILE);
+
+
+.PHONY: ver
+ver:
+	$(QUIET)echo $(GCC_VERSION)
+
+.PHONY: dep
+dep: $(WORK_DIR) $(DEPENDFILE)
+	@cat $(DEPENDFILE)
+
+.PHONY: lsrc
+lsrc:
+	$(QUIET)echo $(_SOURCE) | tr ' ' '\n'
+
+.PHONY: ldep
+ldep: $(WORK_DIR) $(DEPENDFILE)
+	$(QUIET) cat $(DEPENDFILE) | sed 's/:/:\n/g'| grep -v ':' | grep -v '@' | \
+	tr -d '\\' | tr ' ' '\n' | awk NF | sort | uniq
+
+.PHONY: incdirs
+incdirs:
+	$(QUIET)echo $(INCLUDE_DIRS) | tr ' ' '\n'
+
+.PHONY: incargs
+incargs:
+	$(QUIET)echo $(OPT_INCLUDE)
+
+.PHONY: clean
+clean:
+	$(QUIET)( rm $(ADDITIONAL_TO_CLEAN); \
+	rm $(OBJ_FILES); \
+	rm $(DEPENDFILE); \
+	rm $(BIN_FILE); \
+	rmdir $(WORK_DIR); \
+	rmdir $(TARGET_DIR); \
+	rmdir $(DEPLOY_DIR); \
+	rmdir $(GENERATED_DIR); \
+	exit 0 ) 2>/dev/null
+
+.PHONY: rebuild
+rebuild: clean
+	$(MAKE) all
+
+-include $(DEPENDFILE)
+
+#-------------------------------- Doxygen -------------------------------------
+
+.PHONY: doxinput
+doxinput: $(DEPENDFILE)
+	@echo 'INPUT                    = \'                 > ${DOXY_CFG_FILE}
+	@cat $(DEPENDFILE) | sed 's/:/:\n/g' | grep -v ':' | \
+	     grep -v '@' | tr -d '\\' | tr ' ' '\n' | \
+	     awk NF | sort | uniq | \
+	     tr '\n' ' '                                    >> ${DOXY_CFG_FILE}
+	@echo                                               >> ${DOXY_CFG_FILE}
+
+DOX_FILE_APPEND             := 1
+DOX_ADDITIONAL_DEPENDENCIES += doxinput
+DOX_PROJECT_NAME            ?= "$(shell echo $(TARGET) | tr '_' ' ' )"
+DOX_INPUT                  += $(MAKEFILE_DIR)/makefile.base
+DOX_TYPEDEF_HIDES_STRUCT   ?= "YES"
+DOX_INLINE_INHERITED_MEMB  ?= "YES"
+DOX_OPTIMIZE_OUTPUT_FOR_C  ?= "YES"
+DOX_EXTRACT_ALL            ?= "YES"
+DOX_FORCE_LOCAL_INCLUDES   ?= "YES"
+DOX_RECURSIVE              ?= "NO"
+DOX_INLINE_SOURCES         ?= "NO"
+DOX_FORCE_LOCAL_INCLUDES   ?= "YES"
+DOX_MACRO_EXPANSION        ?= "NO"
+DOX_EXTRACT_STATIC         ?= "YES"
+DOX_PREDEFINED             += $(DEFINES)
+ DOX_PREDEFINED            += "STATIC_ASSERT( cond )=void"
+DOX_REFERENCES_RELATION    ?= "YES"
+DOXY_CFG_FILE              ?= $(DOX_OUTPUT_DIRECTORY)/Doxyfile
+
+DOX_MAKEFILE ?= $(MAKEFILE_DIR)/makefile.dox
+
+# The presence of the Doxygen-makefile is optional only.
+-include $(DOX_MAKEFILE)
+
+#=================================== EOF ======================================

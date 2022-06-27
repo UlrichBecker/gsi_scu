@@ -1,0 +1,77 @@
+###############################################################################
+##                                                                           ##
+##           Include makefile for FreeRTOS LM32 projects on SCU              ##
+##                                                                           ##
+##---------------------------------------------------------------------------##
+## File:    makefile.rtos                                                    ##
+## (c):     GSI Helmholtz Centre for Heavy Ion Research GmbH                 ##
+## Author:  Ulrich Becker                                                    ##
+## Date:    14.01.2020                                                       ##
+###############################################################################
+ifndef REPOSITORY_DIR
+   $(error Variable REPOSITORY_DIR is not defined! )
+endif
+
+# Select one of the heap modules 1 - 5.
+# If this value 0 so the static memory allocation will used. That means
+# the user have to allocate memory explicit. In this case the macro
+# configSUPPORT_DYNAMIC_ALLOCATION will defined with 0 in portmacro.h.
+# The default is 1.
+# See https://www.freertos.org/a00111.html
+RTOS_USING_HEAP ?= 1
+
+# Text for build-id item.
+EMBEDDED_OS ?= FreeRTOS Kernel:
+
+RTOS_BASE_DIR   ?= $(REPOSITORY_DIR)/modules/FreeRTOS
+RTOS_SRC_DIR    ?= $(RTOS_BASE_DIR)/Source
+RTOS_HEADER_DIR ?= $(RTOS_SRC_DIR)/include
+RTOS_PORT_DIR   ?= $(RTOS_SRC_DIR)/portable/GCC/SCU_LM32
+
+RTOS_INCLUDE_DIR += $(RTOS_HEADER_DIR)
+RTOS_INCLUDE_DIR += $(RTOS_PORT_DIR)
+
+# Will used at least for the timer-interrupt.
+RTOS_SOURCE += $(SCU_LIB_SRC_DIR)/lm32Interrupts.c
+
+# SCU specific files for FreeRTOS
+RTOS_SOURCE += $(RTOS_PORT_DIR)/portasm.S
+RTOS_SOURCE += $(RTOS_PORT_DIR)/port.c
+
+# Pure FreeRTOS base files
+RTOS_SOURCE += $(RTOS_SRC_DIR)/list.c
+RTOS_SOURCE += $(RTOS_SRC_DIR)/queue.c
+RTOS_SOURCE += $(RTOS_SRC_DIR)/tasks.c
+RTOS_SOURCE += $(RTOS_SRC_DIR)/timers.c
+
+ifneq ($(RTOS_USING_HEAP), 0)
+  RTOS_SOURCE += $(RTOS_SRC_DIR)/portable/MemMang/heap_$(RTOS_USING_HEAP).c
+  DEFINES += CONFIG_RTOS_HEAP=$(RTOS_USING_HEAP)
+endif
+
+ifdef RTOS_ADDITIONAL_SOURCES
+  RTOS_SOURCE += $(RTOS_SRC_DIR)/croutine.c
+  RTOS_SOURCE += $(RTOS_SRC_DIR)/event_groups.c
+  RTOS_SOURCE += $(RTOS_SRC_DIR)/stream_buffer.c
+endif
+
+SOURCE       += $(RTOS_SOURCE)
+INCLUDE_DIRS += $(RTOS_INCLUDE_DIR)
+
+# Compiler switch CONFIG_RTOS is extremely necessary when FreeRTOS is used!
+# Especially for the startup-code crt0ScuLm32.S.
+DEFINES += CONFIG_RTOS
+
+FREE_RTOS_CONFIG_FILE          ?= $(basename $(MIAN_MODULE))Config.h
+FREE_RTOS_CONFIG_STANDARD_FILE  = $(dir $(MIAN_MODULE))FreeRTOSConfig.h
+ADDITIONAL_DEPENDENCES         += $(FREE_RTOS_CONFIG_STANDARD_FILE)
+ADDITIONAL_TO_CLEAN            += $(FREE_RTOS_CONFIG_STANDARD_FILE)
+CHECK_SOURCE                   += $(FREE_RTOS_CONFIG_FILE)
+
+# ---------------------------- for Doxygen only -------------------------------
+DOX_TAB_SIZE = 4
+
+# Header files which doesn't have a appropriate C-file.
+DOX_INPUT += $(REPOSITORY_DIR)/makefiles/makefile.rtos
+
+#===================================== EOF ====================================

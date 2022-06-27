@@ -1,0 +1,3 @@
+[submodule "makefiles/DoxygenMakefile"]
+	path = makefiles/DoxygenMakefile
+	url = https://github.com/UlrichBecker/DoxygenMakefile.git
