@@ -23,16 +23,16 @@ RTOS_USING_HEAP ?= 1
 # Text for build-id item.
 EMBEDDED_OS ?= FreeRTOS Kernel:
 
-RTOS_BASE_DIR   ?= $(REPOSITORY_DIR)/modules/FreeRTOS
-RTOS_SRC_DIR    ?= $(RTOS_BASE_DIR)/Source
+RTOS_BASE_DIR   ?= $(SCU_LIB_SRC_LM32_DIR)/FreeRTOS-Kernel
+RTOS_SRC_DIR    ?= $(RTOS_BASE_DIR)
 RTOS_HEADER_DIR ?= $(RTOS_SRC_DIR)/include
-RTOS_PORT_DIR   ?= $(RTOS_SRC_DIR)/portable/GCC/SCU_LM32
+RTOS_PORT_DIR   ?= $(SCU_LIB_SRC_LM32_DIR)/FreeRTOS_LM32_SCU/port
 
 RTOS_INCLUDE_DIR += $(RTOS_HEADER_DIR)
 RTOS_INCLUDE_DIR += $(RTOS_PORT_DIR)
 
 # Will used at least for the timer-interrupt.
-RTOS_SOURCE += $(SCU_LIB_SRC_DIR)/lm32Interrupts.c
+RTOS_SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
 
 # SCU specific files for FreeRTOS
 RTOS_SOURCE += $(RTOS_PORT_DIR)/portasm.S

@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: etherbone
+Description: Wishbone serial protocol library
+Version: @VERSION@
+Libs: -L${libdir} -letherbone
+Cflags: -I${includedir}

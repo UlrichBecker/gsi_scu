@@ -1,0 +1,28 @@
+# Targets
+libetherbone.la
+# Compilation junk
+*.lo
+*.o
+.libs
+.deps
+.dirstamp
+deb
+# Automake junk
+ChangeLog
+aclocal.m4
+auto
+autom4te.cache
+config.h
+config.h.in
+config.log
+config.status
+configure
+etherbone.pc
+libtool
+Makefile.in
+Makefile
+stamp-h1
+etherbone-*.tar.gz
+build
+debian/control
+debian/libetherbone*.install

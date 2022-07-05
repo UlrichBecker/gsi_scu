@@ -39,39 +39,33 @@ endif
 
 include $(MAKEFILE_DIR)/scu_dirs.inc
 
-INCLUDE_DIRS += $(WR_DIR)/include
+INCLUDE_DIRS += $(WR_DIR)
 INCLUDE_DIRS += $(GENERATED_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)/sys
 
 ifdef USE_RTOS
   include $(MAKEFILE_DIR)/makefile.rtos
 endif
 
-STARTUP_CODE ?= $(REPOSITORY_DIR)/modules/lm32_stub/crt0ScuLm32.S
+STARTUP_CODE ?= $(SCU_LIB_SRC_LM32_DIR)/sys/crt0ScuLm32.S
 
 SOURCE += $(STARTUP_CODE)
-SOURCE += $(REPOSITORY_DIR)/modules/lm32_stub/stubs.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/stubs.c
 
 SOURCE += $(GENERATED_DIR)/$(BUILD_ID_FILE)
 
-SOURCE += $(SCU_LIB_SRC_DIR)/mini_sdb.c
-SOURCE += $(SCU_LIB_SRC_DIR)/sdb_add.c
-SOURCE += $(SCU_LIB_SRC_DIR)/mprintf.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mini_sdb.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sdb_add.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mprintf.c
 
-SOURCE += $(WR_DIR)/dev/w1.c
-SOURCE += $(WR_DIR)/dev/w1-hw.c
-SOURCE += $(WR_DIR)/dev/uart.c
-SOURCE += $(WR_DIR)/dev/devicelist.c
-SOURCE += $(WR_DIR)/dev/syscon.c
-SOURCE += $(WR_DIR)/lib/usleep.c
-ifdef USE_LINUX_PRINTF
- SOURCE += $(WR_DIR)/pp_printf/printf.c
-# SOURCE += $(WR_DIR)/pp_printf/vsprintf-mini.c #
- SOURCE += $(WR_DIR)/pp_printf/vsprintf-full.c
- SOURCE += $(WR_DIR)/pp_printf/div64.c
- DEFINES += CONFIG_USE_LINUX_PRINTF
-endif
-
-SOURCE += $(WR_DIR)/sdb-lib/glue.c
+SOURCE += $(WR_DIR)/w1.c
+SOURCE += $(WR_DIR)/w1-hw.c
+SOURCE += $(WR_DIR)/uart.c
+SOURCE += $(WR_DIR)/devicelist.c
+SOURCE += $(WR_DIR)/syscon.c
+SOURCE += $(WR_DIR)/usleep.c
+SOURCE += $(WR_DIR)/glue.c
 
 
 
@@ -374,7 +368,7 @@ $(RESULT_FILE): $(BIN_FILE)
 ifndef GENRAMMIF
    GENRAMMIF := $(shell which genrammif 2>/dev/null)
    ifeq ($(GENRAMMIF),  )
-      GENRAMMIF := $(WR_DIR)/tools/genrammif
+      GENRAMMIF := $(WR_TOOLS)/genrammif
    endif
 endif
 

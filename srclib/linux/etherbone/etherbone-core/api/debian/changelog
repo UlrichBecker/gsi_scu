@@ -1,0 +1,54 @@
+etherbone (2.1.0-1) unstable; urgency=medium
+
+  * Support MSI access requests.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Wed, 27 Apr 2016 21:38:31 +0200
+
+etherbone (2.0.0-1) unstable; urgency=medium
+
+  * Removed all C++ symbols from library.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Tue, 26 Apr 2016 12:28:00 +0200
+
+etherbone (1.3.2-1) unstable; urgency=medium
+
+  * Report devices without MSI gracefully.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Tue, 26 Apr 2016 10:23:30 +0200
+
+etherbone (1.3.1-1) unstable; urgency=medium
+
+  * Urgent bugfix.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Fri, 22 Apr 2016 22:17:06 +0200
+
+etherbone (1.3.0-1) unstable; urgency=medium
+
+  * New MSI API added
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Fri, 22 Apr 2016 20:16:05 +0200
+
+etherbone (1.2.3-1) unstable; urgency=medium
+
+  * Fixup some warnings on wheezy.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Wed, 20 Apr 2016 11:33:59 +0200
+
+etherbone (1.2.2-1) unstable; urgency=medium
+
+  * New manpages.
+  * Support multi-arch.
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Mon, 18 Apr 2016 15:54:21 +0200
+
+etherbone (1.2.1-1) unstable; urgency=low
+
+  * Fixed libtool versioning
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Wed, 13 Apr 2016 18:57:58 +0200
+
+etherbone (1.2.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Wesley W. Terpstra <terpstra@debian.org>  Wed, 13 Apr 2016 12:08:49 +0200

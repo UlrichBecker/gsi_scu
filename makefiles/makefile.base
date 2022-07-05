@@ -203,6 +203,8 @@ else
 	@echo "Compiler: $$($(CC) --version | head -n1)"
 endif
 
+# INCLUDE_DIRS += $(dir $(SOURCE))
+
 CHECK_SOURCE += $(SOURCE)
 
 .PHONY: check_src

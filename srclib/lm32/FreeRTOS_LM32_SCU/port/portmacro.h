@@ -90,12 +90,8 @@ typedef uint32_t       UBaseType_t;
   #endif
 #endif
 
-#ifndef configSTACK_DEPTH_TYPE
-  #define configSTACK_DEPTH_TYPE            uint32_t
-#endif
-#ifndef configMESSAGE_BUFFER_LENGTH_TYPE
-  #define configMESSAGE_BUFFER_LENGTH_TYPE  size_t
-#endif
+#define configSTACK_DEPTH_TYPE            uint32_t
+#define configMESSAGE_BUFFER_LENGTH_TYPE  size_t
 
 /*!
  * @ingroup OVERWRITABLE
@@ -111,6 +107,9 @@ typedef uint32_t       UBaseType_t;
  */
 #ifndef configMINIMAL_STACK_SIZE
   #define configMINIMAL_STACK_SIZE        128
+#endif
+#if (configMINIMAL_STACK_SIZE < 128)
+  #error configMINIMAL_STACK_SIZE has to be at least 128
 #endif
 
 /*!
@@ -177,7 +176,11 @@ typedef uint32_t       UBaseType_t;
 #define portTICK_RATE_MS      ( ( portTickType ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT    4
 #define portNOP()             NOP()
-#define portFORCE_INLINE      ALWAYS_INLINE
+#define portFORCE_INLINE      inline ALWAYS_INLINE
+
+#define configPRINTF( a )     mprintf a
+#define configMIN             min
+#define configMAX             max
 
 /*-----------------------------------------------------------*/
 
@@ -207,7 +210,7 @@ typedef uint32_t       UBaseType_t;
  * @brief Port Enable Interrupts
  * @see irqEnable
  */
-#define portENABLE_INTERRUPTS() irqEnablef()
+#define portENABLE_INTERRUPTS()  _irqEnable()
 
 /*-----------------------------------------------------------*/
 
@@ -221,8 +224,7 @@ typedef uint32_t       UBaseType_t;
    void vFunction( void *pvParameters )
 
 /*! ---------------------------------------------------------------------------
- * @brief Resets the global variable __atomic_section_nesting_count,
- *        starts the first task and enable global interrupt.
+ * @brief Start first task and enable global interrupt
  *
  * Declaration of assembly function implemented in portasm.S
  * @see portasm.S
@@ -237,7 +239,11 @@ void vStartFirstTask( void );
  */
 void vPortYield( void );
 
-#define portYIELD()          vPortYield()
+//#define portYIELD()          vPortYield()
+STATIC inline ALWAYS_INLINE void portYIELD( void )
+{
+   vPortYield();
+}
 
 #ifdef __cplusplus
 }

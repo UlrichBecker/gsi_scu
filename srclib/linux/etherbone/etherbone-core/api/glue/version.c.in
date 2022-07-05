@@ -1,0 +1,46 @@
+/** @file version.c
+ *  @brief Report the version and date of the source code.
+ *
+ *  Copyright (C) 2011-2012 GSI Helmholtz Centre for Heavy Ion Research GmbH 
+ *
+ *  @author Wesley W. Terpstra <w.terpstra@gsi.de>
+ *
+ *  @bug None!
+ *
+ *******************************************************************************
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 3 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************
+ */
+
+#include <inttypes.h>
+#include "version.h"
+#include "config.h"
+
+const uint32_t eb_version_short = UINT32_C(0x@EB_VERSION_SHORT@);
+const uint32_t eb_date_short    = UINT32_C(0x@EB_DATE_SHORT@);
+
+static const char source_version[] =
+  PACKAGE_STRING " (@EB_VERSION_FULL@): @EB_DATE_FULL@";
+static const char build_info[] =
+  "built by " USERNAME " on " __DATE__ " " __TIME__ " with " HOSTNAME " running " OPERATING_SYSTEM;
+
+const char* eb_source_version(void)
+{
+  return source_version;
+}
+
+const char* eb_build_info(void)
+{
+  return build_info;
+}

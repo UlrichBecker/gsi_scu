@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "mini_sdb.h"
 #include "dbg.h"
-#include "hw/memlayout.h"
+#include "memlayout.h"
 #include "sdb_add.h"
 
 sdb_location *find_sdb_deep(sdb_record_t *parent_sdb, sdb_location *found_sdb, uint32_t base, uint32_t msi_base,  uint32_t msi_last, uint32_t *idx, uint32_t qty, uint32_t venId, uint32_t devId)
