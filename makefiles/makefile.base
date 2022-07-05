@@ -341,7 +341,7 @@ DOX_PREDEFINED             += $(DEFINES)
 DOX_REFERENCES_RELATION    ?= "YES"
 DOXY_CFG_FILE              ?= $(DOX_OUTPUT_DIRECTORY)/Doxyfile
 
-DOX_MAKEFILE ?= $(MAKEFILE_DIR)/makefile.dox
+DOX_MAKEFILE ?= $(MAKEFILE_DIR)/DoxygenMakefile/makefile.dox
 
 # The presence of the Doxygen-makefile is optional only.
 -include $(DOX_MAKEFILE)
