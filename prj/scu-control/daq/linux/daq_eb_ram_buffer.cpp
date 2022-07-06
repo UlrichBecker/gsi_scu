@@ -27,7 +27,7 @@
  *******************************************************************************
  */
 #include <daq_eb_ram_buffer.hpp>
-#include <generated/shared_mmap.h>
+#include <shared_mmap.h>
 #include <dbg.h>
 #include <iostream>
 using namespace Scu;

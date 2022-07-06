@@ -13,11 +13,23 @@ STATIC_LIBRARY := 1
 
 TARGET         := scu_fg_feedback
 
-INCLUDE_DIRS += $(DAQ_DIR)/feSupport/scu/etherbone
-INCLUDE_DIRS += $(MDAQ_LINUX_DIR)
-INCLUDE_DIRS += $(SDAQ_LINUX_DIR)
-INCLUDE_DIRS += $(DAQ_DIR)/tools
-INCLUDE_DIRS += $(SCU_DIR)/generated
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+MDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/mdaq
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
+ETHERBONE_DIR  = $(SCU_LIB_SRC_LINUX_DIR)/etherbone
+
+INCLUDE_DIRS += $(SCU_LIB_SRC_LINUX_DIR)
+INCLUDE_DIRS += $(ETHERBONE_DIR)/fe-wrapper
+INCLUDE_DIRS += $(ETHERBONE_DIR)/etherbone-core/api
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)
+INCLUDE_DIRS += $(DAQ_DIR)
+INCLUDE_DIRS += $(DAQ_DIR)/lm32
+INCLUDE_DIRS += $(SCU_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
 
 SOURCE =  $(MDAQ_LINUX_DIR)/mdaq_administration.cpp
 SOURCE += $(MDAQ_LINUX_DIR)/mdaq_interface.cpp
@@ -30,7 +42,7 @@ SOURCE += $(DAQ_LINUX_DIR)/scu_fg_list.cpp
 SOURCE += $(DAQ_LINUX_DIR)/watchdog_poll.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_base_interface.cpp
 SOURCE += $(DAQ_LINUX_DIR)/scu_fg_feedback.cpp
-SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 
 # NO_LTO = 1
