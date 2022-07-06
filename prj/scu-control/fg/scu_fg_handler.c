@@ -12,7 +12,7 @@
 #include "scu_fg_macros.h"
 #include "scu_fg_handler.h"
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
-  #include "daq_main.h"
+  #include <daq_main.h>
 #endif
 
 /*!

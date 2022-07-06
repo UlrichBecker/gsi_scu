@@ -40,9 +40,6 @@ endif
 include $(MAKEFILE_DIR)/scu_dirs.inc
 
 INCLUDE_DIRS += $(WR_DIR)
-INCLUDE_DIRS += $(GENERATED_DIR)
-INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
-INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)/sys
 
 ifdef USE_RTOS
   include $(MAKEFILE_DIR)/makefile.rtos
@@ -66,8 +63,6 @@ SOURCE += $(WR_DIR)/devicelist.c
 SOURCE += $(WR_DIR)/syscon.c
 SOURCE += $(WR_DIR)/usleep.c
 SOURCE += $(WR_DIR)/glue.c
-
-
 
 DEFINES += CONFIG_WR_NODE
 DEFINES += CONFIG_PRINT_BUFSIZE=$(PRINT_BUFSIZE)

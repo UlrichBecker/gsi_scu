@@ -35,32 +35,32 @@
 #endif
 
 #include <stdint.h>
-#include "syscon.h"
-#include "eb_console_helper.h"
+#include <syscon.h>
+#include <eb_console_helper.h>
 
-#include "scu_wr_time.h"
+#include <scu_wr_time.h>
 
 #ifdef _CONFIG_OLD_IRQ
  #include "scu_lm32_macros.h"
  #include "irq.h"
 #else
- #include "scu_msi.h"
+ #include <scu_msi.h>
 #endif
-#include "scu_bus.h"
-#include "mini_sdb.h"
+#include <scu_bus.h>
+#include <mini_sdb.h>
 #include "board.h"
-#include "uart.h"
-#include "w1.h"
-#include "scu_shared_mem.h"
-#include "scu_fg_list.h"
+#include <uart.h>
+#include <w1.h>
+#include <scu_shared_mem.h>
+#include <scu_fg_list.h>
 #include "scu_mil.h"
-#include "eca_queue_type.h"
+#include <eca_queue_type.h>
 
-#include "history.h"
+#include <history.h>
 #include <scu_syslog.h>
 
-#include "scu_circular_buffer.h"
-#include "event_measurement.h"
+#include <scu_circular_buffer.h>
+#include <event_measurement.h>
 
 #ifdef CONFIG_USE_MMU
  #include <scu_mmu_lm32.h>

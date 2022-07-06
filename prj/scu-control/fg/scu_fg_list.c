@@ -13,20 +13,20 @@
   #error This module is for the target LM32 only!
 #endif
 
-#include <scu_fg_list.h>
 #include <scu_fg_handler.h>
 #include <scu_main.h>
 #include <eb_console_helper.h>
 #include <scu_fg_handler.h>
 #ifdef CONFIG_MIL_FG
  #include <scu_mil.h>
- #include "scu_mil_fg_handler.h"
+ #include <scu_mil_fg_handler.h>
 #endif
 #include <mini_sdb.h>
 #include "scu_fg_macros.h"
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #include <daq_main.h>
 #endif
+#include "scu_fg_list.h"
 
 /*! ---------------------------------------------------------------------------
  * @brief Prints all found function generators.

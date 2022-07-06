@@ -9,8 +9,8 @@
 ## Date:    09.01.2019                                                       ##
 ###############################################################################
 
-TARGET_DIR     := ..
-DEPLOY_DIR     := .
+#TARGET_DIR     := ..
+#DEPLOY_DIR     := .
 TARGET         := scu_control
 
 # USE_HISTORY=1
@@ -90,7 +90,7 @@ endif
 
 
 # DEFINES += DEBUGLEVEL
-MIAN_MODULE    = $(SCU_DIR)/scu_main.c
+MIAN_MODULE    = scu_main.c
 
 ifdef MIL_DAQ_USE_DDR3
    DEFINES += CONFIG_MIL_DAQ_USE_RAM
@@ -144,58 +144,64 @@ ifdef ADDAC_DAQ
 endif
 VERSION = $(VERSION_STR)
 
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_std_init.c
-SOURCE += $(SCU_LIB_SRC_DIR)/lm32Interrupts.c #_old.c
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_mailbox.c
-# SOURCE += $(SCU_LIB_SRC_DIR)/LM32assert.c
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_bus.c
-SOURCE += $(SCU_LIB_SRC_DIR)/event_measurement.c
-SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
-SOURCE += $(SCU_LIB_SRC_DIR)/sw_queue.c
-# SOURCE += $(SCU_LIB_SRC_DIR)/dbg.c
-SOURCE += $(SCU_DIR)/scu_fg_list.c
+SCU_DIR      = $(PRJ_DIR)/scu-control
+DAQ_DIR      = $(SCU_DIR)/daq
+DAQ_LM32_DIR = $(DAQ_DIR)/lm32
+
+#INCLUDE_DIRS += $(SCU_DIR)
+#INCLUDE_DIRS += $(SCU_DIR)/fg
+#INCLUDE_DIRS += $(DAQ_DIR)
+#INCLUDE_DIRS += $(DAQ_LM32_DIR)
+#INCLUDE_DIRS += $(SCU_DIR)/temperature
+
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mailbox.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/event_measurement.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/sw_queue.c
+SOURCE += $(SCU_DIR)/fg/scu_fg_list.c
 ifndef MIL_DAQ_USE_DDR3
-   SOURCE += $(SCU_DIR)/scu_circular_buffer.c
+   SOURCE += $(SCU_DIR)/fg/scu_circular_buffer.c
 endif
-SOURCE += $(SCU_DIR)/scu_fg_macros.c
-SOURCE += $(SCU_DIR)/scu_fg_handler.c
+SOURCE += $(SCU_DIR)/fg/scu_fg_macros.c
+SOURCE += $(SCU_DIR)/fg/scu_fg_handler.c
 SOURCE += $(SCU_DIR)/scu_command_handler.c
-SOURCE += $(SCU_DIR)/scu_temperature.c
+SOURCE += $(SCU_DIR)/temperature/scu_temperature.c
 ifdef SCU_MIL
-  SOURCE += $(SCU_LIB_SRC_DIR)/eca_queue_type.c
-  SOURCE += $(SCU_DIR)/scu_eca_handler.c
-  SOURCE += $(SCU_DIR)/scu_mil.c
-  SOURCE += $(SCU_DIR)/scu_mil_fg_handler.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/eca_queue_type.c
+  SOURCE += $(SCU_DIR)/fg/scu_eca_handler.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mil.c
+  SOURCE += $(SCU_DIR)/fg/scu_mil_fg_handler.c
 endif
 ifdef ADDAC_DAQ
-  SOURCE += $(SCU_LIB_SRC_DIR)/scu_ddr3.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
   SOURCE += $(DAQ_LM32_DIR)/daq.c
   SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
   SOURCE += $(DAQ_LM32_DIR)/daq_command_interface_uc.c
   SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
   SOURCE += $(DAQ_LM32_DIR)/daq_main.c
-#  DOX_INPUT += $(DAQ_DIR)/daq_command_interface.h
-#  DOX_INPUT += $(DAQ_DIR)/daq_descriptor.h
   USE_SCU_EXTERN_RAM := 1
 endif
 ifdef USE_HISTORY
   SOURCE += $(SCU_DIR)/history.c
 endif
 ifdef USE_LM32LOG
-  SOURCE += $(SCU_LIB_SRC_DIR)/lm32_syslog.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/lm32_syslog.c
 endif
 ifdef USE_SCU_EXTERN_RAM
   DEFINES += CONFIG_SCU_USE_DDR3
 endif
 ifdef USE_MMU
-  SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu_lm32.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mmu_lm32.c
   SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu.c
   DEFINES += CONFIG_USE_MMU
   VERSION_STR += "+MMU"
 endif
 
-SOURCE += $(SCU_DIR)/dow_crc.c
-SOURCE += $(WR_DIR)/dev/w1-temp.c
+SOURCE += $(SCU_LIB_SRC_DIR)/dow_crc.c
+SOURCE += $(WR_DIR)/w1-temp.c
 
 # ADDITIONAL_HEADDER_IN_BUILD_ID = $(SCU_DIR)/scu_shared_mem.h
 

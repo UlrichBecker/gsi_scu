@@ -158,7 +158,10 @@ TARGET_DIR    ?= $(DEPLOY_DIR)/result
 
 GIT_REVISION := "$(shell git --git-dir=$(REPOSITORY_DIR)/.git log -n1 --pretty='format:%h (%ci)')"
 
-OPT_INCLUDE := $(addprefix -I,$(strip $(INCLUDE_DIRS)))
+INCLUDE_DIRS += $(shell dirname $$(echo $(_SOURCE)))
+_INCLUDE_DIRS = $(shell echo $(INCLUDE_DIRS) | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
+
+OPT_INCLUDE := $(addprefix -I,$(strip $(_INCLUDE_DIRS)))
 OPT_DEFINES := $(addprefix -D,$(DEFINES) )
 OPT_DEFINES += -DGIT_REVISION=$(GIT_REVISION)
 
@@ -202,8 +205,6 @@ ifeq ($(V), 1)
 else
 	@echo "Compiler: $$($(CC) --version | head -n1)"
 endif
-
-# INCLUDE_DIRS += $(dir $(SOURCE))
 
 CHECK_SOURCE += $(SOURCE)
 
@@ -287,7 +288,7 @@ ldep: $(WORK_DIR) $(DEPENDFILE)
 
 .PHONY: incdirs
 incdirs:
-	$(QUIET)echo $(INCLUDE_DIRS) | tr ' ' '\n'
+	$(QUIET)echo $(_INCLUDE_DIRS) | tr ' ' '\n'
 
 .PHONY: incargs
 incargs:
