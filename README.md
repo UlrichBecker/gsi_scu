@@ -4,4 +4,6 @@ This repository includes some sub-repositories, therefore don't forget the optio
 
 ```git clone --recursive https://github.com/UlrichBecker/gsi_scu.git```
 
+By the way, for people who don't work at GSI, this repository is completely worthless.
+
 Further explanations will follow as soon as possible.
