@@ -13,8 +13,23 @@ MAKEFILE_DIR ?= $(REPOSITORY_DIR)/makefiles
 include $(MAKEFILE_DIR)/scu_dirs.inc
 EB_API_DIR   = $(IP_CORE_DIR)/etherbone-core/api
 
+
+
+ETHERBONE_DIR        = $(SCU_LIB_SRC_LINUX_DIR)/etherbone
+
+OPT_PARSER_DIR       = $(SCU_LIB_SRC_LINUX_DIR)/command_line_option_parser_cpp11/src
+LINUX_PROCESS_ID_DIR = $(SCU_LIB_SRC_LINUX_DIR)/get_linux_process_id/src
+GNU_PLOT_STREAM_DIR  = $(SCU_LIB_SRC_LINUX_DIR)/gnu-plotstream/src
+EB_FE_WRAPPER_DIR    = $(ETHERBONE_DIR)/fe-wrapper
+EB_API_DIR           = $(ETHERBONE_DIR)/etherbone-core/api
+EB_LIB_DIR           = $(EB_API_DIR)/libs
+
+DEFINES += CONFIG_N0_INCLUDE_PATHS
+
+INCLUDE_DIRS += $(EB_FE_WRAPPER_DIR)
 INCLUDE_DIRS += $(EB_API_DIR)
-LIB_DIRS     += $(EB_API_DIR)/.libs
+LIB_DIRS     += $(EB_LIB_DIR)
+
 
 # ------------ Additional defines for Doxygen ---------------------------------
 DOX_INPUT    += $(SCU_DIR)/scu_bus.h

@@ -25,10 +25,10 @@
 #ifndef _MDAQT_COMMAND_LINE_HPP
 #define _MDAQT_COMMAND_LINE_HPP
 #ifndef __DOCFSM__
- #include "daqt_messages.hpp"
- #include "parse_opts.hpp"
+ #include <daqt_messages.hpp>
+ #include <parse_opts.hpp>
  #include "mdaqt.hpp"
- #include "gnuplotstream.hpp"
+ #include <gnuplotstream.hpp>
  #include <string.h>
 #endif
 

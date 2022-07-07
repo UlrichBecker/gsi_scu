@@ -6,9 +6,15 @@
  *      Revised: 2018 by Ulrich Becker
  */
 
-#include "feSupport/scu/etherbone/EtherboneConnection.hpp"
-#include "feSupport/scu/etherbone/Constants.hpp"
-#include "feSupport/scu/etherbone/BusException.hpp"
+#ifdef CONFIG_N0_INCLUDE_PATHS
+ #include "EtherboneConnection.hpp"
+ #include <Constants.hpp>
+ #include <BusException.hpp>
+#else
+ #include "feSupport/scu/etherbone/EtherboneConnection.hpp"
+ #include "feSupport/scu/etherbone/Constants.hpp"
+ #include "feSupport/scu/etherbone/BusException.hpp"
+#endif
 
 #ifdef CONFIG_EB_USE_NORMAL_MUTEX
  #include <iostream>

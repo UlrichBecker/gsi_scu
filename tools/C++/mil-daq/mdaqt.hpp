@@ -210,7 +210,7 @@ public:
       return static_cast<Device*>(DaqAdministration::getDevice( number ));
    }
 
-   void onUnregistered( RingItem* pUnknownItem )  override;
+   void onUnregistered( RingItem* pUnknownItem );
 
    bool showUngegistered( void );
 
@@ -221,13 +221,13 @@ public:
       m_oSwi.send( opCode, param );
    }
 
-   RAM_RING_INDEX_T getCurrentRamSize( bool update = true ) override
+   RAM_RING_INDEX_T getCurrentRamSize( bool update = true ) // override
    {
       std::cerr << "Dummyfunction not used: " << __func__ << "()" << std::endl;
       return 0;
    }
 
-   void clearBuffer( bool update = true ) override
+   void clearBuffer( bool update = true ) //override
    {
       std::cerr << "Dummyfunction not used: " << __func__ << "()" << std::endl;
    }

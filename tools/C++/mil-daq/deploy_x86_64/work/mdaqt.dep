@@ -1,0 +1,388 @@
+./deploy_x86_64/work/mdaqt_command_line.cpp.o: mdaqt_command_line.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_onFoundProcess.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/get_linux_process_id/src/find_process.h \
+ mdaqt_command_line.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/command_line_option_parser_cpp11/src/parse_opts.hpp \
+ mdaqt.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_administration.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ mdaqt_command_line.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/gnu-plotstream/src/gnuplotstream.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/mdaq_plot.cpp.o: mdaq_plot.cpp mdaq_plot.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/gnu-plotstream/src/gnuplotstream.hpp \
+ mdaqt.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_administration.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ mdaqt_command_line.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/command_line_option_parser_cpp11/src/parse_opts.hpp \
+ mdaqt.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/daqt_read_stdin.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_read_stdin.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_read_stdin.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/parse_opts.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/command_line_option_parser_cpp11/src/parse_opts.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/command_line_option_parser_cpp11/src/parse_opts.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/gnuplotstream.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/gnu-plotstream/src/gnuplotstream.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/gnu-plotstream/src/gnuplotstream.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/find_process.c.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/get_linux_process_id/src/find_process.c \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/get_linux_process_id/src/find_process.h
+	$(CC_F) -c -o $@ $< $(CC_ARG)
+
+./deploy_x86_64/work/daqt_onFoundProcess.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_onFoundProcess.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_onFoundProcess.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/get_linux_process_id/src/find_process.h
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/daq_eb_ram_buffer.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/dbg.h
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/daq_access.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/scu_lm32_mailbox.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/sdb_ids.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/scu_fg_list.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/sdb_ids.h
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/mdaq_interface.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/mdaq_administration.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_administration.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_administration.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/daq_base_interface.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/watchdog_poll.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/circular_index.c.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.c \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h
+	$(CC_F) -c -o $@ $< $(CC_ARG)
+
+./deploy_x86_64/work/EtherboneConnection.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/BusException.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/BusException.cpp.o: \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/BusException.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/BusException.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+
+./deploy_x86_64/work/mdaqt.cpp.o: mdaqt.cpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_read_stdin.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daqt_messages.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/eb_console_helper.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/helper_macros.h \
+ mdaqt_command_line.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/command_line_option_parser_cpp11/src/parse_opts.hpp \
+ mdaqt.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_administration.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/mdaq/mdaq_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_base_interface.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/scu_control_config.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_exception.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_access.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/EtherboneConnection.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/etherbone-core/api/etherbone.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/etherbone/fe-wrapper/Constants.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_assert.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/lm32/daq_ramBuffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_ring_admin.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/fifo/circular_index.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_ddr3.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_descriptor.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_fg_allocator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/daq_calculations.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/scu_shared_mem.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/lm32/scu_mailbox.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_function_generator.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/scu_bus_defines.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/fg/scu_circular_buffer.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/daq_command_interface.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/lm32-non-os_exe/generated/shared_mmap.h \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/watchdog_poll.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_fg_list.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/scu_lm32_mailbox.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/prj/scu-control/daq/linux/daq_eb_ram_buffer.hpp \
+ mdaqt_command_line.hpp \
+ /common/home/bel/ubecker/lnx/src/gsi/gsi_scu/srclib/linux/gnu-plotstream/src/gnuplotstream.hpp \
+ mdaq_plot.hpp
+	$(CXX_F) -c -o $@ $< $(CXX_ARG)
+

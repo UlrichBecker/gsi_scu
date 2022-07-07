@@ -17,19 +17,22 @@ FOR_SCU_AND_ACC := 1
 
 MIAN_MODULE := fg-feedback.cpp
 
-BASE_DIR := ..
-EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+MDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/mdaq
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
 
 SOURCE += fb_command_line.cpp
 SOURCE += fb_plot.cpp
 
-SOURCE += $(BASE_DIR)/daqt_read_stdin.cpp
-SOURCE += $(BASE_DIR)/parse_opts.cpp
-SOURCE += $(BASE_DIR)/gnuplotstream.cpp
-SOURCE += $(BASE_DIR)/find_process.c
-SOURCE += $(BASE_DIR)/daqt_onFoundProcess.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
+SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
+SOURCE += $(GNU_PLOT_STREAM_DIR)/gnuplotstream.cpp
+SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_onFoundProcess.cpp
 
-SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 
 SOURCE += $(DAQ_LINUX_DIR)/scu_lm32_mailbox.cpp
@@ -44,8 +47,8 @@ SOURCE += $(MDAQ_LINUX_DIR)/mdaq_administration.cpp
 SOURCE += $(SDAQ_LINUX_DIR)/daq_administration.cpp
 SOURCE += $(SDAQ_LINUX_DIR)/daq_interface.cpp
 
-SOURCE += $(EB_SRC)/EtherboneConnection.cpp
-SOURCE += $(EB_SRC)/BusException.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
 
 GNUPLOT_BIN ?= $(shell which gnuplot)
@@ -67,17 +70,20 @@ DEFINES += GPSTR_DEFAULT_GNUPLOT_EXE=\"$(GNUPLOT_BIN)\"
 
 # DEFINES += CONFIG_DDR3_NO_BURST_FUNCTIONS
 
-INCLUDE_DIRS += $(EB_SRC)
-INCLUDE_DIRS += $(BASE_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)
+INCLUDE_DIRS += $(SCU_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+INCLUDE_DIRS += $(DAQ_DIR)/lm32
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
-INCLUDE_DIRS += $(SCU_DIR)/generated
+INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
 
  USE_STATIC_LIBS := 1
 
 ifdef USE_STATIC_LIBS
 # ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
- ADDITIONAL_OBJECTS += $(IP_CORE_DIR)/etherbone-core/api/.libs/libetherbone.a
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
 # LIBS += boost_system
  LIBS += etherbone

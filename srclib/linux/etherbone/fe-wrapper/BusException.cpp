@@ -5,7 +5,11 @@
  *      Author: rapp
  */
 
-#include "feSupport/scu/etherbone/BusException.hpp"
+#ifdef CONFIG_N0_INCLUDE_PATHS
+ #include "BusException.hpp"
+#else
+ #include "feSupport/scu/etherbone/BusException.hpp"
+#endif
 #include <cstdarg>
 #include <sstream>
 #include <stdint.h>

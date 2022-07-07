@@ -13,16 +13,19 @@ DEFINES += VERSION=0.10
 
 MIAN_MODULE := mdaqt.cpp
 
-BASE_DIR := ..
-EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+MDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/mdaq
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
 
 SOURCE += mdaqt_command_line.cpp
 SOURCE += mdaq_plot.cpp
-SOURCE += $(BASE_DIR)/daqt_read_stdin.cpp
-SOURCE += $(BASE_DIR)/parse_opts.cpp
-SOURCE += $(BASE_DIR)/gnuplotstream.cpp
-SOURCE += $(BASE_DIR)/find_process.c
-SOURCE += $(BASE_DIR)/daqt_onFoundProcess.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
+SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
+SOURCE += $(GNU_PLOT_STREAM_DIR)/gnuplotstream.cpp
+SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_onFoundProcess.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_eb_ram_buffer.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_access.cpp
 SOURCE += $(DAQ_LINUX_DIR)/scu_lm32_mailbox.cpp
@@ -30,9 +33,11 @@ SOURCE += $(DAQ_LINUX_DIR)/scu_fg_list.cpp
 SOURCE += $(MDAQ_LINUX_DIR)/mdaq_interface.cpp
 SOURCE += $(MDAQ_LINUX_DIR)/mdaq_administration.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_base_interface.cpp
+SOURCE += $(DAQ_LINUX_DIR)/watchdog_poll.cpp
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 
-SOURCE += $(EB_SRC)/EtherboneConnection.cpp
-SOURCE += $(EB_SRC)/BusException.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
 
 GNUPLOT_BIN ?= $(shell which gnuplot)
@@ -53,15 +58,21 @@ DEFINES += GPSTR_DEFAULT_GNUPLOT_EXE=\"$(GNUPLOT_BIN)\"
 
 # DEFINES += CONFIG_DDR3_NO_BURST_FUNCTIONS
 
-INCLUDE_DIRS += $(EB_SRC)
-INCLUDE_DIRS += $(BASE_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)
+INCLUDE_DIRS += $(SCU_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+INCLUDE_DIRS += $(DAQ_DIR)/lm32
+INCLUDE_DIRS += $(DAQ_DIR)
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
+INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
 
 USE_STATIC_LIBS := 1
 
 ifdef USE_STATIC_LIBS
 # ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
- ADDITIONAL_OBJECTS += $(IP_CORE_DIR)/etherbone-core/api/.libs/libetherbone.a
+ ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
 # LIBS += boost_system
  LIBS += etherbone
@@ -81,7 +92,7 @@ HOST ?= tcp/$(SCU_URL)
 #CALL_ARGS = tcp/scuxl0107 39 130 39 129 39 1 39 2
 #CALL_ARGS = -cv tcp/scuxl0107 39 130 39 129
 #CALL_ARGS = -c tcp/scuxl0107
-#CALL_ARGS = tcp/scuxl0107 39 130 -c
+CALL_ARGS = tcp/scuxl0162 39 129 -c
 #CALL_ARGS = tcp/scuxl0107 -avdc --time 25 -G /home/bel/ubecker/lnx/.local/bin/gnuplot
 #CALL_ARGS = scuxl0107 -avcd
 #CALL_ARGS = -V
@@ -90,7 +101,7 @@ HOST ?= tcp/$(SCU_URL)
 REMOTE_CALL_ARGS  ?= "dev/wbm0"
 #CALL_ARGS = tcp/scuxl0107 -v
 
-CALL_ARGS = --generate_doc_tagged
+#CALL_ARGS = --generate_doc_tagged
 
 # DEBUG = 1
 

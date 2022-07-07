@@ -14,21 +14,23 @@ DEFINES += VERSION=1.0
 
 MIAN_MODULE := daqt.cpp
 
-BASE_DIR := ..
-EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
 
 DEFINES += CONFIG_AUTODOC_OPTION
 
 SOURCE += daqt_command_line.cpp
 SOURCE += daqt_attributes.cpp
 
-SOURCE += $(BASE_DIR)/daqt_read_stdin.cpp
-SOURCE += $(BASE_DIR)/parse_opts.cpp
-SOURCE += $(BASE_DIR)/gnuplotstream.cpp
-SOURCE += $(BASE_DIR)/find_process.c
-SOURCE += $(BASE_DIR)/daqt_onFoundProcess.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
+SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
+SOURCE += $(GNU_PLOT_STREAM_DIR)/gnuplotstream.cpp
+SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_onFoundProcess.cpp
 
-SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(DAQ_LINUX_DIR)/daq_eb_ram_buffer.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_access.cpp
 SOURCE += $(SDAQ_LINUX_DIR)/daq_interface.cpp
@@ -36,8 +38,8 @@ SOURCE += $(SDAQ_LINUX_DIR)/daq_administration.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_base_interface.cpp
 SOURCE += $(DAQ_LINUX_DIR)/watchdog_poll.cpp
 
-SOURCE += $(EB_SRC)/EtherboneConnection.cpp
-SOURCE += $(EB_SRC)/BusException.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
 
 GNUPLOT_BIN ?= $(shell which gnuplot)
@@ -53,17 +55,22 @@ DEFINES += CONFIG_DAQ_TEST
 DEFINES += CONFIG_DAQ_DEBUG
 DEFINES += GPSTR_DEFAULT_GNUPLOT_EXE=\"$(GNUPLOT_BIN)\"
 
-
-INCLUDE_DIRS += $(EB_SRC)
-INCLUDE_DIRS += $(BASE_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)
+INCLUDE_DIRS += $(SCU_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+INCLUDE_DIRS += $(DAQ_DIR)/lm32
+INCLUDE_DIRS += $(DAQ_DIR)
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
-INCLUDE_DIRS += $(SCU_DIR)/generated
+INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
+
 
  USE_STATIC_LIBS := 1
 
 ifdef USE_STATIC_LIBS
 # ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
- ADDITIONAL_OBJECTS += $(IP_CORE_DIR)/etherbone-core/api/.libs/libetherbone.a
+ ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
 # LIBS += boost_system
  LIBS += etherbone
@@ -72,8 +79,6 @@ endif
 LIBS += pthread
 LIBS += stdc++
 
-
-DOX_INPUT += $(DAQ_LINUX_DIR)/daq_calculations.hpp
 
 HOST ?= $(SCU_URL)
 

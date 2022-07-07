@@ -1,6 +1,6 @@
 ###############################################################################
 ##                                                                           ##
-##        Makefile for building the commandline tool "fg-feedback"           ##
+##          Makefile for building the commandline tool "fg-wave"             ##
 ##                                                                           ##
 ##---------------------------------------------------------------------------##
 ## File:     gsi_daq/tools/fg-wave/Makefile                                  ##
@@ -13,14 +13,19 @@ DEFINES += VERSION=1.4
 
 MIAN_MODULE := fg-wave.cpp
 
-BASE_DIR := ..
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
+
+
 
 SOURCE += fgw_commandline.cpp
 SOURCE += fgw_polynom.cpp
-SOURCE += $(BASE_DIR)/parse_opts.cpp
-SOURCE += $(BASE_DIR)/gnuplotstream.cpp
-SOURCE += $(BASE_DIR)/fgw_parser.cpp
-SOURCE += $(BASE_DIR)/daqt_read_stdin.cpp
+SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
+SOURCE += $(GNU_PLOT_STREAM_DIR)/gnuplotstream.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/fgw_parser.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
 
 GNUPLOT_BIN ?= $(shell which gnuplot)
 
@@ -39,10 +44,9 @@ DEFINES += GPSTR_DEFAULT_GNUPLOT_EXE=\"$(GNUPLOT_BIN)\"
 
 # DEFINES += CONFIG_DDR3_NO_BURST_FUNCTIONS
 
-#INCLUDE_DIRS += $(EB_SRC)
-INCLUDE_DIRS += $(BASE_DIR)
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)
-#INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
+INCLUDE_DIRS += $(DAQ_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
 
 # LIBS += pthread
 LIBS += stdc++

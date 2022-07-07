@@ -18,10 +18,10 @@ DAQ_DIR        = $(SCU_DIR)/daq
 DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
 MDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/mdaq
 SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
-ETHERBONE_DIR  = $(SCU_LIB_SRC_LINUX_DIR)/etherbone
+
 
 INCLUDE_DIRS += $(SCU_LIB_SRC_LINUX_DIR)
-INCLUDE_DIRS += $(ETHERBONE_DIR)/fe-wrapper
+# INCLUDE_DIRS += $(EB_FE_WRAPPER_DIR)
 INCLUDE_DIRS += $(ETHERBONE_DIR)/etherbone-core/api
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)
 INCLUDE_DIRS += $(DAQ_DIR)
@@ -53,10 +53,12 @@ endif
 
 DOX_EXPAND_AS_DEFINED      = ADD_NAMESPACE
 
-DOX_EXAMPLE_PATH = $(DAQ_LINUX_DIR)/../example/feedback/
+DOX_EXAMPLE_PATH = $(REPOSITORY_DIR)/demo-and-test/linux/feedback/
+
 DOX_EXTRACT_PRIVATE = "YES"
 
 DOX_INPUT += $(DAQ_LINUX_DIR)/feedback/scu_feedback.md
+DOX_INPUT += $(DOX_EXAMPLE_PATH)/feedback-example.cpp
 DOX_FILE_PATTERNS += *.md
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
