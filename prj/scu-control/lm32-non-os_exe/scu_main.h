@@ -48,17 +48,16 @@
 #endif
 #include <scu_bus.h>
 #include <mini_sdb.h>
-#include "board.h"
+#include <board.h>
 #include <uart.h>
 #include <w1.h>
 #include <scu_shared_mem.h>
 #include <scu_fg_list.h>
 #include "scu_mil.h"
 #include <eca_queue_type.h>
-
 #include <history.h>
 #include <scu_syslog.h>
-
+#include <scu_logutil.h>
 #include <scu_circular_buffer.h>
 #include <event_measurement.h>
 
@@ -142,14 +141,6 @@ extern TIME_MEASUREMENT_T g_irqTimeMeasurement;
   #define ADDR_DEVBUS 0x20
 #endif
 
-/*! ---------------------------------------------------------------------------
- * @ingroup LM32_LOG
- * @ingroup PRINTF
- * @brief Sends a log-message via vLm32Log() and vprintf().
- * @note This function is only during the initialization allowed! 
- */
-void scuLog( const unsigned int filter, const char* format, ... );
-
 #define CONFIG_QUEUE_ALARM
 
 #ifdef CONFIG_QUEUE_ALARM
@@ -168,12 +159,6 @@ void pushInQueue( SW_QUEUE_T* pThis, const void* pItem );
 #else
 #define pushInQueue queuePush
 #endif
-
-/*! ---------------------------------------------------------------------------
- * @brief Prints a error-message via UART and stop the LM32 firmware.
- * @param pErrorMessage String containing a error message.
- */
-void die( const char* pErrorMessage );
 
 /*! ---------------------------------------------------------------------------
  * @brief Scans for function generators on mil extension and scu bus.

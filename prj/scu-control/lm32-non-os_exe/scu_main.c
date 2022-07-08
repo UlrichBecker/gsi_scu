@@ -99,38 +99,6 @@ volatile uint32_t*     g_pMil_irq_base    = NULL;
 #endif /* CONFIG_MIL_FG */
 
 /*===========================================================================*/
-/*! ---------------------------------------------------------------------------
- * @see scu_main.h
- */
-OPTIMIZE( "-O1"  )
-void scuLog( const unsigned int filter, const char* format, ... )
-{
-   va_list ap;
-
-   va_start( ap, format );
-   vprintf( format, ap );
-   va_end( ap );
-#ifdef CONFIG_USE_LM32LOG
-   va_start( ap, format );
-   vLm32log( filter, format, ap );
-   va_end( ap );
-#endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @see scu_main.h
- */
-void die( const char* pErrorMessage )
-{
-   scuLog( LM32_LOG_ERROR, ESC_ERROR
-           "\nPanic: \"%s\"\n+++ LM32 stopped! +++\n" ESC_NORMAL, pErrorMessage );
-#ifndef CONFIG_REINCERNATE
-   while( true );
-#else
-   scuLog( "...continued...\n" );
-#endif
-}
-
 #ifdef CONFIG_QUEUE_ALARM
 /*
  * Alarm queue containing the pointer of queues in which has been happend

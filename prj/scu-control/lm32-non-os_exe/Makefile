@@ -155,6 +155,7 @@ DAQ_LM32_DIR = $(DAQ_DIR)/lm32
 #INCLUDE_DIRS += $(SCU_DIR)/temperature
 
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_logutil.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mailbox.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
@@ -243,14 +244,14 @@ endif
 ### SCU_URL = scuxl0107
 # SCU_URL = scuxl0035
 # SCU_URL = scuxl0192
-#SCU_URL = scuxl0212
+# SCU_URL = scuxl0212
 # SCU_URL = scuxl0331
 # SCU_URL = scuxl0025
 # SCU_URL = scuxl0328
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
- SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 
