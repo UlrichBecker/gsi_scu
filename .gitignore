@@ -1,3 +1,4 @@
 .o 
 deploy_*/
 generated/
+FreeRTOSConfig.h
