@@ -16,9 +16,16 @@ EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone
 
 MIAN_MODULE := feedback-example.cpp
 
+SCU_DIR        = $(PRJ_DIR)/scu-control
+DAQ_DIR        = $(SCU_DIR)/daq
+DAQ_LINUX_DIR  = $(DAQ_DIR)/linux
+MDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/mdaq
+SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
+
+
 ifndef USE_SHARED_LIB
  DEFINES += DEBUGLEVEL
- SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
+ SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
  SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
  SOURCE += $(DAQ_LINUX_DIR)/scu_lm32_mailbox.cpp
  SOURCE += $(DAQ_LINUX_DIR)/scu_fg_list.cpp
@@ -34,7 +41,7 @@ ifndef USE_SHARED_LIB
 else
  # When a library will used so the following header files
  # has to be told Doxygen explicitly.
- DOX_INPUT += $(SCU_LIB_SRC_DIR)/circular_index.h
+ DOX_INPUT += $(SCU_LIB_SRC_DIR)/fifo/circular_index.h
  DOX_INPUT += $(DAQ_LINUX_DIR)/scu_lm32_mailbox.cpp
  DOX_INPUT += $(DAQ_LINUX_DIR)/scu_fg_list.hpp
  DOX_INPUT += $(DAQ_LINUX_DIR)/daq_eb_ram_buffer.hpp
@@ -44,14 +51,19 @@ endif
 
 DOX_INPUT += $(DAQ_DIR)/daq_ring_admin.h
 
-SOURCE += $(EB_SRC)/EtherboneConnection.cpp
-SOURCE += $(EB_SRC)/BusException.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
+SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
-INCLUDE_DIRS += $(EB_SRC)
-INCLUDE_DIRS += $(MDAQ_LINUX_DIR)
-INCLUDE_DIRS += $(SDAQ_LINUX_DIR)
 INCLUDE_DIRS += $(DAQ_DIR)/tools
-INCLUDE_DIRS += $(SCU_DIR)/generated
+INCLUDE_DIRS += $(SCU_LIB_SRC_LM32_DIR)
+INCLUDE_DIRS += $(SCU_LIB_SRC_LINUX_DIR)
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)
+INCLUDE_DIRS += $(SCU_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+INCLUDE_DIRS += $(DAQ_DIR)/lm32
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
+INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
+INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
 # LIBS += boost_system
 
 # ADDITIONAL_OBJECTS += /opt/gsi/3rdparty/boost/1.54.0/lib/x86_64/libboost_system.a
