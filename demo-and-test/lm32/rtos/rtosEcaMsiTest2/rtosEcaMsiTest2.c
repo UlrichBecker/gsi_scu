@@ -124,7 +124,7 @@ void _onException( const uint32_t sig )
          _CASE_SIGNAL( SIGSEGV )
          default: str = "unknown"; break;
       }
-      mprintf( ESC_ERROR "\n%s( %d ): %s\n" ESC_NORMAL, __func__, sig, str );
+      scuLog( LM32_LOG_ERROR, ESC_ERROR "\n%s( %d ): %s\n" ESC_NORMAL, __func__, sig, str );
    }
 }
 

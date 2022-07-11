@@ -34,7 +34,7 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 
 /* Memory allocation related definitions. */
-#define configSUPPORT_STATIC_ALLOCATION         1
+#define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 #define configTOTAL_HEAP_SIZE                   10240
 //#define configTOTAL_HEAP_SIZE                   (4 * 1024)
