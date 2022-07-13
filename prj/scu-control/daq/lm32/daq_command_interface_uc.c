@@ -53,11 +53,18 @@ typedef struct
     * @brief Operation code
     * @see DAQ_OPERATION_CODE_T
     */
-   DAQ_OPERATION_CODE_T code;
+   const DAQ_OPERATION_CODE_T code;
    /*!
     * @brief Pointer of the related function
     */
-   DAQ_OPERATION_FT     operation;
+   const DAQ_OPERATION_FT     operation;
+   
+#ifdef CONFIG_USE_LM32LOG
+   /*!
+    * @brief Name of operation for debugging and logging purposes only.
+    */
+   const char*                name;
+#endif
 } DAQ_OPERATION_TAB_ITEM_T;
 
 #ifdef DEBUGLEVEL
@@ -716,11 +723,20 @@ DAQ_RETURN_CODE_T opSyncTimeStamp( DAQ_ADMIN_T* pDaqAdmin,
  * @brief Helper macro for making a item in the command function table.
  * @see DAQ_OPERATION_TAB_ITEM_T
  */
+#ifdef CONFIG_USE_LM32LOG
+#define OPERATION_ITEM( opcode, function )                                    \
+{                                                                             \
+   .code      = opcode,                                                       \
+   .operation = function,                                                     \
+   .name      = #opcode                                                       \
+}
+#else
 #define OPERATION_ITEM( opcode, function )                                    \
 {                                                                             \
    .code      = opcode,                                                       \
    .operation = function                                                      \
 }
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_INTERFACE
@@ -767,44 +783,6 @@ STATIC const DAQ_OPERATION_TAB_ITEM_T g_operationTab[] =
    OPERATION_ITEM_TERMINATOR
 };
 
-#ifdef CONFIG_USE_LM32LOG
-char* logDaqCmd2String( DAQ_OPERATION_CODE_T opcode )
-{
-#define CASE_RETURN( c ) case c: return #c
-   switch( opcode )
-   {
-      CASE_RETURN( DAQ_OP_IDLE );
-    #ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-      CASE_RETURN( DAQ_OP_LOCK );
-   #endif
-      CASE_RETURN( DAQ_OP_GET_ERROR_STATUS );
-      CASE_RETURN( DAQ_OP_RESET );
-      CASE_RETURN( DAQ_OP_GET_MACRO_VERSION );
-      CASE_RETURN( DAQ_OP_GET_SLOTS );
-      CASE_RETURN( DAQ_OP_GET_CHANNELS );
-      CASE_RETURN( DAQ_OP_RESCAN );
-      CASE_RETURN( DAQ_OP_PM_ON );
-      CASE_RETURN( DAQ_OP_HIRES_ON );
-      CASE_RETURN( DAQ_OP_PM_HIRES_OFF );
-      CASE_RETURN( DAQ_OP_CONTINUE_ON );
-      CASE_RETURN( DAQ_OP_CONTINUE_OFF );
-      CASE_RETURN( DAQ_OP_SET_TRIGGER_CONDITION );
-      CASE_RETURN( DAQ_OP_GET_TRIGGER_CONDITION );
-      CASE_RETURN( DAQ_OP_SET_TRIGGER_DELAY );
-      CASE_RETURN( DAQ_OP_GET_TRIGGER_DELAY );
-      CASE_RETURN( DAQ_OP_SET_TRIGGER_MODE );
-      CASE_RETURN( DAQ_OP_GET_TRIGGER_MODE );
-      CASE_RETURN( DAQ_OP_SET_TRIGGER_SOURCE_CON );
-      CASE_RETURN( DAQ_OP_GET_TRIGGER_SOURCE_CON );
-      CASE_RETURN( DAQ_OP_SET_TRIGGER_SOURCE_HIR );
-      CASE_RETURN( DAQ_OP_GET_TRIGGER_SOURCE_HIR );
-      CASE_RETURN( DAQ_OP_GET_DEVICE_TYPE );
-      CASE_RETURN( DAQ_OP_SYNC_TIMESTAMP );
-   }
-   return "unknown";
-}
-#endif
-
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_INTERFACE
  * @brief Performs the list and executes a function in the table if it is
@@ -832,12 +810,13 @@ bool executeIfRequested( DAQ_ADMIN_T* pDaqAdmin )
    {
       if( g_operationTab[i].code == GET_SHARED().operation.code )
       {
+      #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_CMD, "DAQ command: %s( %u, %u )\n",
-                  logDaqCmd2String( g_operationTab[i].code ),
+                  g_operationTab[i].name,
                   GET_SHARED().operation.ioData.location.deviceNumber,
                   GET_SHARED().operation.ioData.location.channel
                 );
-
+      #endif
          GET_SHARED().operation.retCode =
             g_operationTab[i].operation( pDaqAdmin,
                                          &GET_SHARED().operation.ioData );
