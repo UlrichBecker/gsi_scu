@@ -832,7 +832,10 @@ bool executeIfRequested( DAQ_ADMIN_T* pDaqAdmin )
    { /*
       * No, making known this for the Linux host.
       */
-      lm32Log( LM32_LOG_ERROR, "Unknown DAQ command!\n" );
+      lm32Log( LM32_LOG_ERROR, ESC_ERROR 
+                               "Unknown DAQ command: 0x%04X\n"
+                               ESC_NORMAL,
+               GET_SHARED().operation.code );
       DBPRINT1( "DBG: DAQ_RET_ERR_UNKNOWN_OPERATION\n" );
       GET_SHARED().operation.retCode = DAQ_RET_ERR_UNKNOWN_OPERATION;
    }
