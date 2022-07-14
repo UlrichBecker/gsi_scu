@@ -45,6 +45,7 @@
 #include <eca_queue_type.h>
 #include <scu_wr_time.h>
 #include <sw_queue.h>
+#include <scu_logutil.h>
 #include <FreeRTOS.h>
 #include <task.h>
 
@@ -88,24 +89,6 @@ QUEUE_CREATE_STATIC( g_msgQueue, 5, sizeof( MSI_ITEM_T ) );
  *        and unable to store any further messages,
  */
 unsigned int g_overfolwCount = 0;
-
-/*! ---------------------------------------------------------------------------
- * @brief Unified output function for LM32-console an lM32-syslog.
- */
-OPTIMIZE( "-O0"  )
-void scuLog( const unsigned int filter, const char* format, ... )
-{
-   va_list ap;
-
-   va_start( ap, format );
-   vprintf( format, ap );
-   va_end( ap );
-#ifdef CONFIG_USE_LM32LOG
-   va_start( ap, format );
-   vLm32log( filter, format, ap );
-   va_end( ap );
-#endif
-}
 
 /*! ---------------------------------------------------------------------------
  * @brief Callback function becomes invoked by LM32 when an exception appeared.
