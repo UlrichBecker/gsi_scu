@@ -40,4 +40,25 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```make run```       Builds the binary-file and invoke it.
 * ```make dbg```       Builds a debugable binary-file and invokes the KDE-debugger frontend [```kdbg```](https://www.kdbg.org) if the makefile-variable ```DEBUG=1```. **Yes KDE!** That isn't exotic!
 
+## Building LM32-application ```scu_control.bin```
+
+1. Change in directory ```gsi_scu/prj/scu-control/lm32-non-os_exe```
+2. Build binary file by typing: ```make```.
+3. If the binary was successful built it will be in this directory: ```gsi_scu/prj/scu-control/lm32-non-os_exe/deploy_lm32/result/scu_control.bin```.
+4. If the variable ```SCU_URL``` specified so you can upload the binary-file by typing ```make load```.
+
+## Building the static library ```libscu_fg_feedback.a```
+Prerequisite is that the LM32-binary file is already built.
+1. Change in directory ```gsi_scu/prj/scu-control/daq/linux/feedback/```
+2. Build binary file by typing: ```make```.
+3. If the binary was successful built it will be in this directory: scu-control/daq/linux/feedback/deploy_x86_64/result/libscu_fg_feedback.a```
+
+## Building the tool ```fg-feedback```
+Prerequisite is that the LM32-binary file is already built.
+1. Change in directory ```gsi_scu/tools/C++/fg-feedback/```
+2. Build binary file by typing: ```make```.
+3. If the binary was successful built it will be in this directory: ```gsi_scu/tools/C++/fg-feedback/deploy_x86_64/result/fg-feedback```
+
+
+
 Further explanations will follow as soon as possible.
