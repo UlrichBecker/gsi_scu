@@ -51,7 +51,7 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 Prerequisite is that the LM32-binary file is already built.
 1. Change in directory ```gsi_scu/prj/scu-control/daq/linux/feedback/```
 2. Build binary file by typing: ```make```.
-3. If the binary was successful built it will be in this directory: scu-control/daq/linux/feedback/deploy_x86_64/result/libscu_fg_feedback.a```
+3. If the binary was successful built it will be in this directory: ```scu-control/daq/linux/feedback/deploy_x86_64/result/libscu_fg_feedback.a```
 
 ## Building the tool ```fg-feedback```
 Prerequisite is that the LM32-binary file is already built.
