@@ -119,8 +119,8 @@ typedef struct
  * MY_STRUCT_WITH_QUEUE_T myStruct = 
  * {
  *    QUEUE_STATIC_MEMBER_INITIALIZER( myQueue, 42, ITEM_TYP ),
- *    some = 4711,
- *    others = 57 
+ *    .some = 4711,
+ *    .others = 57
  * };
  * @endcode
  * @param name Name of the queue to create.

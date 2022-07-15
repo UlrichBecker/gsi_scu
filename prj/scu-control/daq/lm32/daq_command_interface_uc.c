@@ -44,28 +44,6 @@ volatile DAQ_SHARED_IO_T SHARED g_shared = DAQ_SHARAD_MEM_INITIALIZER;
 typedef DAQ_RETURN_CODE_T (*DAQ_OPERATION_FT)( DAQ_ADMIN_T* pDaqAdmin,
                                                volatile DAQ_OPERATION_IO_T* );
 
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_INTERFACE
- * @brief Definition of the item for the operation match list.
- */
-typedef struct
-{  /*!
-    * @brief Operation code
-    * @see DAQ_OPERATION_CODE_T
-    */
-   const DAQ_OPERATION_CODE_T code;
-   /*!
-    * @brief Pointer of the related function
-    */
-   const DAQ_OPERATION_FT     operation;
-   
-#ifdef CONFIG_USE_LM32LOG
-   /*!
-    * @brief Name of operation for debugging and logging purposes only.
-    */
-   const char*                name;
-#endif
-} DAQ_OPERATION_TAB_ITEM_T;
 
 #ifdef DEBUGLEVEL
 /*! ---------------------------------------------------------------------------
@@ -717,6 +695,29 @@ DAQ_RETURN_CODE_T opSyncTimeStamp( DAQ_ADMIN_T* pDaqAdmin,
    }
    return DAQ_RET_OK;
 }
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ_INTERFACE
+ * @brief Definition of the item for the operation match list.
+ */
+typedef struct
+{  /*!
+    * @brief Operation code
+    * @see DAQ_OPERATION_CODE_T
+    */
+   const DAQ_OPERATION_CODE_T code;
+   /*!
+    * @brief Pointer of the related function
+    */
+   const DAQ_OPERATION_FT     operation;
+
+#ifdef CONFIG_USE_LM32LOG
+   /*!
+    * @brief Name of operation for debugging and logging purposes only.
+    */
+   const char*                name;
+#endif
+} DAQ_OPERATION_TAB_ITEM_T;
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_INTERFACE
