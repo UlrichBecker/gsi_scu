@@ -314,7 +314,7 @@ bool queuePushSave( SW_QUEUE_T* pThis, const void* pItem );
  * @param pThis Pointer to the concerned queue object. 
  * @param pItem Destination pointer in which will copied.
  * @retval true Data valid, at least one item was in queue.
- * @retval false Date invalid, queue was empty.
+ * @retval false Data invalid, queue was empty.
  */
 bool queuePop( SW_QUEUE_T* pThis, void* pItem );
 
