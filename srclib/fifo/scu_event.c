@@ -22,3 +22,66 @@
  ******************************************************************************
  */
 #include <scu_event.h>
+#if defined(__lm32__) || defined(__DOXYGEN__)
+  #include <lm32Interrupts.h>
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_event.h
+ */
+void evInit( EVENT_T* pEvent, const size_t maxCapacity )
+{
+   pEvent->counter = 0;
+   pEvent->capacity = maxCapacity;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_event.h
+ */
+bool evPush( EVENT_T* pEvent )
+{
+   if( pEvent->counter >= pEvent->capacity )
+      return false;
+   
+   pEvent->counter++;
+   return true;
+}
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @see scu_event.h
+ */
+bool evPushSave( EVENT_T* pEvent )
+{
+   criticalSectionEnter();
+   const bool ret = evPush( pEvent );
+   criticalSectionExit();
+   return ret;
+}
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_event.h
+ */
+bool evPop( EVENT_T* pEvent )
+{
+   if( !evIsPresent( pEvent ) )
+      return false;
+
+   pEvent->counter--;
+   return true;
+}
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @see scu_event.h
+ */
+bool evPopSave( EVENT_T* pEvent )
+{
+   criticalSectionEnter();
+   const bool ret = evPop( pEvent );
+   criticalSectionExit();
+   return ret;
+}
+#endif
+/*================================== EOF ====================================*/

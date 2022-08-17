@@ -8,27 +8,28 @@
 ## Author:  Ulrich Becker                                                    ##
 ## Date:    09.01.2019                                                       ##
 ###############################################################################
-
-#TARGET_DIR     := ..
-#DEPLOY_DIR     := .
-TARGET         := scu_control
-
+BASE_VERSION = 4
+SUB_VERSION  = 5.2
+TARGET       := scu_control
+#------------------------------------------------------------------------------
 # USE_HISTORY=1
  USE_LM32LOG=1
  USE_MMU := 1
  SCU_MIL := 1
 # MIL_GAP := 1
-# MIL_DAQ_USE_DDR3 := 1
+
+MIL_DAQ_USE_DDR3 := 1
+
+ifdef SCU_MIL
  MIL_IN_TIMER_INTERRUPT := 1
- 
+endif
  ADDAC_DAQ := 1
  DIOB_WITH_DAQ := 1
 # DEFINES += _CONFIG_DBG_MIL_TASK
 
-BASE_VERSION = 4
-SUB_VERSION =5.1
-
 NEW_ADDAC_HANDSHAKE := 1
+
+#------------------------------------------------------------------------------
 
 ifdef USE_HISTORY
  ifdef USE_LM32LOG
@@ -54,9 +55,7 @@ DEFINES += _SCU_CONTROL_CONFIG_H
  DEFINES += _CONFIG_ECA_BY_MSI
 # DEFINES += CONFIG_LOG_ALL_SIGNALS
 
- DEFINES += _CONFIG_NEW
-
-
+# DEFINES += _CONFIG_NEW
 
 DEFINES += FG_VERSION=$(BASE_VERSION)
 VERSION_STR = $(BASE_VERSION).$(SUB_VERSION)
@@ -148,12 +147,6 @@ SCU_DIR      = $(PRJ_DIR)/scu-control
 DAQ_DIR      = $(SCU_DIR)/daq
 DAQ_LM32_DIR = $(DAQ_DIR)/lm32
 
-#INCLUDE_DIRS += $(SCU_DIR)
-#INCLUDE_DIRS += $(SCU_DIR)/fg
-#INCLUDE_DIRS += $(DAQ_DIR)
-#INCLUDE_DIRS += $(DAQ_LM32_DIR)
-#INCLUDE_DIRS += $(SCU_DIR)/temperature
-
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_logutil.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
@@ -175,6 +168,7 @@ ifdef SCU_MIL
   SOURCE += $(SCU_DIR)/fg/scu_eca_handler.c
   SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mil.c
   SOURCE += $(SCU_DIR)/fg/scu_mil_fg_handler.c
+  SOURCE += $(SCU_LIB_SRC_DIR)/fifo/scu_event.c
 endif
 ifdef ADDAC_DAQ
   SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
@@ -251,7 +245,7 @@ endif
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+ SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 

@@ -24,6 +24,9 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#define _CONFIG_MIL_EV_QUEUE
+
+
 #include "scu_main.h"
 #include "scu_command_handler.h"
 #include <scu_fg_list.h>
@@ -31,6 +34,9 @@
 #ifdef CONFIG_MIL_FG
  #ifdef CONFIG_MIL_IN_TIMER_INTERRUPT
   #include "scu_lm32Timer.h"
+ #endif
+ #ifdef _CONFIG_MIL_EV_QUEUE
+  #include <scu_event.h>
  #endif
  #include "scu_eca_handler.h"
  #include "scu_mil_fg_handler.h"
@@ -96,6 +102,11 @@ volatile unsigned int* g_pScu_mil_base    = NULL;
  * @see initializeGlobalPointers
  */
 volatile uint32_t*     g_pMil_irq_base    = NULL;
+
+#ifdef _CONFIG_MIL_EV_QUEUE
+EV_CREATE_STATIC( g_ecaEvent, 16 );
+#endif
+
 #endif /* CONFIG_MIL_FG */
 
 /*===========================================================================*/
@@ -123,14 +134,34 @@ void pushInQueue( SW_QUEUE_T* pThis, const void* pItem )
    queuePush( &g_queueAlarm, &pThis );
 }
 
+#if defined( CONFIG_MIL_FG ) && defined( _CONFIG_MIL_EV_QUEUE )
+/*! ---------------------------------------------------------------------------
+ * @brief Put a event in the given event-queue object.
+ * 
+ * If the concerned queue is full, then a alarm-item will put in the 
+ * alarm-queue which becomes evaluated in the function queuePollAlarm().
+ *
+ * @see queuePollAlarm.
+ * @param pThis Pointer to the queue object.
+ * @param pItem Pointer to the payload object.
+ */
+STATIC inline
+void pushInEvQueue( EVENT_T* pEvent )
+{
+   if( evPush( pEvent ) )
+      return;
+   queuePush( &g_queueAlarm, &pEvent );
+}
+#endif
+
 /*! ----------------------------------------------------------------------------
  * @brief Checks whether a possible overflow has been happen in one or more
  *        of the used message queues. 
  */
 STATIC inline void queuePollAlarm( void )
 {
-   SW_QUEUE_T* pOverflowedQueue;
-
+   void* pOverflowedQueue;
+   
    if( !queuePopSave( &g_queueAlarm, &pOverflowedQueue ) )
       return;
 
@@ -146,9 +177,22 @@ STATIC inline void queuePollAlarm( void )
 #endif
    #undef QEUE2STRING
 
-   scuLog( LM32_LOG_ERROR, ESC_ERROR
-           "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
-           ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
+#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
+   if( pOverflowedQueue != &g_ecaEvent )
+   {
+#endif
+      scuLog( LM32_LOG_ERROR, ESC_ERROR
+              "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
+              ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
+#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
+   }
+   else
+   {
+      scuLog( LM32_LOG_ERROR, ESC_ERROR
+              "ERROR: ECA-event-queue has overflowed! Capacity: %d\n"
+              ESC_NORMAL, g_ecaEvent.capacity );
+   }
+#endif
 }
 #else
    #define queuePollAlarm()
@@ -311,7 +355,11 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
                * ECA event received
                */
                TRACE_MIL_DRQ( "*\n" );
+             #ifdef _CONFIG_MIL_EV_QUEUE
+               pushInEvQueue( &g_ecaEvent );
+             #else
                ecaHandler();
+             #endif
                break;
             }
          #endif
@@ -392,6 +440,9 @@ ONE_TIME_CALL void initInterrupt( void )
 #endif
 #ifdef CONFIG_MIL_FG
    queueReset( &g_queueMilFg );
+ #ifdef _CONFIG_MIL_EV_QUEUE
+   evDelete( &g_ecaEvent );
+ #endif
 #endif
 #ifdef CONFIG_QUEUE_ALARM
    queueReset( &g_queueAlarm );
@@ -541,8 +592,16 @@ ONE_TIME_CALL void schedule( void )
       milExecuteTasks();
  #ifndef _CONFIG_ECA_BY_MSI
    ecaHandler();
+ #else
+  #ifdef _CONFIG_MIL_EV_QUEUE
+   if( evPopSave( &g_ecaEvent ) )
+   {
+      ecaHandler();
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );
+   }
+  #endif
  #endif
-#endif
+#endif /* ifdef CONFIG_MIL_FG */
    commandHandler();
 }
 
@@ -709,9 +768,9 @@ void main( void )
    scuLog( LM32_LOG_INFO, "MIL-DAQ buffer capacity:   %5u item\n",
            g_shared.mDaq.memAdmin.indexes.capacity );
 #endif
-
+#if defined( CONFIG_MIL_FG )
    scuLog( LM32_LOG_INFO, "Found MIL function generators: %d\n", milGetNumberOfFg() );
- 
+#endif
    initInterrupt();
 
    scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD

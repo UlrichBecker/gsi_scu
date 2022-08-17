@@ -80,6 +80,18 @@ typedef struct
 void evInit( EVENT_T* pEvent, const size_t maxCapacity );
 
 /*! ---------------------------------------------------------------------------
+ * @brief Deletes all events in the queue.
+ * @note This action is necessary by a static queue creation in the case of a
+ *       SCU-CPU reset. 
+ * @param pEvent Pointer to event queue object.
+ */
+ALWAYS_INLINE STATIC inline
+void evDelete( EVENT_T* pEvent )
+{
+   pEvent->counter = 0;
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Pushes a event in the queue.
  * @param pEvent Pointer to event queue object.
  * @retval true Action was successful.
@@ -88,27 +100,49 @@ void evInit( EVENT_T* pEvent, const size_t maxCapacity );
 bool evPush( EVENT_T* pEvent );
 
 #if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @brief Pushes a event in the queue within a atomic section.
+ * @param pEvent Pointer to event queue object.
+ * @retval true Action was successful.
+ * @retval false Queue already full, no additional event stored.
+ */
 bool evPushSave( EVENT_T* pEvent );
 #endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Removes a event from the queue if any present.
+ * @param pEvent Pointer to event queue object.
  * @retval true At least one event was in queue and has been removed.
- * @retval false No event in te queue.
+ * @retval false No event in the queue.
  */
 bool evPop( EVENT_T* pEvent );
 
 #if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @brief Removes a event from the queue within a atomic section 
+ *        if any present.
+ * @param pEvent Pointer to event queue object.
+ * @retval true At least one event was in queue and has been removed.
+ * @retval false No event in the queue.
+ */
 bool evPopSave( EVENT_T* pEvent );
 #endif
 
-
+/*! ---------------------------------------------------------------------------
+ * @brief Returns the number of events which are currently in the queue.
+ */
 ALWAYS_INLINE STATIC inline
 EV_COUNTER_T evGetNumberOf( const EVENT_T* pEvent )
 {
    return pEvent->counter;
 }
 
+/*! ---------------------------------------------------------------------------
+ * @brief Returns true if at least one event in the queue.
+ * @param pEvent Pointer to event queue object.
+ * @retval false No event in the queue.
+ * @retval true At least one event in the queue.
+ */
 ALWAYS_INLINE STATIC inline
 bool evIsPresent( const EVENT_T* pEvent )
 {
