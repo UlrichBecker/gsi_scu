@@ -14,7 +14,7 @@
 #endif
 
 #include <scu_fg_handler.h>
-#include <scu_main.h>
+#include <scu_lm32_common.h>
 #include <eb_console_helper.h>
 #include <scu_fg_handler.h>
 #ifdef CONFIG_MIL_FG
@@ -22,7 +22,7 @@
  #include <scu_mil_fg_handler.h>
 #endif
 #include <mini_sdb.h>
-#include "scu_fg_macros.h"
+#include <scu_fg_macros.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #include <daq_main.h>
 #endif

@@ -39,7 +39,7 @@
 #include <daq_ramBuffer.h>
 
 #ifndef CONFIG_DAQ_SINGLE_APP
- #include <scu_main.h>
+ #include <scu_lm32_common.h>
 #endif
 
 #ifdef __cplusplus

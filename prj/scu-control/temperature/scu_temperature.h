@@ -9,7 +9,7 @@
 #ifndef _SCU_TEMPERATURE_H
 #define _SCU_TEMPERATURE_H
 
-#include "scu_main.h"
+#include <scu_lm32_common.h>
 
 #ifdef __cplusplus
 extern "C" {

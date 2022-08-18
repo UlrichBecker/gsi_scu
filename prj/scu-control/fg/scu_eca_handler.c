@@ -7,8 +7,8 @@
  * Outsourced from scu_main.c
  */
 
-#include "scu_main.h"
-#include "scu_fg_list.h"
+#include <scu_lm32_common.h>
+#include <scu_fg_list.h>
 #include "scu_eca_handler.h"
 
 extern volatile unsigned int* g_pScu_mil_base;

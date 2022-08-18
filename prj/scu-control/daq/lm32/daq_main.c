@@ -395,11 +395,7 @@ ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice )
 ALWAYS_INLINE STATIC inline
 bool addacDaqQueuePop( DAQ_QUEUE_SLOT_T* pSlot )
 {
-#ifdef CONFIG_RTOS
-   return (xQueueReceive( g_queueAddacDaq, pSlot, 0 ) == pdPASS);
-#else
    return queuePopSave( &g_queueAddacDaq, pSlot );
-#endif
 }
 
 /*! ---------------------------------------------------------------------------

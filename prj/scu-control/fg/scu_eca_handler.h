@@ -9,9 +9,10 @@
 #ifndef _SCU_ECA_HANDLER_H
 #define _SCU_ECA_HANDLER_H
 
-#include "eca_queue_type.h"
-#include "scu_shared_mem.h"
-#include "scu_main.h"
+#include <eca_queue_type.h>
+#include <scu_shared_mem.h>
+#include <scu_lm32_common.h>
+
 
 #ifdef __cplusplus
 extern "C" {

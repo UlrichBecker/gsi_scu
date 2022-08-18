@@ -13,8 +13,8 @@
 #endif
 #ifndef __DOCFSM__
 /* Headers will not need for FSM analysator "docfsm" */
-  #include "scu_main.h"
-  #include "scu_fg_macros.h"
+  #include <scu_lm32_common.h>
+  #include <scu_fg_macros.h>
 #endif
 
 //#define CONFIG_MIL_WAIT

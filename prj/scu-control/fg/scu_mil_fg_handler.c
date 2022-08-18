@@ -1307,9 +1307,7 @@ int milGetTask( register MIL_TASK_DATA_T* pMilTaskData,
 ALWAYS_INLINE STATIC inline
 bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
 {
-#ifdef CONFIG_RTOS
-   return (xQueueReceive( g_queueMilFg, &pMilData->lastMessage, 0 ) == pdPASS);
-#elif  CONFIG_MIL_IN_TIMER_INTERRUPT
+#ifdef  CONFIG_MIL_IN_TIMER_INTERRUPT
    return queuePop( &g_queueMilFg, &pMilData->lastMessage );
 #else
    return queuePopSave( &g_queueMilFg, &pMilData->lastMessage );

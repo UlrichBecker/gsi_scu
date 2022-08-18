@@ -9,8 +9,8 @@
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/AdcDacScu
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/AdcDac2Scu
  */
-#include "scu_fg_macros.h"
-#include "scu_fg_handler.h"
+#include <scu_fg_macros.h>
+#include <scu_fg_handler.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
   #include <daq_main.h>
 #endif

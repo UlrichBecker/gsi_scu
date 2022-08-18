@@ -14,8 +14,8 @@
 
 #include <scu_lm32_macros.h>
 #include <scu_bus.h>
-#include "scu_main.h"
-#include "scu_mailbox.h"
+#include <scu_lm32_common.h>
+#include <scu_mailbox.h>
 
 #ifdef __cplusplus
 extern "C" {

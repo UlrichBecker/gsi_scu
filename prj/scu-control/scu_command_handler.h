@@ -10,7 +10,7 @@
 #define _SCU_COMMAND_HANDLER_H
 
 #include <sw_queue.h>
-#include "scu_main.h"
+#include <scu_lm32_common.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,8 +12,8 @@
 #ifndef _SCU_FG_MAIN_H
 #define _SCU_FG_MAIN_H
 
-#include "scu_main.h"
-#include "scu_fg_macros.h"
+#include <scu_lm32_common.h>
+#include <scu_fg_macros.h>
 
 #ifdef __cplusplus
 extern "C" {
