@@ -204,7 +204,7 @@ _crt0:
     mvhi    r2,     hi(STACK_MAGIC)
     ori     r2, r2, lo(STACK_MAGIC)
     sw      (r1+0), r2 /* _endram = STACK_MAGIC; */
-    
+
     /*
      * Initializing .bss by zero.
      */

@@ -641,7 +641,7 @@ void fgMilClearHandlerState( const unsigned int socket )
      /*
       * Triggering of a software pseudo interrupt.
       */
-      ATOMIC_SECTION() pushInQueue( &g_queueMilFg, &milMsg );
+      ATOMIC_SECTION() queuePushWatched( &g_queueMilFg, &milMsg );
       return;
    }
 
@@ -655,7 +655,7 @@ void fgMilClearHandlerState( const unsigned int socket )
      /*
       * Triggering of a software pseudo interrupt.
       */
-      ATOMIC_SECTION() pushInQueue( &g_queueMilFg, &milMsg );
+      ATOMIC_SECTION() queuePushWatched( &g_queueMilFg, &milMsg );
    }
 }
 

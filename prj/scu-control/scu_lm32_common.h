@@ -7,8 +7,6 @@
  *
  *  @author Ulrich Becker <u.becker@gsi.de>
  *
- *  @note Header only!
- *
  *  For testing:
  *  @see https://www-acc.gsi.de/wiki/Hardware/Intern/Saft_Fg_Ctl
  ******************************************************************************
@@ -62,6 +60,7 @@
 #include <scu_logutil.h>
 #include <scu_circular_buffer.h>
 #include <event_measurement.h>
+#include <queue_watcher.h>
 
 #ifdef CONFIG_USE_MMU
  #include <scu_mmu_lm32.h>
@@ -132,6 +131,12 @@ extern volatile uint32_t __reset_count;
 extern TIME_MEASUREMENT_T g_irqTimeMeasurement;
 #endif
 
+extern volatile uint16_t*     g_pScub_base;
+extern volatile uint32_t*     g_pScub_irq_base;
+#ifdef CONFIG_MIL_FG
+extern volatile unsigned int* g_pScu_mil_base;
+extern volatile uint32_t*     g_pMil_irq_base;
+#endif
 
 /*!
  * @todo find the related definitions in the source code of SAFTLIB and
@@ -143,34 +148,41 @@ extern TIME_MEASUREMENT_T g_irqTimeMeasurement;
   #define ADDR_DEVBUS 0x20
 #endif
 
-#define CONFIG_QUEUE_ALARM
-
-#ifdef CONFIG_QUEUE_ALARM
 /*! ---------------------------------------------------------------------------
- * @brief Put a message in the given queue object.
- *
- * If the concerned queue is full, then a alarm-item will put in the
- * alarm-queue which becomes evaluated in the function queuePollAlarm().
- *
- * @see queuePollAlarm.
- * @param pThis Pointer to the queue object.
- * @param pItem Pointer to the payload object.
+ * @brief Initializing of all global pointers accessing the hardware.
  */
-void pushInQueue( SW_QUEUE_T* pThis, const void* pItem );
+void initializeGlobalPointers( void );
 
-#else
-#define pushInQueue queuePush
-#endif
+/*! ---------------------------------------------------------------------------
+ * @ingroup MAILBOX
+ * @brief Tells SAFTLIB the mailbox slot for software interrupts.
+ * @see commandHandler
+ * @see FG_MB_SLOT saftlib/drivers/aRegs.h
+ * @see FunctionGeneratorFirmware::ScanFgChannels() in
+ *      saftlib/drivers/FunctionGeneratorFirmware.cpp
+ * @see FunctionGeneratorFirmware::ScanMasterFg() in
+ *      saftlib/drivers/FunctionGeneratorFirmware.cpp
+ */
+void tellMailboxSlot( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Scans for function generators on mil extension and scu bus.
  */
 void scanFgs( void );
 
+/*! ---------------------------------------------------------------------------
+ * @brief initialize procedure at startup
+ */
+void initAndScan( void );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Allocates memory for MIL- and  ADDAC- DAQs
+ */
+void mmuAllocateDaqBuffer( void );
+
 #ifdef __cplusplus
 }
 #endif
-
 
 
 #endif /* ifndef _SCU_LM32_COMMON_H */

@@ -26,8 +26,8 @@
  */
 #define _CONFIG_MIL_EV_QUEUE
 
-
 #include "scu_main.h"
+#include <sys_exception.h>
 #include "scu_command_handler.h"
 #include <scu_fg_list.h>
 #include "scu_fg_macros.h"
@@ -46,7 +46,7 @@
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #include "daq_main.h"
 #endif
-#include "lm32signal.h"
+
 
 #ifndef USRCPUCLK
    #define CPU_FREQUENCY 125000000
@@ -78,179 +78,14 @@ SCU_SHARED_DATA_T SHARED g_shared = SCU_SHARED_DATA_INITIALIZER;
 bool g_milUseTimerinterrupt = false;
 #endif
 
-/*!
- * @brief Base pointer of SCU bus.
- * @see initializeGlobalPointers
- */
-volatile uint16_t*     g_pScub_base       = NULL;
-
-/*!
- * @brief Base pointer of irq controller for SCU bus
- * @see initializeGlobalPointers
- */
-volatile uint32_t*     g_pScub_irq_base   = NULL;
 
 #ifdef CONFIG_MIL_FG
-/*!
- * @brief Base pointer of MIL extension macro
- * @see initializeGlobalPointers
- */
-volatile unsigned int* g_pScu_mil_base    = NULL;
-
-/*!
- * @brief Base pointer of IRQ controller for dev bus extension
- * @see initializeGlobalPointers
- */
-volatile uint32_t*     g_pMil_irq_base    = NULL;
-
 #ifdef _CONFIG_MIL_EV_QUEUE
 EV_CREATE_STATIC( g_ecaEvent, 16 );
 #endif
-
 #endif /* CONFIG_MIL_FG */
 
 /*===========================================================================*/
-#ifdef CONFIG_QUEUE_ALARM
-/*
- * Alarm queue containing the pointer of queues in which has been happend
- * a overflow.
- */
-QUEUE_CREATE_STATIC( g_queueAlarm, MAX_FG_CHANNELS, SW_QUEUE_T* );
-
-/*! ---------------------------------------------------------------------------
- * @brief Put a message in the given queue object.
- * 
- * If the concerned queue is full, then a alarm-item will put in the 
- * alarm-queue which becomes evaluated in the function queuePollAlarm().
- *
- * @see queuePollAlarm.
- * @param pThis Pointer to the queue object.
- * @param pItem Pointer to the payload object.
- */
-void pushInQueue( SW_QUEUE_T* pThis, const void* pItem )
-{
-   if( queuePush( pThis, pItem ) )
-      return;
-   queuePush( &g_queueAlarm, &pThis );
-}
-
-#if defined( CONFIG_MIL_FG ) && defined( _CONFIG_MIL_EV_QUEUE )
-/*! ---------------------------------------------------------------------------
- * @brief Put a event in the given event-queue object.
- * 
- * If the concerned queue is full, then a alarm-item will put in the 
- * alarm-queue which becomes evaluated in the function queuePollAlarm().
- *
- * @see queuePollAlarm.
- * @param pThis Pointer to the queue object.
- * @param pItem Pointer to the payload object.
- */
-STATIC inline
-void pushInEvQueue( EVENT_T* pEvent )
-{
-   if( evPush( pEvent ) )
-      return;
-   queuePush( &g_queueAlarm, &pEvent );
-}
-#endif
-
-/*! ----------------------------------------------------------------------------
- * @brief Checks whether a possible overflow has been happen in one or more
- *        of the used message queues. 
- */
-STATIC inline void queuePollAlarm( void )
-{
-   void* pOverflowedQueue;
-   
-   if( !queuePopSave( &g_queueAlarm, &pOverflowedQueue ) )
-      return;
-
-   const char* str = "unknown";
-   #define QEUE2STRING( name ) if( &name == pOverflowedQueue ) str = #name
-
-   QEUE2STRING( g_queueSaftCmd );
-#ifdef CONFIG_SCU_DAQ_INTEGRATION
-   QEUE2STRING( g_queueAddacDaq );
-#endif
-#ifdef CONFIG_MIL_FG
-   QEUE2STRING( g_queueMilFg );
-#endif
-   #undef QEUE2STRING
-
-#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
-   if( pOverflowedQueue != &g_ecaEvent )
-   {
-#endif
-      scuLog( LM32_LOG_ERROR, ESC_ERROR
-              "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
-              ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
-#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
-   }
-   else
-   {
-      scuLog( LM32_LOG_ERROR, ESC_ERROR
-              "ERROR: ECA-event-queue has overflowed! Capacity: %d\n"
-              ESC_NORMAL, g_ecaEvent.capacity );
-   }
-#endif
-}
-#else
-   #define queuePollAlarm()
-#endif /* else if CONFIG_QUEUE_ALARM */
-
-/*! ---------------------------------------------------------------------------
- * @brief Initializing of all global pointers accessing the hardware.
- */
-STATIC inline ALWAYS_INLINE
-void initializeGlobalPointers( void )
-{
-   initOneWire();
-
-   /*
-    * Additional periphery needed for SCU.
-    */
-
-   g_pScub_base = (volatile uint16_t*)find_device_adr( GSI, SCU_BUS_MASTER );
-   if( (int)g_pScub_base == ERROR_NOT_FOUND )
-      die( "SCU-bus not found!" );
-
-   g_pScub_irq_base = (volatile uint32_t*)find_device_adr( GSI, SCU_IRQ_CTRL );
-   if( (int)g_pScub_irq_base == ERROR_NOT_FOUND )
-      die( "Interrupt control for SCU-bus not found!" );
-
-#ifdef CONFIG_MIL_FG
-   g_pScu_mil_base = (unsigned int*)find_device_adr( GSI, SCU_MIL );
-   if( (int)g_pScu_mil_base == ERROR_NOT_FOUND )
-      die( "MIL-bus not found!" );
-
-   g_pMil_irq_base = (volatile uint32_t*)find_device_adr( GSI, MIL_IRQ_CTRL );
-   if( (int)g_pMil_irq_base == ERROR_NOT_FOUND )
-      die( "Interrupt control for MIL-bus not found!" );
-#endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @ingroup MAILBOX
- * @brief Tells SAFTLIB the mailbox slot for software interrupts.
- * @see commandHandler
- * @see FG_MB_SLOT saftlib/drivers/aRegs.h
- * @see FunctionGeneratorFirmware::ScanFgChannels() in
- *      saftlib/drivers/FunctionGeneratorFirmware.cpp
- * @see FunctionGeneratorFirmware::ScanMasterFg() in
- *      saftlib/drivers/FunctionGeneratorFirmware.cpp
- */
-STATIC inline ALWAYS_INLINE
-void tellMailboxSlot( void )
-{
-   const int slot = getMsiBoxSlot(0x10); //TODO Where does 0x10 come from?
-   if( slot == -1 )
-      die( "No free slots in MsgBox left!" );
-
-   scuLog( LM32_LOG_INFO, 
-           ESC_FG_MAGENTA "Configured slot %d in MsgBox\n" ESC_NORMAL, slot );
-   g_shared.oSaftLib.oFg.mailBoxSlot = slot;
-}
-
 /*! ---------------------------------------------------------------------------
  * @brief delay in multiples of one millisecond
  *  uses the system timer
@@ -306,7 +141,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
         /*!
          * @see milTask
          */
-         pushInQueue( &g_queueMilFg, &milMsg );
+         queuePushWatched( &g_queueMilFg, &milMsg );
       }
    #endif
 
@@ -316,7 +151,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
        #ifndef __DOXYGEN__
          STATIC_ASSERT( sizeof( slot ) == sizeof( DAQ_QUEUE_SLOT_T ) );
        #endif
-         pushInQueue( &g_queueAddacDaq, &slot );
+         queuePushWatched( &g_queueAddacDaq, &slot );
       }
    //TODO (1 << DAQ_IRQ_HIRES_FINISHED)
    #endif
@@ -356,7 +191,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
                */
                TRACE_MIL_DRQ( "*\n" );
              #ifdef _CONFIG_MIL_EV_QUEUE
-               pushInEvQueue( &g_ecaEvent );
+               evPushWatched( &g_ecaEvent );
              #else
                ecaHandler();
              #endif
@@ -377,7 +212,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             */
 
             STATIC_ASSERT( sizeof( m.msg ) == sizeof( SAFT_CMD_T ) );
-            pushInQueue( &g_queueSaftCmd, &m.msg );
+            queuePushWatched( &g_queueSaftCmd, &m.msg );
             break;
          }
 
@@ -399,7 +234,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
            /*!
             * @see milDeviceHandler
             */
-            pushInQueue( &g_queueMilFg, &milMsg );
+            queuePushWatched( &g_queueMilFg, &milMsg );
             break;
          }
      #endif /* ifdef CONFIG_MIL_FG */
@@ -487,81 +322,6 @@ ONE_TIME_CALL void initInterrupt( void )
    irqEnable();
    IRQ_ASSERT( irqGetAtomicNestingCount() == 0 );
 #endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief initialize procedure at startup
- */
-STATIC void initAndScan( void )
-{
-   /*
-    *  No function generator macros assigned to channels at startup!
-    */
-   for( unsigned int channel = 0; channel < ARRAY_SIZE(g_shared.oSaftLib.oFg.aRegs); channel++ )
-      g_shared.oSaftLib.oFg.aRegs[channel].macro_number = SCU_INVALID_VALUE;
-
-   /*
-    * Update one wire ID and temperatures.
-    */
-   updateTemperature();
-
-   /*
-    * Scans for SCU-bus slave cards and function generators.
-    */
-   scanFgs();
-}
-
-#define CONFIG_STOP_ON_LM32_EXCEPTION
-
-/*! ---------------------------------------------------------------------------
- * @brief Callback function becomes invoked by LM32 when an exception has
- *        been appeared.
- */
-void _onException( const uint32_t sig )
-{
-   char* str;
-   #define _CASE_SIGNAL( S ) case S: str = #S; break;
-   switch( sig )
-   {
-      _CASE_SIGNAL( SIGINT )
-      _CASE_SIGNAL( SIGTRAP )
-      _CASE_SIGNAL( SIGFPE )
-      _CASE_SIGNAL( SIGSEGV )
-      default: str = "unknown"; break;
-   }
-   scuLog( LM32_LOG_ERROR, ESC_ERROR "Exception occurred: %d -> %s\n"
-                                  #ifdef CONFIG_STOP_ON_LM32_EXCEPTION
-                                     "System stopped!\n"
-                                  #endif
-                           ESC_NORMAL, sig, str );
-#ifdef CONFIG_STOP_ON_LM32_EXCEPTION
-   irqDisable();
-   while( true );
-#endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief Scans for fgs on mil extension and scu bus.
- */
-void scanFgs( void )
-{
-#if defined( CONFIG_READ_MIL_TIME_GAP ) && defined( CONFIG_MIL_FG )
-   suspendGapReading();
-#endif
-#if __GNUC__ >= 9
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-#endif
-   fgListFindAll( g_pScub_base,
-              #ifdef CONFIG_MIL_FG
-                 g_pScu_mil_base,
-              #endif
-                 g_shared.oSaftLib.oFg.aMacros,
-                 &g_shared.oSaftLib.oTemperatures.ext_id );
-#if __GNUC__ >= 9
-  #pragma GCC diagnostic pop
-#endif
-   printFgs();
 }
 
 /*! ---------------------------------------------------------------------------
@@ -707,67 +467,9 @@ void main( void )
     */
    initAndScan();
    //print_regs();
-#ifdef CONFIG_USE_MMU
- #ifdef CONFIG_SCU_DAQ_INTEGRATION
-  #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ringAdmin.indexes.offset) );
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ringAdmin.indexes.capacity) );
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-   status = mmuAlloc( TAG_ADDAC_DAQ,
-                     (size_t*)&g_shared.sDaq.ringAdmin.indexes.offset,
-                     (size_t*)&g_shared.sDaq.ringAdmin.indexes.capacity,
-                     true );
-   #pragma GCC diagnostic pop
-  #else
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ramIndexes.ringIndexes.offset) );
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ramIndexes.ringIndexes.capacity) );
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-   status = mmuAlloc( TAG_ADDAC_DAQ,
-                      (size_t*)&g_shared.sDaq.ramIndexes.ringIndexes.offset,
-                      (size_t*)&g_shared.sDaq.ramIndexes.ringIndexes.capacity,
-                      true );
-   #pragma GCC diagnostic pop
-  #endif
- #endif
-   scuLog( LM32_LOG_INFO, "MMU-Tag 0x%04X for ADDAC-DAQ-buffer: %s\n",
-           TAG_ADDAC_DAQ, mmuStatus2String( status ) );
- #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM )
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.mDaq.memAdmin.indexes.offset) );
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.mDaq.memAdmin.indexes.capacity) );
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-   status = mmuAlloc( TAG_MIL_DAQ,
-                      (size_t*)&g_shared.mDaq.memAdmin.indexes.offset,
-                      (size_t*)&g_shared.mDaq.memAdmin.indexes.capacity,
-                      true );
-   #pragma GCC diagnostic pop
-   scuLog( LM32_LOG_INFO, "MMU-Tag 0x%04X for MIL-DAQ-buffer:   %s\n",
-           TAG_MIL_DAQ, mmuStatus2String( status ) );
- #endif
-#endif /* CONFIG_USE_MMU */
 
-#ifdef CONFIG_SCU_DAQ_INTEGRATION
- #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer offset:   %5u item\n",
-           g_shared.sDaq.ringAdmin.indexes.offset );
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer capacity: %5u item\n",
-           g_shared.sDaq.ringAdmin.indexes.capacity );
- #else
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer offset:   %5u item\n",
-           g_shared.sDaq.ramIndexes.ringIndexes.offset );
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer capacity: %5u item\n",
-           g_shared.sDaq.ramIndexes.ringIndexes.capacity );
- #endif
-#endif
+   mmuAllocateDaqBuffer();
 
-#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM )
-   scuLog( LM32_LOG_INFO, "MIL-DAQ buffer offset:     %5u item\n",
-           g_shared.mDaq.memAdmin.indexes.offset );
-   scuLog( LM32_LOG_INFO, "MIL-DAQ buffer capacity:   %5u item\n",
-           g_shared.mDaq.memAdmin.indexes.capacity );
-#endif
 #if defined( CONFIG_MIL_FG )
    scuLog( LM32_LOG_INFO, "Found MIL function generators: %d\n", milGetNumberOfFg() );
 #endif
