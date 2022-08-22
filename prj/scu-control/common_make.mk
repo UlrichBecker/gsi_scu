@@ -9,10 +9,13 @@
 ## Date:    09.01.2022                                                       ##
 ###############################################################################
 
+NEW_ADDAC_HANDSHAKE := 1
+
 ifdef MIL_DAQ_USE_DDR3
    DEFINES += CONFIG_MIL_DAQ_USE_RAM
    USE_SCU_EXTERN_RAM := 1
 endif
+
 
 # DEFINES += CONFIG_USE_SENT_COUNTER
 #DEFINES += CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
@@ -26,6 +29,54 @@ DEFINES += CONFIG_WR_NODE
 DEFINES += CONFIG_NON_DAQ_FG_SUPPORT
 
  # DEFINES += CONFIG_USE_INTERRUPT_TIMESTAMP
+ifdef USE_HISTORY
+ ifdef USE_LM32LOG
+  $(error Either History or LM32-logsystem but not both! )
+ endif
+endif
+ifdef USE_LM32LOG
+  USE_MMU := 1
+endif
+
+ifdef NEW_ADDAC_HANDSHAKE
+ DEFINES += _CONFIG_WAS_READ_FOR_ADDAC_DAQ
+endif
+
+# DEFINES += CONFIG_DBG_MEASURE_IRQ_TIME
+# DEFINES += CONFIG_FG_PEDANTIC_CHECK
+# DEFINES += CONFIG_DAQ_PEDANTIC_CHECK
+
+# Avoiding of including of scu_control_config.h
+DEFINES += _SCU_CONTROL_CONFIG_H
+
+ DEFINES += _CONFIG_IRQ_ENABLE_IN_START_FG
+ DEFINES += _CONFIG_ECA_BY_MSI
+# DEFINES += CONFIG_LOG_ALL_SIGNALS
+
+# DEFINES += _CONFIG_NEW
+
+DEFINES += FG_VERSION=$(BASE_VERSION)
+VERSION_STR = $(BASE_VERSION).$(SUB_VERSION)
+DEFINES += SW_VERSION=$(BASE_VERSION).$(SUB_VERSION)
+
+ifdef NEW_ADDAC_HANDSHAKE
+ VERSION_STR += "*"
+endif
+
+ifeq ($(BASE_VERSION), 3)
+  DEFINES += CONFIG_FW_VERSION_3
+endif
+
+DEFINES += CONFIG_USE_FG_MSI_TIMEOUT
+
+
+ DEFINES += CONFIG_USE_INTERRUPT_TIMESTAMP
+# DEFINES += CONFIG_IRQ_RESET_IP_AFTER
+# DEFINES += CONFIG_DISABLE_CRITICAL_SECTION
+ DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+ DEFINES +=  CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
+
+ DEFINES += MICO32_FULL_CONTEXT_SAVE_RESTORE
 
 # DEFINES += DEBUG_SAFTLIB
 ifdef SCU_MIL
@@ -150,4 +201,25 @@ ifdef ADDAC_DAQ
 else
    SHARED_SIZE = 81920
 endif
+
+DOX_EXTRACT_STATIC         = "YES"
+DOX_EXTRACT_PRIVATE = "YES"
+# DOX_EXTRACT_ALL            = "YES"
+DOX_MACRO_EXPANSION        = "YES"
+DOX_EXPAND_ONLY_PREDEF     = "YES"
+DOX_EXPAND_AS_DEFINED      = "FSM_DECLARE_STATE __DAQ_SHARED_IO_T"
+DOX_EXPAND_AS_DEFINED      += ADD_NAMESPACE
+DOX_EXPAND_AS_DEFINED      += ATOMIC_SECTION
+DOX_DOTFILE_DIRS           += $(SCU_DIR)
+ifdef ADDAC_DAQ
+ DOX_DOTFILE_DIRS          += $(DAQ_LM32_DIR)
+endif
+
+ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
+   DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/lm32-firmware
+endif
+
+REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
+# Including common makefile for arbitrary LM32 software for SCU
+include $(REPOSITORY_DIR)/makefiles/makefile.scu
 #=================================== EOF ======================================

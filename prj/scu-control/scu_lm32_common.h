@@ -154,6 +154,12 @@ extern volatile uint32_t*     g_pMil_irq_base;
 void initializeGlobalPointers( void );
 
 /*! ---------------------------------------------------------------------------
+ * @brief Helper function for printing the CPU-ID and the number of
+ *        MSI endpoints.
+ */
+void printCpuId( void );
+
+/*! ---------------------------------------------------------------------------
  * @ingroup MAILBOX
  * @brief Tells SAFTLIB the mailbox slot for software interrupts.
  * @see commandHandler

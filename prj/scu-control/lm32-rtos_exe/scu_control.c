@@ -28,44 +28,155 @@
 #include <lm32signal.h>
 #include <task.h>
 
+#include <scu_command_handler.h>
+
+#ifdef CONFIG_MIL_FG
+ #include <scu_eca_handler.h>
+ #include <scu_task_mil.h>
+#endif
+#ifdef CONFIG_SCU_DAQ_INTEGRATION
+ #include <scu_task_daq.h>
+#endif
+
 #define MAIN_TASK_PRIORITY ( tskIDLE_PRIORITY + 1 )
 
-/*! ---------------------------------------------------------------------------
- * @brief Callback function becomes invoked by LM32 when an exception has
- *        been appeared.
+/*!----------------------------------------------------------------------------
+ * @see scu_control.h
  */
-void _onException( const uint32_t sig )
+void taskInfoLog( void )
 {
-   char* str;
-   #define _CASE_SIGNAL( S ) case S: str = #S; break;
-   switch( sig )
-   {
-      _CASE_SIGNAL( SIGINT )
-      _CASE_SIGNAL( SIGTRAP )
-      _CASE_SIGNAL( SIGFPE )
-      _CASE_SIGNAL( SIGSEGV )
-      default: str = "unknown"; break;
-   }
-   scuLog( LM32_LOG_ERROR, ESC_ERROR "Exception occurred: %d -> %s\n"
-                                  #ifdef CONFIG_STOP_ON_LM32_EXCEPTION
-                                     "System stopped!\n"
-                                  #endif
-                           ESC_NORMAL, sig, str );
-#ifdef CONFIG_STOP_ON_LM32_EXCEPTION
-   irqDisable();
-   while( true );
-#endif
+   lm32Log( LM32_LOG_INFO, ESC_BOLD "Task: \"%s\" started.\n" ESC_NORMAL, pcTaskGetName( NULL ) );
 }
 
-STATIC void vMainTask( void* pTaskData )
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Handling of all SCU-bus MSI events.
+ */
+ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 {
-   scuLog( LM32_LOG_INFO, "Task: \"%s\" started.\n", pcTaskGetName( NULL ) );
+   uint16_t pendingIrqs;
+
+   while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
+   {
+      //TODO
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Interrupt callback function for each Message Signaled Interrupt
+ * @param intNum Interrupt number.
+ * @param pContext Value of second parameter from irqRegisterISR not used
+ *                 in this case.
+ * @see initInterrupt
+ * @see irqRegisterISR
+ * @see irq_pop_msi
+ * @see dispatch
+ */
+STATIC void onScuMSInterrupt( const unsigned int intNum,
+                              const void* pContext UNUSED )
+{
+   MSI_ITEM_T m;
+
+   while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
+   {
+      switch( GET_LOWER_HALF( m.adr )  )
+      {
+         case ADDR_SCUBUS:
+         {
+         #ifdef CONFIG_MIL_FG
+            STATIC_ASSERT( ADDR_SCUBUS == 0 );
+            if( (m.msg & ECA_VALID_ACTION) != 0 )
+            { /*
+               * ECA event received
+               */
+             //  evPushWatched( &g_ecaEvent );
+               break;
+            }
+         #endif
+
+           /*
+            * Message from SCU- bus.
+            */
+            onScuBusEvent( GET_LOWER_HALF( m.msg ) + SCUBUS_START_SLOT );
+            break;
+         }
+         //TODO
+      }
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Installs the interrupt callback function and clears the interrupt
+ *        message buffer.
+ * @see onScuMSInterrupt
+ */
+ONE_TIME_CALL void initInterrupt( void )
+{
+   //TODO
+
+   initCommandHandler();
+   irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onScuMSInterrupt );
+   scuLog( LM32_LOG_INFO, "IRQ table configured: 0b%b\n", irqGetMaskRegister() );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @brief Main task
+ */
+STATIC void taskMain( void* pTaskData UNUSED )
+{
+   taskInfoLog();
+
+   tellMailboxSlot();
+   printCpuId();
+
+   mmuAllocateDaqBuffer();
+
+ //  scuLog( LM32_LOG_INFO, "g_oneWireBase.pWr is:   0x%p\n", g_oneWireBase.pWr );
+ //  scuLog( LM32_LOG_INFO, "g_oneWireBase.pUser is: 0x%p\n", g_oneWireBase.pUser );
+   scuLog( LM32_LOG_INFO, "g_pScub_irq_base is:    0x%p\n", g_pScub_irq_base );
+
+#ifdef CONFIG_MIL_FG
+   scuLog( LM32_LOG_INFO, "g_pMil_irq_base is:     0x%p\n", g_pMil_irq_base );
+   initEcaQueue();
+#endif
+
+
+   initInterrupt();
+
+   //taskStartMil(); //!!
+
+   scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD
+           "\n *** Initialization done, %u tasks running, going in main loop of task \"%s\" ***\n\n"
+           ESC_NORMAL, uxTaskGetNumberOfTasks(), pcTaskGetName( NULL ) );
+
+   unsigned int i = 0;
+   const char fan[] = { '|', '/', '-', '\\' };
+   TickType_t fanTime = 0;
 
    while( true )
    {
+      const TickType_t tick = xTaskGetTickCount();
+      if( fanTime <= tick )
+      {
+         fanTime = tick + pdMS_TO_TICKS( 250 );
+         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
+         i %= ARRAY_SIZE( fan );
+      }
+    //  queuePollAlarm();
+   #ifdef CONFIG_USE_FG_MSI_TIMEOUT
+      wdtPoll();
+   #endif
+      commandHandler();
    }
 }
 
+/*! ---------------------------------------------------------------------------
+ * @brief Main-function: establishing the memory management unit (MMU) and
+ *        LM32-logging system;
+ *        creates the main task and start it.
+ */
 void main( void )
 {
    const char* text;
@@ -114,21 +225,9 @@ void main( void )
           );
 #endif
 #endif
+   initializeGlobalPointers();
 
-   BaseType_t xReturned;
-
-   xReturned = xTaskCreate(
-                vMainTask,                    /* Function that implements the task. */
-                "main",              /* Text name for the task. */
-                configMINIMAL_STACK_SIZE, /* Stack size in words, not bytes. */
-                NULL,                     /* Parameter passed into the task. */
-                MAIN_TASK_PRIORITY,       /* Priority at which the task is created. */
-                NULL                      /* Used to pass out the created task's handle. */
-              );
-   if( xReturned != pdPASS )
-   {
-      die( "Error by creating main task!" );
-   }
+   TASK_CREATE_OR_DIE( taskMain, 1024, 1, NULL );
 
    vTaskStartScheduler();
 }

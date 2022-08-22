@@ -8,6 +8,8 @@
 #ifndef _SCU_CONTROLCONFIG_H
 #define _SCU_CONTROLCONFIG_H
 
+#include <scu_control.h>
+
 /*
  * Here is a good place to include header files that are required across
  * your application.
@@ -16,7 +18,7 @@
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
-#define configTICK_RATE_HZ                      20000
+#define configTICK_RATE_HZ                      10000
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                128
 #define configMAX_TASK_NAME_LEN                 16

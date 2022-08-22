@@ -62,14 +62,6 @@ TIME_MEASUREMENT_T g_irqTimeMeasurement = TIME_MEASUREMENT_INITIALIZER;
 
 extern ONE_WIRE_T g_oneWireBase;
 
-/*====================== Begin of shared memory area ========================*/
-/*!
- * @brief Memory space of shared memory for communication with Linux-host
- *        and initializing of them.
- */
-SCU_SHARED_DATA_T SHARED g_shared = SCU_SHARED_DATA_INITIALIZER;
-/*====================== End of shared memory area ==========================*/
-
 #ifdef CONFIG_MIL_IN_TIMER_INTERRUPT
 /*!
  * @brief Module global flag becones "true" when the mil-handling runs
@@ -363,21 +355,6 @@ ONE_TIME_CALL void schedule( void )
  #endif
 #endif /* ifdef CONFIG_MIL_FG */
    commandHandler();
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief Helper function for printing the CPU-ID and the number of
- *        MSI endpoints.
- */
-ONE_TIME_CALL void printCpuId( void )
-{
-   unsigned int* cpu_info_base;
-   cpu_info_base = (unsigned int*)find_device_adr( GSI, CPU_INFO_ROM );
-   if( (int)cpu_info_base == ERROR_NOT_FOUND )
-      die( "No CPU INFO ROM found!" );
-
-   scuLog( LM32_LOG_INFO, "CPU-ID: 0x%04X\nNumber MSI endpoints: %d\n",
-           cpu_info_base[0], cpu_info_base[1] );
 }
 
 /*================================ MAIN =====================================*/

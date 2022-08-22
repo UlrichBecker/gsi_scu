@@ -53,6 +53,15 @@ volatile unsigned int* g_pScu_mil_base    = NULL;
 volatile uint32_t*     g_pMil_irq_base    = NULL;
 #endif
 
+/*====================== Begin of shared memory area ========================*/
+/*!
+ * @brief Memory space of shared memory for communication with Linux-host
+ *        and initializing of them.
+ */
+SCU_SHARED_DATA_T SHARED g_shared = SCU_SHARED_DATA_INITIALIZER;
+/*====================== End of shared memory area ==========================*/
+
+
 /*! ---------------------------------------------------------------------------
  * @see scu_lm32_common.h
  */
@@ -82,6 +91,21 @@ void initializeGlobalPointers( void )
       die( "Interrupt control for MIL-bus not found!" );
 #endif
 }
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_lm32_common.h
+ */
+void printCpuId( void )
+{
+   unsigned int* cpu_info_base;
+   cpu_info_base = (unsigned int*)find_device_adr( GSI, CPU_INFO_ROM );
+   if( (int)cpu_info_base == ERROR_NOT_FOUND )
+      die( "No CPU INFO ROM found!" );
+
+   scuLog( LM32_LOG_INFO, "CPU-ID: 0x%04X\nNumber MSI endpoints: %d\n",
+           cpu_info_base[0], cpu_info_base[1] );
+}
+
 
 /*! ---------------------------------------------------------------------------
  * @see scu_lm32_common.h
