@@ -30,6 +30,7 @@
 
 #include <scu_command_handler.h>
 
+#include <scu_task_fg.h>
 #ifdef CONFIG_MIL_FG
  #include <scu_eca_handler.h>
  #include <scu_task_mil.h>
@@ -45,7 +46,22 @@
  */
 void taskInfoLog( void )
 {
-   lm32Log( LM32_LOG_INFO, ESC_BOLD "Task: \"%s\" started.\n" ESC_NORMAL, pcTaskGetName( NULL ) );
+   lm32Log( LM32_LOG_INFO, ESC_BOLD "Task: \"%s\" started.\n" ESC_NORMAL,
+            pcTaskGetName( NULL ) );
+}
+
+/*!----------------------------------------------------------------------------
+ * @see scu_control.h
+ */
+void taskDelete( void* pTaskHandle )
+{
+   if( *(TaskHandle_t*)pTaskHandle  != NULL )
+   {
+      lm32Log( LM32_LOG_INFO, ESC_BOLD "Deleting task: \"%s\".\n" ESC_NORMAL,
+               pcTaskGetName( *(TaskHandle_t*)pTaskHandle ) );
+      vTaskDelete( *(TaskHandle_t*)pTaskHandle  );
+      *(TaskHandle_t*)pTaskHandle = NULL;
+   }
 }
 
 /*! ---------------------------------------------------------------------------
@@ -58,6 +74,15 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 
    while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
    {
+      if( (pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
+      {
+         const FG_QUEUE_T queueFgItem =
+         {
+            .slot     = slot,
+            .msiFlags = pendingIrqs
+         };
+         queuePushWatched( &g_queueFg, &queueFgItem );
+      }
       //TODO
    }
 }
@@ -90,7 +115,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             { /*
                * ECA event received
                */
-             //  evPushWatched( &g_ecaEvent );
+               evPushWatched( &g_ecaEvent );
                break;
             }
          #endif
@@ -151,12 +176,19 @@ STATIC void taskMain( void* pTaskData UNUSED )
            "\n *** Initialization done, %u tasks running, going in main loop of task \"%s\" ***\n\n"
            ESC_NORMAL, uxTaskGetNumberOfTasks(), pcTaskGetName( NULL ) );
 
+#ifdef CONFIG_STILL_ALIVE_SIGNAL
    unsigned int i = 0;
    const char fan[] = { '|', '/', '-', '\\' };
    TickType_t fanTime = 0;
+#endif
 
    while( true )
    {
+   #ifdef CONFIG_STILL_ALIVE_SIGNAL
+      /*
+       * Showing a animated software fan as still alive signal
+       * in the LM32- console.
+       */
       const TickType_t tick = xTaskGetTickCount();
       if( fanTime <= tick )
       {
@@ -164,7 +196,8 @@ STATIC void taskMain( void* pTaskData UNUSED )
          mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
          i %= ARRAY_SIZE( fan );
       }
-    //  queuePollAlarm();
+   #endif
+      queuePollAlarm();
    #ifdef CONFIG_USE_FG_MSI_TIMEOUT
       wdtPoll();
    #endif

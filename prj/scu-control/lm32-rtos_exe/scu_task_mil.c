@@ -30,22 +30,43 @@
 
 STATIC TaskHandle_t mg_taskMilHandle = NULL;
 
+EV_CREATE_STATIC( g_ecaEvent, 16 );
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
 STATIC void taskMil( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
    while( true )
    {
+      if( evPopSave( &g_ecaEvent ) )
+      {
+         ecaHandler();
+         lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );
+      }
+      milExecuteTasks();
    }
 }
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
 void taskStartMil( void )
 {
+   queueReset( &g_queueMilFg );
+   evDelete( &g_ecaEvent );
+
    TASK_CREATE_OR_DIE( taskMil, 1024, 1, &mg_taskMilHandle );
 }
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
 void taskStopMil( void )
 {
+   taskDelete( &mg_taskMilHandle );
 }
 
 /*================================== EOF ====================================*/

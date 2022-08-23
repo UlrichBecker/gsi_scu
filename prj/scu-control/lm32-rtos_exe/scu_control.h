@@ -35,7 +35,8 @@ extern "C" {
  * @param func Name of task function.
  * @param stackSize Additional stack size.
  * @param prio Priority
- * @param handle Pointer to the task handle, if not used, is can be NULL.
+ * @param handle Pointer to the task handle,
+ *               if not used then it has to be NULL.
  * @retval pdPASS Success.
  */
 #define TASK_CREATE( func, stackSize, prio, handle )                          \
@@ -50,7 +51,8 @@ extern "C" {
  * @param func Name of task function.
  * @param stackSize Additional stack size.
  * @param prio Priority
- * @param handle Pointer to the task handle, if not used, is can be NULL.
+ * @param handle Pointer to the task handle,
+ *               if not used then it has to be NULL.
  */
 #define TASK_CREATE_OR_DIE( func, stackSize, prio, handle )                   \
    if( TASK_CREATE( func, stackSize, prio, handle ) != pdPASS )               \
@@ -62,6 +64,16 @@ extern "C" {
  * @brief Prints the task start information in the logging system.
  */
 void taskInfoLog( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Deletes the given task and puts an appropriate message in the
+ *        logging system, if the content of the given pointer not NULL.
+ * @note The argument is a double pointer, the function will made a pointer
+ *       cast into "TaskHandle_t*"! 
+ * @param pTaskHandle Pointer to the task handle, after this function call
+ *                    the content will be NULL.
+ */
+void taskDelete( void* pTaskHandle );
 
 #ifdef __cplusplus
 }

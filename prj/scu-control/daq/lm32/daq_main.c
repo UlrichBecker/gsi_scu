@@ -34,10 +34,7 @@
 
 #ifndef CONFIG_DAQ_SINGLE_APP
  extern volatile uint16_t* g_pScub_base;
- 
-#ifndef CONFIG_RTOS
  QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, DAQ_QUEUE_SLOT_T );
-#endif
 #endif
 
 #ifdef CONFIG_DAQ_SINGLE_APP

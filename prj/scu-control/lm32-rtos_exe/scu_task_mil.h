@@ -37,7 +37,19 @@
 extern "C" {
 #endif
 
+extern EVENT_T g_ecaEvent;
+
+/*!----------------------------------------------------------------------------
+ * @brief Starts the RTOS- MIL task for MIL-FGs and MIL-DAQs,
+ *        or - if not successful - it stops the CPU with a final
+ *        error- log message.
+ */
 void taskStartMil( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Stops the possible running MIL- tsk if running, else this function
+ *        is without effect.
+ */
 void taskStopMil( void );
 
 #ifdef __cplusplus

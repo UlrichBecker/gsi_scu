@@ -23,6 +23,52 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#include <FreeRTOS.h>
+#include <task.h>
 #include "scu_task_fg.h"
+
+STATIC TaskHandle_t mg_taskFgHandle = NULL;
+
+QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, FG_QUEUE_T ); 
+
+/*!----------------------------------------------------------------------------
+ * @brief Task for handling SCU-bus respectively ADDAC function generators.
+ */
+STATIC void taskFg( void* pTaskData UNUSED )
+{
+   taskInfoLog();
+   
+   while( true )
+   {
+      FG_QUEUE_T queueFgItem;
+
+      if( !queuePopSave( &g_queueFg, &queueFgItem ) )
+         continue;
+      
+      if( (queueFgItem.msiFlags & FG1_IRQ) != 0 )
+         handleAdacFg( queueFgItem.slot, FG1_BASE );
+
+      if( (queueFgItem.msiFlags & FG2_IRQ) != 0 )
+         handleAdacFg( queueFgItem.slot, FG2_BASE );
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_fg.h
+ */
+void taskStartFg( void )
+{
+   queueReset( &g_queueFg );
+   TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_fg.h
+ */
+void taskStopFg( void )
+{
+   taskDelete( &mg_taskFgHandle );
+}
+
 
 /*================================== EOF ====================================*/

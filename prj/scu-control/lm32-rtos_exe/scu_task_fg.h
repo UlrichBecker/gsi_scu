@@ -26,9 +26,32 @@
 #ifndef _SCU_TASK_FG_H
 #define _SCU_TASK_FG_H
 
+#include <scu_fg_handler.h>
+#include <sw_queue.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern SW_QUEUE_T g_queueFg;
+
+/*!----------------------------------------------------------------------------
+ * @brief Queue message type for SCU-bus function generators.
+ */
+typedef struct
+{ /*!
+   * @brief Slotnumber of SCU-bus slave from where comes the MSI.
+   */
+   uint16_t slot;
+
+   /*!
+    * @brief Flags signalizing the active function generator macro
+    *        which has caused the interrupt:\n
+    *        FG0 or FG1 or both.
+    */
+   uint16_t msiFlags;
+} FG_QUEUE_T;
+
 
 #ifdef __cplusplus
 }
