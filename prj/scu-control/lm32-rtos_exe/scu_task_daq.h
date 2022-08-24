@@ -30,9 +30,24 @@
 #error "Compilerswitch CONFIG_SCU_DAQ_INTEGRATION is not defined!"
 #endif
 
+#include <daq_main.h> 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*!----------------------------------------------------------------------------
+ * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or
+ *        at least one DAQ present or - if not successful - it stops the CPU
+ *        with a final error- log message.
+ */
+void taskStartDaqIfAnyPresent( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Stops the possible running ADDAC-DAQ- task if running, else this
+ *        function is without effect.
+ */
+void taskStopDaqIfRunning( void );
 
 #ifdef __cplusplus
 }

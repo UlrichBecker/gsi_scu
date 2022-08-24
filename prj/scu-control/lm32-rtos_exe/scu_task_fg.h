@@ -52,6 +52,18 @@ typedef struct
    uint16_t msiFlags;
 } FG_QUEUE_T;
 
+/*!----------------------------------------------------------------------------
+ * @brief Starts the RTOS-ADDAC FG task for SCU-bus FGs if at least
+ *        one FG present or - if not successful - it stops the CPU with a final
+ *        error- log message.
+ */
+void taskStartFgIfAnyPresent( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Stops the possible running ADDAC-FG- task if running, else this
+ *        function is without effect.
+ */
+void taskStopFgIfRunning( void );
 
 #ifdef __cplusplus
 }

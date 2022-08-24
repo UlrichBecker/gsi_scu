@@ -39,7 +39,7 @@
  #include <scu_task_daq.h>
 #endif
 
-#define MAIN_TASK_PRIORITY ( tskIDLE_PRIORITY + 1 )
+extern volatile uint32_t __atomic_section_nesting_count;
 
 /*!----------------------------------------------------------------------------
  * @see scu_control.h
@@ -53,15 +53,43 @@ void taskInfoLog( void )
 /*!----------------------------------------------------------------------------
  * @see scu_control.h
  */
-void taskDelete( void* pTaskHandle )
+void taskDeleteIfRunning( void* pTaskHandle )
 {
-   if( *(TaskHandle_t*)pTaskHandle  != NULL )
+   if( *(TaskHandle_t*)pTaskHandle != NULL )
    {
       lm32Log( LM32_LOG_INFO, ESC_BOLD "Deleting task: \"%s\".\n" ESC_NORMAL,
                pcTaskGetName( *(TaskHandle_t*)pTaskHandle ) );
       vTaskDelete( *(TaskHandle_t*)pTaskHandle  );
       *(TaskHandle_t*)pTaskHandle = NULL;
    }
+}
+
+/*!----------------------------------------------------------------------------
+ * @see scu_control.h
+ */
+void taskDeleteAllRunningFgAndDaq( void )
+{
+   taskStopFgIfRunning();
+#ifdef CONFIG_SCU_DAQ_INTEGRATION
+   taskStopDaqIfRunning();
+#endif
+#ifdef CONFIG_MIL_FG
+   taskStopMilIfRunning();
+#endif
+}
+
+/*!----------------------------------------------------------------------------
+ * @see scu_control.h
+ */
+void taskStartAllIfHwPresent( void )
+{
+   taskStartFgIfAnyPresent();
+#ifdef CONFIG_SCU_DAQ_INTEGRATION
+   taskStartDaqIfAnyPresent();
+#endif
+#ifdef CONFIG_MIL_FG
+   taskStartMilIfAnyPresent();
+#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -83,7 +111,37 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          };
          queuePushWatched( &g_queueFg, &queueFgItem );
       }
-      //TODO
+   #ifdef CONFIG_MIL_FG
+      if( (pendingIrqs & DREQ ) != 0 )
+      { /*
+         * MIL-SIO function generator recognized. 
+         */
+         TRACE_MIL_DRQ( "3\n" );
+         const MIL_QEUE_T milMsg =
+         { /*
+            * The slot number is in any cases not zero.
+            * In this way the MIL handler function knows it comes
+            * from a SCU-bus SIO slave.
+            */
+            .slot = slot,
+            .time = getWrSysTime()
+         };
+
+        /*!
+         * @see milTask
+         */
+         queuePushWatched( &g_queueMilFg, &milMsg );
+      }
+   #endif
+
+   #ifdef CONFIG_SCU_DAQ_INTEGRATION
+      if( (pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+      {
+         STATIC_ASSERT( sizeof( slot ) == sizeof( DAQ_QUEUE_SLOT_T ) );
+         queuePushWatched( &g_queueAddacDaq, &slot );
+      }
+   //TODO (1 << DAQ_IRQ_HIRES_FINISHED)
+   #endif
    }
 }
 
@@ -126,7 +184,42 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             onScuBusEvent( GET_LOWER_HALF( m.msg ) + SCUBUS_START_SLOT );
             break;
          }
-         //TODO
+         case ADDR_SWI:
+         { /*
+            * Command message from SAFT-lib
+            */
+
+            STATIC_ASSERT( sizeof( m.msg ) == sizeof( SAFT_CMD_T ) );
+            queuePushWatched( &g_queueSaftCmd, &m.msg );
+            break;
+         }
+     #ifdef CONFIG_MIL_FG
+         case ADDR_DEVBUS:
+         { /*
+            * Message from MIL- extention bus respectively device-bus.
+            * MIL-Piggy
+            */
+            const MIL_QEUE_T milMsg =
+            { /*
+               * In the case of MIL-PIGGY the slot-number has to be zero.
+               * In this way the MIL handler function becomes to know that.
+               */
+               .slot = 0,
+               .time = getWrSysTime()
+            };
+
+           /*!
+            * @see milDeviceHandler
+            */
+            queuePushWatched( &g_queueMilFg, &milMsg );
+            break;
+         }
+     #endif /* ifdef CONFIG_MIL_FG */
+         default:
+         {
+            FG_ASSERT( false );
+            break;
+         }
       }
    }
 }
@@ -167,10 +260,11 @@ STATIC void taskMain( void* pTaskData UNUSED )
    initEcaQueue();
 #endif
 
+   initAndScan();
 
    initInterrupt();
 
-   //taskStartMil(); //!!
+   //!!taskStartAllIfHwPresent();
 
    scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD
            "\n *** Initialization done, %u tasks running, going in main loop of task \"%s\" ***\n\n"
@@ -249,7 +343,7 @@ void main( void )
      mprintf( ESC_ERROR "ERROR Unable to get DDR3- RAM!\n" ESC_NORMAL );
      while( true );
   }
-#ifdef CONFIG_USE_MMU
+#ifdef CONFIG_USE_LM32LOG
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
                           pCpuMsiBox,
@@ -258,11 +352,23 @@ void main( void )
           );
 #endif
 #endif
+   scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Addr nesting count: 0x%p\n" ESC_NORMAL,
+           &__atomic_section_nesting_count );
+
    initializeGlobalPointers();
 
+   /*
+    * Creating the main task. 
+    */
    TASK_CREATE_OR_DIE( taskMain, 1024, 1, NULL );
 
+   /*
+    * Starting the main- and idle- task.
+    * If successful, this function will not left.
+    */
    vTaskStartScheduler();
+
+   die( "This point shall never be reached!" );
 }
 
 /*================================== EOF ====================================*/

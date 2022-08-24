@@ -44,13 +44,13 @@ extern EVENT_T g_ecaEvent;
  *        or - if not successful - it stops the CPU with a final
  *        error- log message.
  */
-void taskStartMil( void );
+void taskStartMilIfAnyPresent( void );
 
 /*!----------------------------------------------------------------------------
- * @brief Stops the possible running MIL- tsk if running, else this function
+ * @brief Stops the possible running MIL- task if running, else this function
  *        is without effect.
  */
-void taskStopMil( void );
+void taskStopMilIfRunning( void );
 
 #ifdef __cplusplus
 }

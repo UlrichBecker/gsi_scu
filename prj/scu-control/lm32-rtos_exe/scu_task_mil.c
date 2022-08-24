@@ -33,7 +33,7 @@ STATIC TaskHandle_t mg_taskMilHandle = NULL;
 EV_CREATE_STATIC( g_ecaEvent, 16 );
 
 /*! ---------------------------------------------------------------------------
- * @see scu_task_mil.h
+ * @brief RTOS- task for MIL-FGs and MIL-DAQs
  */
 STATIC void taskMil( void* pTaskData UNUSED )
 {
@@ -53,20 +53,23 @@ STATIC void taskMil( void* pTaskData UNUSED )
 /*! ---------------------------------------------------------------------------
  * @see scu_task_mil.h
  */
-void taskStartMil( void )
+void taskStartMilIfAnyPresent( void )
 {
-   queueReset( &g_queueMilFg );
-   evDelete( &g_ecaEvent );
+   if( (mg_taskMilHandle == NULL) && (milGetNumberOfFg() > 0) )
+   {
+      queueReset( &g_queueMilFg );
+      evDelete( &g_ecaEvent );
 
-   TASK_CREATE_OR_DIE( taskMil, 1024, 1, &mg_taskMilHandle );
+      TASK_CREATE_OR_DIE( taskMil, 1024, 1, &mg_taskMilHandle );
+   }
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_task_mil.h
  */
-void taskStopMil( void )
+void taskStopMilIfRunning( void )
 {
-   taskDelete( &mg_taskMilHandle );
+   taskDeleteIfRunning( &mg_taskMilHandle );
 }
 
 /*================================== EOF ====================================*/

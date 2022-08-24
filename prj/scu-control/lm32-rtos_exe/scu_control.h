@@ -73,7 +73,16 @@ void taskInfoLog( void );
  * @param pTaskHandle Pointer to the task handle, after this function call
  *                    the content will be NULL.
  */
-void taskDelete( void* pTaskHandle );
+void taskDeleteIfRunning( void* pTaskHandle );
+
+
+void taskDeleteAllRunningFgAndDaq( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Starts all RTOS tasks for which the corresponding hardware
+ *        was detected. That can be MIL
+ */
+void taskStartAllIfHwPresent( void );
 
 #ifdef __cplusplus
 }

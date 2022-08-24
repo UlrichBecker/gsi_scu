@@ -42,32 +42,35 @@ STATIC void taskFg( void* pTaskData UNUSED )
    {
       FG_QUEUE_T queueFgItem;
 
-      if( !queuePopSave( &g_queueFg, &queueFgItem ) )
-         continue;
-      
-      if( (queueFgItem.msiFlags & FG1_IRQ) != 0 )
-         handleAdacFg( queueFgItem.slot, FG1_BASE );
+      if( queuePopSave( &g_queueFg, &queueFgItem ) )
+      {
+         if( (queueFgItem.msiFlags & FG1_IRQ) != 0 )
+            handleAdacFg( queueFgItem.slot, FG1_BASE );
 
-      if( (queueFgItem.msiFlags & FG2_IRQ) != 0 )
-         handleAdacFg( queueFgItem.slot, FG2_BASE );
+         if( (queueFgItem.msiFlags & FG2_IRQ) != 0 )
+            handleAdacFg( queueFgItem.slot, FG2_BASE );
+      }
    }
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_task_fg.h
  */
-void taskStartFg( void )
+void taskStartFgIfAnyPresent( void )
 {
-   queueReset( &g_queueFg );
-   TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
+   if( (mg_taskFgHandle == NULL) && (addacGetNumberOfFg() > 0) )
+   {
+      queueReset( &g_queueFg );
+      TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
+   }
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_task_fg.h
  */
-void taskStopFg( void )
+void taskStopFgIfRunning( void )
 {
-   taskDelete( &mg_taskFgHandle );
+   taskDeleteIfRunning( &mg_taskFgHandle );
 }
 
 

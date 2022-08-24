@@ -23,6 +23,45 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#include <FreeRTOS.h>
+#include <task.h>
+#include <daq_main.h>
 #include "scu_task_daq.h"
+
+STATIC TaskHandle_t mg_taskDaqHandle = NULL;
+
+/*! ---------------------------------------------------------------------------
+ * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
+ */
+STATIC void taskDaq( void* pTaskData UNUSED )
+{
+   taskInfoLog();
+
+   while( true )
+   {
+      addacDaqTask();
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void taskStartDaqIfAnyPresent( void )
+{
+   if( (mg_taskDaqHandle == NULL) && (daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs ) > 0) )
+   {
+      queueReset( &g_queueAddacDaq );
+      TASK_CREATE_OR_DIE( taskDaq, 1024, 1, &mg_taskDaqHandle );
+   }      
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void taskStopDaqIfRunning( void )
+{
+   taskDeleteIfRunning( &mg_taskDaqHandle );
+}
+
 
 /*================================== EOF ====================================*/

@@ -192,7 +192,15 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       { /*
          * Rescaning of all function generators.
          */
+      #ifdef CONFIG_RTOS
+         taskDeleteAllRunningFgAndDaq();
+      #endif
+
          scanFgs();
+
+      #ifdef CONFIG_RTOS
+         taskStartAllIfHwPresent();
+      #endif
          break;
       }
 

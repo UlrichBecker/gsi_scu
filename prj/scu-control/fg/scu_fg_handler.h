@@ -146,6 +146,12 @@ STATIC_ASSERT( sizeof( FG_REGISTER_T ) == 12 * sizeof( uint16_t ));
  */
 #define ADDAC_FG_ACCESS( p, m ) __SCU_BUS_ACCESS( FG_REGISTER_T, p, m )
 
+/*! ---------------------------------------------------------------------------
+ * @brief Returns the number of all found ADDAC- function generators after
+ *        SCU- bus scanning.
+ */
+unsigned int addacGetNumberOfFg( void );
+
 #ifndef CONFIG_SCU_DAQ_INTEGRATION
 /*! ---------------------------------------------------------------------------
  * @brief Scans the whole SCU-bus direct to the SCU-bus connected

@@ -62,6 +62,20 @@ STATIC const ADDAC_DEV_T mg_devTab[MAX_FG_PER_SLAVE] =
 
 STATIC_ASSERT( ARRAY_SIZE(mg_devTab) == MAX_FG_PER_SLAVE );
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_fg_handler.h
+ */
+unsigned int addacGetNumberOfFg( void )
+{
+   unsigned int numberOfFg = 0;
+   for( unsigned int i = 0; i < ARRAY_SIZE( g_shared.oSaftLib.oFg.aMacros ); i++ )
+   {
+      if( isAddacFg( g_shared.oSaftLib.oFg.aMacros[i].socket ) )
+         numberOfFg++;
+   }
+   return numberOfFg;
+}
+
 #ifndef CONFIG_SCU_DAQ_INTEGRATION
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_handler.h

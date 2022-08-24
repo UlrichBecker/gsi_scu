@@ -32,9 +32,12 @@
 #endif
 #ifdef CONFIG_MIL_FG
  #include <scu_mil_fg_handler.h>
+ #ifdef CONFIG_RTOS
+  #include <scu_task_mil.h>
+ #endif
 #endif
 #ifdef CONFIG_RTOS
-//TODO
+ #include <scu_task_fg.h>
 #endif
 #include "queue_watcher.h"
 
@@ -65,18 +68,18 @@ void queuePollAlarm( void )
    QEUE2STRING( g_queueMilFg );
 #endif
 #ifdef CONFIG_RTOS
-   //TODO
+   QEUE2STRING( g_queueFg );
 #endif
    #undef QEUE2STRING
 
-#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
+#if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
    if( pOverflowedQueue != &g_ecaEvent )
    {
 #endif
       scuLog( LM32_LOG_ERROR, ESC_ERROR
               "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
               ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
-#if defined( _CONFIG_MIL_EV_QUEUE ) && defined( CONFIG_MIL_FG )
+#if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
    }
    else
    {
