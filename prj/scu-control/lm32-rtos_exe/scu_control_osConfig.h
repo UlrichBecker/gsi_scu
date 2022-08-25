@@ -1,5 +1,5 @@
 /*!
- * @file scu_controlConfig.h
+ * @file scu_controlConfig_os.h
  * @brief FreeRTOS configuration file for test program rtosEcaMsiTest
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>
@@ -8,7 +8,7 @@
 #ifndef _SCU_CONTROLCONFIG_H
 #define _SCU_CONTROLCONFIG_H
 
-#include <scu_control.h>
+#include <scu_control_os.h>
 
 /*
  * Here is a good place to include header files that are required across
@@ -40,9 +40,8 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   10240
-//#define configTOTAL_HEAP_SIZE                   (4 * 1024)
-#define configAPPLICATION_ALLOCATED_HEAP        1
+#define configTOTAL_HEAP_SIZE                   12240
+#define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0

@@ -11,7 +11,7 @@
 #include "dow_crc.h"
 #include "w1.h"
 #include "dbg.h"
-#include <scu_syslog.h>
+#include <scu_logutil.h>
 
 /*!
  * @brief Object contains the base pointer of one wire connection
@@ -40,9 +40,7 @@ void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemper
    if( w1_scan_bus( &wrpc_w1_bus ) <= 0 )
    {
     #ifdef DEBUG
-      const char* text = "No devices found on bus %d\n";
-      mprintf( text, wrpc_w1_bus.detail );
-      lm32Log( LM32_LOG_WARNING, text, wrpc_w1_bus.detail );
+      scuLog( LM32_LOG_WARNING, "No devices found on bus %d\n", wrpc_w1_bus.detail );
     #endif
       return;
    }
@@ -56,13 +54,7 @@ void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemper
       if(( calc_crc( (int)GET_UPPER_HALF( pData->rom ), (int)pData->rom)) != 0 )
          continue;
     #ifdef DEBUG
-      const char* text = "bus,device (%d,%d): 0x%08X%08X ";
-      mprintf( text,
-               wrpc_w1_bus.detail,
-               i,
-               (int)GET_UPPER_HALF( pData->rom ),
-               (int)GET_LOWER_HALF( pData->rom ) );
-      lm32Log( LM32_LOG_INFO, text,
+      scuLog( LM32_LOG_INFO, "bus,device (%d,%d): 0x%08X%08X ",
                wrpc_w1_bus.detail,
                i,
                (int)GET_UPPER_HALF( pData->rom ),
@@ -74,9 +66,7 @@ void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemper
          int tvalue = w1_read_temp(pData, 0);
          *pTemperature = (tvalue >> 12); //full precision with 1/16 degree C
        #ifdef DEBUG
-         const char* text = "temperature: %d°C\n";
-         mprintf( text, (int)GET_UPPER_HALF( tvalue )); //show only integer part for debug
-         lm32Log( LM32_LOG_INFO, text, (int)GET_UPPER_HALF( tvalue ));
+         scuLog( LM32_LOG_INFO, "temperature: %d°C\n", (int)GET_UPPER_HALF( tvalue ));
        #endif
       }
       #ifdef DEBUG

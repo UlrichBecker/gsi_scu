@@ -37,7 +37,7 @@ QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, FG_QUEUE_T );
 STATIC void taskFg( void* pTaskData UNUSED )
 {
    taskInfoLog();
-   
+
    while( true )
    {
       FG_QUEUE_T queueFgItem;

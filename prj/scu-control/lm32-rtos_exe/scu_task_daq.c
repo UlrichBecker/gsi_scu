@@ -51,7 +51,7 @@ void taskStartDaqIfAnyPresent( void )
    if( (mg_taskDaqHandle == NULL) && (daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs ) > 0) )
    {
       queueReset( &g_queueAddacDaq );
-      TASK_CREATE_OR_DIE( taskDaq, 1024, 1, &mg_taskDaqHandle );
+      TASK_CREATE_OR_DIE( taskDaq, 512, 1, &mg_taskDaqHandle );
    }      
 }
 

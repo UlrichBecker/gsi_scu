@@ -1,5 +1,5 @@
 /*!
- * @file scu_control.h
+ * @file scu_control_os.h
  * @brief Main module of SCU control including the main-thread FreeRTOS.
  *
  * @date 22.08.2022
@@ -23,8 +23,8 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#ifndef _SCU_CONTROL_H
-#define _SCU_CONTROL_H
+#ifndef _SCU_CONTROL_OS_H
+#define _SCU_CONTROL_OS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +75,10 @@ void taskInfoLog( void );
  */
 void taskDeleteIfRunning( void* pTaskHandle );
 
-
+/*!----------------------------------------------------------------------------
+ * @brief Deletes all possible running tasks of MIL-FG/DAQ, ADDAC-FG and
+ *        ADDAC-DAQ.
+ */
 void taskDeleteAllRunningFgAndDaq( void );
 
 /*!----------------------------------------------------------------------------
@@ -88,5 +91,5 @@ void taskStartAllIfHwPresent( void );
 }
 #endif
 
-#endif /* ifndef _SCU_CONTROL_H */
+#endif /* ifndef _SCU_CONTROL_OS_H */
 /*==================================  EOF ===================================*/

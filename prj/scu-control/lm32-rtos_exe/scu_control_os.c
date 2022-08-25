@@ -1,5 +1,5 @@
 /*!
- *  @file scu_control.c
+ *  @file scu_control_os.c
  *  @brief Main module of SCU control including the main-thread FreeRTOS.
  *
  *  @date 18.08.2022
@@ -264,7 +264,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    initInterrupt();
 
-   //!!taskStartAllIfHwPresent();
+   taskStartAllIfHwPresent();
 
    scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD
            "\n *** Initialization done, %u tasks running, going in main loop of task \"%s\" ***\n\n"

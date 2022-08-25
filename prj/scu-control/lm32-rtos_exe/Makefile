@@ -18,7 +18,7 @@ SUB_VERSION  = 6.0
  SCU_MIL := 1
 # MIL_GAP := 1
 
-MIL_DAQ_USE_DDR3 := 1
+# MIL_DAQ_USE_DDR3 := 1
  ADDAC_DAQ := 1
  DIOB_WITH_DAQ := 1
 # DEFINES += _CONFIG_DBG_MIL_TASK
@@ -27,14 +27,23 @@ NEW_ADDAC_HANDSHAKE := 1
 
 #------------------------------------------------------------------------------
 USE_RTOS = 1
-RTOS_USING_HEAP = 1
+
+#
+# Heap model 2 is needed, because child processes will dynamically created
+# and destroyed.
+#
+RTOS_USING_HEAP = 4
+
+# Enables the assert-macros within FreeRTOS-kernel.
+ DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
+ DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 
 #------------------------------------------------------------------------------
 
 DEFINES += MAX_LM32_INTERRUPTS=2
 
 # DEFINES += DEBUGLEVEL
-MIAN_MODULE    = scu_control.c
+MIAN_MODULE    = scu_control_os.c
 
 ifdef ADDAC_DAQ
   SOURCE += scu_task_daq.c
