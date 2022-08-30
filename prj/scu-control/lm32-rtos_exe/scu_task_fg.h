@@ -36,23 +36,6 @@ extern "C" {
 extern SW_QUEUE_T g_queueFg;
 
 /*!----------------------------------------------------------------------------
- * @brief Queue message type for SCU-bus function generators.
- */
-typedef struct
-{ /*!
-   * @brief Slotnumber of SCU-bus slave from where comes the MSI.
-   */
-   uint16_t slot;
-
-   /*!
-    * @brief Flags signalizing the active function generator macro
-    *        which has caused the interrupt:\n
-    *        FG0 or FG1 or both.
-    */
-   uint16_t msiFlags;
-} FG_QUEUE_T;
-
-/*!----------------------------------------------------------------------------
  * @brief Starts the RTOS-ADDAC FG task for SCU-bus FGs if at least
  *        one FG present or - if not successful - it stops the CPU with a final
  *        error- log message.

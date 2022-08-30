@@ -50,6 +50,23 @@ extern "C" {
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS
+ * @ingroup INTERRUPT
+ * @brief Queue message type for SCU-bus slave interrupts.
+ */
+typedef struct PACKET
+{ /*!
+   * @brief Slotnumber of SCU-bus slave from where comes the IRQ.
+   */
+   uint16_t slot;
+
+  /*!
+   * @brief Flag-field of active IRQs of this slave.
+   */
+   uint16_t pendingIrqs;
+} SCU_BUS_IRQ_QUEUE_T;
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup SCU_BUS
  * @brief Calculates the absolute address of a SCU bus slave from the
  *        given slot number.
  * @see MAX_SCU_SLAVES

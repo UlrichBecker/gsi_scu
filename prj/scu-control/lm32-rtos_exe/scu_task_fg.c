@@ -29,7 +29,7 @@
 
 STATIC TaskHandle_t mg_taskFgHandle = NULL;
 
-QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, FG_QUEUE_T ); 
+QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 
 /*!----------------------------------------------------------------------------
  * @brief Task for handling SCU-bus respectively ADDAC function generators.
@@ -40,14 +40,14 @@ STATIC void taskFg( void* pTaskData UNUSED )
 
    while( true )
    {
-      FG_QUEUE_T queueFgItem;
+      SCU_BUS_IRQ_QUEUE_T queueFgItem;
 
       if( queuePopSave( &g_queueFg, &queueFgItem ) )
       {
-         if( (queueFgItem.msiFlags & FG1_IRQ) != 0 )
+         if( (queueFgItem.pendingIrqs & FG1_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG1_BASE );
 
-         if( (queueFgItem.msiFlags & FG2_IRQ) != 0 )
+         if( (queueFgItem.pendingIrqs & FG2_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
       }
    }

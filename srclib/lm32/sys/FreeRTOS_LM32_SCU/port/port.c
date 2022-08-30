@@ -306,7 +306,7 @@ void vApplicationGetTimerTaskMemory( StaticTask_t** ppxTimerTaskTCBBuffer,
 OVERRIDE
 void vApplicationStackOverflowHook( TaskHandle_t xTask UNUSED, char* pcTaskName )
 {
-   mprintf( ESC_ERROR "Error: Stack overflow in task \"%s\"!\n"
+   mprintf( ESC_ERROR "Error: Stack overflow at task \"%s\"!\n"
                       "Method: %d\n" ESC_NORMAL,
                        pcTaskName,
                        configCHECK_FOR_STACK_OVERFLOW

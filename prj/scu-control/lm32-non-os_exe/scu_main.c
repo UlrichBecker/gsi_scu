@@ -138,14 +138,15 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    #endif
 
    #ifdef CONFIG_SCU_DAQ_INTEGRATION
-      if( (pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+      if( (pendingIrqs & ((1 << DAQ_IRQ_DAQ_FIFO_FULL) | (1 << DAQ_IRQ_HIRES_FINISHED))) != 0 )
       {
-       #ifndef __DOXYGEN__
-         STATIC_ASSERT( sizeof( slot ) == sizeof( DAQ_QUEUE_SLOT_T ) );
-       #endif
-         queuePushWatched( &g_queueAddacDaq, &slot );
+         const SCU_BUS_IRQ_QUEUE_T queueScuBusIrq =
+         {
+            .slot        = slot,
+            .pendingIrqs = pendingIrqs
+         };
+         queuePushWatched( &g_queueAddacDaq, &queueScuBusIrq );
       }
-   //TODO (1 << DAQ_IRQ_HIRES_FINISHED)
    #endif
    }
 }

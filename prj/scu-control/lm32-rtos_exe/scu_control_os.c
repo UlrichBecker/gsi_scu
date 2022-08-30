@@ -41,6 +41,37 @@
 
 extern volatile uint32_t __atomic_section_nesting_count;
 
+#if ( configCHECK_FOR_STACK_OVERFLOW != 0 )
+/*! ---------------------------------------------------------------------------
+ * @ingroup OVERWRITABLE
+ * @brief Becomes invoked in the case of a stack overflow.
+ * @note Use this function for develop and debug purposes only!
+ * @see https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+ * @see FreeRTOSConfig.h
+ */
+void vApplicationStackOverflowHook( TaskHandle_t xTask UNUSED, char* pcTaskName )
+{
+   scuLog( LM32_LOG_ERROR,
+           ESC_ERROR "Panic: Stack overflow at task \"%s\"!\n"
+                     "+++ LM32 stopped! +++" ESC_NORMAL, pcTaskName );
+   irqDisable();
+   while( true );
+}
+#endif /* #if ( configCHECK_FOR_STACK_OVERFLOW != 0 ) */
+#if ( configUSE_MALLOC_FAILED_HOOK != 0 )
+/*! ---------------------------------------------------------------------------
+ * @ingroup OVERWRITABLE
+ * @brief Becomes invoked when a memory allocation was not successful.
+ * @note Use this function for develop and debug purposes only!
+ * @see https://www.freertos.org/a00016.html
+ * @see FreeRTOSConfig.h
+ */
+void vApplicationMallocFailedHook( void )
+{
+   die( "Memory allocation failed!" );
+}
+#endif /* #if ( configUSE_MALLOC_FAILED_HOOK != 0 ) */
+
 /*!----------------------------------------------------------------------------
  * @see scu_control.h
  */
@@ -97,22 +128,21 @@ void taskStartAllIfHwPresent( void )
  * @brief Handling of all SCU-bus MSI events.
  */
 ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
-{
-   uint16_t pendingIrqs;
+{  /*!
+    * @brief Contains the slot-number and IRQ-flags for ADDAC-FGs and ADDAC-DAQs
+    */
+   SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
 
-   while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
+   queueScuBusIrq.slot = slot;
+
+   while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
    {
-      if( (pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
+      if( (queueScuBusIrq.pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
       {
-         const FG_QUEUE_T queueFgItem =
-         {
-            .slot     = slot,
-            .msiFlags = pendingIrqs
-         };
-         queuePushWatched( &g_queueFg, &queueFgItem );
+         queuePushWatched( &g_queueFg, &queueScuBusIrq );
       }
    #ifdef CONFIG_MIL_FG
-      if( (pendingIrqs & DREQ ) != 0 )
+      if( (queueScuBusIrq.pendingIrqs & DREQ ) != 0 )
       { /*
          * MIL-SIO function generator recognized. 
          */
@@ -135,12 +165,10 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    #endif
 
    #ifdef CONFIG_SCU_DAQ_INTEGRATION
-      if( (pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+      if( (queueScuBusIrq.pendingIrqs & ((1 << DAQ_IRQ_DAQ_FIFO_FULL) | (1 << DAQ_IRQ_HIRES_FINISHED))) != 0 )
       {
-         STATIC_ASSERT( sizeof( slot ) == sizeof( DAQ_QUEUE_SLOT_T ) );
-         queuePushWatched( &g_queueAddacDaq, &slot );
+         queuePushWatched( &g_queueAddacDaq, &queueScuBusIrq );
       }
-   //TODO (1 << DAQ_IRQ_HIRES_FINISHED)
    #endif
    }
 }
@@ -247,6 +275,14 @@ STATIC void taskMain( void* pTaskData UNUSED )
    taskInfoLog();
 
    tellMailboxSlot();
+
+
+  //!! vTaskDelay( pdMS_TO_TICKS( 1500 ) );
+
+   if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
+      die( "No SYS_CON found!" );
+   scuLog( LM32_LOG_INFO, "SYS_CON found on addr: 0x%p\n", BASE_SYSCON );
+
    printCpuId();
 
    mmuAllocateDaqBuffer();

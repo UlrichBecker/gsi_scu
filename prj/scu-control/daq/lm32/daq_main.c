@@ -34,7 +34,7 @@
 
 #ifndef CONFIG_DAQ_SINGLE_APP
  extern volatile uint16_t* g_pScub_base;
- QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, DAQ_QUEUE_SLOT_T );
+ QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 #endif
 
 #ifdef CONFIG_DAQ_SINGLE_APP
@@ -366,14 +366,21 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
  * @retval false Not all channels of this device handled yet.
  * @retval true  All channels of this device has been handled.
  */
-ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice )
+ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice, const uint16_t pendingIrqs )
 {
    static unsigned int s_channelNumber = 0;
    DAQ_CANNEL_T* pChannel = daqDeviceGetChannelObject( pDevice, s_channelNumber );
 
-   handleContinuousMode( pChannel );
- //  handleHiresMode( pChannel );
- //  handlePostMortemMode( pChannel );
+   if( (pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+   {
+      handleContinuousMode( pChannel );
+   }
+
+   if( (pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
+   {
+      handleHiresMode( pChannel );
+      handlePostMortemMode( pChannel );
+   }
 
    s_channelNumber++;
    if( s_channelNumber < daqDeviceGetMaxChannels( pDevice ) )
@@ -386,13 +393,13 @@ ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice )
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
  * @ingroup TASK
- * @brief Returns true and copies the slot-number in pSlot, if a message is
- *        in queue by DAQ-MSI.
+ * @brief Returns true and copies the slot-number and the irq-flags in
+ *        pQueueScuBusIrq, if a message is in queue by DAQ-MSI.
  */
 ALWAYS_INLINE STATIC inline
-bool addacDaqQueuePop( DAQ_QUEUE_SLOT_T* pSlot )
+bool addacDaqQueuePop( SCU_BUS_IRQ_QUEUE_T* pQueueScuBusIrq )
 {
-   return queuePopSave( &g_queueAddacDaq, pSlot );
+   return queuePopSave( &g_queueAddacDaq, pQueueScuBusIrq );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -430,23 +437,25 @@ void addacDaqTask( void )
    ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
 #endif
 
-   static DAQ_DEVICE_T* s_pDaqDevice = NULL;
+   static DAQ_DEVICE_T* s_pDaqDevice  = NULL;
+   static uint16_t      s_pendingIrqs = 0;
 
    if( s_pDaqDevice == NULL )
    {
-      DAQ_QUEUE_SLOT_T slot;
+      SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       /*
        * Did the interrupt put a message in the pipe?
        */
-      if( addacDaqQueuePop( &slot ) )
+      if( addacDaqQueuePop( &queueScuBusIrq ) )
       {
-         s_pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
+         s_pDaqDevice  = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
+         s_pendingIrqs = queueScuBusIrq.pendingIrqs;
       }
    }
 
    if( s_pDaqDevice != NULL )
    {
-      if( daqExeNextChannel( s_pDaqDevice ) )
+      if( daqExeNextChannel( s_pDaqDevice, s_pendingIrqs ) )
          s_pDaqDevice = NULL;
    }
 }
