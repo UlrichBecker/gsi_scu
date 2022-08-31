@@ -62,6 +62,8 @@
 #include <event_measurement.h>
 #include <queue_watcher.h>
 
+#include <scu_temperature.h>
+
 #ifdef CONFIG_USE_MMU
  #include <scu_mmu_lm32.h>
  #include <scu_mmu_tag.h>

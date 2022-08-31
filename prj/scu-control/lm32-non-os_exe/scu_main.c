@@ -42,7 +42,6 @@
  #include "scu_mil_fg_handler.h"
 #endif
 #include "scu_fg_handler.h"
-#include "scu_temperature.h"
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #include "daq_main.h"
 #endif
@@ -59,8 +58,6 @@ TIME_MEASUREMENT_T g_irqTimeMeasurement = TIME_MEASUREMENT_INITIALIZER;
 #endif
 
 //  #define _CONFIG_NO_INTERRUPT
-
-extern ONE_WIRE_T g_oneWireBase;
 
 #ifdef CONFIG_MIL_IN_TIMER_INTERRUPT
 /*!

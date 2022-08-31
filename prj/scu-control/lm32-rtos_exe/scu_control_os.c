@@ -277,7 +277,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    tellMailboxSlot();
 
 
-  //!! vTaskDelay( pdMS_TO_TICKS( 1500 ) );
+   vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
    if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
       die( "No SYS_CON found!" );
@@ -287,8 +287,8 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    mmuAllocateDaqBuffer();
 
- //  scuLog( LM32_LOG_INFO, "g_oneWireBase.pWr is:   0x%p\n", g_oneWireBase.pWr );
- //  scuLog( LM32_LOG_INFO, "g_oneWireBase.pUser is: 0x%p\n", g_oneWireBase.pUser );
+   scuLog( LM32_LOG_INFO, "g_oneWireBase.pWr is:   0x%p\n", g_oneWireBase.pWr );
+   scuLog( LM32_LOG_INFO, "g_oneWireBase.pUser is: 0x%p\n", g_oneWireBase.pUser );
    scuLog( LM32_LOG_INFO, "g_pScub_irq_base is:    0x%p\n", g_pScub_irq_base );
 
 #ifdef CONFIG_MIL_FG

@@ -42,6 +42,8 @@ bool initOneWire( void );
  */
 void updateTemperature( void );
 
+
+extern ONE_WIRE_T g_oneWireBase;
 #ifdef __cplusplus
 }
 #endif
