@@ -1,0 +1,23 @@
+
+MIAN_MODULE := buffer_test.c
+
+SOURCE += $(SCU_LIB_SRC_DIR)/scu_ddr3.c
+SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
+SOURCE += $(DAQ_LM32_DIR)/daq.c
+
+REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
+
+#  TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
+
+DEFINES += CONFIG_DDR_PEDANTIC_CHECK
+DEFINES += CONFIG_RAM_PEDANTIC_CHECK
+DEFINES += DEBUGLEVEL=2
+# DEFINES += CONFIG_DDR3_NO_BURST_FUNCTIONS
+DEFINES += CONFIG_SCU_USE_DDR3
+DEFINES += CONFIG_DAQ_SIMULATE_CHANNEL
+DEFINES += CONFIG_DAQ_DEBUG
+
+CODE_OPTIMIZATION = 2
+
+include $(REPOSITORY_DIR)/makefiles/makefile.scu
+#=================================== EOF ======================================
