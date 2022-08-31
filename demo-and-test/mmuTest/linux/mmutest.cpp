@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <string.h>
 #include <scu_env.hpp>
 #include <scu_mmu_fe.hpp>
 #include <lm32_hexdump.h>
