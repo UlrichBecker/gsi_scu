@@ -40,7 +40,11 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   12240
+#ifdef CONFIG_MIL_DAQ_USE_RAM
+  #define configTOTAL_HEAP_SIZE                   16240
+#else
+  #define configTOTAL_HEAP_SIZE                   12240
+#endif
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */

@@ -303,7 +303,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    taskStartAllIfHwPresent();
 
    scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD
-           "\n *** Initialization done, %u tasks running, going in main loop of task \"%s\" ***\n\n"
+           "\n *** Initialization done, %u tasks running, entering main-loop of task \"%s\" ***\n\n"
            ESC_NORMAL, uxTaskGetNumberOfTasks(), pcTaskGetName( NULL ) );
 
 #ifdef CONFIG_STILL_ALIVE_SIGNAL
@@ -392,6 +392,12 @@ void main( void )
            &__atomic_section_nesting_count );
 
    initializeGlobalPointers();
+
+  /*!
+   * Will need by usleep_init()
+   */
+   timer_init(1);
+   usleep_init();
 
    /*
     * Creating the main task. 

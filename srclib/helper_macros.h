@@ -547,16 +547,31 @@ template <typename TYP> bool isInRange( const TYP v, const TYP minimum,
 } /* namespace gsi */
 #endif /* __cplusplus   */
 
+/*!
+ * @brief Will produce the compiler warning: "comparison of distinct pointer"
+ *        when argument "x" not of type "type".
+ */
+#define TYPECHECK( type, x ) \
+({                           \
+    type      _z;            \
+    TYPEOF(x) _y;            \
+    (void)(&_y == &_z);      \
+    1;                       \
+})
+
 #ifndef __cplusplus
 
 #ifndef min
    /*!
     * @brief Returns the smaller value of the parameters "a" or "b"
+    * @note If the types of the arguments a and b are different, then
+    *       the compiler warning "comparison of distinct pointer" will appear.
     */
    #define min( a, b )    \
    ({                     \
       TYPEOF(a) _a = (a); \
       TYPEOF(b) _b = (b); \
+      (void)(&_a == &_b); \
       (_a < _b)? _a : _b; \
    })
 #endif
@@ -564,16 +579,20 @@ template <typename TYP> bool isInRange( const TYP v, const TYP minimum,
 #ifndef max
    /*!
     * @brief Returns the greater value of the parameters "a" or "b"
+    * @note If the types of the arguments a and b are different, then
+    *       the compiler warning "comparison of distinct pointer" will appear.
     */
    #define max( a, b )    \
    ({                     \
       TYPEOF(a) _a = (a); \
       TYPEOF(b) _b = (b); \
+      (void)(&_a == &_b); \
       (_a > _b)? _a : _b; \
    })
 #endif
 
 #endif /* ifndef __cplusplus */
+
 
 /*!
  * Maybe a bug in the obsolete DOXYGEN 1.8.5 in the ASL-cluster,

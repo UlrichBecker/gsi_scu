@@ -92,7 +92,7 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
    DDR_ASSERT( (word64len + start) <= DDR3_MAX_INDEX64 );
    while( word64len > 0 )
    {
-      unsigned int blkLen = min( word64len, DDR3_XFER_FIFO_SIZE );
+      unsigned int blkLen = min( word64len, (unsigned int)DDR3_XFER_FIFO_SIZE );
       DBPRINT2( "DBG: blkLen: %d\n", blkLen );
       ddr3StartBurstTransfer( pThis, start, blkLen );
 

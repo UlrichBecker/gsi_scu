@@ -330,7 +330,9 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
           */
          bool next;
          do
-         {
+         { /*
+            * Flag becomes "true" within the macro FSM_TRANSITION_NEXT.
+            */
             next = false;
             switch( state )
             {
@@ -356,6 +358,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
                   ret++;
                   FSM_TRANSITION_SELF();
                }
+
                case ESC_CHAR:
                {
                   if( buffer[i] == '[' )
@@ -363,6 +366,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
 
                   FSM_TRANSITION( NO_ESC );
                }
+
                case ESC_FIRST:
                {
                   if( isDecDigit( buffer[i] ) )
@@ -370,6 +374,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
 
                   FSM_TRANSITION_NEXT( ESC_OP_CODE );
                }
+
                case ESC_DIGIT:
                {
                   if( isDecDigit( buffer[i] ) )
@@ -377,6 +382,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
 
                   FSM_TRANSITION_NEXT( ESC_OP_CODE );
                }
+
                case ESC_OP_CODE:
                {
                   if( (buffer[i] == ';') || isDecDigit( buffer[i] ) )
@@ -566,7 +572,9 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    {
       bool next;
       do
-      {
+      { /*
+         * Flag becomes "true" within the macro FSM_TRANSITION_NEXT.
+         */
          next = false;
          switch( state )
          {
