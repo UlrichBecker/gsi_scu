@@ -13,6 +13,7 @@
 ###############################################################################
 
 #
+<<<<<<< HEAD
 # Location of this script on ASL: /common/export/nfsinit/global/lm32-test-apps/
 # Location of this script on SCU:           /opt/nfsinit/global/lm32-test-apps/
 #
@@ -41,5 +42,27 @@ sleep 3
 $LM32_LOGD -Habd=/var/log/lm32.log 2>>$ERROR_LOG
 
 $SOCAT tcp-listen:60368,reuseaddr,fork file:/dev/wbm0 2>>$ERROR_LOG
+=======
+# Location pdf this script: /common/export/nfsinit/global/
+#
+
+LM32_APP=scu_control.bin
+#LM32_APP=scu_control_OS.bin
+LM32_APP_DIR="../global/lm32-test-apps/"
+
+EB_FWLOAD=/usr/bin/eb-fwload
+EB_RESET=/usr/bin/eb-reset
+LM32_LOGD=/opt/nfsinit/global/tools/lm32-logd
+SOCAT=/usr/bin/socat
+
+
+$EB_RESET dev/wbm0 cpuhalt 0
+$EB_FWLOAD dev/wbm0 u0 0 ${LM32_APP_DIR}/${LM32_APP}
+
+sleep 3
+
+$LM32_LOGD -Habd=/var/log/lm32.log
+
+$SOCAT tcp-listen:60368,reuseaddr,fork file:/dev/wbm0
 
 #=================================== EOF ======================================
