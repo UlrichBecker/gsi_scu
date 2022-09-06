@@ -62,6 +62,7 @@ void taskStartFgIfAnyPresent( void )
    {
       queueReset( &g_queueFg );
       TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
+      vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }
 }
 

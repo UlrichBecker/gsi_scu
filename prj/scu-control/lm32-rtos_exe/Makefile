@@ -52,6 +52,8 @@ ifdef SCU_MIL
   SOURCE += scu_task_mil.c
 endif
 SOURCE   += scu_task_fg.c
+SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/ros_timeout.c
+
 
 include ../common_make.mk
 
@@ -69,7 +71,7 @@ include ../common_make.mk
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
- SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 

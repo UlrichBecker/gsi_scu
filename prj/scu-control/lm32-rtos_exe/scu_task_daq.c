@@ -52,7 +52,8 @@ void taskStartDaqIfAnyPresent( void )
    {
       queueReset( &g_queueAddacDaq );
       TASK_CREATE_OR_DIE( taskDaq, 512, 1, &mg_taskDaqHandle );
-   }      
+      vTaskDelay( pdMS_TO_TICKS( 1 ) );
+   }
 }
 
 /*! ---------------------------------------------------------------------------

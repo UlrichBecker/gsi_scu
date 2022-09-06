@@ -63,6 +63,10 @@ Options:
    Generates a start tag for all function generator channels else
    for the last channel only.
 
+-f, --feedback
+   Using "fg-feedback -L" for initializing the FG-list will used
+   that means no rescan will made.
+
 Example:
 $PROG_NAME sinus.fgw 1 3 5
 Funktion generator channels 1, 2 and 5 will activated if present.
@@ -108,12 +112,20 @@ then
    die "Program saft-ctl not found!"
 fi
 
+FG_FEEEDBACK=$(which fg-feedback)
+if [ ! -x "FG_FEEEDBACK" ]
+then
+   die "Program fg-feedback not found!"
+fi
+
 #
 # Parsing of all options:
 #
 GENERATE_STROBE=false
 DO_EXIT=false
 NO_KILL=false
+USE_FG_FEEDBACK=false
+
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -135,6 +147,9 @@ do
          "t")
             START_TAG="-g"
          ;;
+         "f")
+            USE_FG_FEEDBACK=true
+         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
@@ -152,6 +167,9 @@ do
                ;;
                "tag")
                   START_TAG="-g"
+               ;;
+               "feedback")
+                  USE_FG_FEEDBACK=true
                ;;
                *)
                   die "Unknown long option \"-${A}\"!"
@@ -228,7 +246,13 @@ fi
 #
 # Initializing of the FG-list by all found function generators..
 #
-FG_LIST=$( $FG_CTL -si 2>/dev/null | egrep 'fg-[0-9]{1,3}-[0-9]{1,3}' | awk '{printf $1; printf "\n"}')
+if $USE_FG_FEEDBACK
+then
+   FG_LIST=$( $FG_FEEEDBACK -L )
+else
+   FG_LIST=$( $FG_CTL -si 2>/dev/null | egrep 'fg-[0-9]{1,3}-[0-9]{1,3}' | awk '{printf $1; printf "\n"}')
+fi
+
 if [ ! -n "$FG_LIST" ]
 then
    die "No function generator(s) found!"

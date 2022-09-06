@@ -61,6 +61,7 @@ void taskStartMilIfAnyPresent( void )
       evDelete( &g_ecaEvent );
 
       TASK_CREATE_OR_DIE( taskMil, 1024, 1, &mg_taskMilHandle );
+      vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }
 }
 

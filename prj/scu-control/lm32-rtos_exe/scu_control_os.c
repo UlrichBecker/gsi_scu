@@ -38,6 +38,7 @@
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #include <scu_task_daq.h>
 #endif
+#include <ros_timeout.h>
 
 extern volatile uint32_t __atomic_section_nesting_count;
 
@@ -260,8 +261,6 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
  */
 ONE_TIME_CALL void initInterrupt( void )
 {
-   //TODO
-
    initCommandHandler();
    irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onScuMSInterrupt );
    scuLog( LM32_LOG_INFO, "IRQ table configured: 0b%b\n", irqGetMaskRegister() );
@@ -277,7 +276,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    tellMailboxSlot();
 
 
-   vTaskDelay( pdMS_TO_TICKS( 1500 ) );
+   //vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
    if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
       die( "No SYS_CON found!" );
@@ -308,8 +307,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
 #ifdef CONFIG_STILL_ALIVE_SIGNAL
    unsigned int i = 0;
-   const char fan[] = { '|', '/', '-', '\\' };
-   TickType_t fanTime = 0;
+   static const char fan[] = { '|', '/', '-', '\\' };
+   TIMEOUT_T fanInterval;
+   toStart( &fanInterval, pdMS_TO_TICKS( 250 ) );
 #endif
 
    while( true )
@@ -319,10 +319,8 @@ STATIC void taskMain( void* pTaskData UNUSED )
        * Showing a animated software fan as still alive signal
        * in the LM32- console.
        */
-      const TickType_t tick = xTaskGetTickCount();
-      if( fanTime <= tick )
+      if( toInterval( &fanInterval ) )
       {
-         fanTime = tick + pdMS_TO_TICKS( 250 );
          mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
          i %= ARRAY_SIZE( fan );
       }
