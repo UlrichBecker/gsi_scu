@@ -531,7 +531,7 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
 
  * @dotfile daq.gv
  */
-STATIC bool daqDeviceDoFeedbackSwitchOnOffFSM( register DAQ_DEVICE_T* pThis )
+bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 {
    DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
 

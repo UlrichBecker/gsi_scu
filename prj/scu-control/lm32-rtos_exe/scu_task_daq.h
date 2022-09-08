@@ -36,6 +36,8 @@
 extern "C" {
 #endif
 
+int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList );
+   
 /*!----------------------------------------------------------------------------
  * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or
  *        at least one DAQ present or - if not successful - it stops the CPU

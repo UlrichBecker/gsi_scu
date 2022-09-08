@@ -1833,6 +1833,15 @@ void daqDeviceReset( register DAQ_DEVICE_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
+ * @brief Finite state machine which handles the on/off switching of
+ *        feed-back channels for ADDAC- function generators.
+
+ * @dotfile daq.gv
+ */
+bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ_DEVICE
  * @brief Puts a command for the feedback switch FSM in the waiting queue
  *        this command will executed ASAP.
  * @param pThis Pointer to the DAQ-device object

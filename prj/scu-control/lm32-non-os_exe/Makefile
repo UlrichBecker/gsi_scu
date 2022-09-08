@@ -35,6 +35,9 @@ endif
 MIAN_MODULE    = scu_main.c
 
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
+ifdef ADDAC_DAQ
+  SOURCE += $(DAQ_LM32_DIR)/daq_main.c
+endif
 
 ifdef MIL_IN_TIMER_INTERRUPT
  DEFINES += MAX_LM32_INTERRUPTS=2
@@ -43,6 +46,7 @@ else
  DEFINES += MAX_LM32_INTERRUPTS=1
 endif
 include ../common_make.mk
+
 
 # NO_LTO=1
  STACK_SIZE  =  4096

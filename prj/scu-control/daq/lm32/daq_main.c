@@ -379,7 +379,6 @@ ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice, const uint16_t pend
    if( (pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
    {
       handleHiresMode( pChannel );
-      handlePostMortemMode( pChannel );
    }
 
    s_channelNumber++;

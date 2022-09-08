@@ -47,6 +47,7 @@ MIAN_MODULE    = scu_control_os.c
 
 ifdef ADDAC_DAQ
   SOURCE += scu_task_daq.c
+  #SOURCE += $(DAQ_LM32_DIR)/daq_main.c
 endif
 ifdef SCU_MIL
   SOURCE += scu_task_mil.c
@@ -54,10 +55,12 @@ endif
 SOURCE   += scu_task_fg.c
 SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/ros_timeout.c
 
+LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
+
+#NO_LTO := 1
 
 include ../common_make.mk
 
-# NO_LTO=1
  STACK_SIZE  =  512
 
 # SCU_URL = scuxl0118

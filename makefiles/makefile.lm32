@@ -17,7 +17,7 @@ OUTPUT_FORMAT ?= binary
 
 GNUC_STD ?= gnu17
 
-CC      = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)gcc -std=$(GNUC_STD)
+CC      = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)gcc -std=$(GNUC_STD) -ffreestanding
 CXX     = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)g++ -fno-exceptions -fno-rtti
 LD      = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)gcc
 OBJCPY  = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)objcopy

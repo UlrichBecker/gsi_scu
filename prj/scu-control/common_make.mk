@@ -150,7 +150,6 @@ ifdef ADDAC_DAQ
   SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
   SOURCE += $(DAQ_LM32_DIR)/daq_command_interface_uc.c
   SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
-  SOURCE += $(DAQ_LM32_DIR)/daq_main.c
   USE_SCU_EXTERN_RAM := 1
 endif
 ifdef USE_HISTORY
