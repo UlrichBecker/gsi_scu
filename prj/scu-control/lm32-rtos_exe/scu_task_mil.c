@@ -39,6 +39,9 @@ STATIC void taskMil( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
+   queueResetSave( &g_queueMilFg );
+   evDelete( &g_ecaEvent );
+
    while( true )
    {
       if( evPopSave( &g_ecaEvent ) )
@@ -57,9 +60,6 @@ void taskStartMilIfAnyPresent( void )
 {
    if( (mg_taskMilHandle == NULL) && (milGetNumberOfFg() > 0) )
    {
-      queueReset( &g_queueMilFg );
-      evDelete( &g_ecaEvent );
-
       TASK_CREATE_OR_DIE( taskMil, 1024, 1, &mg_taskMilHandle );
       vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }

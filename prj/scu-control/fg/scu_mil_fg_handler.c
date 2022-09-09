@@ -8,11 +8,8 @@
  */
 
 #ifndef __DOCFSM__
-  #include "scu_fg_macros.h"
-  #include "scu_fg_list.h"
-  #ifdef CONFIG_MIL_DAQ_USE_RAM
-    #include <daq_main.h>
-  #endif
+  #include <scu_fg_macros.h>
+  #include <scu_fg_list.h>
   #include <scu_syslog.h>
 #endif
 

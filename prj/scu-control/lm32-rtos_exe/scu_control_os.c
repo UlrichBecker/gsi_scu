@@ -27,7 +27,7 @@
 #include <FreeRTOS.h>
 #include <lm32signal.h>
 #include <task.h>
-
+#include <timers.h>
 #include <scu_command_handler.h>
 
 #include <scu_task_fg.h>
@@ -266,6 +266,13 @@ ONE_TIME_CALL void initInterrupt( void )
    scuLog( LM32_LOG_INFO, "IRQ table configured: 0b%b\n", irqGetMaskRegister() );
 }
 
+#if (configUSE_TIMERS > 0)
+void onTimer( TimerHandle_t xTimer UNUSED )
+{
+   lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
+}
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @brief Main task
  */
@@ -298,6 +305,11 @@ STATIC void taskMain( void* pTaskData UNUSED )
    initAndScan();
 
    initInterrupt();
+
+#if (configUSE_TIMERS > 0)
+   TimerHandle_t th = xTimerCreate( "Timer", pdMS_TO_TICKS( 1000 ), pdTRUE, NULL, onTimer );
+   xTimerStart( th, 0 );
+#endif
 
    taskStartAllIfHwPresent();
 

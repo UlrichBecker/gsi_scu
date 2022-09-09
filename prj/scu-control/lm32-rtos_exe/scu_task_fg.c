@@ -38,6 +38,8 @@ STATIC void taskFg( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
+   queueResetSave( &g_queueFg );
+
    while( true )
    {
       SCU_BUS_IRQ_QUEUE_T queueFgItem;
@@ -60,7 +62,6 @@ void taskStartFgIfAnyPresent( void )
 {
    if( (mg_taskFgHandle == NULL) && (addacGetNumberOfFg() > 0) )
    {
-      queueReset( &g_queueFg );
       TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
       vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }

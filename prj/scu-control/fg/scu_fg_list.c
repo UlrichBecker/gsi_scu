@@ -24,7 +24,11 @@
 #include <mini_sdb.h>
 #include <scu_fg_macros.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
- #include <daq_main.h>
+ #ifdef CONFIG_RTOS
+  #include <scu_task_daq.h>
+ #else
+  #include <daq_main.h>
+ #endif
 #endif
 #include "scu_fg_list.h"
 

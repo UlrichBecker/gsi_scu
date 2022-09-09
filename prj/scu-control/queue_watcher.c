@@ -28,7 +28,11 @@
 #include <scu_function_generator.h>
 #include <scu_command_handler.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
- #include <daq_main.h>
+ #ifdef CONFIG_RTOS
+   #include <scu_task_daq.h>
+ #else
+   #include <daq_main.h>
+ #endif
 #endif
 #ifdef CONFIG_MIL_FG
  #include <scu_mil_fg_handler.h>

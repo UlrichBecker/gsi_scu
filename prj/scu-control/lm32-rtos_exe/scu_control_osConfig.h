@@ -26,7 +26,7 @@
 #define configMAX_TASK_NAME_LEN                 16
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
-#define configUSE_MUTEXES                       1
+#define configUSE_MUTEXES                       0
 #define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_COUNTING_SEMAPHORES           0
 #define configUSE_ALTERNATIVE_API               0 /* Deprecated! */
@@ -67,7 +67,7 @@
 #define configUSE_TIMERS                        0
 #define configTIMER_TASK_PRIORITY               3
 #define configTIMER_QUEUE_LENGTH                10
-#define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
+#define configTIMER_TASK_STACK_DEPTH            (configMINIMAL_STACK_SIZE + 1000)
 
 /* Interrupt nesting behaviour configuration. */
 #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]

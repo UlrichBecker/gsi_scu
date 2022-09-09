@@ -29,7 +29,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #ifdef _CONFIG_DAQ_MAIN
-#include <daq_main.h>
+//#include <daq_main.h>
 #endif
 #include <daq.h>
 #include <scu_lm32_common.h>
@@ -135,7 +135,8 @@ STATIC inline void handleHiresMode( DAQ_CANNEL_T* pChannel )
 
 #endif
 
-
+/*! ---------------------------------------------------------------------------
+ */
 STATIC inline void daqDeviceScanPostMortem( DAQ_DEVICE_T* pDaqDevice )
 {
    const unsigned int maxChannels = daqDeviceGetMaxChannels( pDaqDevice );
@@ -172,7 +173,7 @@ STATIC inline void daqScanForCommands( void )
 /*! ---------------------------------------------------------------------------
  * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
  */
-OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I dont know why yet!
+OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
 STATIC void taskDaq( void* pTaskData UNUSED )
 {
    taskInfoLog();
@@ -199,6 +200,7 @@ STATIC void taskDaq( void* pTaskData UNUSED )
       ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
    #endif
       daqScanForCommands();
+
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
          continue;
@@ -208,12 +210,12 @@ STATIC void taskDaq( void* pTaskData UNUSED )
       for( unsigned int channelNumber = 0; channelNumber < maxChannels; channelNumber++ )
       {
          DAQ_CANNEL_T* pChannel = daqDeviceGetChannelObject( pDaqDevice, channelNumber );
-         
-         if((( queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0)  )
+
+         if(( queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
          {
             handleContinuousMode( pChannel );
          }
-         
+
          if(( queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
          {
             handleHiresMode( pChannel );

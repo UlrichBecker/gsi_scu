@@ -37,9 +37,14 @@
 
 #include <daq.h>
 #include <daq_ramBuffer.h>
-#include <daq_main.h>
+#ifdef CONFIG_RTOS
+   #include <scu_task_daq.h>
+#else
+   #include <daq_main.h>
+#endif
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
    #include <scu_shared_mem.h>
+   #include <scu_lm32_common.h>
 #else
    #include <daq_command_interface.h>
 #endif
@@ -55,6 +60,7 @@ extern "C" {
    extern SCU_SHARED_DATA_T g_shared;
    #define GET_SHARED() g_shared.sDaq
 #endif
+
 
 /*! ---------------------------------------------------------------------------
  * @brief Executes a a from host (Linux) requested function.

@@ -30,14 +30,43 @@
 #error "Compilerswitch CONFIG_SCU_DAQ_INTEGRATION is not defined!"
 #endif
 
-#include <daq_main.h> 
+#include <daq.h>
+#include <daq_ramBuffer.h>
+#include <scu_lm32_common.h>
+
+/*!
+ * @ingroup DAQ
+ * @brief Message queue for ADDAC/ACU DAQs
+ */
+extern SW_QUEUE_T g_queueAddacDaq;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList );
-   
+/*! ---------------------------------------------------------------------------
+ * @brief Enables the feedback-channel for the given function generator number
+ *        in the given slot.
+ *
+ * Counterpart to daqDisableFgFeedBack
+ * @see daqDisableFgFeedBack
+ * @param slot SCU-bus slot number
+ * @param fgNum Function generator number 0 or 1
+ */
+void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Disables the feedback-channel for the given function generator number
+ *        in the given slot.
+ *
+ * Counterpart to daqEnableFgFeedback
+ * @see daqEnableFgFeedback
+ * @param slot SCU-bus slot number
+ * @param fgNum Function generator number 0 or 1
+ */
+void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
+
+
 /*!----------------------------------------------------------------------------
  * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or
  *        at least one DAQ present or - if not successful - it stops the CPU

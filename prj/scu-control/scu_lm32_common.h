@@ -151,6 +151,42 @@ extern volatile uint32_t*     g_pMil_irq_base;
 #endif
 
 /*! ---------------------------------------------------------------------------
+ * @brief Type of data-object for administrating all non-MIL DAQs
+ */
+typedef struct
+{
+   DAQ_BUS_T oDaqDevs;
+   RAM_SCU_T oRam;
+   volatile bool isIrq;
+} DAQ_ADMIN_T;
+
+extern DAQ_ADMIN_T g_scuDaqAdmin;
+
+int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList );
+
+int initBuffer( RAM_SCU_T* poRam );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Finding and initializing of all non-MIL DAQs.
+ * @param pDaqAdmin Pointer to the nom-MIL-DAQ administrating object
+ */
+STATIC // Doxygen 1.8.5 seems to have a problem...
+inline void scuDaqInitialize( DAQ_ADMIN_T* pDaqAdmin
+                            #ifndef CONFIG_DAQ_SINGLE_APP
+                             ,FG_MACRO_T* pFgList
+                            #endif
+                           )
+
+{
+#ifdef CONFIG_DAQ_SINGLE_APP
+   daqScanScuBus( &pDaqAdmin->oDaqDevs );
+#else
+   daqScanScuBus( &pDaqAdmin->oDaqDevs, pFgList );
+#endif
+   initBuffer( &pDaqAdmin->oRam );
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Initializing of all global pointers accessing the hardware.
  */
 void initializeGlobalPointers( void );

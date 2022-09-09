@@ -70,6 +70,7 @@ void addacDaqTask( void );
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
+#if 0
 /*! ---------------------------------------------------------------------------
  * @brief Type of data-object for administrating all non-MIL DAQs
  */
@@ -79,7 +80,7 @@ typedef struct
    RAM_SCU_T oRam;
    volatile bool isIrq;
 } DAQ_ADMIN_T;
-
+#endif
 /*! ---------------------------------------------------------------------------
  * @brief Initializes the memory (at now the DDR3-RAM) for the received
  *        non-MIL-DAQ data.
@@ -95,6 +96,7 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices
                 #endif
                  );
 
+#if 0
 /*! ---------------------------------------------------------------------------
  * @brief Finding and initializing of all non-MIL DAQs.
  * @param pDaqAdmin Pointer to the nom-MIL-DAQ administrating object
@@ -114,7 +116,7 @@ inline void scuDaqInitialize( DAQ_ADMIN_T* pDaqAdmin
 #endif
    initBuffer( &pDaqAdmin->oRam );
 }
-
+#endif
 #ifndef CONFIG_DAQ_SINGLE_APP
 
 /*! ---------------------------------------------------------------------------
@@ -145,7 +147,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum );
  */
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 
-extern DAQ_ADMIN_T g_scuDaqAdmin;
+//extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
 
 #ifdef __cplusplus

@@ -13,8 +13,12 @@
 #endif
 #include <scu_command_handler.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
+ #ifdef CONFIG_RTOS
+  #include <scu_task_daq.h>
+ #else
   #include <daq_main.h>
-  #include <daq_command_interface_uc.h>
+ #endif
+ #include <daq_command_interface_uc.h>
 #endif
 
 //extern FG_MESSAGE_BUFFER_T    g_aMsg_buf[QUEUE_CNT];
