@@ -496,6 +496,36 @@ void daqDeviceReset( register DAQ_DEVICE_T* pThis )
 
 #ifndef CONFIG_DAQ_SINGLE_APP
 
+#define CONFIG_DAQ_CMD_SINGLE_THREAD
+
+/*! ---------------------------------------------------------------------------
+ * @see queuePush
+ * @see queuePushSave
+ */
+STATIC inline ALWAYS_INLINE
+bool daqQueuePush( DAQ_DEVICE_T* pThis, const DAQ_ACTION_ITEM_T* pAct )
+{
+#if defined( CONFIG_RTOS ) && !defined( CONFIG_DAQ_CMD_SINGLE_THREAD )
+   return queuePushSave( &pThis->feedback.aktionBuffer, pAct ); 
+#else
+   return queuePush( &pThis->feedback.aktionBuffer, pAct ); 
+#endif
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see queuePop
+ * @see queuePopSave
+ */
+STATIC inline ALWAYS_INLINE
+bool daqQueuePop( DAQ_FEEDBACK_T* pFeedback, DAQ_ACTION_ITEM_T* pAct )
+{
+#if defined( CONFIG_RTOS ) && !defined( CONFIG_DAQ_CMD_SINGLE_THREAD )
+   return queuePopSave( &pFeedback->aktionBuffer, pAct );
+#else
+   return queuePop( &pFeedback->aktionBuffer, pAct );
+#endif
+}
+
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */
@@ -505,7 +535,8 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
                                       )
 {
    const DAQ_ACTION_ITEM_T act = { .action = what, .fgNumber = fgNumber };
-   if( !queuePush( &pThis->feedback.aktionBuffer, &act ) )
+   //if( !queuePush( &pThis->feedback.aktionBuffer, &act ) )
+   if( !daqQueuePush( pThis, &act ) )
    {
    #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR "ERROR: DAQ command buffer of slot %u full!\n" ESC_NORMAL,
@@ -548,7 +579,8 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
          /*
           * Command from FG-layer received?
           */
-         if( !queuePop( &pFeedback->aktionBuffer, &act ) )
+         //if( !queuePop( &pFeedback->aktionBuffer, &act ) )
+         if( !daqQueuePop( pFeedback, &act ) )
          { /*
             * No!
             */
