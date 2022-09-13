@@ -511,8 +511,10 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       m_isError = true;
       *this << "Invalid timestamp: last: " << m_lastTimestamp
             << ", actual: " << item.timestamp << std::flush;
+      m_lastTimestamp = 0;
       return;
    }
+   m_lastTimestamp = item.timestamp;
 
    if( m_rCmdLine.isPrintFilter() )
    {
@@ -521,8 +523,6 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
              << ", ";
       rOutput += stream.str();
    }
-
-   m_lastTimestamp = item.timestamp;
 
    if( !m_rCmdLine.isNoTimestamp() )
    {
