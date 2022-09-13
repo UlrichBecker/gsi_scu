@@ -163,7 +163,7 @@ _INCLUDE_DIRS = $(shell echo $(INCLUDE_DIRS) | tr ' ' '\n' | sort | uniq | tr '\
 
 OPT_INCLUDE := $(addprefix -I,$(strip $(_INCLUDE_DIRS)))
 OPT_DEFINES := $(addprefix -D,$(DEFINES) )
-OPT_DEFINES += -DGIT_REVISION=$(GIT_REVISION)
+#OPT_DEFINES += -DGIT_REVISION=$(GIT_REVISION)
 
 OBJ_FILES   := $(addprefix $(WORK_DIR)/,$(addsuffix .o,$(notdir $(_SOURCE))))
 DEPENDFILE  = $(WORK_DIR)/$(TARGET).dep
@@ -185,7 +185,7 @@ ifdef GCC_LEGACY
   #CFLAGS += -Wmaybe-uninitialized
 endif
 
-CC_ARG = $(CFLAGS) $(OPT_INCLUDE) $(OPT_DEFINES)
+CC_ARG = $(CFLAGS) $(OPT_INCLUDE) $(OPT_DEFINES) -DGIT_REVISION=$(GIT_REVISION)
 CXX_ARG ?= $(CC_ARG)
 AS_ARG ?= $(CC_ARG)
 
@@ -293,6 +293,10 @@ incdirs:
 .PHONY: incargs
 incargs:
 	$(QUIET)echo $(OPT_INCLUDE)
+
+.PHONY: devargs
+devargs:
+	$(QUIET)echo -e $(OPT_DEFINES)
 
 .PHONY: clean
 clean:

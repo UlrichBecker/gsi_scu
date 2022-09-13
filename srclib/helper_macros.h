@@ -377,7 +377,7 @@
  * Origin in <kernel-source>/include/linux/kernel.h as "container_of".
  *
  * This macro has also been tested successful with the compiler "lm32-elf-gcc"
- * version 4.5.3 and 7.3.0, and in C++ environment as well.
+ * version 4.5.3 and 9.3.0, and in C++ environment as well.
  *
  * @note The condition for working this macro properly is, that the content
  *       structures of the container structure has to be flat members,

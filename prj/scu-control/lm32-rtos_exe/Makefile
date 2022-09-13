@@ -40,6 +40,7 @@ RTOS_USING_HEAP = 4
 
 #------------------------------------------------------------------------------
 
+#DEFINES += CONFIG_DISABLE_CRITICAL_SECTION
 DEFINES += MAX_LM32_INTERRUPTS=2
 
 # DEFINES += DEBUGLEVEL

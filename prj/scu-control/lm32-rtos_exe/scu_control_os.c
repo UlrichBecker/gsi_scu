@@ -270,6 +270,7 @@ ONE_TIME_CALL void initInterrupt( void )
 void onTimer( TimerHandle_t xTimer UNUSED )
 {
    lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
+   //ATOMIC_SECTION() mprintf(  "%s", __func__ );
 }
 #endif
 

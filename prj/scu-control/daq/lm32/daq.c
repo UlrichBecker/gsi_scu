@@ -593,7 +593,11 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
          DAQ_CANNEL_T* pActChannel = &pThis->aChannel[daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
          pSetChannel->sequenceContinuous = 0;
          pActChannel->sequenceContinuous = 0;
-
+#if 0
+         lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "fg-%u-%u: setDAQ: %u actDAQ: %u\n" ESC_NORMAL,
+                  daqDeviceGetSlot( pThis ), pFeedback->fgNumber,
+                  daqChannelGetNumber( pSetChannel ), daqChannelGetNumber( pActChannel ) );
+#endif
          /*
           * Evaluating of DAQ command coming from function generator.
           */
