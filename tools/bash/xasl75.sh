@@ -45,22 +45,21 @@ LC_ALL=C
 #
 TMP_FILE=/tmp/${SERVER}.tmp
 ssh $GSI_USERNAME@$SERVER -L $LOCAL_PORT:localhost:3389 -N -f 2>$TMP_FILE
-if [ "?" != "0" ]
+ERROR_TEXT=$(cat $TMP_FILE)
+rm $TMP_FILE
+if [ -n "$ERROR_TEXT" ]
 then
-   if [ ! -n "$(cat $TMP_FILE | grep "Address already in use")" ]
+   if [ -n "$(echo $ERROR_TEXT | grep "Address already in use")" ]
    then
-      ERROR_TEXT=$(cat $TMP_FILE)
-      rm $TMP_FILE
-      die "$ERROR_TEXT"
-   else
       echo "INFO: Connection to $SERVER:$LOCAL_PORT already established."
+   else
+      die "$ERROR_TEXT"
    fi
 else
    echo "INFO: First connection to $SERVER:$LOCAL_PORT ."
    sleep 1
 fi
-rm $TMP_FILE
 
 xfreerdp +clipboard /u:$GSI_USERNAME /f +fonts +glyph-cache /v:localhost:$LOCAL_PORT /relax-order-checks /dynamic-resolution 
-
+echo "End..."
 #=================================== EOF ======================================

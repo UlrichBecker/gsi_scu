@@ -122,8 +122,9 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
  */
 STATIC inline void syslogPushItem( const SYSLOG_FIFO_ITEM_T* pItem )
 {
-
    SYSLOG_FIFO_ADMIN_T admin;
+
+   criticalSectionEnter();
 
    syslogReadFifoAdmin( &admin );
 
@@ -149,6 +150,8 @@ STATIC inline void syslogPushItem( const SYSLOG_FIFO_ITEM_T* pItem )
    }
 
    syslogWriteFifoAdmin( &admin );
+
+   criticalSectionExit();
 }
 
 
