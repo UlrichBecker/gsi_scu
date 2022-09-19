@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V10.4.6
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -65,6 +65,8 @@
  * be set and then tested atomically - as is the case where event groups are
  * used to create a synchronisation point between multiple tasks (a
  * 'rendezvous').
+ *
+ * \defgroup EventGroup
  */
 
 
@@ -241,8 +243,7 @@ typedef TickType_t               EventBits_t;
  *
  * @param xTicksToWait The maximum amount of time (specified in 'ticks') to wait
  * for one/all (depending on the xWaitForAllBits value) of the bits specified by
- * uxBitsToWaitFor to become set. A value of portMAX_DELAY can be used to block
- * indefinitely (provided INCLUDE_vTaskSuspend is set to 1 in FreeRTOSConfig.h).
+ * uxBitsToWaitFor to become set.
  *
  * @return The value of the event group at the time either the bits being waited
  * for became set, or the block time expired.  Test the return value to know
@@ -376,12 +377,6 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  * timer task to have the clear operation performed in the context of the timer
  * task.
  *
- * @note If this function returns pdPASS then the timer task is ready to run
- * and a portYIELD_FROM_ISR(pdTRUE) should be executed to perform the needed
- * clear on the event group.  This behavior is different from
- * xEventGroupSetBitsFromISR because the parameter xHigherPriorityTaskWoken is
- * not present.
- *
  * @param xEventGroup The event group in which the bits are to be cleared.
  *
  * @param uxBitsToClear A bitwise value that indicates the bit or bits to clear.
@@ -411,7 +406,6 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  *      if( xResult == pdPASS )
  *      {
  *          // The message was posted successfully.
- *          portYIELD_FROM_ISR(pdTRUE);
  *      }
  * }
  * @endcode

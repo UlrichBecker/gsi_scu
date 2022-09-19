@@ -27,7 +27,7 @@ OPTIMIZE( "O1" )
 void criticalSectionEnter( void )
 {
    asm volatile
-   ( 
+   (
       ".long    __atomic_section_nesting_count             \n\t"
    #ifndef CONFIG_DISABLE_CRITICAL_SECTION
       "wcsr     ie, r0                                     \n\t"
@@ -43,13 +43,13 @@ void criticalSectionEnter( void )
    );
 }
 
-#define CONFIG_IRQ_ENABLE_IF_COUNTER_ALREADY_ZERO
+#define CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
 
 OPTIMIZE( "O1" )
 void criticalSectionExit( void )
 {
    asm volatile
-   (  
+   (
       ".long    __atomic_section_nesting_count             \n\t"
       "orhi     r1, r0, hi(__atomic_section_nesting_count) \n\t"
       "ori      r1, r1, lo(__atomic_section_nesting_count) \n\t"
@@ -72,9 +72,14 @@ void criticalSectionExit( void )
    );
 }
 #endif
+
+
+
+extern volatile uint32_t __reset_count;
+
 void main( void )
 {
-   mprintf( "Inline assembler test\n" );
+   mprintf( "Inline assembler test no: %u\n", __reset_count );
    mprintf( "Address of __atomic_section_nesting_count: 0x%p\n", &__atomic_section_nesting_count );
 
    mprintf( "__atomic_section_nesting_count = %d, enable = 0x%08X, \n",

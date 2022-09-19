@@ -105,6 +105,7 @@ STATIC bool sendToUart( PRINTF_T* pPrintfObj UNUSED, const int c )
  * @brief Base function for all printf variants.
  * @param pPrintfObj->putch Pointer to the character output function.
  */
+OPTIMIZE( "-O1"  )
 STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
 {
    /*

@@ -290,6 +290,7 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
          mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
          i %= ARRAY_SIZE( fan );
       }
+      vPortYield();
    }
 }
 

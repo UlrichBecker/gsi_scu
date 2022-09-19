@@ -245,13 +245,15 @@ void _irq_entry( void )
 #endif
 }
 
+#if 0
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
  *
  * When the compiler and linker has LTO ability so the following inline
  * declarations will be really inline.
  */
-inline void criticalSectionEnter( void )
+OPTIMIZE( "O1" )
+void criticalSectionEnter( void )
 {
 #ifndef CONFIG_DISABLE_CRITICAL_SECTION
    irqDisable();
@@ -265,7 +267,8 @@ inline void criticalSectionEnter( void )
  * When the compiler and linker has LTO ability so the following inline
  * declarations will be really inline.
  */
-inline void criticalSectionExit( void )
+OPTIMIZE( "O1" )
+void criticalSectionExit( void )
 {
    IRQ_ASSERT( __atomic_section_nesting_count != 0 );
    __atomic_section_nesting_count--;
@@ -274,6 +277,77 @@ inline void criticalSectionExit( void )
       _irqEnable();
 #endif
 }
+#else
+
+#define CONFIG_SAVE_BIE_AND_EIE
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
+OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
+void criticalSectionEnter( void )
+{
+   asm volatile
+   (
+      ".long  __atomic_section_nesting_count              \n\t"
+   #ifndef CONFIG_DISABLE_CRITICAL_SECTION
+    #ifdef  CONFIG_SAVE_BIE_AND_EIE
+      "rcsr   r1, ie                                      \n\t"
+      "andi   r1, r1, "TO_STRING( ~IRQ_IE & 0x0000FFFF )" \n\t"
+      "wcsr   ie, r1                                      \n\t"
+    #else
+      "wcsr   ie, r0                                      \n\t"
+    #endif
+   #endif
+      "orhi   r1, r0, hi(__atomic_section_nesting_count)  \n\t"
+      "ori    r1, r1, lo(__atomic_section_nesting_count)  \n\t"
+      "lw     r2, (r1+0)                                  \n\t"
+      "addi   r2, r2, 1                                   \n\t"
+      "sw     (r1+0), r2                                  \n\t"
+      :
+      :
+      : "r1", "r2"
+   );
+}
+
+#define CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
+OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
+void criticalSectionExit( void )
+{
+   IRQ_ASSERT( __atomic_section_nesting_count != 0 );
+   asm volatile
+   (
+      ".long   __atomic_section_nesting_count             \n\t"
+      "orhi   r1, r0, hi(__atomic_section_nesting_count)  \n\t"
+      "ori    r1, r1, lo(__atomic_section_nesting_count)  \n\t"
+      "lw     r2, (r1+0)                                  \n\t"
+   #ifdef CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
+      "be     r2, r0, L_ENABLE                            \n\t"
+   #else
+      "be     r2, r0, L_NO_ENABLE                         \n\t"
+   #endif
+      "addi   r2, r2, -1                                  \n\t"
+      "sw     (r1+0), r2                                  \n\t"
+      "bne    r2, r0, L_NO_ENABLE                         \n"
+   "L_ENABLE:                                             \n\t"
+   #ifdef CONFIG_SAVE_BIE_AND_EIE
+      "rcsr   r1, ie                                      \n\t"
+      "ori    r1, r1, " TO_STRING( IRQ_IE ) "             \n\t"
+   #else
+      "ori    r1, r0, " TO_STRING( IRQ_IE ) "             \n\t"
+   #endif
+      "wcsr   ie, r1                                      \n"
+   "L_NO_ENABLE:                                          \n\t"
+      :
+      :
+      : "r1", "r2"
+   );
+}
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h

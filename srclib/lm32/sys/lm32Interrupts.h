@@ -84,7 +84,7 @@ namespace gsi
  * @ingroup INTERRUPT
  * @brief Interrupt enable bit mask of interrupt control register.
  */
-#define IRQ_IE ((uint32_t)0x00000001)
+#define IRQ_IE 0x00000001
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT

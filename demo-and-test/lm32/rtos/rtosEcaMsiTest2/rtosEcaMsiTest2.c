@@ -45,6 +45,7 @@
 #include <eca_queue_type.h>
 #include <scu_wr_time.h>
 #include <sw_queue.h>
+#include <ros_timeout.h>
 #include <scu_logutil.h>
 #include <FreeRTOS.h>
 #include <task.h>
@@ -272,10 +273,11 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
    irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onIrqEcaEvent );
    scuLog( LM32_LOG_INFO, "Installing of ECA interrupt is done.\n" );
 
-
    unsigned int i = 0;
-   const char fan[] = { '|', '/', '-', '\\' };
-   TickType_t fanTime = 0;
+   static const char fan[] = { '|', '/', '-', '\\' };
+   TIMEOUT_T fanInterval;
+   toStart( &fanInterval, pdMS_TO_TICKS( 250 ) );
+
    lm32Log( LM32_LOG_INFO, "NOTE: The software fan as still alive signal is only in LM32-console visible!\n" );
    scuLog( LM32_LOG_INFO, ESC_BOLD "Entering task main loop and waiting for MSI ...\n" ESC_NORMAL );
    while( true )
@@ -315,15 +317,10 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
             criticalSectionExit();
          }
       }
-      else
+      else if( toInterval( &fanInterval ) )
       {
-         const TickType_t tick = xTaskGetTickCount();
-         if( fanTime <= tick )
-         {
-            fanTime = tick + pdMS_TO_TICKS( 250 );
-            mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
-            i %= ARRAY_SIZE( fan );
-         }
+         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
+         i %= ARRAY_SIZE( fan );
       }
 
       vPortYield();
@@ -357,7 +354,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
  */
 void main( void )
 {
-   mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "FreeRTOS ECA-MSI test\n"
+   mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "FreeRTOS ECA-MSI test using sw_queue\n"
             "Compiler: " COMPILER_VERSION_STRING "\n" );
 
    const BaseType_t status = initAndStartRTOS();
