@@ -269,8 +269,13 @@ ONE_TIME_CALL void initInterrupt( void )
 #if (configUSE_TIMERS > 0)
 void onTimer( TimerHandle_t xTimer UNUSED )
 {
-   lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
-   //ATOMIC_SECTION() mprintf(  "%s", __func__ );
+   static unsigned int count = 0;
+  // ATOMIC_SECTION()
+   //   lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
+   //ATOMIC_SECTION()
+   //mprintf(  "%s: %u", __func__, count );
+   //ATOMIC_SECTION()
+   count++;
 }
 #endif
 
@@ -415,6 +420,7 @@ void main( void )
     */
    TASK_CREATE_OR_DIE( taskMain, 1024, 1, NULL );
 
+   scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Starting sheduler...\n" ESC_NORMAL );
    /*
     * Starting the main- and idle- task.
     * If successful, this function will not left.
