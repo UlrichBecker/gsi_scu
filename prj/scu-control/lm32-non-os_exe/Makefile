@@ -45,6 +45,11 @@ ifdef MIL_IN_TIMER_INTERRUPT
 else
  DEFINES += MAX_LM32_INTERRUPTS=1
 endif
+
+DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+
+# CFLAGS += -S
+
 include ../common_make.mk
 
 

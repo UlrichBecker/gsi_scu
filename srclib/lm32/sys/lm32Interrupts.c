@@ -279,7 +279,7 @@ void criticalSectionExit( void )
 }
 #else
 
-#define CONFIG_SAVE_BIE_AND_EIE
+//#define CONFIG_SAVE_BIE_AND_EIE
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
@@ -287,6 +287,8 @@ void criticalSectionExit( void )
 OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
 void criticalSectionEnter( void )
 {
+   IRQ_ASSERT( (__atomic_section_nesting_count == 0) == ((irqGetEnableRegister() & IRQ_IE) != 0) );
+
    asm volatile
    (
       ".long  __atomic_section_nesting_count              \n\t"
@@ -319,6 +321,8 @@ OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
 void criticalSectionExit( void )
 {
    IRQ_ASSERT( __atomic_section_nesting_count != 0 );
+   IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
+
    asm volatile
    (
       ".long   __atomic_section_nesting_count             \n\t"
