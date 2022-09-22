@@ -50,7 +50,10 @@ ifndef NO_COLORED
    ESC_ERROR      := "$(ESC_BOLD)$(ESC_FG_RED)"
 endif
 
+CP := cp
+
 ifeq ($(V), 1)
+   CP_F      = $(CP)
    CC_F      = $(CC)
    CXX_F     = $(CXX)
    CPP_F     = $(CPP)
@@ -61,6 +64,7 @@ ifeq ($(V), 1)
    OBJCPY_F  = $(OBJCPY)
    OBJDUMP_F = $(OBJDUMP)
 else
+   CP_MSG      := "COPY"
    CXX_MSG     := "CXX"
    CC_MSG      := "CC"
    CPP_MSG     := "CPP"
@@ -79,6 +83,7 @@ else
    FORMAT_L    := @printf "[ %s %s ]\t$(ESC_FG_MAGENTA)%s$(ESC_NORMAL)\n"
    FORMAT_R    := @printf "[ %s %s ]\t$(ESC_FG_CYAN)$(ESC_BOLD)%s$(ESC_NORMAL)\n"
  endif
+   CP_F        = $(FORMAT)   $(CPU) $(CP_MSG)      $(@); $(CP)
    CC_F        = $(FORMAT)   $(CPU) $(CC_MSG)      $(@); $(CC)
    CXX_F       = $(FORMAT)   $(CPU) $(CXX_MSG)     $(@); $(CXX)
    CPP_F       = $(FORMAT)   $(CPU) $(CPP_MSG)     $(@); $(CPP)
@@ -155,6 +160,7 @@ INCLUDE_DIRS  += $(GENERATED_DIR)
 DEPLOY_DIR    ?= ./deploy_$(CPU)
 WORK_DIR      ?= $(DEPLOY_DIR)/work
 TARGET_DIR    ?= $(DEPLOY_DIR)/result
+ASM_DIR       ?= $(DEPLOY_DIR)/asm
 
 GIT_REVISION := "$(shell git --git-dir=$(REPOSITORY_DIR)/.git log -n1 --pretty='format:%h (%ci)')"
 
@@ -163,9 +169,9 @@ _INCLUDE_DIRS = $(shell echo $(INCLUDE_DIRS) | tr ' ' '\n' | sort | uniq | tr '\
 
 OPT_INCLUDE := $(addprefix -I,$(strip $(_INCLUDE_DIRS)))
 OPT_DEFINES := $(addprefix -D,$(DEFINES) )
-#OPT_DEFINES += -DGIT_REVISION=$(GIT_REVISION)
 
 OBJ_FILES   := $(addprefix $(WORK_DIR)/,$(addsuffix .o,$(notdir $(_SOURCE))))
+ASM_FILES   := $(addprefix $(ASM_DIR)/,$(addsuffix .s,$(notdir $(_SOURCE))))
 DEPENDFILE  = $(WORK_DIR)/$(TARGET).dep
 
 ifeq ($(DEBUG), 1)
@@ -185,9 +191,13 @@ ifdef GCC_LEGACY
   #CFLAGS += -Wmaybe-uninitialized
 endif
 
-CC_ARG = $(CFLAGS) $(OPT_INCLUDE) $(OPT_DEFINES) -DGIT_REVISION=$(GIT_REVISION)
+OPT_INC_DEFS = $(OPT_INCLUDE) $(OPT_DEFINES) -DGIT_REVISION=$(GIT_REVISION)
+
+CC_ARG = $(CFLAGS) $(OPT_INC_DEFS)
 CXX_ARG ?= $(CC_ARG)
 AS_ARG ?= $(CC_ARG)
+
+ASM_OPTS = -O$(CODE_OPTIMIZATION) $(OPT_INC_DEFS)
 
 ALL += check_src $(WORK_DIR) $(TARGET_DIR) $(RESULT_FILE)
 #ifndef IS_LIBRARY
@@ -220,8 +230,12 @@ $(GENERATED_DIR):
 $(WORK_DIR):
 	$(QUIET)mkdir -p $(WORK_DIR)
 
+$(ASM_DIR):
+	$(QUIET)mkdir -p $(ASM_DIR)
+
 $(TARGET_DIR):
 	$(QUIET)mkdir -p $(TARGET_DIR)
+
 
 ifdef FREE_RTOS_CONFIG_STANDARD_FILE
 $(FREE_RTOS_CONFIG_STANDARD_FILE):
@@ -232,40 +246,60 @@ endif
 # TODO Following rule could be made a bit better...
 #
 $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
-	$(QUIET)(for i in $(_SOURCE); do                                       \
-		printf "$(WORK_DIR)/";                                         \
-		case "$${i##*.}" in                                            \
-		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                             \
-			x=$$($(CXX) -MM $(CC_ARG) "$$i");                      \
-			if [ "$$?" != "0" ];                                   \
-			then                                                   \
-			   echo :;  # prevents a makefile syntax error         \
-			else                                                   \
-			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
-			fi;                                                    \
-			printf '\t$$(CXX_F) -c -o $$@ $$< $$(CXX_ARG)\n\n';    \
-		;;                                                             \
-		"c"|"C")                                                       \
-			x=$$($(CC) -MM $(CC_ARG) "$$i");                       \
-			if [ "$$?" != "0" ];                                   \
-			then                                                   \
-			   echo :;  # prevents a makefile syntax error         \
-			else                                                   \
-			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
-			fi;                                                    \
-			printf '\t$$(CC_F) -c -o $$@ $$< $$(CC_ARG)\n\n';      \
-		;;                                                             \
-		"s"|"S")                                                       \
-			x=$$($(AS) -MM $(CC_ARG) "$$i");                       \
-			if [ "$$?" != "0" ];                                   \
-			then                                                   \
-			   echo :;  # prevents a makefile syntax error         \
-			else                                                   \
-			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';   \
-			fi;                                                    \
-			printf '\t$$(AS_F) -c -o $$@ $$< $$(AS_ARG)\n\n';      \
-		;;                                                             \
-		esac;                                                          \
+	$(QUIET)(for i in $(_SOURCE); do                                            \
+		case "$${i##*.}" in                                                 \
+		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                                  \
+			x=$$($(CXX) -MM $(CC_ARG) "$$i");                           \
+			if [ "$$?" != "0" ];                                        \
+			then                                                        \
+			   echo :;  # prevents a makefile syntax error              \
+			else                                                        \
+			   printf "$(WORK_DIR)/";                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';        \
+			   printf '\t$$(CXX_F) -c -o $$@ $$< $$(CXX_ARG)\n\n';      \
+			   if $${MK_ASM};                                           \
+			   then                                                     \
+			      printf "$(ASM_DIR)/";                                 \
+			      echo $${x/.o:/.$${i##*.}.s:} | sed 's/\\/\\\n/g';     \
+			      printf '\t$$(CXX_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';  \
+			   fi                                                       \
+			fi;                                                         \
+		;;                                                                  \
+		"c"|"C")                                                            \
+			x=$$($(CC) -MM $(CC_ARG) "$$i");                            \
+			if [ "$$?" != "0" ];                                        \
+			then                                                        \
+			   echo :;  # prevents a makefile syntax error              \
+			else                                                        \
+			   printf "$(WORK_DIR)/";                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';        \
+			   printf '\t$$(CC_F) -c -o $$@ $$< $$(CC_ARG)\n\n';        \
+			   if $${MK_ASM};                                           \
+			   then                                                     \
+			      printf "$(ASM_DIR)/";                                 \
+			      echo $${x/.o:/.$${i##*.}.s:} | sed 's/\\/\\\n/g';     \
+			      printf '\t$$(CC_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';   \
+			   fi                                                       \
+			fi;                                                         \
+		;;                                                                  \
+		"s"|"S")                                                            \
+			x=$$($(AS) -MM $(CC_ARG) "$$i");                            \
+			if [ "$$?" != "0" ];                                        \
+			then                                                        \
+			   echo :;  # prevents a makefile syntax error              \
+			else                                                        \
+			   printf "$(WORK_DIR)/";                                   \
+			   echo $${x/.o:/.$${i##*.}.o:} | sed 's/\\/\\\n/g';        \
+			   printf '\t$$(AS_F) -c -o $$@ $$< $$(AS_ARG)\n\n';        \
+			   if $${MK_ASM};                                           \
+			   then                                                     \
+			      printf "$(ASM_DIR)/";                                 \
+			      echo $${x/.o:/.$${i##*.}.s:} | sed 's/\\/\\\n/g';     \
+			      printf '\t$$(CPP_F) -o $$@ $$< $$(ASM_OPTS)\n\n';     \
+			   fi                                                       \
+			fi;                                                         \
+		;;                                                                  \
+		esac;                                                               \
 	done) > $(DEPENDFILE);
 
 
@@ -298,13 +332,19 @@ incargs:
 devargs:
 	$(QUIET)echo -e $(OPT_DEFINES)
 
+.PHONY: asm
+asm:   $(ASM_DIR) $(ASM_FILES)
+	ls $(ASM_DIR)
+
 .PHONY: clean
 clean:
 	$(QUIET)( rm $(ADDITIONAL_TO_CLEAN); \
 	rm $(OBJ_FILES); \
 	rm $(DEPENDFILE); \
 	rm $(BIN_FILE); \
+	rm $(ASM_FILES); \
 	rmdir $(WORK_DIR); \
+	rmdir $(ASM_DIR); \
 	rmdir $(TARGET_DIR); \
 	rmdir $(DEPLOY_DIR); \
 	rmdir $(GENERATED_DIR); \
