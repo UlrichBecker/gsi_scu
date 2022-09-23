@@ -36,12 +36,13 @@ RTOS_USING_HEAP = 4
 
 # Enables the assert-macros within FreeRTOS-kernel.
  DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
- DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
-
+ 
 #------------------------------------------------------------------------------
 
 #DEFINES += CONFIG_DISABLE_CRITICAL_SECTION
 DEFINES += MAX_LM32_INTERRUPTS=2
+DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+
 
 # DEFINES += DEBUGLEVEL
 MIAN_MODULE    = scu_control_os.c

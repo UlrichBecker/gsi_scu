@@ -346,7 +346,13 @@ STATIC inline ALWAYS_INLINE void irqDisable( void )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
- * @brief Function shall be invoked immediately before a critical respectively
+ * @see criticalSectionEnter
+ */
+void criticalSectionEnterBase( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ATOMIC
+ * @brief Macro shall be invoked immediately before a critical respectively
  *        atomic section begins.
  *
  * Counterpart to criticalSectionExit.
@@ -356,20 +362,29 @@ STATIC inline ALWAYS_INLINE void irqDisable( void )
  *
  * @see criticalSectionExit
  */
-void criticalSectionEnter( void );
+#define criticalSectionEnter()                                                \
+{                                                                             \
+   IRQ_ASSERT( (irqGetAtomicNestingCount() == 0) ==                           \
+               ((irqGetEnableRegister() & IRQ_IE) != 0) );                    \
+                                                                              \
+   criticalSectionEnterBase();                                                \
+}             
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
  * @brief Backward compatibility
  */
-STATIC inline ALWAYS_INLINE void atomic_on( void )
-{
-   criticalSectionEnter();
-}
+#define atomic_on criticalSectionEnter
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
- * @brief Function shall be invoked immediately after the end of a critical
+ * @see criticalSectionExit
+ */
+void criticalSectionExitBase( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ATOMIC
+ * @brief Macro shall be invoked immediately after the end of a critical
  *        respectively atomic section.
  *
  * Counterpart to criticalSectionEnter
@@ -379,16 +394,19 @@ STATIC inline ALWAYS_INLINE void atomic_on( void )
  *
  * @see criticalSectionEnter
  */
-void criticalSectionExit( void );
+#define criticalSectionExit()                                                 \
+{                                                                             \
+   IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
+   IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );                      \
+                                                                              \
+   criticalSectionExitBase();                                                 \
+}
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
  * @brief Backward compatibility
  */
-STATIC inline ALWAYS_INLINE void atomic_off( void )
-{
-   criticalSectionExit();
-}
+#define atomic_off criticalSectionExit
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC

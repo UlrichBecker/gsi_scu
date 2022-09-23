@@ -285,10 +285,8 @@ void criticalSectionExit( void )
  * @see lm32Interrupts.h
  */
 OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
-void criticalSectionEnter( void )
+void criticalSectionEnterBase( void )
 {
-   IRQ_ASSERT( (__atomic_section_nesting_count == 0) == ((irqGetEnableRegister() & IRQ_IE) != 0) );
-
    asm volatile
    (
       ".long  __atomic_section_nesting_count              \n\t"
@@ -318,11 +316,8 @@ void criticalSectionEnter( void )
  * @see lm32Interrupts.h
  */
 OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
-void criticalSectionExit( void )
+void criticalSectionExitBase( void )
 {
-   IRQ_ASSERT( __atomic_section_nesting_count != 0 );
-   IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
-
    asm volatile
    (
       ".long   __atomic_section_nesting_count             \n\t"

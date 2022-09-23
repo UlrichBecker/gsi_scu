@@ -8,7 +8,6 @@
 ## Company:  GSI Helmholtz Centre for Heavy Ion Research GmbH                ##
 ## Date:     07.12.2020                                                      ##
 ###############################################################################
-REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 DEFINES += VERSION=1.4
 
 MIAN_MODULE := fg-wave.cpp
@@ -65,5 +64,6 @@ CALL_ARGS = ramp_ifa_scu.fgw -c
 
 DOX_OPTIMIZE_OUTPUT_FOR_C = "NO"
 
+REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 include $(REPOSITORY_DIR)/makefiles/makefile.scun
 #=================================== EOF ======================================
