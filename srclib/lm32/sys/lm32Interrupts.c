@@ -306,7 +306,7 @@ void criticalSectionEnterBase( void )
       "sw     (r1+0), r2                                  \n\t"
       :
       :
-      : "r1", "r2"
+      : "r1", "r2", "memory"
    );
 }
 
@@ -343,7 +343,7 @@ void criticalSectionExitBase( void )
    "L_NO_ENABLE:                                          \n\t"
       :
       :
-      : "r1", "r2"
+      : "r1", "r2", "memory"
    );
 }
 #endif

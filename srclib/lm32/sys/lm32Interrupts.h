@@ -346,9 +346,21 @@ STATIC inline ALWAYS_INLINE void irqDisable( void )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @note This shall not directly use in the source code, use its alias
+ *       criticalSectionEnter instead.
  * @see criticalSectionEnter
  */
 void criticalSectionEnterBase( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ATOMIC
+ * @note This shall not directly use in the source code, use its alias
+ *       criticalSectionExit instead.
+ * @see criticalSectionExit
+ */
+void criticalSectionExitBase( void );
+
+#define IRQ_ASSERT_( c ) ((void)(c))
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
@@ -364,23 +376,11 @@ void criticalSectionEnterBase( void );
  */
 #define criticalSectionEnter()                                                \
 {                                                                             \
-   IRQ_ASSERT( (irqGetAtomicNestingCount() == 0) ==                           \
+   IRQ_ASSERT_( (irqGetAtomicNestingCount() == 0) ==                           \
                ((irqGetEnableRegister() & IRQ_IE) != 0) );                    \
                                                                               \
    criticalSectionEnterBase();                                                \
 }             
-
-/*! ---------------------------------------------------------------------------
- * @ingroup ATOMIC
- * @brief Backward compatibility
- */
-#define atomic_on criticalSectionEnter
-
-/*! ---------------------------------------------------------------------------
- * @ingroup ATOMIC
- * @see criticalSectionExit
- */
-void criticalSectionExitBase( void );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
@@ -404,7 +404,15 @@ void criticalSectionExitBase( void );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
- * @brief Backward compatibility
+ * @brief Backward compatibility: alias of criticalSectionEnter
+ * @see criticalSectionEnter
+ */
+#define atomic_on  criticalSectionEnter
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ATOMIC
+ * @brief Backward compatibility: alias of criticalSectionExit
+ * @see criticalSectionExit
  */
 #define atomic_off criticalSectionExit
 

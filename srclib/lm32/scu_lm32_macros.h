@@ -66,5 +66,15 @@
  */
 #define NOP() asm volatile ( "nop" )
 
+/*! ---------------------------------------------------------------------------
+ * @brief Prevents a memory reordering depending at the adjusted optimization
+ *        level.
+ * 
+ * That means that any reads or writes of memory will not be moved across this
+ * memory barrier, nor will the results of such reads or writes be cached
+ * across the barrier.  
+ */
+#define BARRIER() asm volatile ( "" ::: "memory" )
+
 #endif /* ifndef _SCU_LM32_MACROS_H */
 /*================================== EOF ====================================*/

@@ -12,6 +12,9 @@
   #include <scu_mil_fg_handler.h>
 #endif
 #include <scu_command_handler.h>
+#ifdef CONFIG_RTOS
+  #include <task.h>
+#endif
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #ifdef CONFIG_RTOS
   #include <scu_task_daq.h>
@@ -197,13 +200,15 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * Rescaning of all function generators.
          */
       #ifdef CONFIG_RTOS
-         taskDeleteAllRunningFgAndDaq();
+       // vTaskSuspendAll();
+        //!! taskDeleteAllRunningFgAndDaq();
       #endif
 
-         scanFgs();
+         ATOMIC_SECTION() scanFgs();
 
       #ifdef CONFIG_RTOS
-         taskStartAllIfHwPresent();
+       // xTaskResumeAll();
+       //!!  taskStartAllIfHwPresent();
       #endif
          break;
       }

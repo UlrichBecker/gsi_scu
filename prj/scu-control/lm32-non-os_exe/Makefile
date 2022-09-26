@@ -48,7 +48,6 @@ endif
 
 DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 
-# CFLAGS += -S
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 include ../common_make.mk
 

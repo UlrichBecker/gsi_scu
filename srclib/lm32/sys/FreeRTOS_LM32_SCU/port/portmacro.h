@@ -177,6 +177,7 @@ typedef uint32_t       UBaseType_t;
 #define portBYTE_ALIGNMENT    4
 #define portNOP()             NOP()
 #define portFORCE_INLINE      inline ALWAYS_INLINE
+#define portMEMORY_BARRIER()  BARRIER()
 
 #define configPRINTF( a )     mprintf a
 #define configMIN             min
