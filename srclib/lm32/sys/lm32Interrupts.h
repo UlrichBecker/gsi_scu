@@ -376,10 +376,10 @@ void criticalSectionExitBase( void );
  */
 #define criticalSectionEnter()                                                \
 {                                                                             \
-   IRQ_ASSERT_( (irqGetAtomicNestingCount() == 0) ==                           \
-               ((irqGetEnableRegister() & IRQ_IE) != 0) );                    \
-                                                                              \
    criticalSectionEnterBase();                                                \
+                                                                              \
+   IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
+   IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );                      \
 }             
 
 /*! ---------------------------------------------------------------------------
