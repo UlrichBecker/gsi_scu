@@ -83,7 +83,7 @@ _breakpoint_handler:
     calli   _save_all
     mvi     r1,  SIGTRAP
     calli   _onException
-    bi      _restore_all_and_return
+    bi      _restore_all_and_bret
     nop
     nop
     nop
@@ -96,7 +96,7 @@ _instruction_bus_error_handler:
     calli   _save_all
     mvi     r1,  SIGSEGV
     calli   _onException
-    bi      _restore_all_and_return
+    bi      _restore_all_and_eret
     nop
     nop
     nop
@@ -109,7 +109,7 @@ _watchpoint_handler:
     calli   _save_all
     mvi     r1,  SIGTRAP
     calli   _onException
-    bi      _restore_all_and_return
+    bi      _restore_all_and_bret
     nop
     nop
     nop
@@ -122,7 +122,7 @@ _data_bus_error_handler:
     calli   _save_all
     mvi     r1, SIGSEGV
     calli  _onException
-    bi     _restore_all_and_return
+    bi     _restore_all_and_eret
     nop
     nop
     nop
@@ -135,7 +135,7 @@ _divide_by_zero_handler:
     calli   _save_all
     mvi     r1,  SIGFPE
     calli   _onException
-    bi      _restore_all_and_return
+    bi      _restore_all_and_eret
     nop
     nop
     nop
@@ -164,7 +164,7 @@ _interrupt_handler:
  #else
     wcsr    IE, r0                   /* 4 */
  #endif
-    bi      _restore_all_and_return  /* 5 */
+    bi      _restore_all_and_eret  /* 5 */
 #endif
     nop                              /* 6 */
     nop                              /* 7 */
@@ -177,7 +177,7 @@ _system_call_handler:
     calli   _save_all
     mv      r1, sp
     calli   _onSysCall
-    bi      _restore_all_and_return
+    bi      _restore_all_and_eret
     nop
     nop
     nop
@@ -277,31 +277,31 @@ _save_all:
 #else
     addi    sp, sp, -60
 #endif
-    sw      (sp+4), r1
-    sw      (sp+8), r2
-    sw      (sp+12), r3
-    sw      (sp+16), r4
-    sw      (sp+20), r5
-    sw      (sp+24), r6
-    sw      (sp+28), r7
-    sw      (sp+32), r8
-    sw      (sp+36), r9
-    sw      (sp+40), r10
+    sw      (sp+4),   r1
+    sw      (sp+8),   r2
+    sw      (sp+12),  r3
+    sw      (sp+16),  r4
+    sw      (sp+20),  r5
+    sw      (sp+24),  r6
+    sw      (sp+28),  r7
+    sw      (sp+32),  r8
+    sw      (sp+36),  r9
+    sw      (sp+40),  r10
 #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-    sw      (sp+44), r11
-    sw      (sp+48), r12
-    sw      (sp+52), r13
-    sw      (sp+56), r14
-    sw      (sp+60), r15
-    sw      (sp+64), r16
-    sw      (sp+68), r17
-    sw      (sp+72), r18
-    sw      (sp+76), r19
-    sw      (sp+80), r20
-    sw      (sp+84), r21
-    sw      (sp+88), r22
-    sw      (sp+92), r23
-    sw      (sp+96), r24
+    sw      (sp+44),  r11
+    sw      (sp+48),  r12
+    sw      (sp+52),  r13
+    sw      (sp+56),  r14
+    sw      (sp+60),  r15
+    sw      (sp+64),  r16
+    sw      (sp+68),  r17
+    sw      (sp+72),  r18
+    sw      (sp+76),  r19
+    sw      (sp+80),  r20
+    sw      (sp+84),  r21
+    sw      (sp+88),  r22
+    sw      (sp+92),  r23
+    sw      (sp+96),  r24
     sw      (sp+100), r25
     sw      (sp+104), r26
     sw      (sp+108), r27
@@ -314,38 +314,33 @@ _save_all:
     addi    r1, r1, 128
     sw      (sp+112), r1
 #else
-    sw      (sp+52), ea
-    sw      (sp+56), ba
+    sw      (sp+52),  ea
+    sw      (sp+56),  ba
     /* ra and sp need special handling, as they have been modified */
     lw      r1, (sp+60)
-    sw      (sp+48), r1
+    sw      (sp+48),  r1
     mv      r1, sp
     addi    r1, r1, 60
-    sw      (sp+44), r1
+    sw      (sp+44),  r1
 #endif
 //    xor     r1, r1, r1
 //    wcsr    ie, r1
     ret
 .size   _save_all, .-_save_all
 
-/* ----------------------------------------------------------------------------
- * Function _restore_all_and_return
+/*! ----------------------------------------------------------------------------
+ * @brief Macro restores allregisters which has been saved by function _save_all.
  */
-.global _restore_all_and_return
-.type   _restore_all_and_return, @function
-    /* Restore all registers and return from exception */
-_restore_all_and_return:
-//    addi    r1, r0, 2
-//    wcsr    ie, r1
-    lw      r1, (sp+4)
-    lw      r2, (sp+8) 
-    lw      r3, (sp+12) 
-    lw      r4, (sp+16) 
-    lw      r5, (sp+20) 
-    lw      r6, (sp+24) 
-    lw      r7, (sp+28) 
-    lw      r8, (sp+32) 
-    lw      r9, (sp+36) 
+.macro RESTORE_ALL
+    lw      r1,  (sp+4)
+    lw      r2,  (sp+8) 
+    lw      r3,  (sp+12) 
+    lw      r4,  (sp+16) 
+    lw      r5,  (sp+20) 
+    lw      r6,  (sp+24) 
+    lw      r7,  (sp+28) 
+    lw      r8,  (sp+32) 
+    lw      r9,  (sp+36) 
     lw      r10, (sp+40)
 #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
     lw      r11, (sp+44)
@@ -365,20 +360,46 @@ _restore_all_and_return:
     lw      r25, (sp+100)
     lw      r26, (sp+104)
     lw      r27, (sp+108)
-    lw      ra, (sp+116)
-    lw      ea, (sp+120)
-    lw      ba, (sp+124)
+    lw      ra,  (sp+116)
+    lw      ea,  (sp+120)
+    lw      ba,  (sp+124)
     /* Stack pointer must be restored last, in case it has been updated */
-    lw      sp, (sp+112)
+    lw      sp,  (sp+112)
 #else
-    lw      ra, (sp+48)
-    lw      ea, (sp+52)
-    lw      ba, (sp+56)
+    lw      ra,  (sp+48)
+    lw      ea,  (sp+52)
+    lw      ba,  (sp+56)
     /* Stack pointer must be restored last, in case it has been updated */
-    lw      sp, (sp+44)
+    lw      sp,  (sp+44)
 #endif
-    nop
+.endm
+
+/* ----------------------------------------------------------------------------
+ * Function _restore_all_and_eret
+ * Restore all registers and return from exception
+ */
+.global _restore_all_and_eret
+.type   _restore_all_and_eret, @function
+_restore_all_and_eret:
+//    addi    r1, r0, 2
+//    wcsr    ie, r1
+    RESTORE_ALL
+ //   nop
     eret
-.size   _restore_all_and_return, .-_restore_all_and_return
+.size   _restore_all_and_eret, .-_restore_all_and_eret
+
+/* ----------------------------------------------------------------------------
+ * Function _restore_all_and_bret
+ * Restore all registers and return from watchpoint 
+ */
+.global _restore_all_and_bret
+.type   _restore_all_and_bret, @function
+_restore_all_and_bret:
+//    addi    r1, r0, 4
+//    wcsr    ie, r1
+    RESTORE_ALL
+ //   nop
+    bret
+.size   _restore_all_and_bret, .-_restore_all_and_bret
 
 /*================================== EOF ====================================*/

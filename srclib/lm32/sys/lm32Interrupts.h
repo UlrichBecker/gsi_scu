@@ -84,7 +84,21 @@ namespace gsi
  * @ingroup INTERRUPT
  * @brief Interrupt enable bit mask of interrupt control register.
  */
-#define IRQ_IE 0x00000001
+#define IRQ_IE  0x00000001
+
+/*!
+ * @ingroup INTERRUPT
+ * @brief Save bit mask for interrupt enable by exceptions
+ *        of interrupt control register.
+ */
+#define IRQ_EIE 0x00000002
+
+/*!
+ * @ingroup INTERRUPT
+ * @brief Save bit mask for interrupt enable by breakpoints
+ *        of interrupt control register.
+ */
+#define IRQ_BIE 0x00000004
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
@@ -209,7 +223,11 @@ STATIC inline ALWAYS_INLINE
 uint32_t irqGetPendingRegister( void )
 {
    uint32_t ip;
-   asm volatile ( "rcsr %0, ip" :"=r"(ip) );
+   asm volatile
+   (
+      "rcsr %0, ip \n\t"
+      :"=r"(ip) :: "memory"
+   );
    return ip;
 }
 
@@ -223,7 +241,11 @@ uint32_t irqGetPendingRegister( void )
 STATIC inline ALWAYS_INLINE
 void irqResetPendingRegister( const uint32_t ip )
 {
-   asm volatile ( "wcsr ip, %0" ::"r"(ip) );
+   asm volatile
+   (
+      "wcsr ip, %0  \n\t"
+      ::"r"(ip) : "memory"
+   );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -243,9 +265,12 @@ uint32_t irqGetAndResetPendingRegister( void )
     * Therefore its better to implement this in assembler.
     */
    uint32_t pending;
-   asm volatile ( "rcsr %0, ip\n" \
-                  "wcsr ip, %0\n" \
-                  :"=r"(pending) );
+   asm volatile
+   ( 
+      "rcsr %0, ip \n\t"
+      "wcsr ip, %0 \n\t"
+      :"=r"(pending) :: "memory"
+   );
    return pending;
 }
 
@@ -256,7 +281,11 @@ uint32_t irqGetAndResetPendingRegister( void )
 STATIC inline ALWAYS_INLINE uint32_t irqGetEnableRegister( void )
 {
    uint32_t ie;
-   asm volatile ( "rcsr %0, ie" :"=r"(ie) );
+   asm volatile
+   (
+      "rcsr %0, ie  \n\t"
+      :"=r"(ie) :: "memory"
+   );
    return ie;
 }
 
@@ -266,7 +295,11 @@ STATIC inline ALWAYS_INLINE uint32_t irqGetEnableRegister( void )
  */
 STATIC inline ALWAYS_INLINE void irqSetEnableRegister( register const uint32_t ie )
 {
-   asm volatile ( "wcsr ie, %0" ::"r"(ie) );
+   asm volatile
+   (
+      "wcsr ie, %0 \n\t"
+      ::"r"(ie) : "memory"
+   );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -278,7 +311,11 @@ STATIC inline ALWAYS_INLINE
 uint32_t irqGetMaskRegister( void )
 {
    uint32_t im;
-   asm volatile ( "rcsr %0, im" :"=r"(im) );
+   asm volatile
+   (
+      "rcsr %0, im \n\t"
+      :"=r"(im) :: "memory"
+   );
    return im;
 }
 
@@ -290,7 +327,11 @@ uint32_t irqGetMaskRegister( void )
 STATIC inline ALWAYS_INLINE
 void irqSetMaskRegister( const uint32_t im )
 {
-   asm volatile ( "wcsr im, %0" ::"r"(im) );
+   asm volatile
+   (
+      "wcsr im, %0 \n\t"
+      ::"r"(im) : "memory"
+   );
 }
 
 /*! --------------------------------------------------------------------------

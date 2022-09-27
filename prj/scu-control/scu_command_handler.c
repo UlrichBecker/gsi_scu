@@ -201,14 +201,15 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          */
       #ifdef CONFIG_RTOS
        // vTaskSuspendAll();
-        //!! taskDeleteAllRunningFgAndDaq();
+      // ATOMIC_SECTION()  taskDeleteAllRunningFgAndDaq();
       #endif
 
-         ATOMIC_SECTION() scanFgs();
+         ATOMIC_SECTION() 
+            scanFgs();
 
       #ifdef CONFIG_RTOS
        // xTaskResumeAll();
-       //!!  taskStartAllIfHwPresent();
+     // ATOMIC_SECTION()   taskStartAllIfHwPresent();
       #endif
          break;
       }

@@ -135,34 +135,34 @@ void vPortInterruptHandler( void );
 #define RESTORE_REGISTERS
 #else
 .macro RESTORE_REGISTERS
-   lw        ea,  __EA
-   lw        ra,  __RA
-   lw        fp,  __FP
-   lw        gp,  __GP
-   lw        r25, __R25
-   lw        r24, __R24
-   lw        r23, __R23
-   lw        r22, __R22
-   lw        r21, __R21
-   lw        r20, __R20
-   lw        r19, __R19
-   lw        r18, __R18
-   lw        r17, __R17
-   lw        r16, __R16
-   lw        r15, __R15
-   lw        r14, __R14
-   lw        r13, __R13
-   lw        r12, __R12
-   lw        r11, __R11
-   lw        r10, __R10
-   lw        r9,  __R9
-   lw        r8,  __R8
-   lw        r7,  __R7
-   lw        r6,  __R6
-   lw        r5,  __R5
-   lw        r4,  __R4
-   lw        r3,  __R3
    lw        r2,  __R2
+   lw        r3,  __R3
+   lw        r4,  __R4
+   lw        r5,  __R5
+   lw        r6,  __R6
+   lw        r7,  __R7
+   lw        r8,  __R8
+   lw        r9,  __R9
+   lw        r10, __R10
+   lw        r11, __R11
+   lw        r12, __R12
+   lw        r13, __R13
+   lw        r14, __R14
+   lw        r15, __R15
+   lw        r16, __R16
+   lw        r17, __R17
+   lw        r18, __R18
+   lw        r19, __R19
+   lw        r20, __R20
+   lw        r21, __R21
+   lw        r22, __R22
+   lw        r23, __R23
+   lw        r24, __R24
+   lw        r25, __R25
+   lw        gp,  __GP
+   lw        fp,  __FP
+   lw        ra,  __RA
+   lw        ea,  __EA
 .endm
 #endif
 
