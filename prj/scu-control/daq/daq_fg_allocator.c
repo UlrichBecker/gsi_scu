@@ -31,7 +31,9 @@
  ******************************************************************************
  */
 #include <daq_fg_allocator.h>
-#include <scu_function_generator.h>
+#ifndef CONFIG_DAQ_SINGLE_APP
+ #include <scu_function_generator.h>
+#endif
 
 #if defined( CONFIG_DAQ_FG_ALLOCATOR_PEDANTIC_CHECK ) || !defined(__lm32__)
    /* CAUTION:
@@ -68,6 +70,8 @@ const char* daqDeviceTypeToString( const DAQ_DEVICE_TYP_T type )
 
    return "undefined";
 }
+
+#ifndef CONFIG_DAQ_SINGLE_APP
 
 /*! ---------------------------------------------------------------------------
  * @see daq_fg_allocator.h
@@ -142,5 +146,7 @@ unsigned int daqGetActualDaqNumberOfFg( const unsigned int fgNum,
     */
    return 0;
 }
+
+#endif /* #ifndef CONFIG_DAQ_SINGLE_APP */
 
 /*================================== EOF ====================================*/

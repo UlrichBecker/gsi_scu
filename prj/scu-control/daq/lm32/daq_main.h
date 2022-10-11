@@ -70,7 +70,7 @@ void addacDaqTask( void );
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
-#if 0
+#ifdef CONFIG_DAQ_SINGLE_APP
 /*! ---------------------------------------------------------------------------
  * @brief Type of data-object for administrating all non-MIL DAQs
  */
@@ -81,6 +81,8 @@ typedef struct
    volatile bool isIrq;
 } DAQ_ADMIN_T;
 #endif
+
+
 /*! ---------------------------------------------------------------------------
  * @brief Initializes the memory (at now the DDR3-RAM) for the received
  *        non-MIL-DAQ data.
@@ -96,29 +98,21 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices
                 #endif
                  );
 
-#if 0
+#ifdef CONFIG_DAQ_SINGLE_APP
 /*! ---------------------------------------------------------------------------
  * @brief Finding and initializing of all non-MIL DAQs.
  * @param pDaqAdmin Pointer to the nom-MIL-DAQ administrating object
  */
 STATIC // Doxygen 1.8.5 seems to have a problem...
-inline void scuDaqInitialize( DAQ_ADMIN_T* pDaqAdmin
-                            #ifndef CONFIG_DAQ_SINGLE_APP
-                             ,FG_MACRO_T* pFgList
-                            #endif
-                           )
+inline void scuDaqInitialize( DAQ_ADMIN_T* pDaqAdmin )
 
 {
-#ifdef CONFIG_DAQ_SINGLE_APP
    daqScanScuBus( &pDaqAdmin->oDaqDevs );
-#else
-   daqScanScuBus( &pDaqAdmin->oDaqDevs, pFgList );
-#endif
    initBuffer( &pDaqAdmin->oRam );
 }
 #endif
-#ifndef CONFIG_DAQ_SINGLE_APP
 
+#ifndef CONFIG_DAQ_SINGLE_APP
 /*! ---------------------------------------------------------------------------
  * @brief Executes one DAQ channel for each call of this function if requested.
  *

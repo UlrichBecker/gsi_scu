@@ -23,6 +23,7 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#include <lm32Interrupts.h>
 #include <daq_command_interface_uc.h>
 #include <scu_lm32_macros.h>
 #include <daq_ramBuffer.h>

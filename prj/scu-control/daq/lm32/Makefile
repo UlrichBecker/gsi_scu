@@ -8,7 +8,7 @@
 ## (C:)    2019 GSI Helmholtz Centre for Heavy Ion Research GmbH             ##
 ## Date:   27.02.2019                                                        ##
 ###############################################################################
-REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
+
 
 # TARGET_DIR     := ..
 # DEPLOY_DIR     := .
@@ -24,24 +24,31 @@ else
   TARGET := daq_addac_control
 endif
 
+
+SCU_DIR      = $(PRJ_DIR)/scu-control
+DAQ_DIR      = $(SCU_DIR)/daq
+DAQ_LM32_DIR = $(DAQ_DIR)/lm32
+INCLUDE_DIRS += $(DAQ_DIR)
+
 MIAN_MODULE    = $(DAQ_LM32_DIR)/daq_main.c
 
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_bus.c
-SOURCE += $(SCU_DIR)/dow_crc.c
-SOURCE += $(WR_DIR)/dev/w1-temp.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
+SOURCE += $(SCU_LIB_SRC_DIR)/dow_crc.c
+SOURCE += $(WR_DIR)/w1-temp.c
 SOURCE += $(DAQ_LM32_DIR)/daq.c
 SOURCE += $(DAQ_LM32_DIR)/daq_command_interface_uc.c
 SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
-SOURCE += $(SCU_LIB_SRC_DIR)/lm32Interrupts.c
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_ddr3.c
-SOURCE += $(SCU_LIB_SRC_DIR)/circular_index.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
+SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 
 ifdef ACU
-   DEFINES += MAX_SCU_SLAVES=1
+  # DEFINES += MAX_SCU_SLAVES=1
    DEFINES += DAQ_MAX_CHANNELS=4
    DEFINES += CONFIG_ACU
 else
-   DEFINES += MAX_SCU_SLAVES=12
+  # DEFINES += MAX_SCU_SLAVES=12
    DEFINES += DAQ_MAX_CHANNELS=4
 endif
 
@@ -56,9 +63,6 @@ DEFINES += CONFIG_DEBUG_RAM_WRITE_DATA
 # DEFINES += DEBUGLEVEL=2
 #DEFINES += CONFIG_DAQ_DEBUG
 
-DOX_INPUT += $(DAQ_DIR)/daq_descriptor.h
-DOX_INPUT += $(DAQ_DIR)/daq_command_interface.h
-DOX_INPUT += $(DAQ_DIR)/daq_ring_admin.h
 
 SHARED_SIZE = 48
 
@@ -68,5 +72,6 @@ RAM_SIZE    = 147456
 # NO_PRINTF_SUBST=1
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 # NO_LTO = 1
+REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 include $(REPOSITORY_DIR)/makefiles/makefile.scu
 #=================================== EOF ======================================
