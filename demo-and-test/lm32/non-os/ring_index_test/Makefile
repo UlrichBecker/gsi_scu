@@ -1,8 +1,8 @@
 
 MIAN_MODULE := ring_index_test.c
 
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_ddr3.c
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_ramBuffer.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ramBuffer.c
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 

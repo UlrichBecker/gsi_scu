@@ -1,7 +1,14 @@
 
 MIAN_MODULE := buffer_test.c
 
-SOURCE += $(SCU_LIB_SRC_DIR)/scu_ddr3.c
+SCU_DIR      = $(PRJ_DIR)/scu-control
+DAQ_DIR      = $(SCU_DIR)/daq
+DAQ_LM32_DIR = $(DAQ_DIR)/lm32
+
+INCLUDE_DIRS += $(DAQ_DIR)
+INCLUDE_DIRS += $(SCU_DIR)/fg
+
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
 SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
 SOURCE += $(DAQ_LM32_DIR)/daq.c
 

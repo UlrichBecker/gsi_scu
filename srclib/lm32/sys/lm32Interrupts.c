@@ -165,10 +165,9 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 void _irq_entry( void )
 {
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
+   //mprintf( "0x%X\n", irqGetEnableRegister() );
+  // IRQ_ASSERT( irqGetEnableRegister() == IRQ_EIE );
    IRQ_ASSERT( irqGetPendingRegister() != 0 );
-#ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
-   mg_interruptTimestamp = getWrSysTime();
-#endif
 
    /*
     * Allows using of atomic sections within interrupt context.
@@ -197,7 +196,11 @@ void _irq_entry( void )
    while( (ip = irqGetAndResetPendingRegister()) != 0 )
    //while( (ip = irqGetAndResetPendingRegister() & irqGetMaskRegister()) != 0 )
 #endif
-   { /*
+   {
+   #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
+      mg_interruptTimestamp = getWrSysTime();
+   #endif
+     /*
       * Zero has the highest priority.
       */
       for( unsigned int prio = 0; prio < ARRAY_SIZE( ISREntryTable ); prio++ )
@@ -243,6 +246,8 @@ void _irq_entry( void )
    IRQ_ASSERT( __atomic_section_nesting_count == 1 );
    __atomic_section_nesting_count = 0;
 #endif
+ //  IRQ_ASSERT( irqGetEnableRegister() == 0 ); //IRQ_EIE );
+ //  IRQ_ASSERT( irqGetEnableRegister() == IRQ_EIE );
 }
 
 //#define CONFIG_SAVE_BIE_AND_EIE

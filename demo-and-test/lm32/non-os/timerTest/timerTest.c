@@ -93,7 +93,7 @@ void main( void )
    lm32TimerEnable( pTimer );
    irqRegisterISR( TIMER_IRQ, (void*)pTimer, onTimerInterrupt );
    irqEnable();
-   asm volatile ( "wcsr ie, r0" );
+   //asm volatile ( "wcsr ie, r0" );
    int x = 100;
    while( true )
    {

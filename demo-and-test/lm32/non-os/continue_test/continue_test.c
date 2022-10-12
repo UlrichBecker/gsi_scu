@@ -29,7 +29,7 @@
 #include "eb_console_helper.h"
 #include "helper_macros.h"
 #include "scu_assert.h"
-#include "irq.h"
+#include "lm32Interrupts.h"
 
 DAQ_BUS_T g_allDaq;
 
@@ -91,8 +91,8 @@ void printIntRegs( DAQ_DEVICE_T* pDevice )
 }
 
 
-
-
+#define irq_disable criticalSectionEnter
+#define irq_disable criticalSectionExit
 
 void printScuBusSlaveInfo( DAQ_CANNEL_T* pThis )
 {
@@ -107,7 +107,7 @@ void onIrqDaq( void )
 {
    irq_disable();
    g_daqIrqCount++;
-   irq_enable();
+   irq_disable();
 }
 
 unsigned int getDaqIrqCount( void )
@@ -135,6 +135,7 @@ unsigned int getHiResIrqCount( void )
    return ret;
 }
 
+#if 0
 void initIrq( void )
 {
    g_daqIrqCount = 0;
@@ -148,7 +149,7 @@ void initIrq( void )
    irq_set_mask( 0xFFFFFFFF );
    irq_enable();
 }
-
+#endif
 void printLine( const char c )
 {
    for( int i = 0; i < 80; i++ )

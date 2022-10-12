@@ -23,9 +23,11 @@
 #include <stdbool.h>
 #include "eb_console_helper.h"
 #include "mini_sdb.h"
-#include "aux.h"
+
 
 #include "helper_macros.h"
+
+#include <scu_wr_time.h>
 
 void init( void )
 {
@@ -33,7 +35,7 @@ void init( void )
    uart_init_hw();        // init UART, required for printf...
 }
 
-static inline void irqDdisable(void)
+static inline void irqDdisable_(void)
 {
    //globally disable interrupts
    unsigned foo;
@@ -46,7 +48,7 @@ static inline void irqDdisable(void)
                      );
 }
 
-static inline void irqEnable(void)
+static inline void irqEnable_(void)
 {
    //globally enable interrupts
    unsigned foo;
@@ -61,8 +63,8 @@ static inline void irqEnable(void)
 
 uint32_t getTimeOffset( void )
 {
-   volatile uint64_t t1 = getSysTime();
-   volatile uint64_t t2 = getSysTime();
+   volatile uint64_t t1 = getWrSysTime();
+   volatile uint64_t t2 = getWrSysTime();
    return  (uint32_t)(t2 - t1);
 }
 
@@ -196,14 +198,14 @@ int main( void )
    uint32_t  toff = getTimeOffset();
    mprintf("Start measurement. Compiler: "COMPILER_VERSION_STRING"\ntime-offset = %u\n", toff );
 
-   volatile uint64_t t1 = getSysTime();
-   //irqEnable();
-   //irqDdisable();
+   volatile uint64_t t1 = getWrSysTime();
+   //irqEnable_();
+   //irqDdisable_();
    saveRegs();
    restoreRegs();
    asm volatile( "nop\n\t" : : : );
    asm volatile( "nop\n\t" : : : );
-   volatile uint64_t t2 = getSysTime();
+   volatile uint64_t t2 = getWrSysTime();
 
    mprintf( "T = %u, %u\n", (unsigned int)t1, (unsigned int)t2 );
    volatile uint64_t d = t2 - t1;

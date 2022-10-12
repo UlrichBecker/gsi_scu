@@ -46,7 +46,7 @@ CODE_OPTIMIZATION = s
  DEFINES += CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
 # DEFINES += CONFIG_DISABLE_CRITICAL_SECTION
 
-# DEFINES += CONFIG_IRQ_RESET_IP_AFTER
+# DEFINES += CONFIG_IRQ_RESET_IP_AFTERmake
 # Only interrupt 0 and 1 will be used therefore the interrupt vector table
 # can be reduced form the maximum of 32 to two items.
 DEFINES += MAX_LM32_INTERRUPTS=2
