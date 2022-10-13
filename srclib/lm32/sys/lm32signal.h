@@ -26,6 +26,27 @@
    #define SIGSEGV 11  /*!<@brief Segmentation violation. */
 #endif
 
+/*!
+ * @ingroup INTERRUPT
+ * @brief Interrupt enable bit mask of interrupt control register.
+ */
+#define IRQ_IE  0x0001
+
+/*!
+ * @ingroup INTERRUPT
+ * @brief Save bit mask for interrupt enable by exceptions
+ *        of interrupt control register.
+ */
+#define IRQ_EIE 0x0002
+
+/*!
+ * @ingroup INTERRUPT
+ * @brief Save bit mask for interrupt enable by breakpoints
+ *        of interrupt control register.
+ */
+#define IRQ_BIE 0x0004
+
+
 #ifndef STACK_MAGIC
    /*!
     * @brief Magic number for self made stack overflow checking.

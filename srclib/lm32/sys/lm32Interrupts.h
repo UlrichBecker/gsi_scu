@@ -32,6 +32,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <lm32signal.h>
 #include <scu_lm32_macros.h>
 
 /*!
@@ -79,26 +80,6 @@ extern "C" {
 namespace gsi
 {
 #endif
-
-/*!
- * @ingroup INTERRUPT
- * @brief Interrupt enable bit mask of interrupt control register.
- */
-#define IRQ_IE  0x00000001
-
-/*!
- * @ingroup INTERRUPT
- * @brief Save bit mask for interrupt enable by exceptions
- *        of interrupt control register.
- */
-#define IRQ_EIE 0x00000002
-
-/*!
- * @ingroup INTERRUPT
- * @brief Save bit mask for interrupt enable by breakpoints
- *        of interrupt control register.
- */
-#define IRQ_BIE 0x00000004
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT

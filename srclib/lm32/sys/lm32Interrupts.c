@@ -165,8 +165,8 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 void _irq_entry( void )
 {
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
-   //mprintf( "0x%X\n", irqGetEnableRegister() );
-  // IRQ_ASSERT( irqGetEnableRegister() == IRQ_EIE );
+  // mprintf( "0x%X\n", irqGetEnableRegister() );
+  // IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
    IRQ_ASSERT( irqGetPendingRegister() != 0 );
 
    /*
@@ -251,7 +251,7 @@ void _irq_entry( void )
 }
 
 //#define CONFIG_SAVE_BIE_AND_EIE
-#define CONFIG_RESTORE_BIE_AND_EIE
+//#define CONFIG_RESTORE_BIE_AND_EIE
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
@@ -309,7 +309,7 @@ void criticalSectionExitBase( void )
       "rcsr   r1, ie                                                  \n\t"
       "ori    r1, r1, " TO_STRING( IRQ_IE ) "                         \n\t"
    #else
-      "ori    r1, r0, " TO_STRING( IRQ_IE ) "                         \n\t"
+      "mvi    r1, " TO_STRING( IRQ_IE ) "                             \n\t"
    #endif
       "wcsr   ie, r1                                                  \n"
    "L_NO_ENABLE:                                                      \n\t"

@@ -15,16 +15,11 @@
   #error This headder file is for GNU-Assembler only!
 #endif
 
-/*!
- * @brief Interrupt enable storage flag of LM32 interrupt enable register.
- */
-#define EIE (1 << 1)
 
 /*!
  * @brief The byte alignment of LM32 is 4 bytes.
  */
 #define ALIGN 4
-
 
 /*!
  * @brief Stack pointer correction value

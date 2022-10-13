@@ -27,9 +27,9 @@
 #include <lm32Interrupts.h>
 #include <event_measurement.h>
 
-#define configCPU_CLOCK_HZ   (USRCPUCLK * 1000)
+#define configCPU_CLOCK_HZ   (USRCPUCLK * 10)
 
-#define FREQU 4
+#define FREQU 1000
 
 TIME_MEASUREMENT_T g_evTime = TIME_MEASUREMENT_INITIALIZER;
 
@@ -43,20 +43,15 @@ static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
       g_count++;
    
    irqCount++;
-   irqCount %= (FREQU / 4);
+   irqCount %= FREQU;
 }
 
-
-void irqInfo( void )
-{
-   mprintf( "Nesting count: %d; IE: 0x%X\n", irqGetAtomicNestingCount(), irqGetEnableRegister() );
-}
 
 void main( void )
 {
    mprintf( "Timer IRQ test\nCompiler: " COMPILER_VERSION_STRING "\n" );
    mprintf( "CPU frequency: %d Hz\n", configCPU_CLOCK_HZ );
-   mprintf( "IRQ frequency: " TO_STRING( FREQU ) " Hz\n" );
+   mprintf( "Interrupt frequency: " TO_STRING( FREQU ) " HZ\n" );
    unsigned int oldCount = g_count - 1;
 
    SCU_LM32_TIMER_T* pTimer = lm32TimerGetWbAddress();
@@ -70,38 +65,21 @@ void main( void )
 
    lm32TimerSetPeriod( pTimer, configCPU_CLOCK_HZ / FREQU );
    lm32TimerEnable( pTimer );
-   irqRegisterISR( TIMER_IRQ, NULL, onTimerInterrupt );
-   irqInfo();
-   //irqEnable();
-   criticalSectionExit();
-  // criticalSectionExit();
-   irqInfo();
-   
-   
-   criticalSectionEnter();
-   criticalSectionEnter();
-   criticalSectionEnter();
-   irqInfo();
-   criticalSectionExit();
-   criticalSectionExit();
-   criticalSectionExit();
-   irqInfo();
-   
+   irqRegisterISR( TIMER_IRQ, (void*)pTimer, onTimerInterrupt );
+   irqEnable();
+
    unsigned int i = 0;
    static const char fan[] = { '|', '/', '-', '\\' };
-
    while( true )
    {
       volatile unsigned int currentCount;
-     // ATOMIC_SECTION() 
-         currentCount = g_count;
-      if( oldCount != currentCount )
-      {
-         oldCount = currentCount;
+      ATOMIC_SECTION() currentCount = g_count;
+      if( oldCount == currentCount )
+         continue;
+      oldCount = currentCount;
 
-         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
-         i %= ARRAY_SIZE( fan );
-      }
+      mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
+      i %= ARRAY_SIZE( fan );
    }
 }
 
