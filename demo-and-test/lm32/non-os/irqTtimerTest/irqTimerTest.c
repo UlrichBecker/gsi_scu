@@ -29,7 +29,8 @@
 
 #define configCPU_CLOCK_HZ   (USRCPUCLK * 1000)
 
-#define FREQU 4
+#define FREQU 100000
+//#define FREQU 4
 
 TIME_MEASUREMENT_T g_evTime = TIME_MEASUREMENT_INITIALIZER;
 
@@ -67,7 +68,7 @@ void main( void )
    }
 
    mprintf( "Timer found at wishbone base address 0x%p\n", pTimer );
-
+   irqInfo();
    lm32TimerSetPeriod( pTimer, configCPU_CLOCK_HZ / FREQU );
    lm32TimerEnable( pTimer );
    irqRegisterISR( TIMER_IRQ, NULL, onTimerInterrupt );
@@ -93,7 +94,7 @@ void main( void )
    while( true )
    {
       volatile unsigned int currentCount;
-     // ATOMIC_SECTION() 
+      ATOMIC_SECTION() 
          currentCount = g_count;
       if( oldCount != currentCount )
       {

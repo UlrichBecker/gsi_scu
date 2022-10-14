@@ -192,6 +192,10 @@ _system_call_handler:
 _crt0:
     /* Clear r0 */
     xor     r0, r0, r0
+    
+    /* Disable interrupt */ 
+    wcsr    ie, r0
+
     /* Setup stack and global pointer */
     mvhi    sp,     hi(_fstack)
     ori     sp, sp, lo(_fstack)
@@ -267,9 +271,9 @@ loopf:
     bi loopf
 
 /*---------------------------------------------------------------------------*/
+#define ST_OFS 0
 
-#define ALIGN 4
-#define OFS_R( n )     (ALIGN * n)
+#define OFS_R( n )     (ALIGN * (n + ST_OFS))
 #define SAVE_R( n )    sw (sp + OFS_R(n)), r##n
 #define RESTORE_R( n ) lw r##n, (sp + OFS_R(n))
 
@@ -376,10 +380,13 @@ _save_all:
 .global _restore_all_and_eret
 .type   _restore_all_and_eret, @function
 _restore_all_and_eret:
+    /*
+     * Sometimes the EIE flag is zero perhaps caused by using of atomic sections,
+     * therefore it will set here in any cases.
+     */
     mvi     r1, IRQ_EIE /* Enabeling interrupt by "eret" (IE = EIE). */
     wcsr    ie, r1
     RESTORE_ALL
-  //  wcsr  ie, r0
     eret
 .size   _restore_all_and_eret, .-_restore_all_and_eret
 

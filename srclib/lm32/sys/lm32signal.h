@@ -46,6 +46,11 @@
  */
 #define IRQ_BIE 0x0004
 
+/*!
+ * @brief The byte alignment of LM32 is 4 bytes.
+ */
+#define ALIGN 4
+
 
 #ifndef STACK_MAGIC
    /*!

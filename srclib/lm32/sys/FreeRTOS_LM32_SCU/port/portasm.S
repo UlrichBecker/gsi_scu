@@ -87,43 +87,67 @@ void vPortInterruptHandler( void );
 .align ALIGN
 #endif
 
-#if 1
+
+#define TO_SAVE 30
+
+/*!
+ * @brief Stack pointer correction value
+ * @note ST_OFS will defined in the concerning assembler module.
+ */
+#define SP_CORR (ALIGN * (ST_OFS + TO_SAVE)) //29
+
+/*! ---------------------------------------------------------------------------
+ * @brief Macro calculates the absolute stack-pointer offset in bytes.
+ * @param i Relative offset in 32-bit values.
+ */
+#define OS_OFS_R(n)   (sp + (ALIGN * (ST_OFS + TO_SAVE - n)))
+
+
+#define OS_SAVE_R( n )    sw OS_OFS_R( n ), r##n
+#define OS_RESTORE_R( n ) lw r##n, OS_OFS_R( n )
+
+#define __RA  OS_OFS_R(28)  /*!<@brief Storage position of r29, alias ra */
+#define __EA  OS_OFS_R(29)  /*!<@brief Storage position of r30, alias ea */
+//#define __BA  OS_OFS_R(30) 
+
 /*! ---------------------------------------------------------------------------
  * @brief Macro saves the content op all LM32 registers
- *        (except R0, R1 and SP (R28)) on the stack.
+ *        (except R0 and SP (R28)) on the stack.
  */
 #ifdef __DOXYGEN__
 #define SAVE_REGISTERS
 #else
 .macro SAVE_REGISTERS
-   sw        __R2,  r2
-   sw        __R3,  r3
-   sw        __R4,  r4
-   sw        __R5,  r5
-   sw        __R6,  r6
-   sw        __R7,  r7
-   sw        __R8,  r8
-   sw        __R9,  r9
-   sw        __R10, r10
-   sw        __R11, r11
-   sw        __R12, r12
-   sw        __R13, r13
-   sw        __R14, r14
-   sw        __R15, r15
-   sw        __R16, r16
-   sw        __R17, r17
-   sw        __R18, r18
-   sw        __R19, r19
-   sw        __R20, r20
-   sw        __R21, r21
-   sw        __R22, r22
-   sw        __R23, r23
-   sw        __R24, r24
-   sw        __R25, r25
-   sw        __GP,  gp
-   sw        __FP,  fp
-   sw        __RA,  ra
-   sw        __EA,  ea
+   OS_SAVE_R(1)
+   OS_SAVE_R(2)
+   OS_SAVE_R(3)
+   OS_SAVE_R(4)
+   OS_SAVE_R(5)
+   OS_SAVE_R(6)
+   OS_SAVE_R(7)
+   OS_SAVE_R(8)
+   OS_SAVE_R(9)
+   OS_SAVE_R(10)
+   OS_SAVE_R(11)
+   OS_SAVE_R(12)
+   OS_SAVE_R(13)
+   OS_SAVE_R(14)
+   OS_SAVE_R(15)
+   OS_SAVE_R(16)
+   OS_SAVE_R(17)
+   OS_SAVE_R(18)
+   OS_SAVE_R(19)
+   OS_SAVE_R(20)
+   OS_SAVE_R(21)
+   OS_SAVE_R(22)
+   OS_SAVE_R(23)
+   OS_SAVE_R(24)
+   OS_SAVE_R(25)
+   OS_SAVE_R(26)
+   OS_SAVE_R(27)
+   sw  __RA,  ra
+   sw  __EA,  ea
+//   sw  __BA,  ba
 .endm
 #endif
 
@@ -135,38 +159,38 @@ void vPortInterruptHandler( void );
 #define RESTORE_REGISTERS
 #else
 .macro RESTORE_REGISTERS
-   lw        r2,  __R2
-   lw        r3,  __R3
-   lw        r4,  __R4
-   lw        r5,  __R5
-   lw        r6,  __R6
-   lw        r7,  __R7
-   lw        r8,  __R8
-   lw        r9,  __R9
-   lw        r10, __R10
-   lw        r11, __R11
-   lw        r12, __R12
-   lw        r13, __R13
-   lw        r14, __R14
-   lw        r15, __R15
-   lw        r16, __R16
-   lw        r17, __R17
-   lw        r18, __R18
-   lw        r19, __R19
-   lw        r20, __R20
-   lw        r21, __R21
-   lw        r22, __R22
-   lw        r23, __R23
-   lw        r24, __R24
-   lw        r25, __R25
-   lw        gp,  __GP
-   lw        fp,  __FP
-   lw        ra,  __RA
-   lw        ea,  __EA
+   OS_RESTORE_R(2)
+   OS_RESTORE_R(3)
+   OS_RESTORE_R(4)
+   OS_RESTORE_R(5)
+   OS_RESTORE_R(6)
+   OS_RESTORE_R(7)
+   OS_RESTORE_R(8)
+   OS_RESTORE_R(9)
+   OS_RESTORE_R(10)
+   OS_RESTORE_R(11)
+   OS_RESTORE_R(12)
+   OS_RESTORE_R(13)
+   OS_RESTORE_R(14)
+   OS_RESTORE_R(15)
+   OS_RESTORE_R(16)
+   OS_RESTORE_R(17)
+   OS_RESTORE_R(18)
+   OS_RESTORE_R(19)
+   OS_RESTORE_R(20)
+   OS_RESTORE_R(21)
+   OS_RESTORE_R(22)
+   OS_RESTORE_R(23)
+   OS_RESTORE_R(24)
+   OS_RESTORE_R(25)
+   OS_RESTORE_R(26)
+   OS_RESTORE_R(27)
+   lw  ra,  __RA
+   lw  ea,  __EA
+//   lw  ba,  __BA
 .endm
 #endif
 
-#endif
 /*! ---------------------------------------------------------------------------
  * @brief Macro to save registers on the stack.
  */
@@ -183,7 +207,6 @@ void vPortInterruptHandler( void );
     * Saving all register values of the current respectively old context.
     * Register R0 is always 0, therefore start with R1.
     */
-   sw        __R1,  r1
    SAVE_REGISTERS      /* Save all registers except r0 and r1 */
 
    /*
@@ -232,7 +255,7 @@ vStartFirstTask:
    mvi       r1, IRQ_EIE      /* Setting EIE bit enabling the IRQs by "eret" */
    wcsr      ie, r1           /* Setting EIE bit enabling the IRQs by "eret" */
    RESTORE_CONTEXT
-   lw        r1, __R1         /* Load Register R1 back */
+   OS_RESTORE_R(1)            /* Load Register R1 back */
    addi      sp, sp, SP_CORR  /* Correct Stack pointer */
    eret                       /* Return-Address is stored in EA */
 #endif
@@ -245,10 +268,10 @@ void vPortYield( void ) {}
 #else
 vPortYield:
    wcsr      ie, r0             /* Disable interrupts */
-   SAVE_CONTEXT
+   SAVE_CONTEXT                 /* Save all registers */
    sw        __cscf, r0         /* Set the context switch cause flag to zero */
    calli     vTaskSwitchContext /* Call this C-function implemented in task.c */
-   RESTORE_CONTEXT
+   RESTORE_CONTEXT              /* Restore all registers except R1. */
    lw        r1, __cscf         /* Load context change cause flag in r1 */
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
    mv        ea, ra             /* Return-Address is stored in RA */
@@ -260,7 +283,7 @@ L_INT_SAVE:
    mvi       r1, IRQ_EIE        /* Setting EIE bit enabling the IRQs by "eret" */
    wcsr      ie, r1             /* Setting EIE bit enabling the IRQs by "eret" */
 L_NOT_ENABLE:
-   lw        r1, __R1           /* Load register R1 back */
+   OS_RESTORE_R(1)              /* Load register R1 back */
    addi      sp, sp, SP_CORR    /* Correct stack pointer */
    eret                         /* Return-address is stored in EA */
 #endif
@@ -276,17 +299,20 @@ L_NOT_ENABLE:
 void vPortInterruptHandler( void ) {}
 #else
 vPortInterruptHandler:
-   SAVE_CONTEXT
-   ori       r1, r0, 1          /* Set the context switch cause flag to one */
+   SAVE_CONTEXT                 /* Save all registers */
+   mvi       r1, 1              /* Set the context switch cause flag to one */
    sw        __cscf, r1         /* and store it in stack. */
    mvi       r1, SIGINT         /* Argument for C-function _irq_entry (will ignored)*/
    calli     _irq_entry         /* Call this C- callback function */
-   RESTORE_CONTEXT
+   RESTORE_CONTEXT              /* Restore all registers except R1. */
    lw        r1, __cscf         /* Load context switch cause flag in r1 */
    bne       r0, r1, L_RETURN   /* Jump if context change was caused from LM32 exception  */
    mv        ea, ra             /* Return-Address is stored in RA */
 L_RETURN:
-   lw        r1, __R1           /* Load register R1 back */
+   sw        __cscf, r0 //!!
+   mvi       r1, IRQ_EIE 
+   wcsr      ie, r1
+   OS_RESTORE_R(1)              /* Load register R1 back */
    addi      sp, sp, SP_CORR    /* Correct stack pointer */
    eret                         /* Return-address is stored in EA */
 #endif

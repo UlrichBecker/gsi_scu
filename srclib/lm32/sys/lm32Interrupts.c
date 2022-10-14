@@ -265,6 +265,7 @@ void criticalSectionEnterBase( void )
    #ifndef CONFIG_DISABLE_CRITICAL_SECTION
     #ifdef  CONFIG_SAVE_BIE_AND_EIE
       "rcsr   r1, ie                                                  \n\t"
+      "wcsr   ie, r0                                                  \n\t"
       "andi   r1, r1, " TO_STRING( ~IRQ_IE & (IRQ_BIE | IRQ_EIE) ) "  \n\t"
       "wcsr   ie, r1                                                  \n\t"
     #else
