@@ -165,9 +165,10 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 void _irq_entry( void )
 {
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
-  // mprintf( "0x%X\n", irqGetEnableRegister() );
-  // IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
    IRQ_ASSERT( irqGetPendingRegister() != 0 );
+#ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
+   mg_interruptTimestamp = getWrSysTime();
+#endif
 
    /*
     * Allows using of atomic sections within interrupt context.
@@ -196,11 +197,7 @@ void _irq_entry( void )
    while( (ip = irqGetAndResetPendingRegister()) != 0 )
    //while( (ip = irqGetAndResetPendingRegister() & irqGetMaskRegister()) != 0 )
 #endif
-   {
-   #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
-      mg_interruptTimestamp = getWrSysTime();
-   #endif
-     /*
+   { /*
       * Zero has the highest priority.
       */
       for( unsigned int prio = 0; prio < ARRAY_SIZE( ISREntryTable ); prio++ )
@@ -246,78 +243,36 @@ void _irq_entry( void )
    IRQ_ASSERT( __atomic_section_nesting_count == 1 );
    __atomic_section_nesting_count = 0;
 #endif
- //  IRQ_ASSERT( irqGetEnableRegister() == 0 ); //IRQ_EIE );
- //  IRQ_ASSERT( irqGetEnableRegister() == IRQ_EIE );
 }
-
-//#define CONFIG_SAVE_BIE_AND_EIE
-//#define CONFIG_RESTORE_BIE_AND_EIE
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
+ *
+ * When the compiler and linker has LTO ability so the following inline
+ * declarations will be really inline.
  */
-OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
-void criticalSectionEnterBase( void )
+inline void criticalSectionEnter( void )
 {
-   asm volatile
-   (
-      ".long  __atomic_section_nesting_count                          \n\t"
-   #ifndef CONFIG_DISABLE_CRITICAL_SECTION
-    #ifdef  CONFIG_SAVE_BIE_AND_EIE
-      "rcsr   r1, ie                                                  \n\t"
-      //"wcsr   ie, r0                                                  \n\t"
-      "andi   r1, r1, " TO_STRING( ~IRQ_IE & (IRQ_BIE | IRQ_EIE) ) "  \n\t"
-      "wcsr   ie, r1                                                  \n\t"
-    #else
-      "wcsr   ie, r0                                                  \n\t"
-    #endif
-   #endif
-      "orhi   r1, r0, hi(__atomic_section_nesting_count)              \n\t"
-      "ori    r1, r1, lo(__atomic_section_nesting_count)              \n\t"
-      "lw     r2, (r1+0)                                              \n\t"
-      "addi   r2, r2, 1                                               \n\t"
-      "sw     (r1+0), r2                                              \n\t"
-      :
-      :
-      : "r1", "r2", "memory"
-   );
+#ifndef CONFIG_DISABLE_CRITICAL_SECTION
+   irqDisable();
+#endif
+   __atomic_section_nesting_count++;
 }
-
-#define CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
+ *
+ * When the compiler and linker has LTO ability so the following inline
+ * declarations will be really inline.
  */
-OPTIMIZE( "O1" ) /* O1 prevents a function epilogue and prologue. */
-void criticalSectionExitBase( void )
+inline void criticalSectionExit( void )
 {
-   asm volatile
-   (
-      ".long   __atomic_section_nesting_count                         \n\t"
-      "orhi   r1, r0, hi(__atomic_section_nesting_count)              \n\t"
-      "ori    r1, r1, lo(__atomic_section_nesting_count)              \n\t"
-      "lw     r2, (r1+0)                                              \n\t"
-   #ifdef CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
-      "be     r2, r0, L_ENABLE                                        \n\t"
-   #else
-      "be     r2, r0, L_NO_ENABLE                                     \n\t"
-   #endif
-      "addi   r2, r2, -1                                              \n\t"
-      "sw     (r1+0), r2                                              \n\t"
-      "bne    r2, r0, L_NO_ENABLE                                     \n"
-   "L_ENABLE:                                                         \n\t"
-   #ifdef CONFIG_RESTORE_BIE_AND_EIE
-      "rcsr   r1, ie                                                  \n\t"
-      "ori    r1, r1, " TO_STRING( IRQ_IE ) "                         \n\t"
-   #else
-      "mvi    r1, " TO_STRING( IRQ_IE ) "                             \n\t"
-   #endif
-      "wcsr   ie, r1                                                  \n"
-   "L_NO_ENABLE:                                                      \n\t"
-      :
-      :
-      : "r1", "r2", "memory"
-   );
+   IRQ_ASSERT( __atomic_section_nesting_count != 0 );
+   __atomic_section_nesting_count--;
+#ifndef CONFIG_DISABLE_CRITICAL_SECTION
+   if( __atomic_section_nesting_count == 0 )
+      _irqEnable();
+#endif
 }
 
 /*! ---------------------------------------------------------------------------

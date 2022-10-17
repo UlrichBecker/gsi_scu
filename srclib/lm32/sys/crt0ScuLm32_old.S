@@ -83,7 +83,7 @@ _breakpoint_handler:
     calli   _save_all
     mvi     r1,  SIGTRAP
     calli   _onException
-    bi      _restore_all_and_bret
+    bi      _restore_all_and_return
     nop
     nop
     nop
@@ -96,7 +96,7 @@ _instruction_bus_error_handler:
     calli   _save_all
     mvi     r1,  SIGSEGV
     calli   _onException
-    bi      _restore_all_and_eret
+    bi      _restore_all_and_return
     nop
     nop
     nop
@@ -109,7 +109,7 @@ _watchpoint_handler:
     calli   _save_all
     mvi     r1,  SIGTRAP
     calli   _onException
-    bi      _restore_all_and_bret
+    bi      _restore_all_and_return
     nop
     nop
     nop
@@ -122,7 +122,7 @@ _data_bus_error_handler:
     calli   _save_all
     mvi     r1, SIGSEGV
     calli  _onException
-    bi     _restore_all_and_eret
+    bi     _restore_all_and_return
     nop
     nop
     nop
@@ -135,7 +135,7 @@ _divide_by_zero_handler:
     calli   _save_all
     mvi     r1,  SIGFPE
     calli   _onException
-    bi      _restore_all_and_eret
+    bi      _restore_all_and_return
     nop
     nop
     nop
@@ -164,7 +164,7 @@ _interrupt_handler:
  #else
     wcsr    IE, r0                   /* 4 */
  #endif
-    bi      _restore_all_and_eret    /* 5 */
+    bi      _restore_all_and_return  /* 5 */
 #endif
     nop                              /* 6 */
     nop                              /* 7 */
@@ -177,7 +177,7 @@ _system_call_handler:
     calli   _save_all
     mv      r1, sp
     calli   _onSysCall
-    bi      _restore_all_and_eret
+    bi      _restore_all_and_return
     nop
     nop
     nop
@@ -192,10 +192,6 @@ _system_call_handler:
 _crt0:
     /* Clear r0 */
     xor     r0, r0, r0
-    
-    /* Disable interrupt */ 
-    wcsr    ie, r0
-
     /* Setup stack and global pointer */
     mvhi    sp,     hi(_fstack)
     ori     sp, sp, lo(_fstack)
@@ -208,7 +204,7 @@ _crt0:
     mvhi    r2,     hi(STACK_MAGIC)
     ori     r2, r2, lo(STACK_MAGIC)
     sw      (r1+0), r2 /* _endram = STACK_MAGIC; */
-
+    
     /*
      * Initializing .bss by zero.
      */
@@ -270,139 +266,119 @@ _crt0:
 loopf:
     bi loopf
 
-/*---------------------------------------------------------------------------*/
-#define ST_OFS 0
-
-#define OFS_R( n )     (ALIGN * (n + ST_OFS))
-#define SAVE_R( n )    sw (sp + OFS_R(n)), r##n
-#define RESTORE_R( n ) lw r##n, (sp + OFS_R(n))
-
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-   #define OFS_RA    OFS_R( 28 )
-   #define OFS_EA    OFS_R( 29 )
-   #define OFS_BA    OFS_R( 30 )
-   #define STACK_TOP OFS_R( 31 )
-#else
-   #define OFS_RA    OFS_R( 11 )
-   #define OFS_EA    OFS_R( 12 )
-   #define OFS_BA    OFS_R( 13 )
-   #define STACK_TOP OFS_R( 14 )
-#endif
-
 /* ----------------------------------------------------------------------------
  * Function _save_all
  */
 .global _save_all
 .type   _save_all, @function
 _save_all:
-    addi sp, sp, -STACK_TOP
-    SAVE_R(1)
-    SAVE_R(2)
-    SAVE_R(3)
-    SAVE_R(4)
-    SAVE_R(5)
-    SAVE_R(6)
-    SAVE_R(7)
-    SAVE_R(8)
-    SAVE_R(9)
-    SAVE_R(10)
 #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-    SAVE_R(11)
-    SAVE_R(12)
-    SAVE_R(13)
-    SAVE_R(14)
-    SAVE_R(15)
-    SAVE_R(16)
-    SAVE_R(17)
-    SAVE_R(18)
-    SAVE_R(19)
-    SAVE_R(20)
-    SAVE_R(21)
-    SAVE_R(22)
-    SAVE_R(23)
-    SAVE_R(24)
-    SAVE_R(25)
-    SAVE_R(26)
-    SAVE_R(27)
+    addi    sp, sp, -128
+#else
+    addi    sp, sp, -60
 #endif
+    sw      (sp+4), r1
+    sw      (sp+8), r2
+    sw      (sp+12), r3
+    sw      (sp+16), r4
+    sw      (sp+20), r5
+    sw      (sp+24), r6
+    sw      (sp+28), r7
+    sw      (sp+32), r8
+    sw      (sp+36), r9
+    sw      (sp+40), r10
+#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
+    sw      (sp+44), r11
+    sw      (sp+48), r12
+    sw      (sp+52), r13
+    sw      (sp+56), r14
+    sw      (sp+60), r15
+    sw      (sp+64), r16
+    sw      (sp+68), r17
+    sw      (sp+72), r18
+    sw      (sp+76), r19
+    sw      (sp+80), r20
+    sw      (sp+84), r21
+    sw      (sp+88), r22
+    sw      (sp+92), r23
+    sw      (sp+96), r24
+    sw      (sp+100), r25
+    sw      (sp+104), r26
+    sw      (sp+108), r27
+    sw      (sp+120), ea
+    sw      (sp+124), ba
     /* ra and sp need special handling, as they have been modified */
-    lw  r1, (sp + STACK_TOP)
-    sw  (sp + OFS_RA), r1
-    sw  (sp + OFS_EA), ea
-    sw  (sp + OFS_BA), ba
+    lw      r1, (sp+128)
+    sw      (sp+116), r1
+    mv      r1, sp
+    addi    r1, r1, 128
+    sw      (sp+112), r1
+#else
+    sw      (sp+52), ea
+    sw      (sp+56), ba
+    /* ra and sp need special handling, as they have been modified */
+    lw      r1, (sp+60)
+    sw      (sp+48), r1
+    mv      r1, sp
+    addi    r1, r1, 60
+    sw      (sp+44), r1
+#endif
+//    xor     r1, r1, r1
+//    wcsr    ie, r1
     ret
 .size   _save_all, .-_save_all
 
-/*! ----------------------------------------------------------------------------
- * @brief Macro restores allregisters which has been saved by function _save_all.
+/* ----------------------------------------------------------------------------
+ * Function _restore_all_and_return
  */
-.macro RESTORE_ALL
-    RESTORE_R(1)
-    RESTORE_R(2)
-    RESTORE_R(3)
-    RESTORE_R(4)
-    RESTORE_R(5)
-    RESTORE_R(6)
-    RESTORE_R(7)
-    RESTORE_R(8)
-    RESTORE_R(9)
-    RESTORE_R(10)
+.global _restore_all_and_return
+.type   _restore_all_and_return, @function
+    /* Restore all registers and return from exception */
+_restore_all_and_return:
+    addi    r1, r0, 2
+    wcsr    ie, r1
+    lw      r1, (sp+4)
+    lw      r2, (sp+8) 
+    lw      r3, (sp+12) 
+    lw      r4, (sp+16) 
+    lw      r5, (sp+20) 
+    lw      r6, (sp+24) 
+    lw      r7, (sp+28) 
+    lw      r8, (sp+32) 
+    lw      r9, (sp+36) 
+    lw      r10, (sp+40)
 #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-    RESTORE_R(11)
-    RESTORE_R(12)
-    RESTORE_R(13)
-    RESTORE_R(14)
-    RESTORE_R(15)
-    RESTORE_R(16)
-    RESTORE_R(17)
-    RESTORE_R(18)
-    RESTORE_R(19)
-    RESTORE_R(20)
-    RESTORE_R(21)
-    RESTORE_R(22)
-    RESTORE_R(23)
-    RESTORE_R(24)
-    RESTORE_R(25)
-    RESTORE_R(26)
-    RESTORE_R(27)
-#endif
-    lw   ra, (sp+OFS_RA)
-    lw   ea, (sp+OFS_EA)
-    lw   ba, (sp+OFS_BA)
-
+    lw      r11, (sp+44)
+    lw      r12, (sp+48)
+    lw      r13, (sp+52)
+    lw      r14, (sp+56)
+    lw      r15, (sp+60)
+    lw      r16, (sp+64)
+    lw      r17, (sp+68)
+    lw      r18, (sp+72)
+    lw      r19, (sp+76)
+    lw      r20, (sp+80)
+    lw      r21, (sp+84)
+    lw      r22, (sp+88)
+    lw      r23, (sp+92)
+    lw      r24, (sp+96)
+    lw      r25, (sp+100)
+    lw      r26, (sp+104)
+    lw      r27, (sp+108)
+    lw      ra, (sp+116)
+    lw      ea, (sp+120)
+    lw      ba, (sp+124)
     /* Stack pointer must be restored last, in case it has been updated */
-    addi sp, sp, STACK_TOP
+    lw      sp, (sp+112)
+#else
+    lw      ra, (sp+48)
+    lw      ea, (sp+52)
+    lw      ba, (sp+56)
+    /* Stack pointer must be restored last, in case it has been updated */
+    lw      sp, (sp+44)
+#endif
     nop
-.endm
-
-/* ----------------------------------------------------------------------------
- * Function _restore_all_and_eret
- * Restore all registers and return from exception
- */
-.global _restore_all_and_eret
-.type   _restore_all_and_eret, @function
-_restore_all_and_eret:
-    /*
-     * Sometimes the EIE flag is zero perhaps caused by using of atomic sections,
-     * therefore it will set here in any cases.
-     */
-    mvi     r1, IRQ_EIE /* Enabeling interrupt by "eret" (IE = EIE). */
-    wcsr    ie, r1
-    RESTORE_ALL
     eret
-.size   _restore_all_and_eret, .-_restore_all_and_eret
-
-/* ----------------------------------------------------------------------------
- * Function _restore_all_and_bret
- * Restore all registers and return from watchpoint 
- */
-.global _restore_all_and_bret
-.type   _restore_all_and_bret, @function
-_restore_all_and_bret:
-    mvi     r1, IRQ_BIE /* Enabeling interrupt by "bret" (IE = BIE). */
-    wcsr    ie, r1
-    RESTORE_ALL
-    bret
-.size   _restore_all_and_bret, .-_restore_all_and_bret
+.size   _restore_all_and_return, .-_restore_all_and_return
 
 /*================================== EOF ====================================*/
