@@ -334,7 +334,7 @@ _save_all:
 .size   _save_all, .-_save_all
 
 /*! ----------------------------------------------------------------------------
- * @brief Macro restores allregisters which has been saved by function _save_all.
+ * @brief Macro restores all registers which has been saved by function _save_all.
  */
 .macro RESTORE_ALL
     RESTORE_R(1)
@@ -366,13 +366,12 @@ _save_all:
     RESTORE_R(26)
     RESTORE_R(27)
 #endif
-    lw   ra, (sp+OFS_RA)
-    lw   ea, (sp+OFS_EA)
-    lw   ba, (sp+OFS_BA)
+    lw   ra, (sp + OFS_RA)
+    lw   ea, (sp + OFS_EA)
+    lw   ba, (sp + OFS_BA)
 
     /* Stack pointer must be restored last, in case it has been updated */
     addi sp, sp, STACK_TOP
-    nop
 .endm
 
 /* ----------------------------------------------------------------------------
@@ -386,7 +385,7 @@ _restore_all_and_eret:
      * Sometimes the EIE flag is zero perhaps caused by using of atomic sections,
      * therefore it will set here in any cases.
      */
-    mvi     r1, IRQ_EIE /* Enabeling interrupt by "eret" (IE = EIE). */
+    mvi     r1, IRQ_EIE /* Enabling interrupt by "eret" (IE = EIE). */
     wcsr    ie, r1
     RESTORE_ALL
     eret
@@ -399,7 +398,7 @@ _restore_all_and_eret:
 .global _restore_all_and_bret
 .type   _restore_all_and_bret, @function
 _restore_all_and_bret:
-    mvi     r1, IRQ_BIE /* Enabeling interrupt by "bret" (IE = BIE). */
+    mvi     r1, IRQ_BIE /* Enabling interrupt by "bret" (IE = BIE). */
     wcsr    ie, r1
     RESTORE_ALL
     bret

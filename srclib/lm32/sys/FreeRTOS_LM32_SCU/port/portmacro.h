@@ -106,10 +106,10 @@ typedef uint32_t       UBaseType_t;
  * 100 means 400 bytes (each 32-bit stack item consuming 4 bytes).
  */
 #ifndef configMINIMAL_STACK_SIZE
-  #define configMINIMAL_STACK_SIZE        128
+  #define configMINIMAL_STACK_SIZE        34
 #endif
-#if (configMINIMAL_STACK_SIZE < 128)
-  #error configMINIMAL_STACK_SIZE has to be at least 128
+#if (configMINIMAL_STACK_SIZE < 34)
+  #error configMINIMAL_STACK_SIZE has to be at least 34
 #endif
 
 /*!

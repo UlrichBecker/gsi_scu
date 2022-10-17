@@ -24,7 +24,7 @@
 
 #define MAX_TEST_SLAVES MAX_SCU_SLAVES
 
-// #define CONFIG_SCU_ATOMIC_SECTION
+ #define CONFIG_SCU_ATOMIC_SECTION
 
 #ifdef CONFIG_SCU_ATOMIC_SECTION
    #define SCU_ATOMIC_SECTION() ATOMIC_SECTION()
@@ -55,6 +55,8 @@ NO_INLINE STATIC void vTaskScuBusSlave( void* pvParameters )
    const SLAVE_T* pSlave = (SLAVE_T*) pvParameters;
    volatile  uint16_t count;
 
+  // uint32_t v[10];
+  // memset( v, 0, sizeof(v) );
    /*
     * The size of the slaves echo register is 16 bit only. Therefore
     * a delay counter is used to throttle the up respectively down counting.
@@ -146,7 +148,7 @@ STATIC void vTaskMain( void* pvParameters UNUSED )
        */
       int status = xTaskCreate( vTaskScuBusSlave,
                                 "SCU-Slave",
-                                configMINIMAL_STACK_SIZE,
+                                configMINIMAL_STACK_SIZE + 34,
                                 (void*)&slaves[dev],
                                 tskIDLE_PRIORITY + 1,
                                 &slaves[dev].xCreatedTask );
@@ -210,7 +212,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 {
    BaseType_t status = xTaskCreate( vTaskMain,
                                     "Main task",
-                                    configMINIMAL_STACK_SIZE * 4,
+                                    configMINIMAL_STACK_SIZE + 200,
                                     NULL,
                                     tskIDLE_PRIORITY + 1,
                                     NULL

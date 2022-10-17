@@ -204,7 +204,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       // ATOMIC_SECTION()  taskDeleteAllRunningFgAndDaq();
       #endif
 
-         ATOMIC_SECTION() 
+         ATOMIC_SECTION()
             scanFgs();
 
       #ifdef CONFIG_RTOS
