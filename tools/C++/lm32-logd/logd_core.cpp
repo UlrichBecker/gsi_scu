@@ -250,7 +250,13 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
    if( (rAdmin.admin.indexes.offset   != m_offset) ||
        (rAdmin.admin.indexes.capacity != m_capacity) )
    {
-      throw std::runtime_error( "LM32 syslog fifo is corrupt!" );
+      const char* text = "LM32 syslog fifo is corrupt!";
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << text << std::flush;
+      }
+      throw std::runtime_error( text );
    }
 }
 

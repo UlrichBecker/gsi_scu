@@ -62,18 +62,18 @@ void wdtPoll( void )
    const uint64_t currentTime = getWrSysTimeSafe();
    for( unsigned int i = 0; i < ARRAY_SIZE( g_aFgChannels ); i++ )
    {
-     // criticalSectionEnter();
+      criticalSectionEnter();
       volatile const uint64_t timeout = g_aFgChannels[i].timeout;
-     // criticalSectionExit();
+      criticalSectionExit();
 
       if( timeout == 0LL )
          continue;
       if( currentTime <= timeout )
          continue;
 
-    //  criticalSectionEnter();
+      criticalSectionEnter();
       g_aFgChannels[i].timeout = 0LL;
-    //  criticalSectionExit();
+      criticalSectionExit();
 
    #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
