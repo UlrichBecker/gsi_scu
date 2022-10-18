@@ -246,11 +246,18 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
    #else
       uint32_t u_val;
    #endif
+      bool isNegative = false;
       u_val = va_arg( ap, typeof( u_val ) );
       if( signum && ((u_val & (1LL << (BIT_SIZEOF(u_val)-1))) != 0) )
       {
-         __PUT_CHAR('-');
          u_val = -u_val;
+         if( paddingChar == '0' )
+            __PUT_CHAR('-')
+         else
+            isNegative = true;
+         
+         if( paddingWidth > 0 )
+            paddingWidth--;
       }
 
       unsigned char digitBuffer[BIT_SIZEOF(u_val)+1];
@@ -270,6 +277,9 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
             paddingWidth--;
       }
       while( u_val > 0 );
+
+      if( isNegative && (ptr > digitBuffer) )
+         *--ptr = '-';
 
       while( paddingWidth-- != 0 )
          *--ptr = paddingChar;

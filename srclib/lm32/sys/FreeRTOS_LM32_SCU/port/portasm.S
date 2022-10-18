@@ -91,10 +91,10 @@ void vPortInterruptHandler( void );
 #define TO_SAVE 30
 
 /*!
- * @brief Stack pointer correction value
- * @note ST_OFS will defined in the concerning assembler module.
+ * @brief Stack size in bytes for saving all registers and system variables. 
+ * @note ST_OFS is the place of system variable __cscf
  */
-#define SP_CORR (ALIGN * (ST_OFS + TO_SAVE)) //29
+#define ST_REG_SIZE (ALIGN * (ST_OFS + TO_SAVE)) //29
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro calculates the absolute stack-pointer offset in bytes.
@@ -108,7 +108,7 @@ void vPortInterruptHandler( void );
 
 #define __RA  OS_OFS_R(28)  /*!<@brief Storage position of r29, alias ra */
 #define __EA  OS_OFS_R(29)  /*!<@brief Storage position of r30, alias ea */
-//#define __BA  OS_OFS_R(30) 
+#define __BA  OS_OFS_R(30)  /*!<@brief Storage position of r31, alias ba */
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro saves the content op all LM32 registers
@@ -201,7 +201,7 @@ void vPortInterruptHandler( void );
    /*
     * Making space for the context on the stack.
     */
-   addi        sp,  sp, -SP_CORR   /* r28 */
+   addi      sp,  sp, -ST_REG_SIZE   /* r28 */
 
    /*
     * Saving all register values of the current respectively old context.
@@ -227,11 +227,11 @@ void vPortInterruptHandler( void );
    /*
     * Loading last stack value from Task Control Block (TCB).
     */
-   LOAD_VAR  r1, pxCurrentTCB /* Load the pointer of the task control block in register R1. */
-   mv        r2, r1           /* Copy R1 to R2 */
-   lw        sp, (r1+0)       /* After access, SP (r28) hold stack pointer from actual TCB */
-   addi      r1, sp, SP_CORR  /* Calculate new stack pointer */
-   sw        (r2+0), r1       /* Store new Stack pointer in actual TCB */
+   LOAD_VAR  r1, pxCurrentTCB    /* Load the pointer of the task control block in register R1. */
+   mv        r2, r1              /* Copy R1 to R2 */
+   lw        sp, (r1+0)          /* After access, SP (r28) hold stack pointer from actual TCB */
+   addi      r1, sp, ST_REG_SIZE /* Calculate new stack pointer */
+   sw        (r2+0), r1          /* Store new Stack pointer in actual TCB */
 
    /*
     * Restoring all register values (except R0, R1 and R28 (SP))
@@ -251,13 +251,13 @@ void vStartFirstTask( void ) {}
 #else
 vStartFirstTask:
    LOAD_ADDR r1, __atomic_section_nesting_count
-   sw        (r1+0), r0       /* __atomic_section_nesting_count = 0; */
-   mvi       r1, IRQ_EIE      /* Setting EIE bit enabling the IRQs by "eret" */
-   wcsr      ie, r1           /* Setting EIE bit enabling the IRQs by "eret" */
+   sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
+   mvi       r1, IRQ_EIE         /* Setting EIE bit enabling the IRQs by "eret" */
+   wcsr      ie, r1              /* Setting EIE bit enabling the IRQs by "eret" */
    RESTORE_CONTEXT
-   OS_RESTORE_R(1)            /* Load Register R1 back */
-   addi      sp, sp, SP_CORR  /* Correct Stack pointer */
-   eret                       /* Return-Address is stored in EA */
+   OS_RESTORE_R(1)               /* Load Register R1 back */
+   addi      sp, sp, ST_REG_SIZE /* Correct Stack pointer */
+   eret                          /* Return-Address is stored in EA */
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -283,9 +283,9 @@ L_INT_SAVE:
    mvi       r1, IRQ_EIE        /* Setting EIE bit enabling the IRQs by "eret" */
    wcsr      ie, r1             /* Setting EIE bit enabling the IRQs by "eret" */
 L_NOT_ENABLE:
-   OS_RESTORE_R(1)              /* Load register R1 back */
-   addi      sp, sp, SP_CORR    /* Correct stack pointer */
-   eret                         /* Return-address is stored in EA */
+   OS_RESTORE_R(1)               /* Load register R1 back */
+   addi      sp, sp, ST_REG_SIZE /* Correct stack pointer */
+   eret                          /* Return-address is stored in EA */
 #endif
 
 #endif /* ifdef CONFIG_RTOS */
@@ -310,11 +310,11 @@ vPortInterruptHandler:
    mv        ea, ra             /* Return-Address is stored in RA */
 L_RETURN:
    sw        __cscf, r0 //!!
-   mvi       r1, IRQ_EIE 
-   wcsr      ie, r1
-   OS_RESTORE_R(1)              /* Load register R1 back */
-   addi      sp, sp, SP_CORR    /* Correct stack pointer */
-   eret                         /* Return-address is stored in EA */
+   mvi       r1, IRQ_EIE         /* Ensures that the interrupt becomes */
+   wcsr      ie, r1              /*    enable by "eret".               */
+   OS_RESTORE_R(1)               /* Load register R1 back */
+   addi      sp, sp, ST_REG_SIZE /* Correct stack pointer */
+   eret                          /* Return-address is stored in EA */
 #endif
 
 /*================================== EOF ====================================*/
