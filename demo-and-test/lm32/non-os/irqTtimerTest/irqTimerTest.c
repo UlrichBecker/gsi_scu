@@ -94,8 +94,10 @@ void main( void )
    while( true )
    {
       volatile unsigned int currentCount;
-      ATOMIC_SECTION() 
+      //ATOMIC_SECTION() 
+      criticalSectionEnter();
          currentCount = g_count;
+      criticalSectionExit();
       if( oldCount != currentCount )
       {
          oldCount = currentCount;
