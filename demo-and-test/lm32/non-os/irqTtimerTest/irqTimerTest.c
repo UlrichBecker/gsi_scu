@@ -25,16 +25,16 @@
 #include <eb_console_helper.h>
 #include <scu_lm32Timer.h>
 #include <lm32Interrupts.h>
-#include <event_measurement.h>
 
 #define configCPU_CLOCK_HZ   (USRCPUCLK * 1000)
 
-#define FREQU 100000
-//#define FREQU 4
+//#define FREQU 100000
+#define FREQU 4
 
-TIME_MEASUREMENT_T g_evTime = TIME_MEASUREMENT_INITIALIZER;
 
-volatile static unsigned int g_count = 0;
+volatile unsigned int g_count = 0;
+const char g_fan[] = { '|', '/', '-', '\\' };
+
 
 static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
 {
@@ -42,9 +42,9 @@ static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
 
    if( irqCount == 0 )
       g_count++;
-   
+
    irqCount++;
-   irqCount %= (FREQU / 4);
+   irqCount %= (FREQU / ARRAY_SIZE( g_fan ));
 }
 
 
@@ -89,21 +89,23 @@ void main( void )
    irqInfo();
    
    unsigned int i = 0;
-   static const char fan[] = { '|', '/', '-', '\\' };
-
    while( true )
    {
       volatile unsigned int currentCount;
-      //ATOMIC_SECTION() 
-      criticalSectionEnter();
+
+      //criticalSectionEnter();
+     // asm volatile ( "mvi r1, 2\n\twcsr ie, r1\n\t" :::"r1", "memory" );
+      asm volatile ( "wcsr ie, r0\n\t" ::: "memory" );
          currentCount = g_count;
-      criticalSectionExit();
+      asm volatile ( "mvi r1, 1\n\twcsr ie, r1\n\t" :::"r1", "memory" );
+     // criticalSectionExit();
+
       if( oldCount != currentCount )
       {
          oldCount = currentCount;
 
-         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
-         i %= ARRAY_SIZE( fan );
+         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, g_fan[i++] );
+         i %= ARRAY_SIZE( g_fan );
       }
    }
 }

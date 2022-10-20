@@ -402,7 +402,7 @@ void criticalSectionExitBase( void );
                                                                               \
    IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );                      \
-}             
+}
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC

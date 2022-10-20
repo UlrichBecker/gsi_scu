@@ -165,8 +165,8 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 void _irq_entry( void )
 {
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
-  // mprintf( "0x%X\n", irqGetEnableRegister() );
-  // IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
+ //  mprintf( " %X\n", irqGetEnableRegister() );
+ //  IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
    IRQ_ASSERT( irqGetPendingRegister() != 0 );
 
    /*
@@ -197,6 +197,7 @@ void _irq_entry( void )
    //while( (ip = irqGetAndResetPendingRegister() & irqGetMaskRegister()) != 0 )
 #endif
    {
+    //  mprintf( "ip: 0x%X\n", ip );
    #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
       mg_interruptTimestamp = getWrSysTime();
    #endif
@@ -265,7 +266,7 @@ void criticalSectionEnterBase( void )
    #ifndef CONFIG_DISABLE_CRITICAL_SECTION
     #ifdef  CONFIG_SAVE_BIE_AND_EIE
       "rcsr   r1, ie                                                  \n\t"
-      "andi   r1, r1, " TO_STRING( (~IRQ_IE) & (IRQ_BIE | IRQ_EIE) )" \n\t"
+      "andi   r1, r1, " TO_STRING( (~IRQ_IE) & (IRQ_BIE | IRQ_EIE) ) "\n\t"
       "wcsr   ie, r1                                                  \n\t"
     #else
       "wcsr   ie, r0                                                  \n\t"
