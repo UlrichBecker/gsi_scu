@@ -39,6 +39,7 @@
 #if !defined( NDEBUG ) && !defined( CONFIG_NO_SCU_ASSERT )
   #if defined(__lm32__)
     #include <mprintf.h>
+    #include <lm32Interrupts.h>
     #define __stderr
     #define assertMprintf mprintf
   #elif !defined( assertMprintf )
@@ -94,13 +95,18 @@ extern "C" {
   #define __ESC_NORMAL
 #endif
 
+#ifdef __lm32__
+void criticalSectionEnterBase( void );
+void criticalSectionExitBase( void );
+#endif
+
 static inline void __scu_assert_func( const char* fileName,
                                       int lineNumber,
                                       const char* functionName,
                                       const char* conditionStr )
 {
 #ifdef __lm32__
-   asm volatile ( "wcsr ie, r0" );
+   criticalSectionEnterBase();
 #endif
    assertMprintf( __stderr __ESC_BOLD __ESC_RED "Assertion failed in file: \"%s\""
             " line: %d function: \"%s\" condition: \"%s\"\n"
@@ -117,8 +123,7 @@ static inline void __scu_assert_func( const char* fileName,
  #endif
 #else
  #ifdef __lm32__
-   const uint32_t ie = 0x00000001;
-   asm volatile ( "wcsr ie, %0"::"r"(ie) );
+   criticalSectionExitBase();
  #endif
 #endif
 }

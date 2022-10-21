@@ -151,6 +151,11 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
   #define CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
 #endif
 
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+  #warning CAUTION! SCU-BUS becomes misused for logik-analysator by writing 0x47110815 on it for triggering the logc-analysator.
+extern volatile uint16_t* g_pScuBusBase;
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
  * @brief General Interrupt Handler (invoked by low-level routine in portasm.S)
@@ -164,6 +169,13 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
  */
 void _irq_entry( void )
 {
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+   if( (irqGetEnableRegister() & IRQ_EIE) == 0 )
+   {
+      //mprintf( "*\n" );
+      *g_pScuBusBase = 0x4711;
+   }
+#endif
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
  //  mprintf( " %X\n", irqGetEnableRegister() );
  //  IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
@@ -285,6 +297,9 @@ void criticalSectionEnterBase( void )
 
 #define CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
 
+#define IRQ_ENABLE (IRQ_EIE | IRQ_IE)
+//#define IRQ_ENABLE IRQ_EIE
+
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
  */
@@ -310,7 +325,7 @@ void criticalSectionExitBase( void )
       "rcsr   r1, ie                                                  \n\t"
       "ori    r1, r1, " TO_STRING( IRQ_IE ) "                         \n\t"
    #else
-      "mvi    r1, " TO_STRING( IRQ_IE ) "                             \n\t"
+      "mvi    r1, " TO_STRING( IRQ_ENABLE ) "                         \n\t"
    #endif
       "wcsr   ie, r1                                                  \n"
    "L_NO_ENABLE:                                                      \n\t"

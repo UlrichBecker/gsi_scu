@@ -39,7 +39,7 @@ const char g_fan[] = { '|', '/', '-', '\\' };
 static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
 {
    static unsigned int irqCount = 0;
-
+//mprintf( " %X\n", irqGetEnableRegister() );
    if( irqCount == 0 )
       g_count++;
 
@@ -52,6 +52,10 @@ void irqInfo( void )
 {
    mprintf( "Nesting count: %d; IE: 0x%X\n", irqGetAtomicNestingCount(), irqGetEnableRegister() );
 }
+
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+volatile uint16_t* g_pScuBusBase = NULL;
+#endif
 
 void main( void )
 {
@@ -67,27 +71,22 @@ void main( void )
       while( true );
    }
 
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+   g_pScuBusBase = (uint16_t*)find_device_adr(GSI, SCU_BUS_MASTER);
+   SCU_ASSERT( g_pScuBusBase != (uint16_t*)ERROR_NOT_FOUND );
+   mprintf( "SCU base address: 0x%p\n", g_pScuBusBase );
+   *g_pScuBusBase = 0;
+#endif
+   
    mprintf( "Timer found at wishbone base address 0x%p\n", pTimer );
    irqInfo();
    lm32TimerSetPeriod( pTimer, configCPU_CLOCK_HZ / FREQU );
    lm32TimerEnable( pTimer );
    irqRegisterISR( TIMER_IRQ, NULL, onTimerInterrupt );
    irqInfo();
-   //irqEnable();
-   criticalSectionExit();
-  // criticalSectionExit();
-   irqInfo();
-   
-   
-   criticalSectionEnter();
-   criticalSectionEnter();
-   criticalSectionEnter();
-   irqInfo();
-   criticalSectionExit();
-   criticalSectionExit();
    criticalSectionExit();
    irqInfo();
-   
+
    unsigned int i = 0;
    while( true )
    {
@@ -96,7 +95,10 @@ void main( void )
       //criticalSectionEnter();
      // asm volatile ( "mvi r1, 2\n\twcsr ie, r1\n\t" :::"r1", "memory" );
       asm volatile ( "wcsr ie, r0\n\t" ::: "memory" );
-         currentCount = g_count;
+      currentCount = g_count;
+   #ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+      *g_pScuBusBase = 0;
+   #endif
       asm volatile ( "mvi r1, 1\n\twcsr ie, r1\n\t" :::"r1", "memory" );
      // criticalSectionExit();
 
