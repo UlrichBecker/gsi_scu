@@ -192,7 +192,7 @@ _system_call_handler:
 _crt0:
     /* Clear r0 */
     xor     r0, r0, r0
-    
+
     /* Disable interrupt */ 
     wcsr    ie, r0
 
@@ -249,6 +249,25 @@ _crt0:
      * It is called BEFORE the main function. 
      */
     calli   __init
+
+#ifdef CONFIG_CPLUSPLUS_OBSOLETE
+    /*
+     * @see https://tldp.org/HOWTO/Program-Library-HOWTO/miscellaneous.html
+     */
+.weak _init
+    /*
+     * Call C++ constructors
+     */
+    calli   _init
+
+.weak _fini
+    /*
+     * Call C++ destructors on exit
+     */
+    mvhi    r1, hi(_fini)
+    ori     r1, r1, lo(_fini)
+    calli   atexit
+#endif
 
     /*
      * Calling the C-function main( 0, 0, 0 )

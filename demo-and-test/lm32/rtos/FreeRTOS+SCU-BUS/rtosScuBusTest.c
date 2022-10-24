@@ -84,7 +84,8 @@ NO_INLINE STATIC void vTaskScuBusSlave( void* pvParameters )
 
       SCU_ATOMIC_SECTION()
          scuBusSetSlaveValue16( pSlave->pAddress, Echo_Register, count );
-      //portYIELD();
+
+      //vPortYield();
    }
 }
 

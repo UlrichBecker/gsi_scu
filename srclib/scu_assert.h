@@ -39,7 +39,6 @@
 #if !defined( NDEBUG ) && !defined( CONFIG_NO_SCU_ASSERT )
   #if defined(__lm32__)
     #include <mprintf.h>
-    #include <lm32Interrupts.h>
     #define __stderr
     #define assertMprintf mprintf
   #elif !defined( assertMprintf )

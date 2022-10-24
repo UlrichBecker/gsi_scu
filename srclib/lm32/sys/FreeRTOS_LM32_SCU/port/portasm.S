@@ -264,19 +264,37 @@ vStartFirstTask:
  * @brief Function for context switching it enables the IRQs as well.
  */
 #ifdef __DOXYGEN__
-void vPortYield( void ) {}
+void vPortYield( void ) { vTaskSwitchContext(); }
 #else
 vPortYield:
    wcsr      ie, r0             /* Disable interrupts */
    SAVE_CONTEXT                 /* Save all registers */
+
+   /*
+    * __atomic_section_nesting_count++;
+    */
+   LOAD_ADDR r1, __atomic_section_nesting_count
+   lw        r2, (r1+0)
+   addi      r2, r2, 1
+   sw        (r1+0), r2
+
    sw        __cscf, r0         /* Set the context switch cause flag to zero */
    calli     vTaskSwitchContext /* Call this C-function implemented in task.c */
+
+   /*
+    * __atomic_section_nesting_count--;
+    */
+   LOAD_ADDR r1, __atomic_section_nesting_count
+   lw        r2, (r1+0)
+   addi      r2, r2, -1
+   sw        (r1+0), r2
+
    RESTORE_CONTEXT              /* Restore all registers except R1. */
    lw        r1, __cscf         /* Load context change cause flag in r1 */
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
    mv        ea, ra             /* Return-Address is stored in RA */
 L_INT_SAVE:
-#if 1
+#if 0
    LOAD_VAR  r1, __atomic_section_nesting_count
    bne       r1, r0, L_NOT_ENABLE /* Jump to L_NOT_ENABLE if nesting count not zero */
 #endif
@@ -296,7 +314,7 @@ L_NOT_ENABLE:
  * @see crt0FreeRTOS.S
  */
 #ifdef __DOXYGEN__
-void vPortInterruptHandler( void ) {}
+void vPortInterruptHandler( void ) { _irq_entry(); }
 #else
 vPortInterruptHandler:
    SAVE_CONTEXT                 /* Save all registers */
