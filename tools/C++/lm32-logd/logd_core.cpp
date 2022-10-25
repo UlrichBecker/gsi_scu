@@ -134,10 +134,17 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
     */
    if( m_lm32Base < LM32_OFFSET )
    {
+      const char* text = "LM32 base address is corrupt!";
       if( m_poTerminal != nullptr )
          m_poTerminal->reset();
 
-      throw std::runtime_error( "LM32 base address is corrupt!" );
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << text << std::flush;
+      }
+
+      throw std::runtime_error( text );
    }
    m_lm32Base -= LM32_OFFSET;
 
@@ -160,17 +167,34 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
 
    if( !m_oMmu.isPresent() )
    {
+      const char* text = "MMU not present!";
+
       if( m_poTerminal != nullptr )
          m_poTerminal->reset();
-      throw std::runtime_error( "MMU not present!" );
+
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << text << std::flush;
+      }
+         
+      throw std::runtime_error( text );
    }
 
    mmu::MMU_STATUS_T status = m_oMmu.allocate( mmu::TAG_LM32_LOG, m_offset, m_capacity );
    if( status != mmu::OK )
    {
+      string text = m_oMmu.status2String( status );
       if( m_poTerminal != nullptr )
          m_poTerminal->reset();
-      throw std::runtime_error( m_oMmu.status2String( status ) );
+
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << text << std::flush;
+      }
+
+      throw std::runtime_error( text );
    }
 
    if( m_rCmdLine.isVerbose() )
@@ -189,7 +213,7 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
    if( m_rCmdLine.isVerbose() )
    {
       cout << "Begin:          " << m_offset
-            << "\nMax. log items: " << m_capacity / SYSLOG_FIFO_ITEM_SIZE << endl;
+           << "\nMax. log items: " << m_capacity / SYSLOG_FIFO_ITEM_SIZE << endl;
    }
 
    m_fiFoAdmin.admin.indexes.offset   = 0;
