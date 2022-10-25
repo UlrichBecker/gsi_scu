@@ -26,6 +26,7 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <ros_timeout.h>
 #include <lm32signal.h>
 
 #ifndef CONFIG_RTOS
@@ -117,13 +118,12 @@ STATIC void childTask( void* pvParameters UNUSED )
 #if 1
    unsigned int i = 0;
    const char fan[] = { '|', '/', '-', '\\' };
-   TickType_t fanTime = 0;
+   TIMEOUT_T fanInterval;
+   toStart( &fanInterval, pdMS_TO_TICKS( 250 ) );
    while( true )
    {
-      const TickType_t tick = xTaskGetTickCount();
-      if( fanTime <= tick )
+      if( toInterval( &fanInterval ) )
       {
-         fanTime = tick + pdMS_TO_TICKS( 250 );
          mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
          i %= ARRAY_SIZE( fan );
       }
@@ -140,14 +140,14 @@ STATIC void parrentTask( void* pvParameters UNUSED )
 {
    taskInfoLog();
 
-   TickType_t liveTime = 0;
    unsigned int i = 0;
+   
+   TIMEOUT_T interval;
+   toStart( &interval, pdMS_TO_TICKS( 2000 ) );
    while( true )
    {
-      const TickType_t tick = xTaskGetTickCount();
-      if( liveTime < tick )
+      if( toInterval( &interval ))
       {
-         liveTime = tick + pdMS_TO_TICKS( 2000 );
          mprintf( "Tick: %u, tasks: %u\n", ++i, uxTaskGetNumberOfTasks() );
          if( mg_childTaskandle == NULL )
          {

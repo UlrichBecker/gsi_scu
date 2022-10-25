@@ -101,7 +101,7 @@ void vApplicationTickHook( void )
       * parameter), and the parameter is set to NULL.
       */
       xQueueSendToFrontFromISR( g_xPrintQueue, &g_pcStringsToPrint[2], NULL );
-
+    //  mprintf( "*" );
      /*
       * Reset the count ready to print out the string again in 200 ticks time.
       */

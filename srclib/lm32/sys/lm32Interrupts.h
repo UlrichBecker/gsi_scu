@@ -54,8 +54,11 @@
     */
    #include <scu_assert.h>
    #define IRQ_ASSERT SCU_ASSERT
+   #define  IRQ_ENABLE_CHECK()    \
+      IRQ_ASSERT( (irqGetAtomicNestingCount() == 0) != ((irqGetEnableRegister() & IRQ_IE) == 0)) 
 #else
    #define IRQ_ASSERT(__e)
+   #define IRQ_ENABLE_CHECK()
 #endif
 
 #if !defined( MAX_LM32_INTERRUPTS ) || defined(__DOXYGEN__)
@@ -416,6 +419,7 @@ void criticalSectionExitBase( void );
  *
  * @see criticalSectionEnter
  */
+#if 1
 #define criticalSectionExit()                                                 \
 {                                                                             \
    IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
@@ -423,7 +427,9 @@ void criticalSectionExitBase( void );
                                                                               \
    criticalSectionExitBase();                                                 \
 }
-
+#else
+#define criticalSectionExit() criticalSectionExitBase()
+#endif
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
  * @brief Backward compatibility: alias of criticalSectionEnter

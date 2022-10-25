@@ -147,7 +147,7 @@ void vPortInterruptHandler( void );
    OS_SAVE_R(27)
    sw  __RA,  ra
    sw  __EA,  ea
-//   sw  __BA,  ba
+   sw  __BA,  ba
 .endm
 #endif
 
@@ -187,7 +187,7 @@ void vPortInterruptHandler( void );
    OS_RESTORE_R(27)
    lw  ra,  __RA
    lw  ea,  __EA
-//   lw  ba,  __BA
+   lw  ba,  __BA
 .endm
 #endif
 
@@ -294,7 +294,7 @@ vPortYield:
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
    mv        ea, ra             /* Return-Address is stored in RA */
 L_INT_SAVE:
-#if 0
+#if 1
    LOAD_VAR  r1, __atomic_section_nesting_count
    bne       r1, r0, L_NOT_ENABLE /* Jump to L_NOT_ENABLE if nesting count not zero */
 #endif
