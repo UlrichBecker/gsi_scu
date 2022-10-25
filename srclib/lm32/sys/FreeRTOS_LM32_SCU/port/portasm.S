@@ -87,8 +87,19 @@ void vPortInterruptHandler( void );
 .align ALIGN
 #endif
 
+#define MICO32_FULL_CONTEXT_SAVE_RESTORE
 
-#define TO_SAVE 30
+#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
+  #define TO_SAVE 30
+  #define STK_RA  28
+  #define STK_EA  29
+  #define STK_BA  30
+#else
+  #define TO_SAVE 13
+  #define STK_RA  11
+  #define STK_EA  12
+  #define STK_BA  13
+#endif
 
 /*!
  * @brief Stack size in bytes for saving all registers and system variables. 
@@ -106,9 +117,13 @@ void vPortInterruptHandler( void );
 #define OS_SAVE_R( n )    sw OS_OFS_R( n ), r##n
 #define OS_RESTORE_R( n ) lw r##n, OS_OFS_R( n )
 
-#define __RA  OS_OFS_R(28)  /*!<@brief Storage position of r29, alias ra */
-#define __EA  OS_OFS_R(29)  /*!<@brief Storage position of r30, alias ea */
-#define __BA  OS_OFS_R(30)  /*!<@brief Storage position of r31, alias ba */
+#define OS_SAVE_RA     sw OS_OFS_R(STK_RA), ra
+#define OS_SAVE_EA     sw OS_OFS_R(STK_EA), ea
+#define OS_SAVE_BA     sw OS_OFS_R(STK_BA), ba
+
+#define OS_RESTORE_RA  lw ra, OS_OFS_R(STK_RA)
+#define OS_RESTORE_EA  lw ea, OS_OFS_R(STK_EA)
+#define OS_RESTORE_BA  lw ba, OS_OFS_R(STK_BA)
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro saves the content op all LM32 registers
@@ -128,6 +143,7 @@ void vPortInterruptHandler( void );
    OS_SAVE_R(8)
    OS_SAVE_R(9)
    OS_SAVE_R(10)
+ #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
    OS_SAVE_R(11)
    OS_SAVE_R(12)
    OS_SAVE_R(13)
@@ -145,9 +161,10 @@ void vPortInterruptHandler( void );
    OS_SAVE_R(25)
    OS_SAVE_R(26)
    OS_SAVE_R(27)
-   sw  __RA,  ra
-   sw  __EA,  ea
-   sw  __BA,  ba
+ #endif
+   OS_SAVE_RA
+   OS_SAVE_EA
+   OS_SAVE_BA
 .endm
 #endif
 
@@ -168,6 +185,7 @@ void vPortInterruptHandler( void );
    OS_RESTORE_R(8)
    OS_RESTORE_R(9)
    OS_RESTORE_R(10)
+ #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
    OS_RESTORE_R(11)
    OS_RESTORE_R(12)
    OS_RESTORE_R(13)
@@ -185,9 +203,10 @@ void vPortInterruptHandler( void );
    OS_RESTORE_R(25)
    OS_RESTORE_R(26)
    OS_RESTORE_R(27)
-   lw  ra,  __RA
-   lw  ea,  __EA
-   lw  ba,  __BA
+ #endif
+   OS_RESTORE_RA
+   OS_RESTORE_EA
+   OS_RESTORE_BA 
 .endm
 #endif
 
