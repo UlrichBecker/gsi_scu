@@ -92,7 +92,7 @@ else
    AS_F        = $(FORMAT)   $(CPU) $(AS_MSG)      $(@); $(AS)
    AR_F        = $(FORMAT_L) $(CPU) $(AR_MSG)      $(@); $(AR)
    OBJCPY_F    = $(FORMAT_R) $(CPU) $(OBJCPY_MSG)  $(@); $(OBJCPY)
-   OBJDUMP_F   = $(FORMAT)   $(CPU) $(OBJDUMP_MSG) $(@); $(OBJDUMP)
+   OBJDUMP_F   = $(FORMAT_R) $(CPU) $(OBJDUMP_MSG) $(@); $(OBJDUMP)
    QUIET       = @
 endif
 

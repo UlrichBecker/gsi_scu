@@ -42,6 +42,8 @@ extern volatile uint32_t __atomic_section_nesting_count
 .extern __atomic_section_nesting_count
 #endif
 
+
+
 .extern _irq_entry
 
 #ifdef __DOXYGEN__
@@ -93,12 +95,12 @@ void vPortInterruptHandler( void );
   #define TO_SAVE 30
   #define STK_RA  28
   #define STK_EA  29
-  #define STK_BA  30
+  #define STK_BA   0
 #else
   #define TO_SAVE 13
   #define STK_RA  11
   #define STK_EA  12
-  #define STK_BA  13
+  #define STK_BA   0
 #endif
 
 /*!
@@ -170,13 +172,12 @@ void vPortInterruptHandler( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro restores all LM32 registers from stack
- *        except R0, R1 and SP (R28)
+ *        except R0, R1, R2 and SP (R28)
  */
 #ifdef __DOXYGEN__
 #define RESTORE_REGISTERS
 #else
 .macro RESTORE_REGISTERS
-   OS_RESTORE_R(2)
    OS_RESTORE_R(3)
    OS_RESTORE_R(4)
    OS_RESTORE_R(5)
@@ -207,6 +208,45 @@ void vPortInterruptHandler( void );
    OS_RESTORE_RA
    OS_RESTORE_EA
    OS_RESTORE_BA 
+.endm
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @brief Macro restores the remaining registers which are still used after
+ *        restoring of the context and executes the exception-return "eret". 
+ */
+#ifdef __DOXYGEN__
+#define RESTORE_REMANING_REGISTERS_AND_ERET
+#else
+.macro RESTORE_REMANING_REGISTERS_AND_ERET
+   OS_RESTORE_R(1)
+   OS_RESTORE_R(2)
+   addi sp, sp, ST_REG_SIZE
+   eret
+.endm
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @brief Macro disables the interrupts.
+ */
+#ifdef __DOXYGEN__
+#define DISABLE_INTERRUPTS
+#else
+.macro DISABLE_INTERRUPTS
+   wcsr ie, r0 
+.endm
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @brief Macro sets the EIE-bit, so the interrupts becomes enabled by
+ *        exception-return "eret".
+ */
+#ifdef __DOXYGEN__
+#define ENABLE_INTERRUPTS_BY_ERET
+#else
+.macro ENABLE_INTERRUPTS_BY_ERET
+   mvi  r1, IRQ_EIE     /* Setting EIE bit enabling the IRQs by "eret" */
+   wcsr ie, r1          /* Setting EIE bit enabling the IRQs by "eret" */
 .endm
 #endif
 
@@ -271,12 +311,12 @@ void vStartFirstTask( void ) {}
 vStartFirstTask:
    LOAD_ADDR r1, __atomic_section_nesting_count
    sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
-   mvi       r1, IRQ_EIE         /* Setting EIE bit enabling the IRQs by "eret" */
-   wcsr      ie, r1              /* Setting EIE bit enabling the IRQs by "eret" */
+   ENABLE_INTERRUPTS_BY_ERET
    RESTORE_CONTEXT
-   OS_RESTORE_R(1)               /* Load Register R1 back */
-   addi      sp, sp, ST_REG_SIZE /* Correct Stack pointer */
-   eret                          /* Return-Address is stored in EA */
+   RESTORE_REMANING_REGISTERS_AND_ERET
+#endif
+
+#ifdef CONFIG_PATCH_LM32_BUG
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -286,7 +326,7 @@ vStartFirstTask:
 void vPortYield( void ) { vTaskSwitchContext(); }
 #else
 vPortYield:
-   wcsr      ie, r0             /* Disable interrupts */
+   DISABLE_INTERRUPTS
    SAVE_CONTEXT                 /* Save all registers */
 
    /*
@@ -317,12 +357,9 @@ L_INT_SAVE:
    LOAD_VAR  r1, __atomic_section_nesting_count
    bne       r1, r0, L_NOT_ENABLE /* Jump to L_NOT_ENABLE if nesting count not zero */
 #endif
-   mvi       r1, IRQ_EIE        /* Setting EIE bit enabling the IRQs by "eret" */
-   wcsr      ie, r1             /* Setting EIE bit enabling the IRQs by "eret" */
+   ENABLE_INTERRUPTS_BY_ERET
 L_NOT_ENABLE:
-   OS_RESTORE_R(1)               /* Load register R1 back */
-   addi      sp, sp, ST_REG_SIZE /* Correct stack pointer */
-   eret                          /* Return-address is stored in EA */
+   RESTORE_REMANING_REGISTERS_AND_ERET
 #endif
 
 #endif /* ifdef CONFIG_RTOS */
@@ -347,11 +384,8 @@ vPortInterruptHandler:
    mv        ea, ra             /* Return-Address is stored in RA */
 L_RETURN:
    sw        __cscf, r0 //!!
-   mvi       r1, IRQ_EIE         /* Ensures that the interrupt becomes */
-   wcsr      ie, r1              /*    enable by "eret".               */
-   OS_RESTORE_R(1)               /* Load register R1 back */
-   addi      sp, sp, ST_REG_SIZE /* Correct stack pointer */
-   eret                          /* Return-address is stored in EA */
+   ENABLE_INTERRUPTS_BY_ERET
+   RESTORE_REMANING_REGISTERS_AND_ERET
 #endif
 
 /*================================== EOF ====================================*/

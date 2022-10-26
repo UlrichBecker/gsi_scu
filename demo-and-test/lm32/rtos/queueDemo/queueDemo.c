@@ -101,7 +101,7 @@ void vApplicationTickHook( void )
       * parameter), and the parameter is set to NULL.
       */
       xQueueSendToFrontFromISR( g_xPrintQueue, &g_pcStringsToPrint[2], NULL );
-    //  mprintf( "*" );
+      
      /*
       * Reset the count ready to print out the string again in 200 ticks time.
       */
@@ -119,7 +119,7 @@ STATIC void prvPrintTask( void* pvParameters )
    * required type.
    */
    const unsigned int iIndexToString = (int) pvParameters;
-
+   mprintf( "Start of %s()\n", __func__ );
    while( true )
    { /*
       * Print out the string, not directly, but instead by passing a pointer to
@@ -144,6 +144,7 @@ static void prvUartGatekeeperTask( void* pvParameters UNUSED )
 {
    char* pcMessageToPrint;
 
+   mprintf( "Start of %s()\n", __func__ );
    /*
     * This is the only task that is allowed to write to standard out.
     * Any other task wanting to write a string to the output does not access

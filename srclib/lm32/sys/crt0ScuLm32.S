@@ -300,12 +300,12 @@ loopf:
    #define OFS_RA    OFS_R( 28 )
    #define OFS_EA    OFS_R( 29 )
    #define OFS_BA    OFS_R( 30 )
-   #define STACK_TOP OFS_R( 31 )
+   #define STACK_TOP OFS_R( 32 )
 #else
    #define OFS_RA    OFS_R( 11 )
    #define OFS_EA    OFS_R( 12 )
    #define OFS_BA    OFS_R( 13 )
-   #define STACK_TOP OFS_R( 14 )
+   #define STACK_TOP OFS_R( 15 )
 #endif
 
 /* ----------------------------------------------------------------------------
@@ -349,6 +349,9 @@ _save_all:
     sw  (sp + OFS_RA), r1
     sw  (sp + OFS_EA), ea
     sw  (sp + OFS_BA), ba
+#ifdef CONFIG_PATCH_LM32_BUG
+   //!! wcsr ie, r0
+#endif
     ret
 .size   _save_all, .-_save_all
 
@@ -388,7 +391,6 @@ _save_all:
     lw   ra, (sp + OFS_RA)
     lw   ea, (sp + OFS_EA)
     lw   ba, (sp + OFS_BA)
-
     /* Stack pointer must be restored last, in case it has been updated */
     addi sp, sp, STACK_TOP
 .endm

@@ -148,7 +148,7 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 #endif /* ifdef CONFIG_USE_INTERRUPT_TIMESTAMP */
 
 #if defined( CONFIG_RTOS ) && !defined( CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS )
-  #define CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
+  //#define CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
 #endif
 
 #ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
@@ -178,7 +178,9 @@ void _irq_entry( void )
 #endif
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );
  //  mprintf( " %X\n", irqGetEnableRegister() );
- //  IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
+#ifndef CONFIG_PATCH_LM32_BUG
+   IRQ_ASSERT( (irqGetEnableRegister() & IRQ_EIE) != 0 );
+#endif
    IRQ_ASSERT( irqGetPendingRegister() != 0 );
 
    /*
@@ -297,8 +299,8 @@ void criticalSectionEnterBase( void )
 
 #define CONFIG_IRQ_ALSO_ENABLE_IF_COUNTER_ALREADY_ZERO
 
-#define IRQ_ENABLE (IRQ_EIE | IRQ_IE)
-//#define IRQ_ENABLE IRQ_EIE
+//#define IRQ_ENABLE (IRQ_EIE | IRQ_IE)
+#define IRQ_ENABLE IRQ_IE
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h

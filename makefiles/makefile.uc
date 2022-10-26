@@ -19,6 +19,9 @@ CFLAGS += -Wno-main
 
 ELF_FILE    = $(WORK_DIR)/$(TARGET).elf
 BIN_FILE    = $(TARGET_DIR)/$(TARGET).bin
+DMP_FILE    = $(WORK_DIR)/$(TARGET).dmp
+
+ADDITIONAL_TO_CLEAN += $(DMP_FILE)
 
 include $(MAKEFILE_DIR)/makefile.base
 
@@ -56,8 +59,11 @@ endif
 strings: $(BIN_FILE)
 	$(QUIET)$(STRINGS) $(BIN_FILE)
 
+$(DMP_FILE): $(ELF_FILE)
+	$(OBJDUMP_F) -d $(ELF_FILE) > $(DMP_FILE)
+
 .PHONY: objdump
-objdump: $(ELF_FILE)
-	$(OBJDUMP_F) -h $(ELF_FILE)
+objdump: $(DMP_FILE)
+	$(QUIET)echo $(DMP_FILE)
 
 #=================================== EOF ======================================

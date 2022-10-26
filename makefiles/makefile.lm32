@@ -32,6 +32,8 @@ STRINGS = $(TOOLCHAIN_DIR)$(CROSS_COMPILE)strings
 
 ADDITIONAL_TO_CLEAN += $(ELF_FILE)
 
+DEFINES += CONFIG_PATCH_LM32_BUG
+
 # For doxygen if used only.
 DOX_INPUT       += $(MAKEFILE_DIR)/makefile.lm32
 DOX_PREDEFINED  += __lm32__
