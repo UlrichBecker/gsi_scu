@@ -238,13 +238,22 @@ void vStartFirstTask( void );
  * Declaration of assembly function implemented in portasm.S
  * @see portasm.S
  */
-void vPortYield( void );
+void vPortYieldLm32( void );
 
-//#define portYIELD()          vPortYield()
-STATIC inline ALWAYS_INLINE void portYIELD( void )
-{
-   vPortYield();
-}
+#ifdef CONFIG_CHECK_YIELD_PEDANTIC
+   #define portYIELD()    \
+   {                      \
+      IRQ_ENABLE_CHECK(); \
+      vPortYieldLm32();   \
+      IRQ_ENABLE_CHECK(); \
+   }
+#else
+   #define portYIELD()    \
+   {                      \
+      IRQ_ENABLE_CHECK(); \
+      vPortYieldLm32();   \
+   }
+#endif
 
 #ifdef __cplusplus
 }

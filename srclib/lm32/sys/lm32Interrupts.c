@@ -147,6 +147,20 @@ uint64_t irqGetTimeSinceLastInterrupt( void )
 
 #endif /* ifdef CONFIG_USE_INTERRUPT_TIMESTAMP */
 
+#ifdef CONFIG_INTERRUPT_PEDANTIC_CHECK
+/*! --------------------------------------------------------------------------
+ * @brief Function is for debug purposes only.
+ */
+void irqPrintInfo( uint32_t ie,  uint32_t nc )
+{
+   mprintf( "\nAtomic nesting count: %d\n"
+            "Interrupt-enable:     0b%02b\n"
+            "Interrupt-pending:    0b%02b\n",
+            nc, ie,
+            irqGetPendingRegister() );
+}
+#endif
+
 #if defined( CONFIG_RTOS ) && !defined( CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS )
   //#define CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS
 #endif

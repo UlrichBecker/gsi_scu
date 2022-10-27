@@ -53,9 +53,22 @@
     * Therefore use them for bug-fixing or developing purposes only!
     */
    #include <scu_assert.h>
+   /*!
+    * @brief Function is for debug purposes only.
+    */
+   void irqPrintInfo( uint32_t ie,  uint32_t nc );
+
    #define IRQ_ASSERT SCU_ASSERT
-   #define  IRQ_ENABLE_CHECK()    \
-      IRQ_ASSERT( (irqGetAtomicNestingCount() == 0) != ((irqGetEnableRegister() & IRQ_IE) == 0)) 
+   #define  IRQ_ENABLE_CHECK()                    \
+   {                                              \
+      uint32_t ie = irqGetEnableRegister();       \
+      uint32_t nc = irqGetAtomicNestingCount();   \
+      if( (nc == 0) == ((ie & IRQ_IE) == 0))      \
+      {                                           \
+         irqPrintInfo( ie, nc );                  \
+         SCU_ASSERT( false );                     \
+      }                                           \
+   }
 #else
    #define IRQ_ASSERT(__e)
    #define IRQ_ENABLE_CHECK()

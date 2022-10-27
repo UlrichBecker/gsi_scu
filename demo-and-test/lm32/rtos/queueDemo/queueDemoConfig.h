@@ -26,7 +26,7 @@
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
-#define configTICK_RATE_HZ                      10000
+#define configTICK_RATE_HZ                      1000
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
 #define configUSE_MUTEXES                       1
@@ -41,11 +41,12 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 
 /* Memory allocation related definitions. */
-#define configSUPPORT_STATIC_ALLOCATION         0
-#define configSUPPORT_DYNAMIC_ALLOCATION        1
+#define configSUPPORT_STATIC_ALLOCATION         1
+#define configSUPPORT_DYNAMIC_ALLOCATION        0
 //#define configTOTAL_HEAP_SIZE                   10240
-#define configTOTAL_HEAP_SIZE                   (4 * 1024)
+#define configTOTAL_HEAP_SIZE                   (10 * 1024)
 #define configAPPLICATION_ALLOCATED_HEAP        1
+#define configMINIMAL_STACK_SIZE                34
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0

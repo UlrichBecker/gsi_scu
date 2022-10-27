@@ -205,7 +205,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    BaseType_t status;
    status = xTaskCreate( prvUartGatekeeperTask,
                          "Gate-keeper",
-                         configMINIMAL_STACK_SIZE,
+                         configMINIMAL_STACK_SIZE + 200,
                          NULL,
                          0,
                          NULL
@@ -228,7 +228,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 #else
    status = xTaskCreate( prvPrintTask,
                          "prvPrintTask 1",
-                         configMINIMAL_STACK_SIZE,
+                         configMINIMAL_STACK_SIZE + 200,
                          (void*) 0,
                          1,
                          NULL
@@ -251,7 +251,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 #else
    status = xTaskCreate( prvPrintTask,
                          "prvPrintTask 2",
-                         configMINIMAL_STACK_SIZE,
+                         configMINIMAL_STACK_SIZE + 200,
                          (void*) 1,
                          2,
                          NULL

@@ -323,7 +323,7 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
          i %= ARRAY_SIZE( fan );
       }
 
-      vPortYield();
+      vPortYieldLm32();
    }
 }
 

@@ -53,9 +53,9 @@ void vStartFirstTask( void );
 #endif
 
 #ifdef __DOXYGEN__
-void vPortYield( void );
+void vPortYieldLm32( void );
 #else
-.global vPortYield
+.global vPortYieldLm32
 #endif
 
 #ifdef __DOXYGEN__
@@ -128,13 +128,14 @@ void vPortInterruptHandler( void );
 #define OS_RESTORE_BA  lw ba, OS_OFS_R(STK_BA)
 
 /*! ---------------------------------------------------------------------------
- * @brief Macro saves the content op all LM32 registers
- *        (except R0 and SP (R28)) on the stack.
+ * @brief Function saves all registers except SP and RA which needs a
+ *        special handling.
  */
 #ifdef __DOXYGEN__
-#define SAVE_REGISTERS
+STATIC void _saveRegisters( void ) {}
 #else
-.macro SAVE_REGISTERS
+.type   _saveRegisters, @function
+_saveRegisters:
    OS_SAVE_R(1)
    OS_SAVE_R(2)
    OS_SAVE_R(3)
@@ -164,20 +165,23 @@ void vPortInterruptHandler( void );
    OS_SAVE_R(26)
    OS_SAVE_R(27)
  #endif
-   OS_SAVE_RA
    OS_SAVE_EA
    OS_SAVE_BA
-.endm
+   ret
+.size _saveRegisters, .-_saveRegisters
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief Macro restores all LM32 registers from stack
- *        except R0, R1, R2 and SP (R28)
+ * @brief function restores all registers except R1, R2, RA and SP.
+ * @note  R1, R2 and SP will restored in function _restoreRemainingRegistersAndERET.
+ *        Return-address RA needs a special handling.
+ * @see _restoreRemainingRegistersAndERET
  */
 #ifdef __DOXYGEN__
-#define RESTORE_REGISTERS
+STATIC void _restoreRegisters( void );
 #else
-.macro RESTORE_REGISTERS
+.type _restoreRegisters, @function
+_restoreRegisters:
    OS_RESTORE_R(3)
    OS_RESTORE_R(4)
    OS_RESTORE_R(5)
@@ -205,25 +209,28 @@ void vPortInterruptHandler( void );
    OS_RESTORE_R(26)
    OS_RESTORE_R(27)
  #endif
-   OS_RESTORE_RA
    OS_RESTORE_EA
-   OS_RESTORE_BA 
-.endm
+   OS_RESTORE_BA
+   ret
+.size _restoreRegisters, .-_restoreRegisters
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief Macro restores the remaining registers which are still used after
- *        restoring of the context and executes the exception-return "eret". 
+ * @brief Function restores the remaining registers which are still used after
+ *        restoring of the context and executes the exception-return "eret".
+ * @note CAUTION: Invoke this function by "bi" rather than "calli"!
+ * @see _restoreRegisters
  */
 #ifdef __DOXYGEN__
-#define RESTORE_REMANING_REGISTERS_AND_ERET
+STATIC void _restoreRemainingRegistersAndERET( void )
 #else
-.macro RESTORE_REMANING_REGISTERS_AND_ERET
+.type _restoreRemainingRegistersAndERET, @function
+_restoreRemainingRegistersAndERET:
    OS_RESTORE_R(1)
    OS_RESTORE_R(2)
    addi sp, sp, ST_REG_SIZE
    eret
-.endm
+.size _restoreRemainingRegistersAndERET, .-_restoreRemainingRegistersAndERET
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -262,11 +269,8 @@ void vPortInterruptHandler( void );
     */
    addi      sp,  sp, -ST_REG_SIZE   /* r28 */
 
-   /*
-    * Saving all register values of the current respectively old context.
-    * Register R0 is always 0, therefore start with R1.
-    */
-   SAVE_REGISTERS      /* Save all registers except r0 and r1 */
+   OS_SAVE_RA
+   calli _saveRegisters
 
    /*
     * Save the top of stack value to the Task Control Block (TCB).
@@ -274,6 +278,26 @@ void vPortInterruptHandler( void );
    LOAD_VAR  r1, pxCurrentTCB
    sw        (r1+0), sp
 .endm
+#endif
+
+
+/*! ---------------------------------------------------------------------------
+ * @brief Function initialized the stack pointer with the actual pointer of
+ *        the task control block (TCB), and adds to the pointer of TCB
+ *        the value sp + ST_REG_SIZE.
+ */
+#ifdef __DOXYGEN__
+STATIC void _initStackWithTCB( void ) {}
+#else
+.type _initStackWithTCB, @function
+_initStackWithTCB:
+   LOAD_VAR  r1, pxCurrentTCB    /* Load the pointer of the task control block in register R1. */
+   mv        r2, r1              /* Copy R1 to R2 */
+   lw        sp, (r2+0)          /* After access, SP (r28) hold stack pointer from actual TCB */
+   addi      r1, sp, ST_REG_SIZE /* Calculate new stack pointer */
+   sw        (r2+0), r1          /* Store new Stack pointer in actual TCB */
+   ret
+.size _initStackWithTCB, .-_initStackWithTCB
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -286,19 +310,20 @@ void vPortInterruptHandler( void );
    /*
     * Loading last stack value from Task Control Block (TCB).
     */
-   LOAD_VAR  r1, pxCurrentTCB    /* Load the pointer of the task control block in register R1. */
-   mv        r2, r1              /* Copy R1 to R2 */
-   lw        sp, (r1+0)          /* After access, SP (r28) hold stack pointer from actual TCB */
-   addi      r1, sp, ST_REG_SIZE /* Calculate new stack pointer */
-   sw        (r2+0), r1          /* Store new Stack pointer in actual TCB */
+   calli _initStackWithTCB
 
    /*
     * Restoring all register values (except R0, R1 and R28 (SP))
     * for the new context.
     */
-   RESTORE_REGISTERS
+   calli _restoreRegisters
+   OS_RESTORE_RA
 .endm
 #endif
+
+/*===========================================================================*/
+/*=                            Public functions                             =*/
+/*===========================================================================*/
 
 #ifdef CONFIG_RTOS
 /*! ---------------------------------------------------------------------------
@@ -313,7 +338,7 @@ vStartFirstTask:
    sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
    ENABLE_INTERRUPTS_BY_ERET
    RESTORE_CONTEXT
-   RESTORE_REMANING_REGISTERS_AND_ERET
+   bi _restoreRemainingRegistersAndERET
 #endif
 
 #ifdef CONFIG_PATCH_LM32_BUG
@@ -323,9 +348,9 @@ vStartFirstTask:
  * @brief Function for context switching it enables the IRQs as well.
  */
 #ifdef __DOXYGEN__
-void vPortYield( void ) { vTaskSwitchContext(); }
+void vPortYieldLm32( void ) { vTaskSwitchContext(); }
 #else
-vPortYield:
+vPortYieldLm32:
    DISABLE_INTERRUPTS
    SAVE_CONTEXT                 /* Save all registers */
 
@@ -351,15 +376,14 @@ vPortYield:
    RESTORE_CONTEXT              /* Restore all registers except R1. */
    lw        r1, __cscf         /* Load context change cause flag in r1 */
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
-   mv        ea, ra             /* Return-Address is stored in RA */
+   mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
 L_INT_SAVE:
-#if 1
+
    LOAD_VAR  r1, __atomic_section_nesting_count
    bne       r1, r0, L_NOT_ENABLE /* Jump to L_NOT_ENABLE if nesting count not zero */
-#endif
    ENABLE_INTERRUPTS_BY_ERET
 L_NOT_ENABLE:
-   RESTORE_REMANING_REGISTERS_AND_ERET
+   bi _restoreRemainingRegistersAndERET
 #endif
 
 #endif /* ifdef CONFIG_RTOS */
@@ -381,11 +405,11 @@ vPortInterruptHandler:
    RESTORE_CONTEXT              /* Restore all registers except R1. */
    lw        r1, __cscf         /* Load context switch cause flag in r1 */
    bne       r0, r1, L_RETURN   /* Jump if context change was caused from LM32 exception  */
-   mv        ea, ra             /* Return-Address is stored in RA */
+   mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
 L_RETURN:
    sw        __cscf, r0 //!!
    ENABLE_INTERRUPTS_BY_ERET
-   RESTORE_REMANING_REGISTERS_AND_ERET
+   bi _restoreRemainingRegistersAndERET
 #endif
 
 /*================================== EOF ====================================*/

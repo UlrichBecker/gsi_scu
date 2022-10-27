@@ -22,7 +22,7 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 # the user have to allocate memory explicit. In this case the macro
 # configSUPPORT_DYNAMIC_ALLOCATION will defined with 0 in portmacro.h.
 # The default is 1.
-RTOS_USING_HEAP = 1
+RTOS_USING_HEAP = 0
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 
