@@ -46,17 +46,25 @@
    #error Compiler switch CONFIG_RTOS has to be define in Makefile!
  #endif
 #endif
-#include "FreeRTOS.h"
-#include "task.h"
+#include <FreeRTOS.h>
+#include <task.h>
+#include <lm32_port_common.h>
 
 #ifndef CONFIG_NO_RTOS_TIMER
- #include "scu_lm32Timer.h"
+ #include <scu_lm32Timer.h>
 #endif
-#include "eb_console_helper.h"
+#include <eb_console_helper.h>
 
 #ifdef CONFIG_SCU
- #include "mini_sdb.h"
+ #include <mini_sdb.h>
 #endif
+
+#ifdef CONFIG_RTOS_PEDANTIC_CHECK
+ #include <string.h>
+#endif
+
+
+STATIC_ASSERT( ALIGN == sizeof(portSTACK_TYPE) );
 
 #if (configAPPLICATION_ALLOCATED_HEAP == 1)
   uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
@@ -68,29 +76,35 @@
 portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
                                        TaskFunction_t pxCode,
                                        void* pvParameters )
-{  /*
+{  
+   const portSTACK_TYPE* pStart = pxTopOfStack;
+
+   /*!
     * Place a 4 bytes of known values on the bottom of the stack.
     * This is just useful for debugging.
     * Position of "r0" this will not updated its always zero!
     * The compiler expects "r0" to be always 0!
     */
-   *pxTopOfStack = 0xC0FEAD03;
+   *pxTopOfStack = TCB_MAGIC;
    pxTopOfStack--;
 
-   /*
-    * Place the parameter on the stack in the expected location.
+   /*!
+    * Place the parameter for the task-function on the stack in
+    * the expected location.
     * Position of "r1"
     */
+   configASSERT( (pStart - pxTopOfStack) == 1 );
    *pxTopOfStack = (portSTACK_TYPE) pvParameters;
    pxTopOfStack--;
 
-   /*
-    * The registers from "r2" to "r27" can have
+   /*!
+    * The registers from "r2" to "r27" respectively "r10" can have
     * a arbitrary value.
     */
-   for( portSTACK_TYPE i = 2; i <= 27; i++ )
+   configASSERT( (pStart - pxTopOfStack) == 2 );
+   while( (pStart - pxTopOfStack) < STK_RA )
    {
-      *pxTopOfStack = i;
+      *pxTopOfStack = 0xAABBCCDD;
       pxTopOfStack--;
    }
 
@@ -99,6 +113,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of register "r29" alias "ra"
     * @see portasm.S
     */
+   configASSERT( (pStart - pxTopOfStack) == STK_RA );
    *pxTopOfStack = (portSTACK_TYPE) pxCode;
    pxTopOfStack--;
 
@@ -108,6 +123,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of register "r30" alias "ea"
     * @see portasm.S
     */
+   configASSERT( (pStart - pxTopOfStack) == STK_EA );
    *pxTopOfStack = (portSTACK_TYPE) pxCode;
    pxTopOfStack--;
 
@@ -117,11 +133,36 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * @see portasm.S
     * @see __cscf
     */
+   configASSERT( (pStart - pxTopOfStack) == TO_SAVE );
    *pxTopOfStack = (portSTACK_TYPE) 0;
    pxTopOfStack--;
 
+   configASSERT( (pStart - pxTopOfStack) <= configMINIMAL_STACK_SIZE );
    return pxTopOfStack;
 }
+
+#ifdef CONFIG_RTOS_PEDANTIC_CHECK
+/*! --------------------------------------------------------------------------
+ * @see portmacro.h
+ */
+void dbgPrintStackOfCurrentTCB( void )
+{
+   portSTACK_TYPE aTcb[configMINIMAL_STACK_SIZE+1];
+
+   mprintf( "\nTCB:\t0x%p\n", xTaskGetCurrentTaskHandle() );
+   if( xTaskGetCurrentTaskHandle() == NULL )
+      return;
+   
+   portENTER_CRITICAL();
+   memcpy( aTcb, GET_CURRENT_TCB_STACK_PTR(), sizeof( aTcb ) );
+   portEXIT_CRITICAL();
+   
+   for( unsigned int i = 0; i < ARRAY_SIZE(aTcb); i++ )
+   {
+      mprintf( "TCB[%02u]:\t0x%08X, %d\n", i, aTcb[i], aTcb[i] );
+   }
+}
+#endif /* ifdef CONFIG_RTOS_PEDANTIC_CHECK */
 
 #ifndef CONFIG_NO_RTOS_TIMER
 /*! ---------------------------------------------------------------------------

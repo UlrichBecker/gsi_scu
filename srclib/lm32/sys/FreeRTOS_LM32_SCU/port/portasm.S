@@ -18,6 +18,7 @@
 
 #include <lm32signal.h>
 #include <lm32AssemblerMacros.h>
+#include <lm32_port_common.h>
 
 /*!
  * @brief Pointer to current Task Control Block.
@@ -64,13 +65,6 @@ void vPortInterruptHandler( void );
 .global vPortInterruptHandler
 #endif
 
-/*!
- * @brief Storage offset in 32-bit values.
- * @note In this case a variable for the context switch flag will used,
- *       therefore the storage offset for register saving will be one.
- * @see __cscf
- */
-#define ST_OFS 1
 
 
 /*! ---------------------------------------------------------------------------
@@ -89,19 +83,6 @@ void vPortInterruptHandler( void );
 .align ALIGN
 #endif
 
-#define MICO32_FULL_CONTEXT_SAVE_RESTORE
-
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-  #define TO_SAVE 30
-  #define STK_RA  28
-  #define STK_EA  29
-  #define STK_BA   0
-#else
-  #define TO_SAVE 13
-  #define STK_RA  11
-  #define STK_EA  12
-  #define STK_BA   0
-#endif
 
 /*!
  * @brief Stack size in bytes for saving all registers and system variables. 
@@ -407,7 +388,6 @@ vPortInterruptHandler:
    bne       r0, r1, L_RETURN   /* Jump if context change was caused from LM32 exception  */
    mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
 L_RETURN:
-   sw        __cscf, r0 //!!
    ENABLE_INTERRUPTS_BY_ERET
    bi _restoreRemainingRegistersAndERET
 #endif

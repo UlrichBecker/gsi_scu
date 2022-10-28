@@ -7,7 +7,7 @@
  *
  * This test-program scans the SCU-bus and creates a task for each found
  * SCU-bus slave.
- * Each created task increments or decrements its echo register in a alternating
+ * Each created task increments or decrementsq its echo register in a alternating
  * manner depending of the slave position in the scu-bus slot.
  */
 #ifndef CONFIG_RTOS
@@ -52,6 +52,7 @@ typedef struct
  */
 NO_INLINE STATIC void vTaskScuBusSlave( void* pvParameters )
 {
+   CHECK_TCB();
    const SLAVE_T* pSlave = (SLAVE_T*) pvParameters;
    volatile  uint16_t count;
 
@@ -96,6 +97,8 @@ NO_INLINE STATIC void vTaskScuBusSlave( void* pvParameters )
  */
 STATIC void vTaskMain( void* pvParameters UNUSED )
 {
+   CHECK_TCB();
+   //dbgPrintStackOfCurrentTCB();
    mprintf( ESC_FG_BLUE ESC_BOLD "Task \"%s\" started\n%d tasks running\n",
             pcTaskGetName( NULL ), uxTaskGetNumberOfTasks() );
 
@@ -120,19 +123,12 @@ STATIC void vTaskMain( void* pvParameters UNUSED )
 
    SLAVE_T slaves[MAX_TEST_SLAVES];
    unsigned int dev = 0;
-   /*
-    * For all slots.
-    */
-   for( unsigned int slot = SCUBUS_START_SLOT; slot <= MAX_SCU_SLAVES; slot++ )
-   {
-      if( !scuBusIsSlavePresent( slavePersentFlags, slot ) )
-      { /*
-         * No slave in this slot.
-         * Jump to the next slot...
-         */
-         continue;
-      }
 
+   /*
+    * For all found slaves.
+    */
+   SCU_BUS_FOR_EACH_SLAVE( slot, slavePersentFlags )
+   {
       /*
        * In this slot is a slave.
        */

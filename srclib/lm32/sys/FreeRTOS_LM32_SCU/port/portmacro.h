@@ -34,8 +34,10 @@
     */
    #include <scu_assert.h>
    #define configASSERT SCU_ASSERT
+   #define CHECK_TCB() configASSERT( GET_CURRENT_TCB_STACK_PTR()[0] == TCB_MAGIC )
 #else
    #define configASSERT(__e)
+   #define CHECK_TCB()
 #endif
 
 
@@ -162,7 +164,9 @@ typedef uint32_t       UBaseType_t;
   #define configMAX_PRIORITIES          3
 #endif
 
-
+#define TCB_MAGIC 0xC0FEAD03
+#define GET_CURRENT_TCB_STACK_PTR() \
+   ((portSTACK_TYPE*)*((portSTACK_TYPE*)xTaskGetCurrentTaskHandle()))
 
 /*-----------------------------------------------------------*/
 
@@ -182,6 +186,8 @@ typedef uint32_t       UBaseType_t;
 #define configPRINTF( a )     mprintf a
 #define configMIN             min
 #define configMAX             max
+
+#define GET_CURRENT_TCB_STACK() ((portSTACK_TYPE*)*((portSTACK_TYPE*)xTaskGetCurrentTaskHandle()))
 
 /*-----------------------------------------------------------*/
 
@@ -223,6 +229,17 @@ typedef uint32_t       UBaseType_t;
 
 #define portTASK_FUNCTION( vFunction, pvParameters ) \
    void vFunction( void *pvParameters )
+
+/*! --------------------------------------------------------------------------
+ * @brief Debug function prints the content of thr stack belonging
+ *        to the current task.
+ * @note  This function is only active when CONFIG_RTOS_PEDANTIC_CHECK is defined!
+ */
+#ifdef CONFIG_RTOS_PEDANTIC_CHECK
+   void dbgPrintStackOfCurrentTCB( void );
+#else
+   #define dbgPrintStackOfCurrentTCB()
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Start first task and enable global interrupt
