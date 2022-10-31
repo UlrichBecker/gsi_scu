@@ -98,7 +98,10 @@ NO_INLINE STATIC void vTaskScuBusSlave( void* pvParameters )
 STATIC void vTaskMain( void* pvParameters UNUSED )
 {
    CHECK_TCB();
-   //dbgPrintStackOfCurrentTCB();
+ //  dbgPrintStackOfCurrentTCB();
+ //  while( true );
+ //  mprintf( "Magic: 0x%08X\n", GET_CURRENT_TCB_STACK_PTR()[TO_SAVE_REGS + ST_OFS] );
+ //  mprintf( "Magic: 0x%08X\n", GET_CURRENT_TCB_STACK_PTR()[0] );
    mprintf( ESC_FG_BLUE ESC_BOLD "Task \"%s\" started\n%d tasks running\n",
             pcTaskGetName( NULL ), uxTaskGetNumberOfTasks() );
 

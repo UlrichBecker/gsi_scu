@@ -47,6 +47,8 @@ extern volatile uint32_t __atomic_section_nesting_count
 
 .extern _irq_entry
 
+.extern dbgPrintValue
+
 #ifdef __DOXYGEN__
 void vStartFirstTask( void );
 #else
@@ -65,6 +67,10 @@ void vPortInterruptHandler( void );
 .global vPortInterruptHandler
 #endif
 
+#ifndef __DOXYGEN__
+.section .text
+.align ALIGN
+#endif
 
 
 /*! ---------------------------------------------------------------------------
@@ -78,23 +84,23 @@ void vPortInterruptHandler( void );
  */
 #define __cscf (sp + (ALIGN * (1 + 0)))
 
-#ifndef __DOXYGEN__
-.section .text
-.align ALIGN
-#endif
-
+/*! --------------------------------------------------------------------------
+ * @brief Defining of memory place for saving of the atomic section nesting
+ *        counter __atomic_section_nesting_count in each thread.
+ */
+#define __asnc (sp + (ALIGN * (1 + 1)))
 
 /*!
  * @brief Stack size in bytes for saving all registers and system variables. 
  * @note ST_OFS is the place of system variable __cscf
  */
-#define ST_REG_SIZE (ALIGN * (ST_OFS + TO_SAVE)) //29
+#define ST_REG_SIZE (ALIGN * (ST_OFS + TO_SAVE_REGS)) //29
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro calculates the absolute stack-pointer offset in bytes.
  * @param i Relative offset in 32-bit values.
  */
-#define OS_OFS_R(n)   (sp + (ALIGN * (ST_OFS + TO_SAVE - n)))
+#define OS_OFS_R(n)   (sp + (ALIGN * (ST_OFS + TO_SAVE_REGS - n)))
 
 
 #define OS_SAVE_R( n )    sw OS_OFS_R( n ), r##n
@@ -320,6 +326,7 @@ vStartFirstTask:
    ENABLE_INTERRUPTS_BY_ERET
    RESTORE_CONTEXT
    bi _restoreRemainingRegistersAndERET
+.size vStartFirstTask, .-vStartFirstTask
 #endif
 
 #ifdef CONFIG_PATCH_LM32_BUG
@@ -343,6 +350,7 @@ vPortYieldLm32:
    addi      r2, r2, 1
    sw        (r1+0), r2
 
+
    sw        __cscf, r0         /* Set the context switch cause flag to zero */
    calli     vTaskSwitchContext /* Call this C-function implemented in task.c */
 
@@ -355,6 +363,11 @@ vPortYieldLm32:
    sw        (r1+0), r2
 
    RESTORE_CONTEXT              /* Restore all registers except R1. */
+
+      //mvi r1, 0x1964
+   lw r1, __asnc
+  // calli dbgPrintValue
+
    lw        r1, __cscf         /* Load context change cause flag in r1 */
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
    mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
@@ -365,6 +378,7 @@ L_INT_SAVE:
    ENABLE_INTERRUPTS_BY_ERET
 L_NOT_ENABLE:
    bi _restoreRemainingRegistersAndERET
+.size vPortYieldLm32, .-vPortYieldLm32
 #endif
 
 #endif /* ifdef CONFIG_RTOS */
@@ -390,6 +404,7 @@ vPortInterruptHandler:
 L_RETURN:
    ENABLE_INTERRUPTS_BY_ERET
    bi _restoreRemainingRegistersAndERET
+.size vPortInterruptHandler, .-vPortInterruptHandler
 #endif
 
 /*================================== EOF ====================================*/

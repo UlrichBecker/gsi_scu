@@ -48,7 +48,6 @@
 #endif
 #include <FreeRTOS.h>
 #include <task.h>
-#include <lm32_port_common.h>
 
 #ifndef CONFIG_NO_RTOS_TIMER
  #include <scu_lm32Timer.h>
@@ -76,19 +75,22 @@ STATIC_ASSERT( ALIGN == sizeof(portSTACK_TYPE) );
 portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
                                        TaskFunction_t pxCode,
                                        void* pvParameters )
-{  
+{
    const portSTACK_TYPE* pStart = pxTopOfStack;
 
-   /*!
-    * Place a 4 bytes of known values on the bottom of the stack.
+   /*
+    * =================== r0 ====================
+    * Place in the position of "r0" a magic number.
     * This is just useful for debugging.
     * Position of "r0" this will not updated its always zero!
     * The compiler expects "r0" to be always 0!
     */
+   configASSERT( (pStart - pxTopOfStack) == 0 );
    *pxTopOfStack = TCB_MAGIC;
    pxTopOfStack--;
 
-   /*!
+   /*
+    * =================== r1 ====================
     * Place the parameter for the task-function on the stack in
     * the expected location.
     * Position of "r1"
@@ -97,19 +99,21 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    *pxTopOfStack = (portSTACK_TYPE) pvParameters;
    pxTopOfStack--;
 
-   /*!
+   /*
+    * ================ r2 to r27 ================
     * The registers from "r2" to "r27" respectively "r10" can have
     * a arbitrary value.
     */
    configASSERT( (pStart - pxTopOfStack) == 2 );
    while( (pStart - pxTopOfStack) < STK_RA )
    {
-      *pxTopOfStack = 0xAABBCCDD;
+      *pxTopOfStack = (pStart - pxTopOfStack);
       pxTopOfStack--;
    }
 
-   /*!
-    * The return address
+   /*
+    * =================== ra ====================
+    * The return address will keep the task-function.
     * Position of register "r29" alias "ra"
     * @see portasm.S
     */
@@ -117,7 +121,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    *pxTopOfStack = (portSTACK_TYPE) pxCode;
    pxTopOfStack--;
 
-   /*!
+   /*
+    * =================== ea ====================
     * The exception (interrupt) return address
     * - which in this case is the start of the task.
     * Position of register "r30" alias "ea"
@@ -127,16 +132,40 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    *pxTopOfStack = (portSTACK_TYPE) pxCode;
    pxTopOfStack--;
 
-   /*!
+   /*
+    * =================== ba ====================
+    * The exception (brake-point) return address
+    * - which in this case is the start of the task.
+    * Position of register "r31" alias "ba"
+    * @see portasm.S
+    */
+   configASSERT( (pStart - pxTopOfStack) == STK_BA );
+   *pxTopOfStack = (portSTACK_TYPE) pxCode;
+   pxTopOfStack--;
+
+   /*
+    * ================= __cscf ===================
     * Status information.
     * Position of context switch cause flag.
+    * Macro __cscf
     * @see portasm.S
     * @see __cscf
     */
-   configASSERT( (pStart - pxTopOfStack) == TO_SAVE );
+   configASSERT( (pStart - pxTopOfStack) == STK_CSCF );
    *pxTopOfStack = (portSTACK_TYPE) 0;
    pxTopOfStack--;
 
+   /*
+    * ================= __asnc ===================
+    * Stack position for saving the atomic section nesting counter
+    * for each task. Macro: __asnc
+    * __atomic_section_nesting_count
+    */
+   configASSERT( (pStart - pxTopOfStack) == STK_ASNC );
+   *pxTopOfStack = (portSTACK_TYPE)0x4711;
+   pxTopOfStack--;
+
+//   mprintf( "Final stack: %d\n", (pStart - pxTopOfStack) );
    configASSERT( (pStart - pxTopOfStack) <= configMINIMAL_STACK_SIZE );
    return pxTopOfStack;
 }
@@ -147,21 +176,30 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
  */
 void dbgPrintStackOfCurrentTCB( void )
 {
-   portSTACK_TYPE aTcb[configMINIMAL_STACK_SIZE+1];
+   portSTACK_TYPE aTcb[TO_SAVE_REGS + ST_OFS];
 
+   mprintf( "Magic: 0x%08X\n", GET_CURRENT_TCB_STACK_PTR()[TO_SAVE_REGS + ST_OFS] );
+  // CHECK_TCB();
    mprintf( "\nTCB:\t0x%p\n", xTaskGetCurrentTaskHandle() );
    if( xTaskGetCurrentTaskHandle() == NULL )
       return;
-   
+
    portENTER_CRITICAL();
-   memcpy( aTcb, GET_CURRENT_TCB_STACK_PTR(), sizeof( aTcb ) );
+   memcpy( aTcb, &GET_CURRENT_TCB_STACK_PTR()[1], sizeof( aTcb ) );
    portEXIT_CRITICAL();
-   
+
    for( unsigned int i = 0; i < ARRAY_SIZE(aTcb); i++ )
    {
-      mprintf( "TCB[%02u]:\t0x%08X, %d\n", i, aTcb[i], aTcb[i] );
+      mprintf( "TCB[%02u] (%02u):\t0x%08X, %d\n", i, ARRAY_SIZE(aTcb)-i-1, aTcb[i], aTcb[i] );
    }
 }
+
+void dbgPrintValue( const uint32_t v )
+{
+   mprintf( " Value: 0x%08X, %d\n", v, v );
+   //while( true );
+}
+
 #endif /* ifdef CONFIG_RTOS_PEDANTIC_CHECK */
 
 #ifndef CONFIG_NO_RTOS_TIMER
@@ -229,6 +267,8 @@ ONE_TIME_CALL void prvSetupTimer( void )
  */
 portBASE_TYPE xPortStartScheduler( void )
 {
+  // dbgPrintStackOfCurrentTCB(); //!!
+  // configASSERT( false );       //!!
 #ifndef CONFIG_NO_RTOS_TIMER
    /*
     * Setup the hardware to generate the tick.

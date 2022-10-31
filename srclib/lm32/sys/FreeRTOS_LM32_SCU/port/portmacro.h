@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <lm32Interrupts.h>
+#include <lm32_port_common.h>
 
 /* Define to trap errors during development. */
 #ifdef CONFIG_RTOS_PEDANTIC_CHECK
@@ -34,7 +35,8 @@
     */
    #include <scu_assert.h>
    #define configASSERT SCU_ASSERT
-   #define CHECK_TCB() configASSERT( GET_CURRENT_TCB_STACK_PTR()[0] == TCB_MAGIC )
+   #define CHECK_TCB() // configASSERT( GET_CURRENT_TCB_STACK_PTR()[0] == TCB_MAGIC )
+  // #define CHECK_TCB() // configASSERT( GET_CURRENT_TCB_STACK_PTR()[32] == TCB_MAGIC )
 #else
    #define configASSERT(__e)
    #define CHECK_TCB()
@@ -231,6 +233,7 @@ typedef uint32_t       UBaseType_t;
    void vFunction( void *pvParameters )
 
 /*! --------------------------------------------------------------------------
+ * @ingroup DEBUG
  * @brief Debug function prints the content of thr stack belonging
  *        to the current task.
  * @note  This function is only active when CONFIG_RTOS_PEDANTIC_CHECK is defined!
