@@ -84,23 +84,27 @@ void vPortInterruptHandler( void );
  */
 #define __cscf (sp + (ALIGN * (1 + 0)))
 
+#ifdef CONFIG_SAVE_ASNC
 /*! --------------------------------------------------------------------------
  * @brief Defining of memory place for saving of the atomic section nesting
  *        counter __atomic_section_nesting_count in each thread.
+ * @see https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
  */
 #define __asnc (sp + (ALIGN * (1 + 1)))
+
+#endif /* ifdef CONFIG_SAVE_ASNC */
 
 /*!
  * @brief Stack size in bytes for saving all registers and system variables. 
  * @note ST_OFS is the place of system variable __cscf
  */
-#define ST_REG_SIZE (ALIGN * (ST_OFS + TO_SAVE_REGS)) //29
+#define OS_STACK_BYTE_SIZE (ALIGN * OS_STACK_DWORD_SIZE)
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro calculates the absolute stack-pointer offset in bytes.
  * @param i Relative offset in 32-bit values.
  */
-#define OS_OFS_R(n)   (sp + (ALIGN * (ST_OFS + TO_SAVE_REGS - n)))
+#define OS_OFS_R(n)   (sp + (ALIGN * (OS_STACK_DWORD_SIZE - n)))
 
 
 #define OS_SAVE_R( n )    sw OS_OFS_R( n ), r##n
@@ -113,6 +117,22 @@ void vPortInterruptHandler( void );
 #define OS_RESTORE_RA  lw ra, OS_OFS_R(STK_RA)
 #define OS_RESTORE_EA  lw ea, OS_OFS_R(STK_EA)
 #define OS_RESTORE_BA  lw ba, OS_OFS_R(STK_BA)
+
+#ifdef CONFIG_SAVE_ASNC
+.macro OS_SAVE_ASNC
+   LOAD_VAR   r1, __atomic_section_nesting_count
+   sw __asnc, r1
+.endm
+
+.macro OS_RESTORE_ASNC
+   lw         r2, __asnc
+   LOAD_ADDR  r1, __atomic_section_nesting_count
+   sw         (r1+0), r2
+.endm
+#else
+  #define OS_SAVE_ASNC
+  #define OS_RESTORE_ASNC
+#endif /* /ifdef CONFIG_SAVE_ASNC */
 
 /*! ---------------------------------------------------------------------------
  * @brief Function saves all registers except SP and RA which needs a
@@ -154,6 +174,7 @@ _saveRegisters:
  #endif
    OS_SAVE_EA
    OS_SAVE_BA
+   OS_SAVE_ASNC
    ret
 .size _saveRegisters, .-_saveRegisters
 #endif
@@ -198,6 +219,7 @@ _restoreRegisters:
  #endif
    OS_RESTORE_EA
    OS_RESTORE_BA
+   OS_RESTORE_ASNC
    ret
 .size _restoreRegisters, .-_restoreRegisters
 #endif
@@ -215,7 +237,7 @@ STATIC void _restoreRemainingRegistersAndERET( void )
 _restoreRemainingRegistersAndERET:
    OS_RESTORE_R(1)
    OS_RESTORE_R(2)
-   addi sp, sp, ST_REG_SIZE
+   addi sp, sp, OS_STACK_BYTE_SIZE
    eret
 .size _restoreRemainingRegistersAndERET, .-_restoreRemainingRegistersAndERET
 #endif
@@ -254,7 +276,7 @@ _restoreRemainingRegistersAndERET:
    /*
     * Making space for the context on the stack.
     */
-   addi      sp,  sp, -ST_REG_SIZE   /* r28 */
+   addi      sp,  sp, -OS_STACK_BYTE_SIZE   /* r28 */
 
    OS_SAVE_RA
    calli _saveRegisters
@@ -271,7 +293,7 @@ _restoreRemainingRegistersAndERET:
 /*! ---------------------------------------------------------------------------
  * @brief Function initialized the stack pointer with the actual pointer of
  *        the task control block (TCB), and adds to the pointer of TCB
- *        the value sp + ST_REG_SIZE.
+ *        the value sp + OS_STACK_BYTE_SIZE.
  */
 #ifdef __DOXYGEN__
 STATIC void _initStackWithTCB( void ) {}
@@ -281,7 +303,7 @@ _initStackWithTCB:
    LOAD_VAR  r1, pxCurrentTCB    /* Load the pointer of the task control block in register R1. */
    mv        r2, r1              /* Copy R1 to R2 */
    lw        sp, (r2+0)          /* After access, SP (r28) hold stack pointer from actual TCB */
-   addi      r1, sp, ST_REG_SIZE /* Calculate new stack pointer */
+   addi      r1, sp, OS_STACK_BYTE_SIZE /* Calculate new stack pointer */
    sw        (r2+0), r1          /* Store new Stack pointer in actual TCB */
    ret
 .size _initStackWithTCB, .-_initStackWithTCB
@@ -312,7 +334,6 @@ _initStackWithTCB:
 /*=                            Public functions                             =*/
 /*===========================================================================*/
 
-#ifdef CONFIG_RTOS
 /*! ---------------------------------------------------------------------------
  * @brief Start first task, resets the global variable
  *        __atomic_section_nesting_count and enable global interrupt
@@ -321,8 +342,10 @@ _initStackWithTCB:
 void vStartFirstTask( void ) {}
 #else
 vStartFirstTask:
+ #ifndef CONFIG_SAVE_ASNC
    LOAD_ADDR r1, __atomic_section_nesting_count
    sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
+ #endif
    ENABLE_INTERRUPTS_BY_ERET
    RESTORE_CONTEXT
    bi _restoreRemainingRegistersAndERET
@@ -364,10 +387,6 @@ vPortYieldLm32:
 
    RESTORE_CONTEXT              /* Restore all registers except R1. */
 
-      //mvi r1, 0x1964
-   lw r1, __asnc
-  // calli dbgPrintValue
-
    lw        r1, __cscf         /* Load context change cause flag in r1 */
    bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
    mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
@@ -380,8 +399,6 @@ L_NOT_ENABLE:
    bi _restoreRemainingRegistersAndERET
 .size vPortYieldLm32, .-vPortYieldLm32
 #endif
-
-#endif /* ifdef CONFIG_RTOS */
 
 /*! ---------------------------------------------------------------------------
  * @brief Interrupt Handler. Jump target from _interrupt_handler

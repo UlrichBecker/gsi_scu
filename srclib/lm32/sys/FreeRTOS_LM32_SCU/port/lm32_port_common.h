@@ -1,7 +1,7 @@
 /*!
  * @file  lm32_port_common.h Common includefile for port.c and portasm.s
  * @brief 
- *
+ * @note Header only
  * @date 28.10.2022
  * @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
@@ -14,7 +14,7 @@
 #define _LM32_PORT_COMMON_H
 
 #define MICO32_FULL_CONTEXT_SAVE_RESTORE
-
+#define CONFIG_SAVE_ASNC
 /*
  * 31 registers will saved by context switch
  * whereby 30 of the 32 registers will relay saved:
@@ -28,13 +28,16 @@
   #define STK_RA        28
   #define STK_EA        29
   #define STK_BA        30
-  #define STK_CSCF      (TO_SAVE_REGS + 0)
-  #define STK_ASNC      (TO_SAVE_REGS + 1)
 #else
-  #define TO_SAVE_REGS 13
+  #define TO_SAVE_REGS 14
   #define STK_RA  11
   #define STK_EA  12
-  #define STK_BA   0
+  #define STK_BA  13
+#endif
+
+#define STK_CSCF      (TO_SAVE_REGS + 0)
+#ifdef CONFIG_SAVE_ASNC
+ #define STK_ASNC      (TO_SAVE_REGS + 1)
 #endif
 
 /*!
@@ -43,9 +46,13 @@
  *       therefore the storage offset for register saving will be one.
  * @see __cscf
  */
-#define ST_OFS 2 //(STK_ASNC - TO_SAVE_REGS)
+#ifdef CONFIG_SAVE_ASNC
+ #define ST_OFS 2 //(STK_ASNC - TO_SAVE_REGS)
+#else
+ #define ST_OFS 1
+#endif
 
-
+#define OS_STACK_DWORD_SIZE (ST_OFS + TO_SAVE_REGS)
 
 #define CSCF_POS   0
 

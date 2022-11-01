@@ -64,6 +64,7 @@
 
 
 STATIC_ASSERT( ALIGN == sizeof(portSTACK_TYPE) );
+STATIC_ASSERT( OS_STACK_DWORD_SIZE <= configMINIMAL_STACK_SIZE );
 
 #if (configAPPLICATION_ALLOCATED_HEAP == 1)
   uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
@@ -155,18 +156,22 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    *pxTopOfStack = (portSTACK_TYPE) 0;
    pxTopOfStack--;
 
+#ifdef CONFIG_SAVE_ASNC
    /*
     * ================= __asnc ===================
     * Stack position for saving the atomic section nesting counter
     * for each task. Macro: __asnc
     * __atomic_section_nesting_count
+    * https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
     */
    configASSERT( (pStart - pxTopOfStack) == STK_ASNC );
-   *pxTopOfStack = (portSTACK_TYPE)0x4711;
+   *pxTopOfStack = (portSTACK_TYPE) 0;
    pxTopOfStack--;
+#endif /* ifdef CONFIG_SAVE_ASNC */
 
-//   mprintf( "Final stack: %d\n", (pStart - pxTopOfStack) );
-   configASSERT( (pStart - pxTopOfStack) <= configMINIMAL_STACK_SIZE );
+   configASSERT( (pStart - pxTopOfStack) == OS_STACK_DWORD_SIZE );
+   
+  // mprintf( "Final stack: %d\n", (pStart - pxTopOfStack) );
    return pxTopOfStack;
 }
 
@@ -176,9 +181,9 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
  */
 void dbgPrintStackOfCurrentTCB( void )
 {
-   portSTACK_TYPE aTcb[TO_SAVE_REGS + ST_OFS];
+   portSTACK_TYPE aTcb[OS_STACK_DWORD_SIZE];
 
-   mprintf( "Magic: 0x%08X\n", GET_CURRENT_TCB_STACK_PTR()[TO_SAVE_REGS + ST_OFS] );
+   mprintf( "Magic: 0x%08X\n", GET_CURRENT_TCB_STACK_PTR()[OS_STACK_DWORD_SIZE] );
   // CHECK_TCB();
    mprintf( "\nTCB:\t0x%p\n", xTaskGetCurrentTaskHandle() );
    if( xTaskGetCurrentTaskHandle() == NULL )
@@ -267,7 +272,7 @@ ONE_TIME_CALL void prvSetupTimer( void )
  */
 portBASE_TYPE xPortStartScheduler( void )
 {
-  // dbgPrintStackOfCurrentTCB(); //!!
+   dbgPrintStackOfCurrentTCB(); //!!
   // configASSERT( false );       //!!
 #ifndef CONFIG_NO_RTOS_TIMER
    /*
