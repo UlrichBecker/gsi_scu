@@ -77,8 +77,17 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
                                        TaskFunction_t pxCode,
                                        void* pvParameters )
 {
-   const portSTACK_TYPE* pStart = pxTopOfStack;
+   #define PUSH_STACK( value )                  \
+   {                                            \
+      *pxTopOfStack = (portSTACK_TYPE) (value); \
+      pxTopOfStack--;                           \
+   }
 
+   const portSTACK_TYPE* pStart = pxTopOfStack;
+   
+   #define STACK_POSITION() (pStart - pxTopOfStack)
+   #define CHECK_STACK_POSITION( pos ) configASSERT( STACK_POSITION() == pos )
+   
    /*
     * =================== r0 ====================
     * Place in the position of "r0" a magic number.
@@ -86,9 +95,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of "r0" this will not updated its always zero!
     * The compiler expects "r0" to be always 0!
     */
-   configASSERT( (pStart - pxTopOfStack) == 0 );
-   *pxTopOfStack = TCB_MAGIC;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( 0 );
+   PUSH_STACK( TCB_MAGIC );
 
    /*
     * =================== r1 ====================
@@ -96,21 +104,17 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * the expected location.
     * Position of "r1"
     */
-   configASSERT( (pStart - pxTopOfStack) == 1 );
-   *pxTopOfStack = (portSTACK_TYPE) pvParameters;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( 1 );
+   PUSH_STACK( pvParameters );
 
    /*
     * ================ r2 to r27 ================
     * The registers from "r2" to "r27" respectively "r10" can have
     * a arbitrary value.
     */
-   configASSERT( (pStart - pxTopOfStack) == 2 );
-   while( (pStart - pxTopOfStack) < STK_RA )
-   {
-      *pxTopOfStack = (pStart - pxTopOfStack);
-      pxTopOfStack--;
-   }
+   CHECK_STACK_POSITION( 2 );
+   while( STACK_POSITION() < STK_RA )
+      PUSH_STACK( STACK_POSITION() );
 
    /*
     * =================== ra ====================
@@ -118,10 +122,9 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of register "r29" alias "ra"
     * @see portasm.S
     */
-   configASSERT( (pStart - pxTopOfStack) == STK_RA );
-   *pxTopOfStack = (portSTACK_TYPE) pxCode;
-   pxTopOfStack--;
-
+   CHECK_STACK_POSITION( STK_RA );
+   PUSH_STACK( pxCode );
+ 
    /*
     * =================== ea ====================
     * The exception (interrupt) return address
@@ -129,9 +132,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of register "r30" alias "ea"
     * @see portasm.S
     */
-   configASSERT( (pStart - pxTopOfStack) == STK_EA );
-   *pxTopOfStack = (portSTACK_TYPE) pxCode;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( STK_EA );
+   PUSH_STACK( pxCode );
 
    /*
     * =================== ba ====================
@@ -140,9 +142,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * Position of register "r31" alias "ba"
     * @see portasm.S
     */
-   configASSERT( (pStart - pxTopOfStack) == STK_BA );
-   *pxTopOfStack = (portSTACK_TYPE) pxCode;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( STK_BA );
+   PUSH_STACK( pxCode );
 
    /*
     * ================= __cscf ===================
@@ -152,9 +153,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * @see portasm.S
     * @see __cscf
     */
-   configASSERT( (pStart - pxTopOfStack) == STK_CSCF );
-   *pxTopOfStack = (portSTACK_TYPE) 0;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( STK_CSCF );
+   PUSH_STACK( 0 );
 
 #ifdef CONFIG_SAVE_ASNC
    /*
@@ -164,12 +164,11 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * __atomic_section_nesting_count
     * https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
     */
-   configASSERT( (pStart - pxTopOfStack) == STK_ASNC );
-   *pxTopOfStack = (portSTACK_TYPE) 0;
-   pxTopOfStack--;
+   CHECK_STACK_POSITION( STK_ASNC );
+   PUSH_STACK( 0 );
 #endif /* ifdef CONFIG_SAVE_ASNC */
 
-   configASSERT( (pStart - pxTopOfStack) == OS_STACK_DWORD_SIZE );
+   CHECK_STACK_POSITION( OS_STACK_DWORD_SIZE );
    
   // mprintf( "Final stack: %d\n", (pStart - pxTopOfStack) );
    return pxTopOfStack;
@@ -272,7 +271,7 @@ ONE_TIME_CALL void prvSetupTimer( void )
  */
 portBASE_TYPE xPortStartScheduler( void )
 {
-   dbgPrintStackOfCurrentTCB(); //!!
+   //dbgPrintStackOfCurrentTCB(); //!!
   // configASSERT( false );       //!!
 #ifndef CONFIG_NO_RTOS_TIMER
    /*

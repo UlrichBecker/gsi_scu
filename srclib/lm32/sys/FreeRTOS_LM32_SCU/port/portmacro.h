@@ -260,6 +260,9 @@ void vStartFirstTask( void );
  */
 void vPortYieldLm32( void );
 
+
+
+#if 1
 #ifdef CONFIG_CHECK_YIELD_PEDANTIC
    #define portYIELD()    \
    {                      \
@@ -274,7 +277,9 @@ void vPortYieldLm32( void );
       vPortYieldLm32();   \
    }
 #endif
-
+#else
+#define portYIELD vPortYieldLm32
+#endif
 #ifdef __cplusplus
 }
 #endif

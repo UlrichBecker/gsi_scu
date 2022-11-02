@@ -253,7 +253,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    mprintf( "Creating task \"Count up\"\n" );
    status = xTaskCreate( vTaskCountUp,
                          "Count up",
-                         configMINIMAL_STACK_SIZE,
+                         configMINIMAL_STACK_SIZE + 100,
                          NULL,
                          TEST_TASK_PRIORITY,
                          NULL
@@ -264,7 +264,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    mprintf( "Creating task \"Count down\"\n" );
    status = xTaskCreate( vTaskCuontDown,
                          "Count down",
-                         configMINIMAL_STACK_SIZE,
+                         configMINIMAL_STACK_SIZE + 100,
                          NULL,
                          TEST_TASK_PRIORITY,
                          NULL
@@ -275,7 +275,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    mprintf( "Creating task \"Monitor\"\n" );
    status = xTaskCreate( vTaskMonitor,
                          "Monitor",
-                         configMINIMAL_STACK_SIZE * 4,
+                         configMINIMAL_STACK_SIZE + 100,
                          NULL,
                          TEST_TASK_PRIORITY,
                          NULL

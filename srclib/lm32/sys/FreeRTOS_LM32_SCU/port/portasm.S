@@ -135,8 +135,8 @@ void vPortInterruptHandler( void );
 #endif /* /ifdef CONFIG_SAVE_ASNC */
 
 /*! ---------------------------------------------------------------------------
- * @brief Function saves all registers except SP and RA which needs a
- *        special handling.
+ * @brief Function saves all registers and the atomic nesting counter
+ *        except SP and RA which needs a special handling.
  */
 #ifdef __DOXYGEN__
 STATIC void _saveRegisters( void ) {}
@@ -180,7 +180,8 @@ _saveRegisters:
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief function restores all registers except R1, R2, RA and SP.
+ * @brief function restores all registers and the atomic nesting counter 
+ *        except R1, R2, RA and SP.
  * @note  R1, R2 and SP will restored in function _restoreRemainingRegistersAndERET.
  *        Return-address RA needs a special handling.
  * @see _restoreRemainingRegistersAndERET
@@ -235,6 +236,10 @@ STATIC void _restoreRemainingRegistersAndERET( void )
 #else
 .type _restoreRemainingRegistersAndERET, @function
 _restoreRemainingRegistersAndERET:
+   lw  r1, __cscf         /* Load context change cause flag in r1 */
+   bne r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
+   mv  ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
+L_INT_SAVE:
    OS_RESTORE_R(1)
    OS_RESTORE_R(2)
    addi sp, sp, OS_STACK_BYTE_SIZE
@@ -373,25 +378,21 @@ vPortYieldLm32:
    addi      r2, r2, 1
    sw        (r1+0), r2
 
-
    sw        __cscf, r0         /* Set the context switch cause flag to zero */
    calli     vTaskSwitchContext /* Call this C-function implemented in task.c */
 
+#ifndef CONFIG_SAVE_ASNC
    /*
     * __atomic_section_nesting_count--;
+    * When the nesting counter becomes restored then it's not necessary
+    * to decrement it here.
     */
    LOAD_ADDR r1, __atomic_section_nesting_count
    lw        r2, (r1+0)
    addi      r2, r2, -1
    sw        (r1+0), r2
-
-   RESTORE_CONTEXT              /* Restore all registers except R1. */
-
-   lw        r1, __cscf         /* Load context change cause flag in r1 */
-   bne       r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
-   mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
-L_INT_SAVE:
-
+#endif
+   RESTORE_CONTEXT              /* Restore all registers except R1, R2 and SP. */
    LOAD_VAR  r1, __atomic_section_nesting_count
    bne       r1, r0, L_NOT_ENABLE /* Jump to L_NOT_ENABLE if nesting count not zero */
    ENABLE_INTERRUPTS_BY_ERET
@@ -415,10 +416,6 @@ vPortInterruptHandler:
    mvi       r1, SIGINT         /* Argument for C-function _irq_entry (will ignored)*/
    calli     _irq_entry         /* Call this C- callback function */
    RESTORE_CONTEXT              /* Restore all registers except R1. */
-   lw        r1, __cscf         /* Load context switch cause flag in r1 */
-   bne       r0, r1, L_RETURN   /* Jump if context change was caused from LM32 exception  */
-   mv        ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
-L_RETURN:
    ENABLE_INTERRUPTS_BY_ERET
    bi _restoreRemainingRegistersAndERET
 .size vPortInterruptHandler, .-vPortInterruptHandler

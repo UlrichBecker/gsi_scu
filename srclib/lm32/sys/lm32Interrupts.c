@@ -159,6 +159,12 @@ void irqPrintInfo( uint32_t ie,  uint32_t nc )
             nc, ie,
             irqGetPendingRegister() );
 }
+
+void irqPrintNestingCounter( void )
+{
+   mprintf( "\nAtomic nesting count: 0x%08X, %d\n",
+            __atomic_section_nesting_count, __atomic_section_nesting_count );
+}
 #endif
 
 #if defined( CONFIG_RTOS ) && !defined( CONFIG_IRQ_ENABLING_IN_ATOMIC_SECTIONS )
