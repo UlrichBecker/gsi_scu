@@ -24,20 +24,23 @@
  * of stack is 33 words.
  */
 #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-  #define TO_SAVE_REGS  31
-  #define STK_RA        28
-  #define STK_EA        29
-  #define STK_BA        30
+  #define TO_SAVE_REGS 31
+  #define STK_RA       28
+  #define STK_EA       29
+  #define STK_BA       30
 #else
   #define TO_SAVE_REGS 14
-  #define STK_RA  11
-  #define STK_EA  12
-  #define STK_BA  13
+  #define STK_RA       11
+  #define STK_EA       12
+  #define STK_BA       13
 #endif
 
-#define STK_CSCF      (TO_SAVE_REGS + 0)
+#define CSCF_POS 0
+#define STK_CSCF  (TO_SAVE_REGS + STK_CSCF)
+
 #ifdef CONFIG_SAVE_ASNC
- #define STK_ASNC      (TO_SAVE_REGS + 1)
+ #define ASNC_POS 1
+ #define STK_ASNC (TO_SAVE_REGS + ASNC_POS)
 #endif
 
 /*!
@@ -47,11 +50,15 @@
  * @see __cscf
  */
 #ifdef CONFIG_SAVE_ASNC
- #define ST_OFS 2 //(STK_ASNC - TO_SAVE_REGS)
+ #define ST_OFS 2
 #else
  #define ST_OFS 1
 #endif
 
+/*!
+ * @brief Number of reserved DWORDs (32-bit values) for the registers,
+ *        the task switch cause flag and the atomic nesting counter.
+ */
 #define OS_STACK_DWORD_SIZE (ST_OFS + TO_SAVE_REGS)
 
 #define CSCF_POS   0

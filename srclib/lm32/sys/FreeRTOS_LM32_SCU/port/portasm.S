@@ -82,7 +82,7 @@ void vPortInterruptHandler( void );
  *       * If its value equal zero, so the context saving was caused by
  *         the FreeRTOS scheduler.
  */
-#define __cscf (sp + (ALIGN * (1 + 0)))
+#define __cscf (sp + (ALIGN * (1 + CSCF_POS)))
 
 #ifdef CONFIG_SAVE_ASNC
 /*! --------------------------------------------------------------------------
@@ -90,7 +90,7 @@ void vPortInterruptHandler( void );
  *        counter __atomic_section_nesting_count in each thread.
  * @see https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
  */
-#define __asnc (sp + (ALIGN * (1 + 1)))
+#define __asnc (sp + (ALIGN * (1 + ASNC_POS)))
 
 #endif /* ifdef CONFIG_SAVE_ASNC */
 
