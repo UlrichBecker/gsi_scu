@@ -30,15 +30,20 @@
  * @code
  *  saft-ctl tr0 inject 0x1122334455667788 0x8877887766556642 0
  * @endcode
- *
+ * - or in a loop:
+ * @code
+ * while [ true ]; do  saft-ctl tr0 inject 0x1122334455667788 0x8877887766556642 0; done
+ * @endcode
  */
-#include "eb_console_helper.h"
-#include "lm32signal.h"
-#include "scu_msi.h"
-#include "eca_queue_type.h"
-#include "scu_lm32Timer.h"
-#include "FreeRTOS.h"
-
+#include <eb_console_helper.h>
+#include <lm32signal.h>
+#include <scu_msi.h>
+#include <eca_queue_type.h>
+#include <scu_lm32Timer.h>
+#include <FreeRTOS.h>
+#include <task.h>
+#include <ros_timeout.h>
+#include <scu_assert.h>
 
 #ifndef CONFIG_RTOS
    #error "This project provides FreeRTOS"
@@ -64,31 +69,16 @@ ECA_CONTROL_T* g_pEcaCtl;
  */
 ECA_QUEUE_ITEM_T* g_pEcaQueue;
 
-#if 0
-/*! ---------------------------------------------------------------------------
- * @brief Reorders the interrupt priority.
- *
- * This gives the possibility to reorder the interrupt priority if really
- * necessary.\n
- * In this example its just for test purposes.
- *
- * @note When this function is implemented, then the default function
- *       implemented in module lm32interrupts.c will
- *       overwritten by this function.
- */
-unsigned int _irqReorderPriority( const unsigned int prio )
+typedef struct
 {
-   /*
-    * Here the the interrupt priorities of the timer interrupt and the
-    * ECA-Interrupt becomes exchanged.
-    */
-   switch( prio )
-   {
-      case ECA_INTERRUPT_NUMBER: return TIMER_IRQ;
-      case TIMER_IRQ:            return ECA_INTERRUPT_NUMBER;
-   }
-   return prio;
-}
+   unsigned int irq;
+   unsigned int msi;
+} COUNTERS_T;
+
+volatile COUNTERS_T g_counters = {0,0};
+
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+volatile uint16_t* g_pScuBusBase = NULL;
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -155,23 +145,23 @@ STATIC void onIrqEcaEvent( const unsigned int intNum,
 {
    MSI_ITEM_T m;
 
+   g_counters.irq++;
+   
    //irqMsiCopyObjectAndRemove( &m, intNum );
    while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
    {
-   }
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief Pop pending embedded CPU actions from an ECA queue and handle them
- */
-STATIC inline void ecaHandler( void )
-{
-   const unsigned int pending = ecaControlGetAndResetLM32ValidCount( g_pEcaCtl );
-   for( unsigned int i = 0; i < pending; i++ )
-   {
-      if( !ecaIsValid( g_pEcaQueue ) )
+      if( (m.msg & ECA_VALID_ACTION) == 0 )
          continue;
-      ecaPop( g_pEcaQueue );
+      const unsigned int valCnt = ecaControlGetAndResetLM32ValidCount( g_pEcaCtl );
+      if( valCnt == 0 )
+         continue;
+      for( unsigned int i = 0; i < valCnt; i++ )
+      {
+         if( !ecaIsValid( g_pEcaQueue ) )
+            continue;
+         ecaPop( g_pEcaQueue );
+         g_counters.msi++;
+      }
    }
 }
 
@@ -183,6 +173,13 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
    mprintf( ESC_BOLD ESC_FG_CYAN "Function \"%s()\" of task \"%s\" started\n"
             ESC_NORMAL,
             __func__, pcTaskGetName( NULL ) );
+
+#ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
+   g_pScuBusBase = (uint16_t*)find_device_adr(GSI, SCU_BUS_MASTER);
+   SCU_ASSERT( g_pScuBusBase != (uint16_t*)ERROR_NOT_FOUND );
+   mprintf( "SCU base address: 0x%p\n", g_pScuBusBase );
+   *g_pScuBusBase = 0;
+#endif
 
    if( pEca == NULL )
    {
@@ -218,17 +215,33 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
 
    unsigned int i = 0;
    const char fan[] = { '|', '/', '-', '\\' };
+   TIMEOUT_T fanInterval;
+   toStart( &fanInterval, pdMS_TO_TICKS( 250 ) );
+
    mprintf( ESC_BOLD "Entering task main loop and waiting for MSI ...\n" ESC_NORMAL );
    while( true )
    {
-//TODO
-      { /*
-         * Receive timeout: Showing a software fan as still alive.
-         */
-         mprintf( ESC_BOLD "\r%c" ESC_NORMAL, fan[i++] );
-         i %= ARRAY_SIZE( fan );
+      if( !toInterval( &fanInterval ) )
+         continue;
+
+      mprintf( ESC_BOLD ESC_XY( "1", "16" ) "%c" ESC_NORMAL, fan[i++] );
+      i %= ARRAY_SIZE( fan );
+      if( i != 1 )
+         continue;
+
+      COUNTERS_T localCounter;
+      
+      ATOMIC_SECTION()
+      {
+         localCounter = g_counters;
+         g_counters.irq = 0;
+         g_counters.msi = 0;
       }
-      //vPortYield();
+      
+      mprintf( ESC_CURSOR_OFF
+               ESC_XY( "3", "16" ) "IRQ: %4u Hz" 
+               ESC_XY( "3", "17" ) "MSI: %4u Hz",
+               localCounter.irq, localCounter.msi );
    }
 }
 
@@ -236,7 +249,7 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
  */
 STATIC inline BaseType_t initAndStartRTOS( void )
 {
-   static const char* taskName = "ECA-Handler";
+   static const char* taskName = "ECA-Frequ";
    BaseType_t status;
    mprintf( "Creating task \"%s\"\n", taskName );
    status = xTaskCreate( vTaskEcaMain,
@@ -259,7 +272,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
  */
 void main( void )
 {
-   mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "FreeRTOS ECA-MSI test\n"
+   mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "FreeRTOS MSI-Frequency test\n"
             "Compiler: " COMPILER_VERSION_STRING "\n" );
 
    const BaseType_t status = initAndStartRTOS();

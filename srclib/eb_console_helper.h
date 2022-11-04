@@ -60,6 +60,9 @@
 #define ESC_CLR_LINE  "\e[K"    /*!< @brief Clears the sctual line   */
 #define ESC_CLR_SCR   "\e[2J"   /*!< @brief Clears the terminal screen */
 
+#define ESC_CURSOR_OFF "\e[?25l" /*!< @brief Hides the cursor */
+#define ESC_CURSOR_ON  "\e[?25h" /*!< @brief Restores the cursor */
+
 /*!
  * @brief Set the cursor to the position.
  * @note This macro provides that the numbers of _X and _Y are strings,
