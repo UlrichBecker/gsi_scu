@@ -146,7 +146,7 @@ STATIC void onIrqEcaEvent( const unsigned int intNum,
    MSI_ITEM_T m;
 
    g_counters.irq++;
-   
+
    //irqMsiCopyObjectAndRemove( &m, intNum );
    while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
    {
@@ -230,14 +230,14 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
          continue;
 
       COUNTERS_T localCounter;
-      
+
       ATOMIC_SECTION()
       {
          localCounter = g_counters;
          g_counters.irq = 0;
          g_counters.msi = 0;
       }
-      
+
       mprintf( ESC_CURSOR_OFF
                ESC_XY( "3", "16" ) "IRQ: %4u Hz" 
                ESC_XY( "3", "17" ) "MSI: %4u Hz",
@@ -254,7 +254,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    mprintf( "Creating task \"%s\"\n", taskName );
    status = xTaskCreate( vTaskEcaMain,
                          taskName,
-                         configMINIMAL_STACK_SIZE * 2,
+                         configMINIMAL_STACK_SIZE + 256,
                          NULL,
                          tskIDLE_PRIORITY + 1,
                          NULL

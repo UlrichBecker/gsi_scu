@@ -22,7 +22,7 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 # the user have to allocate memory explicit. In this case the macro
 # configSUPPORT_DYNAMIC_ALLOCATION will defined with 0 in portmacro.h.
 # The default is 1.
-RTOS_USING_HEAP = 0
+RTOS_USING_HEAP = 1
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 
@@ -32,7 +32,7 @@ CODE_OPTIMIZATION = s
 # within the FreeRTOS kernel will activated.
 # Meaningful in debug mode.
  DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
- DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+# DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 
 DEFINES += MAX_LM32_INTERRUPTS=2
 

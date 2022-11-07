@@ -153,7 +153,6 @@ _saveRegisters:
    OS_SAVE_R(8)
    OS_SAVE_R(9)
    OS_SAVE_R(10)
- #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
    OS_SAVE_R(11)
    OS_SAVE_R(12)
    OS_SAVE_R(13)
@@ -171,7 +170,6 @@ _saveRegisters:
    OS_SAVE_R(25)
    OS_SAVE_R(26)
    OS_SAVE_R(27)
- #endif
    OS_SAVE_EA
    OS_SAVE_BA
    OS_SAVE_ASNC
@@ -199,7 +197,6 @@ _restoreRegisters:
    OS_RESTORE_R(8)
    OS_RESTORE_R(9)
    OS_RESTORE_R(10)
- #ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
    OS_RESTORE_R(11)
    OS_RESTORE_R(12)
    OS_RESTORE_R(13)
@@ -217,7 +214,6 @@ _restoreRegisters:
    OS_RESTORE_R(25)
    OS_RESTORE_R(26)
    OS_RESTORE_R(27)
- #endif
    OS_RESTORE_EA
    OS_RESTORE_BA
    OS_RESTORE_ASNC

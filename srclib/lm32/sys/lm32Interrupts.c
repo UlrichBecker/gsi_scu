@@ -296,7 +296,6 @@ void criticalSectionEnterBase( void )
 {
    asm volatile
    (
-      ".long  __atomic_section_nesting_count                          \n\t"
    #ifndef CONFIG_DISABLE_CRITICAL_SECTION
     #ifdef  CONFIG_SAVE_BIE_AND_EIE
       "rcsr   r1, ie                                                  \n\t"
@@ -330,7 +329,6 @@ void criticalSectionExitBase( void )
 {
    asm volatile
    (
-      ".long   __atomic_section_nesting_count                         \n\t"
       "orhi   r1, r0, hi(__atomic_section_nesting_count)              \n\t"
       "ori    r1, r1, lo(__atomic_section_nesting_count)              \n\t"
       "lw     r2, (r1+0)                                              \n\t"

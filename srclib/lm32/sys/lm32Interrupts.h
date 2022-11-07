@@ -412,6 +412,7 @@ void criticalSectionExitBase( void );
  *
  * @see criticalSectionExit
  */
+#if 1
 #define criticalSectionEnter()                                                \
 {                                                                             \
    criticalSectionEnterBase();                                                \
@@ -419,6 +420,9 @@ void criticalSectionExitBase( void );
    IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
    IRQ_ASSERT( (irqGetEnableRegister() & IRQ_IE) == 0 );                      \
 }
+#else
+#define criticalSectionEnter() criticalSectionEnterBase()
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC

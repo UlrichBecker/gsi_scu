@@ -84,10 +84,10 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    }
 
    const portSTACK_TYPE* pStart = pxTopOfStack;
-   
+
    #define STACK_POSITION() (pStart - pxTopOfStack)
    #define CHECK_STACK_POSITION( pos ) configASSERT( STACK_POSITION() == pos )
-   
+
    /*
     * =================== r0 ====================
     * Place in the position of "r0" a magic number.
@@ -169,7 +169,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
 #endif /* ifdef CONFIG_SAVE_ASNC */
 
    CHECK_STACK_POSITION( OS_STACK_DWORD_SIZE );
-   
+
   // mprintf( "Final stack: %d\n", (pStart - pxTopOfStack) );
    return pxTopOfStack;
 }

@@ -13,8 +13,8 @@
 #ifndef _LM32_PORT_COMMON_H
 #define _LM32_PORT_COMMON_H
 
-#define MICO32_FULL_CONTEXT_SAVE_RESTORE
 #define CONFIG_SAVE_ASNC
+
 /*
  * 31 registers will saved by context switch
  * whereby 30 of the 32 registers will relay saved:
@@ -23,20 +23,14 @@
  * Together with the variables __cscf and __asnc the total size
  * of stack is 33 words.
  */
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-  #define TO_SAVE_REGS 31
-  #define STK_RA       28
-  #define STK_EA       29
-  #define STK_BA       30
-#else
-  #define TO_SAVE_REGS 14
-  #define STK_RA       11
-  #define STK_EA       12
-  #define STK_BA       13
-#endif
+#define TO_SAVE_REGS 31
+#define STK_RA       28
+#define STK_EA       29
+#define STK_BA       30
+
 
 #define CSCF_POS 0
-#define STK_CSCF  (TO_SAVE_REGS + STK_CSCF)
+#define STK_CSCF  (TO_SAVE_REGS + CSCF_POS)
 
 #ifdef CONFIG_SAVE_ASNC
  #define ASNC_POS 1
@@ -60,8 +54,6 @@
  *        the task switch cause flag and the atomic nesting counter.
  */
 #define OS_STACK_DWORD_SIZE (ST_OFS + TO_SAVE_REGS)
-
-#define CSCF_POS   0
 
 #endif /* ifndef _LM32_PORT_COMMON_H */
 /*================================== EOF ====================================*/

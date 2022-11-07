@@ -30,9 +30,6 @@
 #if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__DOCFSM__)
   #error This module is for the target LM32 only!
 #endif
-#ifndef MICO32_FULL_CONTEXT_SAVE_RESTORE
-  #warning Macro MICO32_FULL_CONTEXT_SAVE_RESTORE is not defined in Makefile!
-#endif
 
 #include <stdint.h>
 #include <syscon.h>

@@ -101,7 +101,7 @@ void vApplicationTickHook( void )
       * parameter), and the parameter is set to NULL.
       */
       xQueueSendToFrontFromISR( g_xPrintQueue, &g_pcStringsToPrint[2], NULL );
-      
+
      /*
       * Reset the count ready to print out the string again in 200 ticks time.
       */
@@ -205,7 +205,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    BaseType_t status;
    status = xTaskCreate( prvUartGatekeeperTask,
                          "Gate-keeper",
-                         configMINIMAL_STACK_SIZE + 200,
+                         configMINIMAL_STACK_SIZE + 512,
                          NULL,
                          0,
                          NULL
@@ -228,7 +228,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 #else
    status = xTaskCreate( prvPrintTask,
                          "prvPrintTask 1",
-                         configMINIMAL_STACK_SIZE + 200,
+                         configMINIMAL_STACK_SIZE + 512,
                          (void*) 0,
                          1,
                          NULL
@@ -236,7 +236,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    if( status != pdPASS )
       return status;
 #endif
-
+#if 1
    mprintf( "Creating task \"prvPrintTask 2\"\n" );
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
    if( xTaskCreateStatic( prvPrintTask,
@@ -251,7 +251,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 #else
    status = xTaskCreate( prvPrintTask,
                          "prvPrintTask 2",
-                         configMINIMAL_STACK_SIZE + 200,
+                         configMINIMAL_STACK_SIZE + 512,
                          (void*) 1,
                          2,
                          NULL
@@ -259,7 +259,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
    if( status != pdPASS )
       return status;
 #endif
-
+#endif
    vTaskStartScheduler();
 
    return pdPASS;
