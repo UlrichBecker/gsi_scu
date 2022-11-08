@@ -26,8 +26,7 @@
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
-#define configTICK_RATE_HZ                      20000
-//#define configTICK_RATE_HZ                      1000
+#define configTICK_RATE_HZ                      40000
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
 #define configUSE_MUTEXES                       0

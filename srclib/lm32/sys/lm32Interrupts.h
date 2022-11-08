@@ -147,6 +147,12 @@ uint32_t _irqGetPendingMask( const unsigned int intNum );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
+ * @brief Returns "true" when the program execution is in a interrupt context.
+ */
+bool irqIsInContext( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
  * @brief Returns the critical- respectively atomic- section nesting counter.
  *
  * @note Usually for debug purposes only.
@@ -436,7 +442,7 @@ void criticalSectionExitBase( void );
  *
  * @see criticalSectionEnter
  */
-#if 1
+#if 0
 #define criticalSectionExit()                                                 \
 {                                                                             \
    IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \

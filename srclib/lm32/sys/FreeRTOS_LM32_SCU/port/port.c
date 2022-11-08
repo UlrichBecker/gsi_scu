@@ -109,7 +109,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
 
    /*
     * ================ r2 to r27 ================
-    * The registers from "r2" to "r27" respectively "r10" can have
+    * The registers from "r2" to "r27" can have
     * a arbitrary value.
     */
    CHECK_STACK_POSITION( 2 );
@@ -149,6 +149,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * ================= __cscf ===================
     * Status information.
     * Position of context switch cause flag.
+    * It has to be initialized by zero.
     * Macro __cscf
     * @see portasm.S
     * @see __cscf
@@ -163,6 +164,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * for each task. Macro: __asnc
     * __atomic_section_nesting_count
     * https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
+    * It has to be initialized by zero.
     */
    CHECK_STACK_POSITION( STK_ASNC );
    PUSH_STACK( 0 );
@@ -271,8 +273,6 @@ ONE_TIME_CALL void prvSetupTimer( void )
  */
 portBASE_TYPE xPortStartScheduler( void )
 {
-   //dbgPrintStackOfCurrentTCB(); //!!
-  // configASSERT( false );       //!!
 #ifndef CONFIG_NO_RTOS_TIMER
    /*
     * Setup the hardware to generate the tick.

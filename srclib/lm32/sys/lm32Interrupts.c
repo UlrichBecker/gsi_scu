@@ -51,6 +51,8 @@ extern volatile uint32_t __atomic_section_nesting_count;
 volatile uint64_t mg_interruptTimestamp = 0LL;
 #endif
 
+volatile bool mg_isInContext = false;
+
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
  * @brief ISR entry type
@@ -80,6 +82,14 @@ typedef struct
  * @see MAX_LM32_INTERRUPTS
  */
 STATIC ISR_ENTRY_T ISREntryTable[MAX_LM32_INTERRUPTS] = {{NULL, NULL}};
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
+inline bool irqIsInContext( void )
+{
+   return mg_isInContext;
+}
 
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
@@ -215,7 +225,7 @@ void _irq_entry( void )
    IRQ_ASSERT( __atomic_section_nesting_count == 0 );
    __atomic_section_nesting_count = 1;
 #endif
-
+   mg_isInContext = true;
    /*!
     * @brief Copy of the interrupt pending register before reset.
     */
@@ -271,6 +281,7 @@ void _irq_entry( void )
       }
    }
 
+   mg_isInContext = false;
    /*
     * Allows using of atomic sections within interrupt context.
     */
@@ -303,6 +314,10 @@ void criticalSectionEnterBase( void )
       "wcsr   ie, r1                                                  \n\t"
     #else
       "wcsr   ie, r0                                                  \n\t"
+     #ifdef CONFIG_PATCH_LM32_BUG
+      "wcsr   ie, r0                                                  \n\t"
+      "wcsr   ie, r0                                                  \n\t"
+     #endif
     #endif
    #endif
       "orhi   r1, r0, hi(__atomic_section_nesting_count)              \n\t"

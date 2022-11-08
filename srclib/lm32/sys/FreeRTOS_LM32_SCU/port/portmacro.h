@@ -262,7 +262,7 @@ void vPortYieldLm32( void );
 
 
 
-#if 1
+#if 0
 #ifdef CONFIG_CHECK_YIELD_PEDANTIC
    #define portYIELD()    \
    {                      \

@@ -250,7 +250,11 @@ L_INT_SAVE:
 #define DISABLE_INTERRUPTS
 #else
 .macro DISABLE_INTERRUPTS
-   wcsr ie, r0 
+   wcsr ie, r0
+ #ifdef CONFIG_PATCH_LM32_BUG
+   wcsr ie, r0
+   wcsr ie, r0
+ #endif
 .endm
 #endif
 
@@ -406,6 +410,9 @@ L_NOT_ENABLE:
 void vPortInterruptHandler( void ) { _irq_entry(); }
 #else
 vPortInterruptHandler:
+ #ifdef CONFIG_PATCH_LM32_BUG
+   wcsr      ie, r0
+ #endif
    SAVE_CONTEXT                 /* Save all registers */
    mvi       r1, 1              /* Set the context switch cause flag to one */
    sw        __cscf, r1         /* and store it in stack. */
