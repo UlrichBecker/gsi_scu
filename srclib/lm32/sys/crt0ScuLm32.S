@@ -314,7 +314,7 @@ loopf:
 .global _save_all
 .type   _save_all, @function
 _save_all:
- #ifdef CONFIG_PATCH_LM32_BUG
+ #if defined( CONFIG_PATCH_LM32_BUG ) && !defined( CONFIG_DEBUG_BY_LOGIK_ANALYSATOR )
     wcsr ie, r0
  #endif
     addi sp, sp, -STACK_TOP

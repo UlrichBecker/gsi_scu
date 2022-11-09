@@ -410,7 +410,7 @@ L_NOT_ENABLE:
 void vPortInterruptHandler( void ) { _irq_entry(); }
 #else
 vPortInterruptHandler:
- #ifdef CONFIG_PATCH_LM32_BUG
+ #if defined( CONFIG_PATCH_LM32_BUG ) && !defined( CONFIG_DEBUG_BY_LOGIK_ANALYSATOR )
    wcsr      ie, r0
  #endif
    SAVE_CONTEXT                 /* Save all registers */
