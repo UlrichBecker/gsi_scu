@@ -408,6 +408,7 @@ void criticalSectionExitBase( void );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @def criticalSectionEnter()
  * @brief Macro shall be invoked immediately before a critical respectively
  *        atomic section begins.
  *
@@ -432,6 +433,7 @@ void criticalSectionExitBase( void );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @def criticalSectionExit()
  * @brief Macro shall be invoked immediately after the end of a critical
  *        respectively atomic section.
  *
@@ -455,6 +457,7 @@ void criticalSectionExitBase( void );
 #endif
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @def atomic_on
  * @brief Backward compatibility: alias of criticalSectionEnter
  * @see criticalSectionEnter
  */
@@ -462,6 +465,7 @@ void criticalSectionExitBase( void );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @def atomic_off
  * @brief Backward compatibility: alias of criticalSectionExit
  * @see criticalSectionExit
  */
@@ -493,6 +497,7 @@ STATIC inline bool __criticalSectionExit( void )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
+ * @def ATOMIC_SECTION()
  * @brief Establishes a atomic respectively critical section between the
  *        following enclosing curly braces.
  *

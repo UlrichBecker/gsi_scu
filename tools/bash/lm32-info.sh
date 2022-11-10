@@ -41,9 +41,10 @@ then
    # Script is running on ASL-cluster
    #
    checkTarget $1
-   echo "Calling eb-info on $1:"
-   echo "------------------------"
-   ssh root@${1} "eb-info -w $DEV"
+#   echo "Calling eb-info on $1:"
+#   echo "------------------------"
+#   ssh root@${1} "eb-info -w $DEV"
+   lm32-logd $1 -B
    exit $?
 else
    #

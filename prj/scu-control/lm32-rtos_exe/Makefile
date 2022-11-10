@@ -61,6 +61,8 @@ LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 
 #NO_LTO := 1
 
+DOX_SKIP_FUNCTION_MACROS = NO
+
 include ../common_make.mk
 
  STACK_SIZE  =  512

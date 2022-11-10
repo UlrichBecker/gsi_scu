@@ -20,7 +20,7 @@
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
-#define configTICK_RATE_HZ                      10000
+#define configTICK_RATE_HZ                      20000
 #define configMAX_PRIORITIES                    5
 #define configMAX_TASK_NAME_LEN                 16
 #define configIDLE_SHOULD_YIELD                 1
@@ -66,7 +66,7 @@
 #define configUSE_TIMERS                        0
 #define configTIMER_TASK_PRIORITY               3
 #define configTIMER_QUEUE_LENGTH                1
-#define configTIMER_TASK_STACK_DEPTH            (configMINIMAL_STACK_SIZE + 1000)
+#define configTIMER_TASK_STACK_DEPTH            (configMINIMAL_STACK_SIZE + 200)
 
 /* Interrupt nesting behaviour configuration. */
 #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]

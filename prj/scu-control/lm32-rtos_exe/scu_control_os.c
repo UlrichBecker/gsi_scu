@@ -52,10 +52,13 @@ extern volatile uint32_t __atomic_section_nesting_count;
  */
 void vApplicationStackOverflowHook( TaskHandle_t xTask UNUSED, char* pcTaskName )
 {
+   criticalSectionEnterBase();
    scuLog( LM32_LOG_ERROR,
            ESC_ERROR "Panic: Stack overflow at task \"%s\"!\n"
                      "+++ LM32 stopped! +++" ESC_NORMAL, pcTaskName );
-   irqDisable();
+   /*
+    * Remaining in the atomic section until reset. :-(
+    */
    while( true );
 }
 #endif /* #if ( configCHECK_FOR_STACK_OVERFLOW != 0 ) */
@@ -267,17 +270,50 @@ ONE_TIME_CALL void initInterrupt( void )
 }
 
 #if (configUSE_TIMERS > 0)
-void onTimer( TimerHandle_t xTimer UNUSED )
+
+#define TEMPERATURE_UPDATE_PERIOD 1
+
+/*! --------------------------------------------------------------------------
+ * @brief Callback function of the software timer.
+ *        It becomes periodically invoked for updating some temperature
+ *        sensors.
+ */
+STATIC void onTimer( TimerHandle_t xTimer UNUSED )
 {
+   //TODO
    static unsigned int count = 0;
   // ATOMIC_SECTION()
    //   lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
-   //ATOMIC_SECTION()
-   //mprintf(  "%s: %u", __func__, count );
+  // ATOMIC_SECTION()
+      mprintf(  "%s: %u", __func__, count );
    //ATOMIC_SECTION()
    count++;
 }
-#endif
+
+/*! ---------------------------------------------------------------------------
+ * @brief Starts the software timer using for cyclic update of some
+ *        temperature sensors.
+ */
+STATIC inline void startTimer( void )
+{
+   const TimerHandle_t th = xTimerCreate( "Timer",
+                                          pdMS_TO_TICKS( 1000 * TEMPERATURE_UPDATE_PERIOD ),
+                                          pdTRUE, NULL, onTimer );
+   if( th == NULL )
+   {
+      scuLog( LM32_LOG_ERROR, ESC_ERROR "Can't create timer!\n" ESC_NORMAL );
+      return;
+   }
+   if( xTimerStart( th, 0 ) != pdPASS )
+   {
+      scuLog( LM32_LOG_ERROR, ESC_ERROR "Can't start timer!\n" ESC_NORMAL );
+      return;
+   }
+   scuLog( LM32_LOG_INFO, "Timer started.\n" );
+}
+#else
+#define startTimer()
+#endif /* (configUSE_TIMERS > 0) */
 
 /*! ---------------------------------------------------------------------------
  * @brief Main task
@@ -312,10 +348,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    initInterrupt();
 
-#if (configUSE_TIMERS > 0)
-   TimerHandle_t th = xTimerCreate( "Timer", pdMS_TO_TICKS( 1000 ), pdTRUE, NULL, onTimer );
-   xTimerStart( th, 0 );
-#endif
+   startTimer();
 
    taskStartAllIfHwPresent();
 
