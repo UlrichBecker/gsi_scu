@@ -147,35 +147,19 @@ extern FG_CHANNEL_T g_aFgChannels[];
 /*! ---------------------------------------------------------------------------
  * @brief Restarts respectively resets the watchdog timer of a given channel.
  */
-STATIC inline void wdtReset( const unsigned int channel )
-{
-   FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
-   g_aFgChannels[channel].timeout = getWrSysTimeSafe() + MSI_TIMEOUT_OFFSET;
-}
+void wdtReset( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  * @brief Disables the watchdog timer of the given channel.
  */
-STATIC inline void wdtDisable( const unsigned int channel )
-{
-   FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
-   g_aFgChannels[channel].timeout = 0LL;
-}
+void wdtDisable( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  * @brief Polls all activated watchdog timers and gives a error-message
  *        on LM32 syslog if en timeout was happened.
  */
 void wdtPoll( void );
-#endif
-
-/*! ---------------------------------------------------------------------------
- * @brief disables the generation of irqs for the specified channel
- *  SIO and MIL extension stop generating irqs
- *  @param channel number of the channel from 0 to MAX_FG_CHANNELS-1
- * @see enable_scub_msis
- */
-void fgDisableInterrupt( const unsigned int channel );
+#endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */
 
 /*! ---------------------------------------------------------------------------
  * @ingroup MAILBOX
@@ -231,25 +215,7 @@ STATIC inline bool fgIsArmed( const unsigned int channel )
  * @brief Helper function of function handleMacros().
  * @see handleMacros
  */
-STATIC inline void makeStop( const unsigned int channel )
-{
-   const SIGNAL_T signal = cbisEmpty( &g_shared.oSaftLib.oFg.aRegs[0], channel )?
-                             IRQ_DAT_STOP_EMPTY : IRQ_DAT_STOP_NOT_EMPTY;
-
-   sendSignal( signal,  channel );
-   fgDisableInterrupt( channel );
-   g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_STOPPED;
-
-#ifndef CONFIG_LOG_ALL_SIGNALS
-   hist_addx( HISTORY_XYZ_MODULE, signal2String( signal ), channel );
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
-            "Signal: %s, fg-%u-%u, channel: %u\n" ESC_NORMAL,
-            signal2String( signal ),
-            getSocket( channel ),
-            getDevice( channel ),
-            channel );
-#endif
-}
+void makeStop( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  */

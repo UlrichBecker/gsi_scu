@@ -57,6 +57,28 @@ STATIC_ASSERT( ARRAY_SIZE(g_aFgChannels) == MAX_FG_CHANNELS );
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
 /*! ---------------------------------------------------------------------------
  */
+void wdtReset( const unsigned int channel )
+{
+   FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
+   criticalSectionEnter();
+   if( fgIsStarted( channel ) )
+      g_aFgChannels[channel].timeout = getWrSysTime() + MSI_TIMEOUT_OFFSET;
+   criticalSectionExit();
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void wdtDisable( const unsigned int channel )
+{
+   FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
+   criticalSectionEnter();
+   g_aFgChannels[channel].timeout = 0LL;
+   criticalSectionExit();
+}
+
+
+/*! ---------------------------------------------------------------------------
+ */
 void wdtPoll( void )
 {
    const uint64_t currentTime = getWrSysTimeSafe();
@@ -284,7 +306,7 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int channel )
  *  @param channel number of the channel from 0 to MAX_FG_CHANNELS-1
  * @see scuBusEnableMeassageSignaledInterrupts
  */
-void fgDisableInterrupt( const unsigned int channel )
+STATIC inline void fgDisableInterrupt( const unsigned int channel )
 {
    if( channel >= MAX_FG_CHANNELS )
       return;
@@ -309,6 +331,31 @@ void fgDisableInterrupt( const unsigned int channel )
    milFgDisableIrq( (void*)g_pScub_base, (void*)g_pScu_mil_base, socket, dev );
 #endif
 }
+
+/*! ---------------------------------------------------------------------------
+ * @brief Helper function of function handleMacros().
+ * @see handleMacros
+ */
+void makeStop( const unsigned int channel )
+{
+
+   fgDisableInterrupt( channel );
+   const SIGNAL_T signal = cbisEmpty( &g_shared.oSaftLib.oFg.aRegs[0], channel )?
+                             IRQ_DAT_STOP_EMPTY : IRQ_DAT_STOP_NOT_EMPTY;
+
+   sendSignal( signal,  channel );
+   g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_STOPPED;
+
+#ifndef CONFIG_LOG_ALL_SIGNALS
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
+            "Signal: %s, fg-%u-%u, channel: %u\n" ESC_NORMAL,
+            signal2String( signal ),
+            getSocket( channel ),
+            getDevice( channel ),
+            channel );
+#endif
+}
+
 
 /*! ---------------------------------------------------------------------------
  * @brief Send signal REFILL to the SAFTLIB when the fifo level has
