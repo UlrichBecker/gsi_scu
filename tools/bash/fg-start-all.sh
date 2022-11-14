@@ -53,6 +53,9 @@ Options:
 -e, --exit
    Exit after activation of the function generators.
 
+-d, --delay
+   Waits for 0.5 seconds after turning on of each single function generator.
+
 -n, --nokill
    Don't kill already running fg-ctl instances.
 
@@ -69,7 +72,7 @@ Options:
 
 Example:
 $PROG_NAME sinus.fgw 1 3 5
-Funktion generator channels 1, 2 and 5 will activated if present.
+Funktion generator channels 1, 3 and 5 will activated if present.
 
 __EOH__
    exit 0
@@ -113,7 +116,7 @@ then
 fi
 
 FG_FEEEDBACK=$(which fg-feedback)
-if [ ! -x "FG_FEEEDBACK" ]
+if [ ! -x "$FG_FEEEDBACK" ]
 then
    die "Program fg-feedback not found!"
 fi
@@ -125,6 +128,7 @@ GENERATE_STROBE=false
 DO_EXIT=false
 NO_KILL=false
 USE_FG_FEEDBACK=false
+DELAY=false
 
 while [ "${1:0:1}" = "-" ]
 do
@@ -134,6 +138,9 @@ do
       case ${A:0:1} in
          "e")
             DO_EXIT=true
+         ;;
+         "d")
+            DELAY=true
          ;;
          "h")
             printHelp
@@ -155,6 +162,9 @@ do
             case ${B%=*} in
                "help")
                   printHelp
+               ;;
+               "delay")
+                  DELAY=true
                ;;
                "exit")
                   DO_EXIT=true
@@ -356,7 +366,10 @@ do
       #
       $FG_CTL -rf $i $START_TAG <$WAVE_FILE &
    fi
-   #sleep 0.5
+   if $DELAY
+   then
+      sleep 0.5
+   fi
 done
 #
 # End for all found function generators

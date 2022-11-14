@@ -125,7 +125,7 @@ int ramInit( register RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj
 /*! ---------------------------------------------------------------------------
  * @brief Generalized function to read a item from the ring buffer.
  */
-static inline
+STATIC inline
 void ramRreadItem( register RAM_SCU_T* pThis, const RAM_RING_INDEX_T index,
                    RAM_DAQ_PAYLOAD_T* pItem )
 {
@@ -232,7 +232,7 @@ RAM_DAQ_BLOCK_T ramRingGetTypeOfOldestBlock( register RAM_SCU_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @brief Removes the oldest DAQ- block in the ring boffer
  */
-static int ramRemoveOldestBlock( register RAM_SCU_T* pThis )
+STATIC int ramRemoveOldestBlock( register RAM_SCU_T* pThis )
 {
    switch( ramRingGetTypeOfOldestBlock( pThis ) )
    {
@@ -264,7 +264,7 @@ static int ramRemoveOldestBlock( register RAM_SCU_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @brief Checks whether a additional DAQ-block can stored in the ring buffer.
  */
-inline static
+STATIC inline
 bool ramDoesBlockFit( register RAM_SCU_T* pThis, const bool isShort )
 {
    return (ramRingGetRemainingCapacity( &pThis->pSharedObj->ringIndexes ) >=
@@ -277,7 +277,7 @@ bool ramDoesBlockFit( register RAM_SCU_T* pThis, const bool isShort )
  * @note If the blocks are not correctly recognized so the entire ring buffer
  *       becomes deleted.
  */
-inline static
+STATIC inline
 void ramMakeSpaceIfNecessary( register RAM_SCU_T* pThis, const bool isShort )
 {
    while( !ramDoesBlockFit( pThis, isShort ) )
@@ -289,7 +289,7 @@ void ramMakeSpaceIfNecessary( register RAM_SCU_T* pThis, const bool isShort )
 
 /*! ---------------------------------------------------------------------------
  */
-static inline ALWAYS_INLINE
+STATIC inline ALWAYS_INLINE
 void ramWriteItem( register RAM_SCU_T* pThis, const RAM_RING_INDEX_T index,
                    RAM_DAQ_PAYLOAD_T* pItem )
 {
@@ -304,7 +304,7 @@ void ramWriteItem( register RAM_SCU_T* pThis, const RAM_RING_INDEX_T index,
 /*! ---------------------------------------------------------------------------
  * @brief Helper function for ramWriteDaqData
  */
-static inline ALWAYS_INLINE
+STATIC inline ALWAYS_INLINE
 void ramFillItem( RAM_DAQ_PAYLOAD_T* pItem, const unsigned int i,
                   const DAQ_DATA_T data )
 {
@@ -320,7 +320,7 @@ void ramFillItem( RAM_DAQ_PAYLOAD_T* pItem, const unsigned int i,
  * @brief Copies the data of the given DAQ-channel in to the RAM and
  *        exchanges the order of DAQ data with device descriptor.
  */
-static inline
+STATIC inline
 void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
                       bool isShort )
 {
@@ -426,7 +426,7 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
             * the first received data words.
             */
             for( unsigned int i = 0; i < ARRAY_SIZE( firstData ); i++ )
-            { mprintf( "Hier! %d\n", i );
+            {
                payloadIndex++;
                RAM_ASSERT( payloadIndex < RAM_DAQ_DATA_WORDS_PER_RAM_INDEX );
                ramFillItem( &ramItem, payloadIndex, firstData[i] );

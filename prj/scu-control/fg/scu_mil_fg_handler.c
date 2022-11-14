@@ -326,7 +326,6 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
       {
          s_clearIsActive |= slaveFlags;
          fgMilClearHandlerState( socket );
-         hist_addx( HISTORY_XYZ_MODULE, __func__, socket );
          return true;
       }
    }
@@ -992,10 +991,10 @@ STATIC inline void feedMilFg( const unsigned int socket,
    if( !cbRead( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
                 &g_shared.oSaftLib.oFg.aRegs[0], channel, &pset ) )
    {
-      hist_addx(HISTORY_XYZ_MODULE, "MIL-FG buffer empty, no parameter sent", socket);
-      lm32Log( LM32_LOG_ERROR, ESC_ERROR
-              "ERROR: Buffer of fg-%u-%u is empty! Channel: %u\n"
-              ESC_NORMAL, socket, devNum, channel );
+      if( fgIsStarted( channel ) )
+         lm32Log( LM32_LOG_ERROR, ESC_ERROR
+                 "ERROR: Buffer of fg-%u-%u is empty! Channel: %u\n"
+                 ESC_NORMAL, socket, devNum, channel );
       return;
    }
 

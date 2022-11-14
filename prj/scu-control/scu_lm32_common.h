@@ -52,7 +52,6 @@
 #include <scu_fg_list.h>
 #include <scu_mil.h>
 #include <eca_queue_type.h>
-#include <history.h>
 #include <scu_syslog.h>
 #include <scu_logutil.h>
 #include <scu_circular_buffer.h>

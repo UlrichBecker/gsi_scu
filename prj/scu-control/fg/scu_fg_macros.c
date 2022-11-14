@@ -55,6 +55,13 @@ FG_CHANNEL_T g_aFgChannels[MAX_FG_CHANNELS] =
 STATIC_ASSERT( ARRAY_SIZE(g_aFgChannels) == MAX_FG_CHANNELS );
 
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
+
+#ifndef MSI_TIMEOUT
+   #define MSI_TIMEOUT 3
+#endif
+
+#define MSI_TIMEOUT_OFFSET (MSI_TIMEOUT * 1000000000ULL)
+
 /*! ---------------------------------------------------------------------------
  */
 void wdtReset( const unsigned int channel )
@@ -76,7 +83,6 @@ void wdtDisable( const unsigned int channel )
    criticalSectionExit();
 }
 
-
 /*! ---------------------------------------------------------------------------
  */
 void wdtPoll( void )
@@ -97,6 +103,9 @@ void wdtPoll( void )
       g_aFgChannels[i].timeout = 0LL;
       criticalSectionExit();
 
+      if( !fgIsStarted( i ) )
+         continue;
+
    #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
                "ERROR: MSI-timeout on fg-%u-%u channel: %u !\n" ESC_NORMAL,
@@ -111,12 +120,96 @@ void wdtPoll( void )
 #endif
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup MAILBOX
+ * @brief Send a signal back to the Linux-host (SAFTLIB)
+ * @param sig Signal
+ * @param channel Concerning channel number.
+ */
+inline void sendSignal( const SIGNAL_T sig, const unsigned int channel )
+{
+   STATIC_ASSERT( sizeof( pCpuMsiBox[0] ) == sizeof( uint32_t ) );
+   FG_ASSERT( channel < ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) );
+
+   ATOMIC_SECTION()
+      MSI_BOX_SLOT_ACCESS( g_shared.oSaftLib.oFg.aRegs[channel].mbx_slot, signal ) = sig;
+
+#ifdef CONFIG_DEBUG_FG_SIGNAL
+ #ifdef CONFIG_USE_LM32LOG
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
+                            "Signal: %s, channel: %d sent\n" ESC_NORMAL,
+            signal2String( sig ), channel );
+ #else
+   #warning CONFIG_DEBUG_FG_SIGNAL is defined this will destroy the timing!
+   mprintf( ESC_DEBUG "Signal: %s, channel: %d sent\n" ESC_NORMAL,
+            signal2String( sig ), channel );
+ #endif
+#endif
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+STATIC inline void sendSignalArmed( const unsigned int channel )
+{
+   g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_ARMED;
+   sendSignal( IRQ_DAT_ARMED, channel );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @brief enables MSI generation for the specified channel.
+ *
+ * Messages from the SCU bus are send to the MSI queue of this CPU with the
+ * offset 0x0. \n
+ * Messages from the MIL extension are send to the MSI queue of this CPU with
+ * the offset 0x20. \n
+ * A hardware macro is used, which generates MSIs from legacy interrupts.
+ *
+ * @todo Replace this awful naked index-numbers by well documented
+ *       and meaningful constants!
+ *
+ * @param socket number of the socket between 0 and MAX_FG_CHANNELS-1
+ * @see fgDisableInterrupt
+ */
+STATIC inline
+void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
+{
+#ifdef CONFIG_MIL_FG
+   if( isAddacFg( socket ) || isMilScuBusFg( socket ) )
+   {
+#endif
+      FG_ASSERT( getFgSlotNumber( socket ) >= SCUBUS_START_SLOT );
+      const uint16_t slot = getFgSlotNumber( socket ) - SCUBUS_START_SLOT;
+      ATOMIC_SECTION()
+      {
+         g_pScub_base[GLOBAL_IRQ_ENA] = 0x20;
+         g_pScub_irq_base[MSI_CHANNEL_SELECT] = slot;
+         g_pScub_irq_base[MSI_SOCKET_NUMBER]  = slot;
+         g_pScub_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[0];
+         g_pScub_irq_base[MSI_ENABLE]         = (1 << slot);
+      }
+#ifdef CONFIG_MIL_FG
+      return;
+   }
+
+   if( !isMilExtentionFg( socket ) )
+      return;
+
+   ATOMIC_SECTION()
+   {
+      g_pMil_irq_base[MSI_CHANNEL_SELECT] = MIL_DRQ;
+      g_pMil_irq_base[MSI_SOCKET_NUMBER]  = MIL_DRQ;
+      //g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)pMyMsi + 0x20;
+      g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[2];
+      g_pMil_irq_base[MSI_ENABLE]         = (1 << MIL_DRQ);
+   }
+#endif
+}
+
+/*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
 void fgEnableChannel( const unsigned int channel )
 {
    FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
-
 
    const unsigned int socket = getSocket( channel );
    const unsigned int dev    = getDevice( channel );
@@ -124,6 +217,7 @@ void fgEnableChannel( const unsigned int channel )
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
             __func__, channel, socket, dev );
 
+   scuBusEnableMeassageSignaledInterrupts( socket );
 
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
    wdtReset( channel );
@@ -156,7 +250,6 @@ void fgEnableChannel( const unsigned int channel )
    }
 #endif
 
-
    FG_PARAM_SET_T pset;
   /*
    * Fetch first parameter set from buffer
@@ -183,10 +276,7 @@ void fgEnableChannel( const unsigned int channel )
    #endif
    } /* if( cbRead( ... ) != 0 ) */
 
-
    sendSignalArmed( channel );
-
-
 }
 
 /*! ---------------------------------------------------------------------------
@@ -196,9 +286,6 @@ void fgDisableChannel( const unsigned int channel )
 {
    FG_ASSERT( channel < ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) );
 
-#ifdef CONFIG_USE_FG_MSI_TIMEOUT
-   wdtDisable( channel );
-#endif
 
    FG_CHANNEL_REG_T* pFgRegs = &g_shared.oSaftLib.oFg.aRegs[channel];
 
@@ -235,68 +322,23 @@ void fgDisableChannel( const unsigned int channel )
 #endif /* CONFIG_MIL_FG */
 
    if( pFgRegs->state == STATE_ACTIVE )
-   {    // hw is running
-      hist_addx( HISTORY_XYZ_MODULE, "flush circular buffer", channel );
+   { /*
+      *  hw is running
+      */
       lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
                "Flush circular buffer of fg-%u-%u channel: %u\n" ESC_NORMAL,
                socket, dev, channel );
-      pFgRegs->rd_ptr = pFgRegs->wr_ptr;
+      flushCircularBuffer( pFgRegs );
    }
-   else
-   {
+ //  else
+ //  {
       pFgRegs->state = STATE_STOPPED;
       sendSignal( IRQ_DAT_DISARMED, channel );
-   }
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief enables MSI generation for the specified channel.
- *
- * Messages from the SCU bus are send to the MSI queue of this CPU with the
- * offset 0x0. \n
- * Messages from the MIL extension are send to the MSI queue of this CPU with
- * the offset 0x20. \n
- * A hardware macro is used, which generates MSIs from legacy interrupts.
- *
- * @todo Replace this awful naked index-numbers by well documented
- *       and meaningful constants!
- *
- * @param channel number of the channel between 0 and MAX_FG_CHANNELS-1
- * @see fgDisableInterrupt
- */
-void scuBusEnableMeassageSignaledInterrupts( const unsigned int channel )
-{
-   const unsigned int socket = getSocket( channel );
-#ifdef CONFIG_MIL_FG
-   if( isAddacFg( socket ) || isMilScuBusFg( socket ) )
-   {
+ //  }
+#ifdef CONFIG_USE_FG_MSI_TIMEOUT
+   wdtDisable( channel );
 #endif
-      FG_ASSERT( getFgSlotNumber( socket ) >= SCUBUS_START_SLOT );
-      const uint16_t slot = getFgSlotNumber( socket ) - SCUBUS_START_SLOT;
-      ATOMIC_SECTION()
-      {
-         g_pScub_base[GLOBAL_IRQ_ENA] = 0x20;
-         g_pScub_irq_base[MSI_CHANNEL_SELECT] = slot;
-         g_pScub_irq_base[MSI_SOCKET_NUMBER]  = slot;
-         g_pScub_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[0];
-         g_pScub_irq_base[MSI_ENABLE]         = (1 << slot);
-      }
-#ifdef CONFIG_MIL_FG
-      return;
-   }
 
-   if( !isMilExtentionFg( socket ) )
-      return;
-
-   ATOMIC_SECTION()
-   {
-      g_pMil_irq_base[MSI_CHANNEL_SELECT] = MIL_DRQ;
-      g_pMil_irq_base[MSI_SOCKET_NUMBER]  = MIL_DRQ;
-      //g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)pMyMsi + 0x20;
-      g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[2];
-      g_pMil_irq_base[MSI_ENABLE]         = (1 << MIL_DRQ);
-   }
-#endif
 }
 
 /*! ---------------------------------------------------------------------------

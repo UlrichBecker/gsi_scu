@@ -66,6 +66,14 @@ bool cbisEmpty(volatile FG_CHANNEL_REG_T* cr, const unsigned int channel)
 }
 
 /*! ---------------------------------------------------------------------------
+ * @brief Flush the circular buffer that means clearing possible unreaded data.
+ */
+STATIC inline void flushCircularBuffer( FG_CHANNEL_REG_T* pFgRegs )
+{
+   pFgRegs->rd_ptr = pFgRegs->wr_ptr;
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief get the fill level  of a channel buffer
  * @param cr channel register
  * @param channel number of the channel

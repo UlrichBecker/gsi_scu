@@ -81,7 +81,7 @@ void vApplicationMallocFailedHook( void )
  */
 void taskInfoLog( void )
 {
-   lm32Log( LM32_LOG_INFO, ESC_BOLD "Task: \"%s\" started.\n" ESC_NORMAL,
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Task: \"%s\" started.\n" ESC_NORMAL,
             pcTaskGetName( NULL ) );
 }
 
@@ -92,7 +92,7 @@ void taskDeleteIfRunning( void* pTaskHandle )
 {
    if( *(TaskHandle_t*)pTaskHandle != NULL )
    {
-      lm32Log( LM32_LOG_INFO, ESC_BOLD "Deleting task: \"%s\".\n" ESC_NORMAL,
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Deleting task: \"%s\".\n" ESC_NORMAL,
                pcTaskGetName( *(TaskHandle_t*)pTaskHandle ) );
       vTaskDelete( *(TaskHandle_t*)pTaskHandle  );
       *(TaskHandle_t*)pTaskHandle = NULL;
@@ -145,6 +145,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       {
          queuePushWatched( &g_queueFg, &queueScuBusIrq );
       }
+
    #ifdef CONFIG_MIL_FG
       if( (queueScuBusIrq.pendingIrqs & DREQ ) != 0 )
       { /*

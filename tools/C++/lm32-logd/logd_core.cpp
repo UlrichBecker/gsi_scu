@@ -526,7 +526,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    if( item.filter >= BIT_SIZEOF( CommandLine::FILTER_FLAG_T ) )
    {
       m_isError = true;
-      *this << "Filter value " << item.filter <<  " out of range!" << std::flush;
+      *this << "Filter value " << item.filter <<  " out of range!" << std::endl;
       return;
    }
 
@@ -540,7 +540,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    {
       m_isError = true;
       *this << "Invalid timestamp: last: " << m_lastTimestamp
-            << ", actual: " << item.timestamp << std::flush;
+            << ", actual: " << item.timestamp << std::endl;
       m_lastTimestamp = 0;
       return;
    }

@@ -179,7 +179,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       { /*
          * Start of a function generator.
          */
-         scuBusEnableMeassageSignaledInterrupts( value ); //duration: 0.03 ms
+        // scuBusEnableMeassageSignaledInterrupts( value ); //duration: 0.03 ms
          fgEnableChannel( value ); //duration: 0.12 ms
          break;
       }
@@ -201,15 +201,14 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          */
       #ifdef CONFIG_RTOS
        // vTaskSuspendAll();
-      // ATOMIC_SECTION()  taskDeleteAllRunningFgAndDaq();
+         taskDeleteAllRunningFgAndDaq();
       #endif
 
-         ATOMIC_SECTION()
-            scanFgs();
+         scanFgs();
 
       #ifdef CONFIG_RTOS
        // xTaskResumeAll();
-     // ATOMIC_SECTION()   taskStartAllIfHwPresent();
+         taskStartAllIfHwPresent();
       #endif
          break;
       }
@@ -220,7 +219,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          fgMilClearHandlerState( value );
        #else
         #ifdef CONFIG_USE_LM32LOG
-          lm32Log( LM32_LOG_ERROR, "No MIL support!\n" );
+          lm32Log( LM32_LOG_ERROR, ESC_ERROR "No MIL support!\n" ESC_NORMAL );
         #else
           mprintf( ESC_ERROR "No MIL support!\n" ESC_NORMAL );
         #endif
@@ -235,14 +234,10 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          timeMeasurePrintMillisecondsSafe( &g_irqTimeMeasurement );
          mprintf( " ms\n\n" );
        #endif
-       #ifdef CONFIG_USE_HISTORY
-         hist_print( true );
-       #else
-        #ifdef CONFIG_USE_LM32LOG
+       #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_WARNING, "No history support!\n" );
-        #else
+       #else
          mprintf( ESC_ERROR "No history!\n" ESC_NORMAL );
-        #endif
        #endif
          break;
       }

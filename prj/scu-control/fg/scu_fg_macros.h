@@ -21,11 +21,6 @@
 extern "C" {
 #endif
 
-#ifndef MSI_TIMEOUT
-   #define MSI_TIMEOUT 3
-#endif
-
-#define MSI_TIMEOUT_OFFSET (MSI_TIMEOUT * 1000000000ULL)
 
 /*!
  * @brief Control register of function generator.
@@ -161,32 +156,7 @@ void wdtDisable( const unsigned int channel );
 void wdtPoll( void );
 #endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */
 
-/*! ---------------------------------------------------------------------------
- * @ingroup MAILBOX
- * @brief Send a signal back to the Linux-host (SAFTLIB)
- * @param sig Signal
- * @param channel Concerning channel number.
- */
-STATIC inline void sendSignal( const SIGNAL_T sig, const unsigned int channel )
-{
-   STATIC_ASSERT( sizeof( pCpuMsiBox[0] ) == sizeof( uint32_t ) );
-   FG_ASSERT( channel < ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) );
-
-   ATOMIC_SECTION()
-      MSI_BOX_SLOT_ACCESS( g_shared.oSaftLib.oFg.aRegs[channel].mbx_slot, signal ) = sig;
-
-#ifdef CONFIG_DEBUG_FG_SIGNAL
- #ifdef CONFIG_USE_LM32LOG
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
-                            "Signal: %s, channel: %d sent\n" ESC_NORMAL,
-            signal2String( sig ), channel );
- #else
-   #warning CONFIG_DEBUG_FG_SIGNAL is defined this will destroy the timing!
-   mprintf( ESC_DEBUG "Signal: %s, channel: %d sent\n" ESC_NORMAL,
-            signal2String( sig ), channel );
- #endif
-#endif
-}
+void sendSignal( const SIGNAL_T sig, const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  * @brief Send signal REFILL to the SAFTLIB when the fifo level has
@@ -195,14 +165,6 @@ STATIC inline void sendSignal( const SIGNAL_T sig, const unsigned int channel )
  * @param channel Channel of concerning function generator.
  */
 void sendRefillSignalIfThreshold( const unsigned int channel );
-
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void sendSignalArmed( const unsigned int channel )
-{
-   g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_ARMED;
-   sendSignal( IRQ_DAT_ARMED, channel );
-}
 
 /*! ---------------------------------------------------------------------------
  */
@@ -244,20 +206,6 @@ STATIC inline bool fgIsStarted( const unsigned int channel )
 {
    return g_shared.oSaftLib.oFg.aRegs[channel].state == STATE_ACTIVE;
 }
-
-/*! ---------------------------------------------------------------------------
- * @brief enables MSI generation for the specified channel.
- *
- * Messages from the SCU bus are send to the MSI queue of this CPU with the
- * offset 0x0. \n
- * Messages from the MIL extension are send to the MSI queue of this CPU with
- * the offset 0x20. \n
- * A hardware macro is used, which generates MSIs from legacy interrupts.
- *
- * @param channel number of the channel between 0 and MAX_FG_CHANNELS-1
- * @see disable_slave_irq
- */
-void scuBusEnableMeassageSignaledInterrupts( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  * @brief configures each function generator channel.
