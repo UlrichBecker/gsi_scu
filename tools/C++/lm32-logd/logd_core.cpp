@@ -177,7 +177,7 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
          m_isError = true;
          *this << text << std::flush;
       }
-         
+
       throw std::runtime_error( text );
    }
 
@@ -537,12 +537,19 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    }
 
    if( m_lastTimestamp >= item.timestamp )
-   {
-      m_isError = true;
-      *this << "Invalid timestamp: last: " << m_lastTimestamp
-            << ", actual: " << item.timestamp << std::endl;
-      m_lastTimestamp = 0;
-      return;
+   { /*
+      * A non-causal deviation of lower or equal of one second will tolerated
+      * because by using FreeRTOS its possible that the order of log-messages
+      * becomes exchanged.
+      */
+      if( (m_lastTimestamp - item.timestamp) > daq::NANOSECS_PER_SEC )
+      {
+         m_isError = true;
+         *this << "Invalid timestamp: last: " << m_lastTimestamp
+               << ", actual: " << item.timestamp << std::endl;
+         m_lastTimestamp = 0;
+         return;
+      }
    }
    m_lastTimestamp = item.timestamp;
 
@@ -577,7 +584,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       *this << "Address of format string is invalid: 0x"
             << std::hex << std::uppercase << std::setfill('0')
             << std::setw( 8 ) << item.format << std::dec << " !"
-            << std::flush;
+            << std::endl;
       return;
    }
 

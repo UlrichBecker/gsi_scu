@@ -17,6 +17,8 @@
 
 #define CONFIG_STILL_ALIVE_SIGNAL
 
+#define configMINIMAL_STACK_SIZE 64
+
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1

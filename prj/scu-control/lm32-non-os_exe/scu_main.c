@@ -436,7 +436,6 @@ void main( void )
    initEcaQueue();
 #endif
 
-   hist_init(HISTORY_XYZ_MODULE);
    /*
     * Scanning and initializing all FG's and DAQ's
     */

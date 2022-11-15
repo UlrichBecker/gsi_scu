@@ -272,7 +272,17 @@ ONE_TIME_CALL void initInterrupt( void )
 
 #if (configUSE_TIMERS > 0)
 
-#define TEMPERATURE_UPDATE_PERIOD 1
+#define TEMPERATURE_UPDATE_PERIOD 10
+
+STATIC void printTemperatures( void )
+{
+   lm32Log( LM32_LOG_INFO, "Board temperature: %d °C,   "
+                           "Backplane temperature: %d °C,   "
+                           "Extern temperature: %d °C,   ",
+                           g_shared.oSaftLib.oTemperatures.board_temp >> 4,
+                           g_shared.oSaftLib.oTemperatures.backplane_temp >> 4,
+                           g_shared.oSaftLib.oTemperatures.ext_temp >> 4 );
+}
 
 /*! --------------------------------------------------------------------------
  * @brief Callback function of the software timer.
@@ -281,14 +291,8 @@ ONE_TIME_CALL void initInterrupt( void )
  */
 STATIC void onTimer( TimerHandle_t xTimer UNUSED )
 {
-   //TODO
-   static unsigned int count = 0;
-  // ATOMIC_SECTION()
-   //   lm32Log( LM32_LOG_DEBUG, "%s", __func__ );
-  // ATOMIC_SECTION()
-      mprintf(  "%s: %u", __func__, count );
-   //ATOMIC_SECTION()
-   count++;
+   updateTemperature();
+   printTemperatures();
 }
 
 /*! ---------------------------------------------------------------------------
@@ -326,7 +330,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    tellMailboxSlot();
 
 
-   //vTaskDelay( pdMS_TO_TICKS( 1500 ) );
+   vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
    if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
       die( "No SYS_CON found!" );

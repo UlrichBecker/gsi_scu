@@ -29,8 +29,9 @@ bool initOneWire( void )
    return false;
 }
 
-#define DEBUG
-
+#ifndef CONFIG_RTOS
+ #define DEBUG
+#endif
 /*! ---------------------------------------------------------------------------
  * @todo for-loop is due to parameter pTemperature suspicious!
  */

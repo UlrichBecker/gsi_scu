@@ -195,8 +195,6 @@ FG_CTRL_RG_T* getFgCntrlRegPtr( const void* pScuBusBase,
    return &getFgRegisterPtr( pScuBusBase, slot, number )->cntrl_reg;
 }
 
-
-
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
@@ -205,7 +203,6 @@ inline BUS_BASE_T getFgOffsetAddress( const unsigned int number )
    FG_ASSERT( number < ARRAY_SIZE( mg_devTab ) );
    return mg_devTab[number].fgBaseAddr;
 }
-
 
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_handler.h

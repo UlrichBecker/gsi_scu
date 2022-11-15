@@ -117,7 +117,7 @@ void wdtPoll( void )
    #endif
    }
 }
-#endif
+#endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */
 
 /*! ---------------------------------------------------------------------------
  * @ingroup MAILBOX
@@ -397,7 +397,6 @@ void makeStop( const unsigned int channel )
             channel );
 #endif
 }
-
 
 /*! ---------------------------------------------------------------------------
  * @brief Send signal REFILL to the SAFTLIB when the fifo level has

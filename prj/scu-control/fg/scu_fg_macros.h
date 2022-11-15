@@ -156,6 +156,12 @@ void wdtDisable( const unsigned int channel );
 void wdtPoll( void );
 #endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup MAILBOX
+ * @brief Send a signal back to the Linux-host (SAFTLIB)
+ * @param sig Signal
+ * @param channel Concerning channel number.
+ */
 void sendSignal( const SIGNAL_T sig, const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
