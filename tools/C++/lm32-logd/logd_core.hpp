@@ -86,6 +86,16 @@ public:
    }
 
 private:
+   void read( const etherbone::address_t eb_address,
+              eb_user_data_t pData,
+              const etherbone::format_t format,
+              const uint size );
+   
+   void write( const etherbone::address_t eb_address,
+               const eb_user_data_t pData,
+               const etherbone::format_t format,
+               const uint size );
+
    uint readLm32( char* pData, std::size_t len,
                   const std::size_t offset );
 

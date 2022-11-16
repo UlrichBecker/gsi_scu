@@ -254,6 +254,52 @@ Lm32Logd::~Lm32Logd( void )
 
 /*! ---------------------------------------------------------------------------
  */
+void Lm32Logd::read( const etherbone::address_t eb_address,
+                     eb_user_data_t pData,
+                     const etherbone::format_t format,
+                     const uint size )
+{
+   assert( m_oMmu.getEb()->isConnected() );
+   try
+   {
+      m_oMmu.getEb()->read( eb_address, pData, format, size );
+   }
+   catch( std::exception& e )
+   {
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << e.what() << endl;
+      }
+      throw e;
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void Lm32Logd::write( const etherbone::address_t eb_address,
+                      const eb_user_data_t pData,
+                      const etherbone::format_t format,
+                      const uint size )
+{
+   assert( m_oMmu.getEb()->isConnected() );
+   try
+   {
+      m_oMmu.getEb()->write( eb_address, pData, format, size );
+   }
+   catch( std::exception& e )
+   {
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << e.what() << endl;
+      }
+      throw e;
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 int Lm32Logd::readKey( void )
 {
    if( m_poTerminal == nullptr )
@@ -266,11 +312,9 @@ int Lm32Logd::readKey( void )
  */
 void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
 {
-   assert( m_oMmu.getEb()->isConnected() );
-
    constexpr uint LEN32 = sizeof(SYSLOG_FIFO_ADMIN_T) / sizeof(uint32_t);
 
-   m_oMmu.getEb()->read( m_fifoAdminBase, &rAdmin, EB_DATA32 | EB_LITTLE_ENDIAN, LEN32 );
+   read( m_fifoAdminBase, &rAdmin, EB_DATA32 | EB_LITTLE_ENDIAN, LEN32 );
    if( (rAdmin.admin.indexes.offset   != m_offset) ||
        (rAdmin.admin.indexes.capacity != m_capacity) )
    {
@@ -278,7 +322,7 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
       if( m_rCmdLine.isDemonize() )
       {
          m_isError = true;
-         *this << text << std::flush;
+         *this << text << std::endl;
       }
       throw std::runtime_error( text );
    }
@@ -290,9 +334,9 @@ void Lm32Logd::setResponse( uint n )
 {
    DEBUG_MESSAGE_M_FUNCTION( n );
 
-   m_oMmu.getEb()->write( m_fifoAdminBase + offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ),
-                          static_cast<eb_user_data_t>(&n),
-                          EB_DATA32 | EB_LITTLE_ENDIAN, 2 );
+   write( m_fifoAdminBase + offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ),
+          static_cast<eb_user_data_t>(&n),
+          EB_DATA32 | EB_LITTLE_ENDIAN, 2 );
 }
 
 constexpr uint LM32_MEM_SIZE = 147456;
@@ -310,7 +354,7 @@ uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset 
       len -= (offset-LM32_OFFSET + len) - LM32_MEM_SIZE;
    }
 
-   m_oMmu.getEb()->read( m_lm32Base + offset, pData, EB_BIG_ENDIAN | EB_DATA8, len );
+   read( m_lm32Base + offset, pData, EB_BIG_ENDIAN | EB_DATA8, len );
 
    return len;
 }
@@ -435,12 +479,12 @@ void Lm32Logd::readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len )
    DEBUG_MESSAGE_M_FUNCTION( " len = " << len );
    DEBUG_MESSAGE( "Read-index: " << sysLogFifoGetReadIndex( &m_fiFoAdmin ) );
 
-   m_oMmu.getEb()->read( m_oMmu.getBase() +
-                            sysLogFifoGetReadIndex( &m_fiFoAdmin ) *
-                            sizeof(SYSLOG_MEM_ITEM_T),
-                         pData,
-                         EB_DATA32 | EB_LITTLE_ENDIAN,
-                         len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t) );
+   read( m_oMmu.getBase() +
+         sysLogFifoGetReadIndex( &m_fiFoAdmin ) *
+         sizeof(SYSLOG_MEM_ITEM_T),
+         pData,
+         EB_DATA32 | EB_LITTLE_ENDIAN,
+         len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t) );
    sysLogFifoAddToReadIndex( &m_fiFoAdmin, len );
 }
 
