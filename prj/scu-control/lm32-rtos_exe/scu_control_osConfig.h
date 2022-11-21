@@ -10,6 +10,12 @@
 
 #include <scu_control_os.h>
 
+#define TASK_PRIO_MAIN        1
+#define TASK_PRIO_ADDAC_FG    1
+#define TASK_PRIO_ADDAC_DAQ   1
+#define TASK_PRIO_MIL_FG      1
+#define TASK_PRIO_TEMPERATURE 1
+
 /*
  * Here is a good place to include header files that are required across
  * your application.
@@ -23,7 +29,7 @@
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
 #define configTICK_RATE_HZ                      20000
-#define configMAX_PRIORITIES                    5
+#define configMAX_PRIORITIES                    2
 #define configMAX_TASK_NAME_LEN                 16
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
@@ -66,7 +72,7 @@
 
 /* Software timer related definitions. */
 #define configUSE_TIMERS                        0
-#define configTIMER_TASK_PRIORITY               3
+#define configTIMER_TASK_PRIORITY               TASK_PRIO_TEMPERATURE
 #define configTIMER_QUEUE_LENGTH                1
 #define configTIMER_TASK_STACK_DEPTH            (configMINIMAL_STACK_SIZE + 200)
 

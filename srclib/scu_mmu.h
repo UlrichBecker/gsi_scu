@@ -37,15 +37,18 @@
 #endif
 
 /*!
- * @defgroup SCU_MMU Melory Management Unit of SCU
+ * @defgroup SCU_MMU Memory Management Unit of SCU
  *
- * Memory organization in DDR3-RAM e.g. 4 payload segments:
+ * Memory organization in DDR3-RAM.\n
+ * Each payload descriptor takes a place of 2 * 8 = 16 bytes.
+ * @see MMU_ITEM_T
+ * E.g.: 4 payload segments with its payload descriptors:
  * @code
  * 63                 47                 31                 15                 0
  * +------------------+------------------+------------------+------------------+
  * |            Magic number             |            Start index 1            |
  * +-------------------------------------+-------------------------------------+
- * |                                  Padding                                  |
+ * |                        Padding respectively RFU                           |
  * +------------------+------------------+-------------------------------------+
  * |       Tag 1      |      Flags 1     |            Start index 2            |
  * +------------------+------------------+-------------------------------------+
@@ -80,6 +83,9 @@
  * |                                                                           |
  * +---------------------------------------------------------------------------+
  * @endcode
+ * @note In the case of DDR3, indices and lengths are counted in 64-bit units.
+ *       That means these numbers has to be dividable by 8, because
+ *       a 64-bit type is the smallest addressable unit.
  */
 
 #ifdef __cplusplus

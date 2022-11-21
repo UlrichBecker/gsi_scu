@@ -29,7 +29,9 @@
 #include <task.h>
 #include <timers.h>
 #include <scu_command_handler.h>
-
+#ifdef CONFIG_USE_TEMPERATURE_WATCHER
+ #include <scu_task_temperature.h>
+#endif
 #include <scu_task_fg.h>
 #ifdef CONFIG_MIL_FG
  #include <scu_eca_handler.h>
@@ -270,56 +272,6 @@ ONE_TIME_CALL void initInterrupt( void )
    scuLog( LM32_LOG_INFO, "IRQ table configured: 0b%b\n", irqGetMaskRegister() );
 }
 
-#if (configUSE_TIMERS > 0)
-
-#define TEMPERATURE_UPDATE_PERIOD 10
-
-STATIC void printTemperatures( void )
-{
-   lm32Log( LM32_LOG_INFO, "Board temperature: %d °C,   "
-                           "Backplane temperature: %d °C,   "
-                           "Extern temperature: %d °C,   ",
-                           g_shared.oSaftLib.oTemperatures.board_temp >> 4,
-                           g_shared.oSaftLib.oTemperatures.backplane_temp >> 4,
-                           g_shared.oSaftLib.oTemperatures.ext_temp >> 4 );
-}
-
-/*! --------------------------------------------------------------------------
- * @brief Callback function of the software timer.
- *        It becomes periodically invoked for updating some temperature
- *        sensors.
- */
-STATIC void onTimer( TimerHandle_t xTimer UNUSED )
-{
-   updateTemperature();
-   printTemperatures();
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief Starts the software timer using for cyclic update of some
- *        temperature sensors.
- */
-STATIC inline void startTimer( void )
-{
-   const TimerHandle_t th = xTimerCreate( "Timer",
-                                          pdMS_TO_TICKS( 1000 * TEMPERATURE_UPDATE_PERIOD ),
-                                          pdTRUE, NULL, onTimer );
-   if( th == NULL )
-   {
-      scuLog( LM32_LOG_ERROR, ESC_ERROR "Can't create timer!\n" ESC_NORMAL );
-      return;
-   }
-   if( xTimerStart( th, 0 ) != pdPASS )
-   {
-      scuLog( LM32_LOG_ERROR, ESC_ERROR "Can't start timer!\n" ESC_NORMAL );
-      return;
-   }
-   scuLog( LM32_LOG_INFO, "Timer started.\n" );
-}
-#else
-#define startTimer()
-#endif /* (configUSE_TIMERS > 0) */
-
 /*! ---------------------------------------------------------------------------
  * @brief Main task
  */
@@ -352,9 +304,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
    initAndScan();
 
    initInterrupt();
-
-   startTimer();
-
+#ifdef CONFIG_USE_TEMPERATURE_WATCHER
+   taskStartTemperatureWatcher();
+#endif
    taskStartAllIfHwPresent();
 
    scuLog( LM32_LOG_INFO, ESC_FG_GREEN ESC_BOLD
@@ -456,7 +408,7 @@ void main( void )
    /*
     * Creating the main task. 
     */
-   TASK_CREATE_OR_DIE( taskMain, 1024, 1, NULL );
+   TASK_CREATE_OR_DIE( taskMain, 1024, TASK_PRIO_MAIN, NULL );
 
    scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Starting sheduler...\n" ESC_NORMAL );
    /*

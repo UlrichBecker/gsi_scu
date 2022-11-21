@@ -232,8 +232,8 @@ void taskStartDaqIfAnyPresent( void )
 {
    if( (mg_taskDaqHandle == NULL) && (daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs ) > 0) )
    {
-      TASK_CREATE_OR_DIE( taskDaq, 512, 1, &mg_taskDaqHandle );
-      vTaskDelay( pdMS_TO_TICKS( 1 ) );
+      TASK_CREATE_OR_DIE( taskDaq, 512, TASK_PRIO_ADDAC_DAQ, &mg_taskDaqHandle );
+      //vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }
 }
 

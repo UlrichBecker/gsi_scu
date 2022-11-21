@@ -65,7 +65,9 @@ void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemper
       {
          *pId = pData->rom;
          int tvalue = w1_read_temp(pData, 0);
-         *pTemperature = (tvalue >> 12); //full precision with 1/16 degree C
+         const int tempInCelsius = (int)GET_UPPER_HALF( tvalue );
+         if( (tempInCelsius >= -30) && (tempInCelsius <= 300) )
+            *pTemperature = (tvalue >> 12); //full precision with 1/16 degree C
        #ifdef DEBUG
          scuLog( LM32_LOG_INFO, "temperature: %d°C\n", (int)GET_UPPER_HALF( tvalue ));
        #endif

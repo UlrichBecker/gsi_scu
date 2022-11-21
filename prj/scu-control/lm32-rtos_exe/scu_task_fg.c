@@ -62,7 +62,7 @@ void taskStartFgIfAnyPresent( void )
 {
    if( (mg_taskFgHandle == NULL) && (addacGetNumberOfFg() > 0) )
    {
-      TASK_CREATE_OR_DIE( taskFg, 512, 1, &mg_taskFgHandle );
+      TASK_CREATE_OR_DIE( taskFg, 512, TASK_PRIO_ADDAC_FG, &mg_taskFgHandle );
      // vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }
 }

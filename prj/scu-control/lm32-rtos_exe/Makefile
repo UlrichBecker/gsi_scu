@@ -18,6 +18,8 @@ SUB_VERSION  = 6.0
  SCU_MIL := 1
 # MIL_GAP := 1
 
+ USE_TEMPERATURE_WATCHER :=1
+
  MIL_DAQ_USE_DDR3 := 1
  ADDAC_DAQ := 1
  DIOB_WITH_DAQ := 1
@@ -55,6 +57,10 @@ ifdef SCU_MIL
   SOURCE += scu_task_mil.c
 endif
 SOURCE   += scu_task_fg.c
+ifdef USE_TEMPERATURE_WATCHER
+  SOURCE    += scu_task_temperature.c
+  DEFINES   += CONFIG_USE_TEMPERATURE_WATCHER
+endif
 SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/ros_timeout.c
 
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
