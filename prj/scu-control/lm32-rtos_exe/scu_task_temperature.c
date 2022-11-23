@@ -30,23 +30,52 @@
  #include "scu_task_temperature.h"
 #endif
 
+//#define CONFIG_DEBUG_TEMPERATURE_WATCHER
+
 #define TEMPERATURE_UPDATE_PERIOD 10
 
+#ifdef CONFIG_DEBUG_TEMPERATURE_WATCHER
+ #define TEMP_HIGH     30
+ #define TEMP_CRITICAL 40
+#else
+ #define TEMP_HIGH     50
+ #define TEMP_CRITICAL 75
+#endif
 
+#define HYSTERESIS     2
 
-STATIC int getDegree( const int v )
+#if ( TEMP_HIGH >= TEMP_CRITICAL )
+ #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
+#endif
+
+/*! --------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Calculates the temperature in degree without decimal places.
+ */
+STATIC int getDegree( const uint32_t v )
 {
    return v >> 4;
 }
 
-STATIC int getTenthDegree( const int v )
+/*! --------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Calculates the first decimal place of the temperature in degree.
+ */
+STATIC unsigned int getTenthDegree( const uint32_t v )
 {
    return getDegree((v & 0x0F) * 10);
 }
 
-
+/*! --------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_DECLARE_STATE( state, attr... ) state
 
+/*! --------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Definition of the states of the finite state machine (FSM)
+ */
 typedef enum
 {
    FSM_DECLARE_STATE( ST_START, color = blue, label = 'Start of temperature\nwatching.' ),
@@ -55,114 +84,159 @@ typedef enum
    FSM_DECLARE_STATE( ST_CRITICAL, color = red, label = 'Temperature is critical!' )
 } STATE_T;
 
-typedef struct PACKED
-{
-   int* pCurrentTemp;
+/*! ---------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Definition of the temperature watch object. 
+ */
+typedef struct
+{  /*!
+    * @brief Points to the received value of the concerning temperature sensor.
+    */
+   uint32_t* pCurrentTemp;
+
+   /*!
+    * @brief Name of the temperature sensor.
+    */
    const char* name;
+
+   /*!
+    * @brief Keeps the current state of the FSM.
+    */
    STATE_T state;
 } TEMP_WATCH_T;
 
 
+#ifdef CONFIG_DEBUG_TEMPERATURE_WATCHER
+#warning Temperature task will compiled in debug mode!
 
 #define TEMP_FORMAT( name )                             \
    getDegree( g_shared.oSaftLib.oTemperatures.name ),   \
    getTenthDegree(g_shared.oSaftLib.oTemperatures.name) \
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Prints the three last received temperatures in the LM32-log system
+ * @note Just for debugging only. 
+ */
 STATIC void printTemperatures( void ) //TODO
 {
-   lm32Log( LM32_LOG_INFO, "Board temperature: %d.%d °C,   "
-                           "Backplane temperature: %d °C,   "
-                           "Extern temperature: %d °C,   ",
-                           TEMP_FORMAT( board_temp ),
-                           getDegree(g_shared.oSaftLib.oTemperatures.backplane_temp),
-                           getDegree(g_shared.oSaftLib.oTemperatures.ext_temp));
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
+            "Board temperature: %d.%d °C,   "
+            "Backplane temperature: %d °C,   "
+            "Extern temperature: %d °C,   " ESC_NORMAL,
+            TEMP_FORMAT( board_temp ),
+            getDegree(g_shared.oSaftLib.oTemperatures.backplane_temp),
+            getDegree(g_shared.oSaftLib.oTemperatures.ext_temp));
 }
-
-#define TEMP_HIGH     50
-#define TEMP_CRITICAL 75
-#define HYSTERESIS     2
+#endif /* ifdef CONFIG_DEBUG_TEMPERATURE_WATCHER */
 
 /*! ---------------------------------------------------------------------------
- * @brief RTOS-task updates periodically the temperature sensors via one wire
- *        bus
+ * @ingroup TEMPERATURE
+ * @ingroup RTOS_TASK
+ * @brief RTOS-task updates periodically the temperature sensors via one-wire-
+ *        bus and sends log messages to the LM32- logging system if one
+ *        or more temperatures exceeds a critical threshold.  
  */
 STATIC void taskTempWatch( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
-   #define FSM_INIT_FSM( init, attr... )       .state = init
+   /*!
+    * @see https://github.com/UlrichBecker/DocFsm
+    */
+   #define FSM_INIT_FSM( init, attr... )  .state = init
+   
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
    TEMP_WATCH_T watchObject[3] =
    {
       {
-         .pCurrentTemp = (int*)&g_shared.oSaftLib.oTemperatures.board_temp,
+         .pCurrentTemp = &g_shared.oSaftLib.oTemperatures.board_temp,
          .name = "board",
          FSM_INIT_FSM( ST_START, color = blue )
       },
       {
-         .pCurrentTemp = (int*)&g_shared.oSaftLib.oTemperatures.backplane_temp,
+         .pCurrentTemp = &g_shared.oSaftLib.oTemperatures.backplane_temp,
          .name = "backplane",
-         FSM_INIT_FSM( ST_START )
+         .state = ST_START
       },
       {
-         .pCurrentTemp = (int*)&g_shared.oSaftLib.oTemperatures.ext_temp,
+         .pCurrentTemp = &g_shared.oSaftLib.oTemperatures.ext_temp,
          .name = "extern",
-         FSM_INIT_FSM( ST_START )
+         .state = ST_START
       }
    };
    #pragma GCC diagnostic pop
 
+   /*!
+    * @see https://github.com/UlrichBecker/DocFsm
+    */
    #define FSM_TRANSITION( newState, attr... ) \
    {                                           \
       pWatchTemp->state = newState;            \
       break;                                   \
    }
 
+   /*!
+    * @see https://github.com/UlrichBecker/DocFsm
+    */
    #define FSM_TRANSITION_SELF( attr... ) break
 
    TickType_t xLastWakeTime = xTaskGetTickCount();
    while( true )
    {
       updateTemperature();
-      printTemperatures(); //TODO
+   #ifdef CONFIG_DEBUG_TEMPERATURE_WATCHER
+      printTemperatures();
+   #endif
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
-         TEMP_WATCH_T* pWatchTemp = &watchObject[i];
+         TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
          const STATE_T lastState = pWatchTemp->state;
-         int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
+         const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          switch( lastState )
          {
             case ST_START:
             {
                if( currentTemperature >= TEMP_CRITICAL )
-                  FSM_TRANSITION( ST_CRITICAL, color = red );
+                  FSM_TRANSITION( ST_CRITICAL, color = red, label = 'T >= TC' );
+
                if( currentTemperature >= TEMP_HIGH )
-                  FSM_TRANSITION( ST_HIGH, color = magenta );
+                  FSM_TRANSITION( ST_HIGH, color = magenta, label = 'T >= TH' );
+
                FSM_TRANSITION( ST_NORMAL, color = green );
             }
+
             case ST_NORMAL:
             {
                if( currentTemperature >= TEMP_CRITICAL )
-                  FSM_TRANSITION( ST_CRITICAL, color = red );
+                  FSM_TRANSITION( ST_CRITICAL, color = red, label = 'T >= TC' );
+
                if( currentTemperature >= TEMP_HIGH )
-                  FSM_TRANSITION( ST_HIGH, color = magenta );
+                  FSM_TRANSITION( ST_HIGH, color = magenta, label = 'T >= TH' );
+
                FSM_TRANSITION_SELF( color = green );
             }
+
             case ST_HIGH:
             {
                if( currentTemperature <= (TEMP_HIGH - HYSTERESIS) )
-                  FSM_TRANSITION( ST_NORMAL, color = green );
+                  FSM_TRANSITION( ST_NORMAL, color = green, label = 'T <= (TH - H)' );
+
                if( currentTemperature >= TEMP_CRITICAL )
-                  FSM_TRANSITION( ST_CRITICAL, color = red );
+                  FSM_TRANSITION( ST_CRITICAL, color = red, label = 'T >= TC' );
+
                FSM_TRANSITION_SELF( color = magenta );
             }
+
             case ST_CRITICAL:
             {
                if( currentTemperature <= (TEMP_HIGH - HYSTERESIS) )
-                  FSM_TRANSITION( ST_NORMAL, color = green );
+                  FSM_TRANSITION( ST_NORMAL, color = green, label = 'T <= (TH - H)' );
+
                if( currentTemperature <= (TEMP_CRITICAL - HYSTERESIS) )
-                  FSM_TRANSITION( ST_HIGH, color = magenta );
+                  FSM_TRANSITION( ST_HIGH, color = magenta, label = 'T <= (TC - H)' );
+
                FSM_TRANSITION_SELF( color = red );
             }  
          }
@@ -176,30 +250,37 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
             case ST_NORMAL:
             {
                lm32Log( LM32_LOG_INFO,
-                        "Temperature of %s is normal: %d.%u °C",
+                        "Temperature of \"%s\" is normal: %d.%u °C",
                         pWatchTemp->name, 
                         currentTemperature, tenthDegree );
                break;
             }
+
             case ST_HIGH:
             {
                lm32Log( LM32_LOG_WARNING, ESC_WARNING
-                        "WARNING: Temperature of %s is high: %d.%u °C" ESC_NORMAL,
+                        "WARNING: Temperature of \"%s\" is high: %d.%u °C" ESC_NORMAL,
                         pWatchTemp->name, 
                         currentTemperature, tenthDegree );
                break;
             }
+            
             case ST_CRITICAL:
             {
                lm32Log( LM32_LOG_ERROR, ESC_ERROR
-                        "ERROR: Temperature of %s is critical: %d.%u °C" ESC_NORMAL,
+                        "ERROR: Temperature of \"%s\" is critical: %d.%u °C" ESC_NORMAL,
                         pWatchTemp->name, 
                         currentTemperature, tenthDegree );
                break;
             }
+
             default: break;
          }
       } /* for() */
+      
+      /*
+       * Task will sleep for the in TEMPERATURE_UPDATE_PERIOD defined seconds.
+       */
       vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 1000 * TEMPERATURE_UPDATE_PERIOD ));
    } /* while( true ) */
 }

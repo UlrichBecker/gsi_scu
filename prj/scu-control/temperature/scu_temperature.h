@@ -15,7 +15,16 @@
 extern "C" {
 #endif
 
+/*!
+ * @defgroup W1 Funktions and macros for handling the one whire bus. 
+ */
+   
+/*!
+ * @defgroup TEMPERATURE Functions and macros for handling the temperature sensors.
+ */
+
 /*! ---------------------------------------------------------------------------
+ * @ingroup W1
  * @brief Pointers for one wire connections.
  */
 typedef struct
@@ -32,12 +41,15 @@ typedef struct
 } ONE_WIRE_T;
 
 /*! ----------------------------------------------------------------------------
+ * @ingroup W1
  * @brief Inizializing of the one wire base pointers used by
  * updateTemperature()
  */
 bool initOneWire( void );
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @ingroup W1
  * @brief updates the temperature information in the shared section
  */
 void updateTemperature( void );

@@ -30,7 +30,13 @@
 extern "C" {
 #endif
 
+/*!
+ * @defgroup RTOS_TASK Functions and macros for handling FreeRTOS tasks
+ *                     respectively threads.
+ */
+   
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Helper macro for creating a task.
  * @param func Name of task function.
  * @param stackSize Additional stack size.
@@ -46,6 +52,7 @@ extern "C" {
                 tskIDLE_PRIORITY + prio, handle )
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Helper Macro creates a task or when not successful it stops the CPU
  *        by a error-log message.
  * @param func Name of task function.
@@ -61,11 +68,13 @@ extern "C" {
    }
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Prints the task start information in the logging system.
  */
 void taskInfoLog( void );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Deletes the given task and puts an appropriate message in the
  *        logging system, if the content of the given pointer not NULL.
  * @note The argument is a double pointer, the function will made a pointer
@@ -76,12 +85,14 @@ void taskInfoLog( void );
 void taskDeleteIfRunning( void* pTaskHandle );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Deletes all possible running tasks of MIL-FG/DAQ, ADDAC-FG and
  *        ADDAC-DAQ.
  */
 void taskDeleteAllRunningFgAndDaq( void );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Starts all RTOS tasks for which the corresponding hardware
  *        was detected. That can be MIL
  */

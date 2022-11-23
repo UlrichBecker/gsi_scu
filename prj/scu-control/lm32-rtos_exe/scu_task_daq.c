@@ -171,6 +171,7 @@ STATIC inline void daqScanForCommands( void )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
  */
 OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!

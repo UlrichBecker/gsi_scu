@@ -68,6 +68,7 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or
  *        at least one DAQ present or - if not successful - it stops the CPU
  *        with a final error- log message.
@@ -75,6 +76,7 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 void taskStartDaqIfAnyPresent( void );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Stops the possible running ADDAC-DAQ- task if running, else this
  *        function is without effect.
  */

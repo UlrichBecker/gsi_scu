@@ -79,6 +79,7 @@ void vApplicationMallocFailedHook( void )
 #endif /* #if ( configUSE_MALLOC_FAILED_HOOK != 0 ) */
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @see scu_control.h
  */
 void taskInfoLog( void )
@@ -273,14 +274,19 @@ ONE_TIME_CALL void initInterrupt( void )
 }
 
 /*! ---------------------------------------------------------------------------
- * @brief Main task
+ * @ingroup RTOS_TASK
+ * @brief Main task controls all other tasks and polls the command-module,
+ *        the MSI-timeout watchdog and the queue-overflow watchdog,
+ *        rotates a software fan as still alive signal.
+ * 
+ * @note All other tasks becomes started or stopped by this task,
+ *       except the idle-task of the FreeRTOS kernel.
  */
 STATIC void taskMain( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
    tellMailboxSlot();
-
 
    vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
@@ -320,6 +326,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
    toStart( &fanInterval, pdMS_TO_TICKS( 250 ) );
 #endif
 
+   /*
+    *      *** Main-loop ***
+    */
    while( true )
    {
    #ifdef CONFIG_STILL_ALIVE_SIGNAL

@@ -33,6 +33,7 @@ STATIC TaskHandle_t mg_taskMilHandle = NULL;
 EV_CREATE_STATIC( g_ecaEvent, 16 );
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief RTOS- task for MIL-FGs and MIL-DAQs
  */
 STATIC void taskMil( void* pTaskData UNUSED )

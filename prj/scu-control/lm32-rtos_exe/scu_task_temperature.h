@@ -28,6 +28,8 @@ extern "C" {
 #endif
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @ingroup RTOS_TASK
  * @brief Starts the task for the periodically temperature watching.
  */
 void taskStartTemperatureWatcher( void );

@@ -36,6 +36,7 @@ extern "C" {
 extern SW_QUEUE_T g_queueFg;
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Starts the RTOS-ADDAC FG task for SCU-bus FGs if at least
  *        one FG present or - if not successful - it stops the CPU with a final
  *        error- log message.
@@ -43,6 +44,7 @@ extern SW_QUEUE_T g_queueFg;
 void taskStartFgIfAnyPresent( void );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Stops the possible running ADDAC-FG- task if running, else this
  *        function is without effect.
  */

@@ -32,6 +32,7 @@ STATIC TaskHandle_t mg_taskFgHandle = NULL;
 QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 
 /*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Task for handling SCU-bus respectively ADDAC function generators.
  */
 STATIC void taskFg( void* pTaskData UNUSED )
