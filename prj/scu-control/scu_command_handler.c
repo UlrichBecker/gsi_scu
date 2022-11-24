@@ -23,8 +23,11 @@
  #endif
  #include <daq_command_interface_uc.h>
 #endif
+#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_TEMPERATURE_WATCHER )
+ #include <scu_task_temperature.h>
+#endif
 
-//extern FG_MESSAGE_BUFFER_T    g_aMsg_buf[QUEUE_CNT];
+
 extern FG_CHANNEL_T           g_aFgChannels[MAX_FG_CHANNELS];
 extern volatile uint16_t*     g_pScub_base;
 #ifdef CONFIG_MIL_FG
@@ -229,16 +232,20 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
 
       case FG_OP_PRINT_HISTORY:
       {
-       #ifdef CONFIG_DBG_MEASURE_IRQ_TIME
+      #ifdef CONFIG_DBG_MEASURE_IRQ_TIME
          mprintf( "\n\nLast IRQ time: ");
          timeMeasurePrintMillisecondsSafe( &g_irqTimeMeasurement );
          mprintf( " ms\n\n" );
-       #endif
+      #endif
+      #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_TEMPERATURE_WATCHER )
+         printTemperatures();
+      #else
        #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_WARNING, "No history support!\n" );
        #else
          mprintf( ESC_ERROR "No history!\n" ESC_NORMAL );
        #endif
+      #endif
          break;
       }
 

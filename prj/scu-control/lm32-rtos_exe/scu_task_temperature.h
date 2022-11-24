@@ -34,6 +34,13 @@ extern "C" {
  */
 void taskStartTemperatureWatcher( void );
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup TEMPERATURE
+ * @brief Prints the three last received temperatures in the LM32-log system
+ */
+void printTemperatures( void );
+
+
 #ifdef __cplusplus
 }
 #endif
