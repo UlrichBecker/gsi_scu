@@ -1,12 +1,12 @@
 # !/bin/bash
 ###############################################################################
 ##                                                                           ##
-##          Test script for testing the interface 1 of DDR3-RAM              ##
+##              Reads a 64-bit value from the SCU-DDR3-RAM                   ##
 ##                                                                           ##
 ##---------------------------------------------------------------------------##
-## File:      ddr3if1test.sh                                                 ##
+## File:      ddr3-read.sh                                                   ##
 ## Author:    Ulrich Becker                                                  ##
-## Date:      24.11.2022                                                     ##
+## Date:      25.11.2022                                                     ##
 ## Copyright: GSI Helmholtz Centre for Heavy Ion Research GmbH               ##
 ###############################################################################
 ESC_ERROR="\e[1m\e[31m"
@@ -37,7 +37,7 @@ checkTarget()
 printHelp()
 {
    cat << __EOH__
-Test script for testing the interface 1 of DDR3-RAM
+Reads a 64-bit value from the SCU-DDR3-RAM
 Usage:
   1) on SCU: $(basename $0) [index]
   2) on ASL: $(basename $0) <SCU-URL> [index]
@@ -46,6 +46,8 @@ Options:
 -h, --help
    This help and exit.
 
+-v, --verbose
+   Be verbose
 __EOH__
    exit 0
 }
@@ -55,29 +57,8 @@ toupper()
    printf '%s\n' "$1" | awk '{ print toupper($0) }'
 }
 
-#------------------------------------------------------------------------------
-writeReadTest()
-{
-   let TEST_COUNT+=1
-   echo "Test $TEST_COUNT:"
-   echo "Writing on index: $INDEX, address: $TEST_ADDR, pattern: $1"
-   eb-write -q $TARGET $TEST_ADDR/$DDR3_ALIGN $1
-
-   local readBack="0x$(toupper $(eb-read -q $TARGET $TEST_ADDR/$DDR3_ALIGN))"
-   echo " Reding on index: $INDEX, address: $TEST_ADDR, pattern: $readBack"
-
-   if [ "$1" = "$readBack" ]
-   then
-      echo -e $ESC_SUCCESS"*** Pass! :-) ***"$ESC_NORMAL
-      let PASS_COUNT+=1
-   else
-      echo -e $ESC_ERROR"*** Fail! :-( ***"$ESC_NORMAL
-      let FAIL_COUNT+=1
-   fi
-   echo
-}
-
 #==============================================================================
+BE_VERBOSE=false
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -87,11 +68,17 @@ do
          "h")
             printHelp
          ;;
+         "v")
+            BE_VERBOSE=true
+         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
                "help")
                   printHelp
+               ;;
+               "verbose")
+                  BE_VERBOSE=true
                ;;
                *)
                   die "Unknown long option \"-${A}\"!"
@@ -133,38 +120,28 @@ then
    die "\"eb-read\" not found!"
 fi
 
-if [ ! -n "$(which eb-write 2>/dev/null)" ]
-then
-   die "\"eb-write\" not found!"
-fi
-
-
 IF1_BASE_ADDR=$(eb-find $TARGET 0x651 0x20150828)
 if [ "$?" -ne "0" ]
 then
    die "Can't find base address of DDR3 interface 1"
 fi
 
-echo "Base address of DDR3 interface 1 is: $IF1_BASE_ADDR"
+if $BE_VERBOSE
+then
+   echo "Base address of DDR3 interface 1 is: $IF1_BASE_ADDR"
+fi
 
 let OFFSET=INDEX*DDR3_ALIGN
 
-TEST_ADDR="$(printf "0x%X\n" $((IF1_BASE_ADDR+OFFSET)))"
+DDR3_ADDR="$(printf "0x%X\n" $((IF1_BASE_ADDR+OFFSET)))"
 
-VALUE=$(eb-read -q $TARGET $TEST_ADDR/$DDR3_ALIGN)
-echo "DDR3[$INDEX] addr: $TEST_ADDR: 0x$VALUE"
+if $BE_VERBOSE
+then
+   echo "Address: $DDR3_ADDR"
+else
+   EB_VERBOSE="-q"
+fi
 
-echo "Start of write/read test..."
-
-writeReadTest 0x1122334455667788
-writeReadTest 0x0000000000000000
-writeReadTest 0xFFFFFFFFFFFFFFFF
-writeReadTest 0xAAAAAAAAAAAAAAAA
-writeReadTest 0x5555555555555555
-
-echo "Summary:"
-echo "Failed: $FAIL_COUNT of $TEST_COUNT"
-echo "Passed: $PASS_COUNT of $TEST_COUNT"
-echo "================"
+toupper $(eb-read $EB_VERBOSE $TARGET $DDR3_ADDR/$DDR3_ALIGN)
 
 #=================================== EOF ======================================

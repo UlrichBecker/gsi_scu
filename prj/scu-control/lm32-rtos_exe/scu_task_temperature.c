@@ -192,8 +192,8 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
-         const STATE_T lastState = pWatchTemp->state;
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
+         const STATE_T lastState = pWatchTemp->state;
          switch( lastState )
          {
             case ST_START:
