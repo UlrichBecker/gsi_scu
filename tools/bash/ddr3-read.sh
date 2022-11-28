@@ -42,16 +42,49 @@ Usage:
   1) on SCU: $(basename $0) [index]
   2) on ASL: $(basename $0) <SCU-URL> [index]
 
+The DDR3 address becomes calculated from the index:
+DDR3-address = DDR3-base-address + 8 * index
+
 Options:
 -h, --help
    This help and exit.
 
 -v, --verbose
    Be verbose
+
 __EOH__
    exit 0
 }
 
+#------------------------------------------------------------------------------
+docTagged()
+{
+   cat << __EOH__
+<toolinfo>
+<name>$(basename $0)</name>
+<topic>Helpers</topic>
+<description>Reads a 64-bit value from the SCU-DDR3-RAM</description>
+<usage>
+on SCU: $(basename $0) [index]
+on ASL: $(basename $0) <SCU-URL> [index]
+</usage>
+<author>ubecker@gsi.de</author>
+<tags></tags>
+<version>1.0</version>
+<documentation>
+The DDR3 address becomes calculated from the index:
+DDR3-address = DDR3-base-address + 8 * index
+</documentation>
+<environment>scu</environment>
+<requires>eb-find, eb-read</requires>
+<autodocversion>1.0</autodocversion>
+<compatibility></compatibility>
+</toolinfo>"
+__EOH__
+   exit 0
+}
+
+#------------------------------------------------------------------------------
 toupper()
 {
    printf '%s\n' "$1" | awk '{ print toupper($0) }'
@@ -76,6 +109,9 @@ do
             case ${B%=*} in
                "help")
                   printHelp
+               ;;
+               "generate_doc_tagged")
+                  docTagged
                ;;
                "verbose")
                   BE_VERBOSE=true
