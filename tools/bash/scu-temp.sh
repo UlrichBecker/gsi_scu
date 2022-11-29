@@ -1,22 +1,24 @@
 # !/bin/bash
 ###############################################################################
 ##                                                                           ##
-##              Writes a 64-bit value in the SCU-DDR3-RAM                    ##
+##  Reads board temperature, backplane temperature and extern temperature    ##
+##     from the shared memory of the LM32-application scu_control_os         ##
 ##                                                                           ##
 ##---------------------------------------------------------------------------##
-## File:      ddr3-write.sh                                                  ##
+## File:      scu-temp.sh                                                    ##
 ## Author:    Ulrich Becker                                                  ##
-## Date:      28.11.2022                                                     ##
+## Date:      29.11.2022                                                     ##
 ## Copyright: GSI Helmholtz Centre for Heavy Ion Research GmbH               ##
 ###############################################################################
 ESC_ERROR="\e[1m\e[31m"
 ESC_SUCCESS="\e[1m\e[32m"
 ESC_NORMAL="\e[0m"
 
-DDR3_ALIGN=8
-FAIL_COUNT=0
-PASS_COUNT=0
-TEST_COUNT=0
+ADDR_BOARD_TEMP=0x518
+ADDR_BACKPLANE_TEMP=0x520
+ADDR_EXTERN_TEMP=0x51C
+ADDR_MAGIC_NUMBER=0x524
+MAGIC_NUMBER=DEADBEEF
 
 #------------------------------------------------------------------------------
 die()
@@ -26,31 +28,23 @@ die()
 }
 
 #------------------------------------------------------------------------------
-checkTarget()
-{
-   [ ! -n "$1" ] && die "Missing target URL!"
-   ping -c1 $1 2>/dev/null 1>/dev/null
-   [ "$?" != '0' ] && die "Target \"$1\" not found!"
-}
-
-#------------------------------------------------------------------------------
 printHelp()
 {
    cat << __EOH__
-Writes a 64-bit value in the SCU-DDR3-RAM
-Usage:
-  1) on SCU: $(basename $0) [option] <index> <64-bit value>
-  2) on ASL: $(basename $0) [option] <SCU-URL> <index> <64-bit value>
+Reads board temperature, backplane temperature and extern temperature
+from the shared memory of the LM32-application scu_control_os
 
-The DDR3 address becomes calculated from the index:
-DDR3-address = DDR3-base-address + 8 * index
+Usage:
+  1) on SCU: $(basename $0)
+  2) on ASL: $(basename $0) <SCU-URL>
+
+NOTE:
+  Really actual temperatures are only obtainable when the FreeRTOS application
+  "scu_control_os" is running!
 
 Options:
 -h, --help
    This help and exit.
-
--v, --verbose
-   Be verbose
 
 __EOH__
    exit 0
@@ -63,20 +57,21 @@ docTagged()
 <toolinfo>
    <name>$(basename $0)</name>
    <topic>Helpers</topic>
-   <description>Writes a 64-bit value in the SCU-DDR3-RAM</description>
+   <description>
+      Reads board temperature, backplane temperature and extern temperature
+      from the shared memory of the LM32-application scu_control_os
+   </description>
    <usage>
-      on SCU: $(basename $0) [option] {index} {64-bit value}
-      on ASL: $(basename $0) [option] {SCU-URL} {index} {64-bit value}
+      on SCU: $(basename $0)
+      on ASL: $(basename $0) {SCU-URL}
    </usage>
    <author>ubecker@gsi.de</author>
    <tags></tags>
    <version>1.0</version>
    <documentation>
-      The DDR3 address becomes calculated from the index:
-      DDR3-address = DDR3-base-address + 8 * index
    </documentation>
    <environment>scu</environment>
-   <requires>eb-find, eb-write</requires>
+   <requires>lm32-read.sh</requires>
    <autodocversion>1.0</autodocversion>
    <compatibility></compatibility>
 </toolinfo>"
@@ -85,13 +80,13 @@ __EOH__
 }
 
 #------------------------------------------------------------------------------
-toupper()
+printTemperature()
 {
-   printf '%s\n' "$1" | awk '{ print toupper($0) }'
+   local temp="0x$(lm32-read.sh $1 $2)"
+   printf "%d.%u °C\n" $((temp/16)) $(((temp&0x0F)*10/16))
 }
 
 #==============================================================================
-BE_VERBOSE=false
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -101,9 +96,6 @@ do
          "h")
             printHelp
          ;;
-         "v")
-            BE_VERBOSE=true
-         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
@@ -112,9 +104,6 @@ do
                ;;
                "generate_doc_tagged")
                   docTagged
-               ;;
-               "verbose")
-                  BE_VERBOSE=true
                ;;
                *)
                   die "Unknown long option \"-${A}\"!"
@@ -132,53 +121,27 @@ done
 
 if [ "${HOSTNAME:0:5}" != "scuxl" ]
 then
-   checkTarget $1
-   TARGET="tcp/$1"
-   shift
+   if [ ! -n "$1" ]
+   then
+      die "Missing SCU-URL"
+   fi
+   TARGET=$1
 else
-   TARGET="dev/wbm0"
+   TARGET=""
 fi
 
-if [ "$#" -ne 2 ]
+if [ ! -n "$(which lm32-read.sh 2>/dev/null)" ]
 then
-   die "Missing argument!"
+   die "\"lm32-read.sh\" not found!"
 fi
 
-INDEX=$1
-VALUE=$2
-
-if [ ! -n "$(which eb-find 2>/dev/null)" ]
+if [ "$(lm32-read.sh $1 $ADDR_MAGIC_NUMBER)" != "$MAGIC_NUMBER" ]
 then
-   die "\"eb-find\" not found!"
+   die "Magic number not found!"
 fi
 
-if [ ! -n "$(which eb-write 2>/dev/null)" ]
-then
-   die "\"eb-write\" not found!"
-fi
-
-IF1_BASE_ADDR=$(eb-find $TARGET 0x651 0x20150828)
-if [ "$?" -ne "0" ]
-then
-   die "Can't find base address of DDR3 interface 1"
-fi
-
-if $BE_VERBOSE
-then
-   echo "Base address of DDR3 interface 1 is: $IF1_BASE_ADDR"
-fi
-
-let OFFSET=INDEX*DDR3_ALIGN
-
-DDR3_ADDR="$(printf "0x%X\n" $((IF1_BASE_ADDR+OFFSET)))"
-
-if $BE_VERBOSE
-then
-   echo "Address: $DDR3_ADDR"
-else
-   EB_VERBOSE="-q"
-fi
-
-eb-write $EB_VERBOSE $TARGET $DDR3_ADDR/$DDR3_ALIGN $VALUE
+echo "Extern:    $(printTemperature $TARGET $ADDR_EXTERN_TEMP)"
+echo "Backplane: $(printTemperature $TARGET $ADDR_BACKPLANE_TEMP)"
+echo "Board:     $(printTemperature $TARGET $ADDR_BOARD_TEMP)"
 
 #=================================== EOF ======================================

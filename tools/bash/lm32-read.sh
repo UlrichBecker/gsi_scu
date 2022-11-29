@@ -1,22 +1,19 @@
 # !/bin/bash
 ###############################################################################
 ##                                                                           ##
-##          Test script for testing the interface 1 of DDR3-RAM              ##
+##              Reads a 32-bit value from the LM32-user-RAM                  ##
 ##                                                                           ##
 ##---------------------------------------------------------------------------##
-## File:      ddr3if1test.sh                                                 ##
+## File:      lm32-read.sh                                                   ##
 ## Author:    Ulrich Becker                                                  ##
-## Date:      24.11.2022                                                     ##
+## Date:      29.11.2022                                                     ##
 ## Copyright: GSI Helmholtz Centre for Heavy Ion Research GmbH               ##
 ###############################################################################
 ESC_ERROR="\e[1m\e[31m"
 ESC_SUCCESS="\e[1m\e[32m"
 ESC_NORMAL="\e[0m"
 
-DDR3_ALIGN=8
-FAIL_COUNT=0
-PASS_COUNT=0
-TEST_COUNT=0
+LM32_ALIGN=4
 
 #------------------------------------------------------------------------------
 die()
@@ -34,20 +31,29 @@ checkTarget()
 }
 
 #------------------------------------------------------------------------------
+toupper()
+{
+   printf '%s\n' "$1" | awk '{ print toupper($0) }'
+}
+
+
+#------------------------------------------------------------------------------
 printHelp()
 {
    cat << __EOH__
-Test script for testing the interface 1 of DDR3-RAM
-Usage:
-  1) on SCU: $(basename $0) [index]
-  2) on ASL: $(basename $0) <SCU-URL> [index]
-
-The DDR3 address becomes calculated from the index:
-DDR3-address = DDR3-base-address + 8 * index
+Reads a 32-bit value from the LM32 user RAM.
+  1) on SCU: $(basename $0) [options] <relative address>
+  2) on ASL: $(basename $0) [options] <SCU-URL> <relative address>
 
 Options:
 -h, --help
    This help and exit.
+
+-n <index>
+   CPU number (default is 0)
+
+-v, --verbose
+   Be verbose
 
 __EOH__
    exit 0
@@ -60,20 +66,16 @@ docTagged()
 <toolinfo>
    <name>$(basename $0)</name>
    <topic>Helpers</topic>
-   <description>Test script for testing the interface 1 of DDR3-RAM</description>
+   <description>Reads a 32-bit value from the LM32 user RAM</description>
    <usage>
-      on SCU: on SCU: $(basename $0) [index]
-      on ASL: on ASL: $(basename $0) {SCU-URL} [index]
+      on SCU: $(basename $0) [options] {relative address}
+      on ASL: $(basename $0) [options] {SCU-URL} {relative address}
    </usage>
    <author>ubecker@gsi.de</author>
    <tags></tags>
    <version>1.0</version>
-   <documentation>
-      The DDR3 address becomes calculated from the index:
-      DDR3-address = DDR3-base-address + 8 * index
-   </documentation>
-   <environment>scu</environment>
-   <requires>eb-find, eb-read, eb-write</requires>
+   <documentation></documentation>
+   <requires>eb-find, eb-read</requires>
    <autodocversion>1.0</autodocversion>
    <compatibility></compatibility>
 </toolinfo>"
@@ -81,35 +83,9 @@ __EOH__
    exit 0
 }
 
-#------------------------------------------------------------------------------
-toupper()
-{
-   printf '%s\n' "$1" | awk '{ print toupper($0) }'
-}
-
-#------------------------------------------------------------------------------
-writeReadTest()
-{
-   let TEST_COUNT+=1
-   echo "Test $TEST_COUNT:"
-   echo "Writing on index: $INDEX, address: $TEST_ADDR, pattern: $1"
-   eb-write -q $TARGET $TEST_ADDR/$DDR3_ALIGN $1
-
-   local readBack="0x$(toupper $(eb-read -q $TARGET $TEST_ADDR/$DDR3_ALIGN))"
-   echo " Reding on index: $INDEX, address: $TEST_ADDR, pattern: $readBack"
-
-   if [ "$1" = "$readBack" ]
-   then
-      echo -e $ESC_SUCCESS"*** Pass! :-) ***"$ESC_NORMAL
-      let PASS_COUNT+=1
-   else
-      echo -e $ESC_ERROR"*** Fail! :-( ***"$ESC_NORMAL
-      let FAIL_COUNT+=1
-   fi
-   echo
-}
-
 #==============================================================================
+BE_VERBOSE=false
+CPU_NO=0
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -119,6 +95,19 @@ do
          "h")
             printHelp
          ;;
+         "v")
+            BE_VERBOSE=true
+         ;;
+         "n")
+            if  [ ! -n "${A:1:1}" ]
+            then
+               shift
+               CPU_NO=$1
+            else
+               CPU_NO=${A:1:1}
+               A=""
+            fi
+         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
@@ -127,6 +116,9 @@ do
                ;;
                "generate_doc_tagged")
                   docTagged
+               ;;
+               "verbose")
+                  BE_VERBOSE=true
                ;;
                *)
                   die "Unknown long option \"-${A}\"!"
@@ -153,9 +145,7 @@ fi
 
 if [ ! -n "$1" ]
 then
-   INDEX=0
-else
-   INDEX=$1
+   die "Missing relative offset address!"
 fi
 
 if [ ! -n "$(which eb-find 2>/dev/null)" ]
@@ -168,38 +158,20 @@ then
    die "\"eb-read\" not found!"
 fi
 
-if [ ! -n "$(which eb-write 2>/dev/null)" ]
-then
-   die "\"eb-write\" not found!"
-fi
-
-
-IF1_BASE_ADDR=$(eb-find $TARGET 0x651 0x20150828)
+LM32_BASE_ADDR=$(eb-find -n $CPU_NO $TARGET 0x651 0x54111351)
 if [ "$?" -ne "0" ]
 then
-   die "Can't find base address of DDR3 interface 1"
+   die "Can't find base address of LM32[$CPU_NO]"
 fi
 
-echo "Base address of DDR3 interface 1 is: $IF1_BASE_ADDR"
+let LM32_ADDRESS=LM32_BASE_ADDR+$1
 
-let OFFSET=INDEX*DDR3_ALIGN
+if $BE_VERBOSE
+then
+   echo "Base address of lm32 is: $LM32_BASE_ADDR"
+   printf "Address to read is:      0x%X\n"  $LM32_ADDRESS
+fi
 
-TEST_ADDR="$(printf "0x%X\n" $((IF1_BASE_ADDR+OFFSET)))"
-
-VALUE=$(eb-read -q $TARGET $TEST_ADDR/$DDR3_ALIGN)
-echo "DDR3[$INDEX] addr: $TEST_ADDR: 0x$VALUE"
-
-echo "Start of write/read test..."
-
-writeReadTest 0x1122334455667788
-writeReadTest 0x0000000000000000
-writeReadTest 0xFFFFFFFFFFFFFFFF
-writeReadTest 0xAAAAAAAAAAAAAAAA
-writeReadTest 0x5555555555555555
-
-echo "Summary:"
-echo "Failed: $FAIL_COUNT of $TEST_COUNT"
-echo "Passed: $PASS_COUNT of $TEST_COUNT"
-echo "================"
+toupper $(eb-read $TARGET $LM32_ADDRESS/$LM32_ALIGN)
 
 #=================================== EOF ======================================

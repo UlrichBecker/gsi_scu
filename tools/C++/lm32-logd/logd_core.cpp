@@ -125,8 +125,20 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
       m_poTerminal = new Terminal;
    }
 
-   m_lm32Base = m_oMmu.getEb()->findDeviceBaseAddress( mmuEb::gsiId,
-                                                       mmuEb::lm32_ram_user );
+   try
+   {
+      m_lm32Base = m_oMmu.getEb()->findDeviceBaseAddress( mmuEb::gsiId,
+                                                          mmuEb::lm32_ram_user );
+   }
+   catch( std::exception& e )
+   {
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << e.what() << endl;
+      }
+      throw e;
+   }
 
    /*
     * The string addresses of LM32 comes from the perspective of the LM32.
