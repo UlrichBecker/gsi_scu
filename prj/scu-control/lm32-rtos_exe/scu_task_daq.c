@@ -180,8 +180,12 @@ STATIC void taskDaq( void* pTaskData UNUSED )
    taskInfoLog();
    queueResetSave( &g_queueAddacDaq );
 
+   /*
+    *         *** Main loop of ADDAC- DAQs ***
+    */
    while( true )
    {
+      //TASK_YIELD();
 #ifdef _CONFIG_DAQ_MAIN
       addacDaqTask();
 #else
@@ -246,5 +250,22 @@ void taskStopDaqIfRunning( void )
    taskDeleteIfRunning( &mg_taskDaqHandle );
 }
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void daqTaskSuspend( void )
+{
+   if( mg_taskDaqHandle != NULL )
+      vTaskSuspend( mg_taskDaqHandle );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void daqTaskResume( void )
+{
+   if( mg_taskDaqHandle != NULL )
+      vTaskResume( mg_taskDaqHandle );
+}
 
 /*================================== EOF ====================================*/

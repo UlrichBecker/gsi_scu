@@ -26,6 +26,8 @@
 #ifndef _SCU_CONTROL_OS_H
 #define _SCU_CONTROL_OS_H
 
+#include <scu_lm32_macros.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -66,6 +68,16 @@ extern "C" {
    {                                                                          \
       die( "Can't create task: " #func );                                     \
    }
+
+/*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @see vPortYieldLm32()
+ */
+#ifdef CONFIG_TASKS_SHOULD_YIELD
+   #define TASK_YIELD() vPortYieldLm32()
+#else
+   #define TASK_YIELD()
+#endif
 
 /*!----------------------------------------------------------------------------
  * @ingroup RTOS_TASK

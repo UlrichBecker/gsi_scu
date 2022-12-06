@@ -334,7 +334,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    #ifdef CONFIG_STILL_ALIVE_SIGNAL
       /*
        * Showing a animated software fan as still alive signal
-       * in the LM32- console.
+       * on the LM32- console.
        */
       if( toInterval( &fanInterval ) )
       {
@@ -347,6 +347,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
       wdtPoll();
    #endif
       commandHandler();
+      TASK_YIELD();
    }
 }
 

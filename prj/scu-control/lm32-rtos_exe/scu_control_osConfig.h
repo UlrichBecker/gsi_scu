@@ -8,20 +8,21 @@
 #ifndef _SCU_CONTROLCONFIG_H
 #define _SCU_CONTROLCONFIG_H
 
-#include <scu_control_os.h>
-
 #define TASK_PRIO_MAIN        1
 #define TASK_PRIO_ADDAC_FG    1
 #define TASK_PRIO_ADDAC_DAQ   1
 #define TASK_PRIO_MIL_FG      1
 #define TASK_PRIO_TEMPERATURE 1
 
+//#define CONFIG_TASKS_SHOULD_YIELD
+#define CONFIG_STILL_ALIVE_SIGNAL
+
 /*
  * Here is a good place to include header files that are required across
  * your application.
  */
+#include <scu_control_os.h>
 
-#define CONFIG_STILL_ALIVE_SIGNAL
 
 #define configMINIMAL_STACK_SIZE 64
 

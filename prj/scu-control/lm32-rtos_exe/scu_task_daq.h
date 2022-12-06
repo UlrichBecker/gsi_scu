@@ -67,6 +67,10 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 
 
+void daqTaskSuspend( void );
+void daqTaskResume( void );
+
+
 /*!----------------------------------------------------------------------------
  * @ingroup RTOS_TASK
  * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or

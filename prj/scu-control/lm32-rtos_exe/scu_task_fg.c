@@ -25,6 +25,7 @@
  */
 #include <FreeRTOS.h>
 #include <task.h>
+#include <scu_task_daq.h>
 #include "scu_task_fg.h"
 
 STATIC TaskHandle_t mg_taskFgHandle = NULL;
@@ -38,21 +39,29 @@ QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 STATIC void taskFg( void* pTaskData UNUSED )
 {
    taskInfoLog();
-
    queueResetSave( &g_queueFg );
 
+   /*
+    *     *** Main loop of ADDAC- function generators ***
+    */
    while( true )
    {
       SCU_BUS_IRQ_QUEUE_T queueFgItem;
 
       if( queuePopSave( &g_queueFg, &queueFgItem ) )
       {
+         daqTaskSuspend();
+
          if( (queueFgItem.pendingIrqs & FG1_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG1_BASE );
 
          if( (queueFgItem.pendingIrqs & FG2_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
+
+         vTaskDelay(  1  );
+         daqTaskResume();
       }
+      TASK_YIELD();
    }
 }
 

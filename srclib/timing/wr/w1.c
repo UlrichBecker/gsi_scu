@@ -22,7 +22,7 @@ int w1_read_byte(struct w1_bus *bus)
 
 	for (i = 1; i < 0x100; i <<= 1)
 		res |= ops->read_bit(bus) ? i : 0;
-	usleep(100); /* inter-byte, for my eyes only */
+	//!!usleep(100); /* inter-byte, for my eyes only */
 	return res;
 
 }
