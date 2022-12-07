@@ -63,6 +63,8 @@ ifdef USE_TEMPERATURE_WATCHER
 endif
 SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/ros_timeout.c
 
+# SOURCE += $(WR_DIR)/usleep.c
+
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 
 #NO_LTO := 1
@@ -84,7 +86,7 @@ include ../common_make.mk
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+ SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 

@@ -56,12 +56,12 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mini_sdb.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sdb_add.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mprintf.c
 
-SOURCE += $(WR_DIR)/w1.c
-SOURCE += $(WR_DIR)/w1-hw.c
+#SOURCE += $(WR_DIR)/w1.c
+#SOURCE += $(WR_DIR)/w1-hw.c
 SOURCE += $(WR_DIR)/uart.c
 SOURCE += $(WR_DIR)/devicelist.c
 SOURCE += $(WR_DIR)/syscon.c
-SOURCE += $(WR_DIR)/usleep.c
+#SOURCE += $(WR_DIR)/usleep.c
 SOURCE += $(WR_DIR)/glue.c
 
 DEFINES += CONFIG_WR_NODE

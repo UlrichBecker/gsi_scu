@@ -169,6 +169,8 @@ endif
 
 SOURCE += $(SCU_LIB_SRC_DIR)/dow_crc.c
 SOURCE += $(WR_DIR)/w1-temp.c
+SOURCE += $(WR_DIR)/w1.c
+SOURCE += $(WR_DIR)/w1-hw.c
 
 # ADDITIONAL_HEADDER_IN_BUILD_ID = $(SCU_DIR)/scu_shared_mem.h
 

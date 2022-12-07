@@ -101,7 +101,7 @@ void addDiobToFgList( const void* pScuBusBase,
  * @brief Finding of all kinds of function generators connected to
  *        this SCU.
  */
-void fgListFindAll( volatile uint16_t *base_adr,
+void fgListFindAll( uint16_t* base_adr,
                   #ifdef CONFIG_MIL_FG
                     volatile unsigned int* mil_base,
                   #endif

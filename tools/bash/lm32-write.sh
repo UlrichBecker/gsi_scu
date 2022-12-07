@@ -167,7 +167,7 @@ let LM32_ADDRESS=LM32_BASE_ADDR+$1
 if $BE_VERBOSE
 then
    echo "Base address of lm32 is: $LM32_BASE_ADDR"
-   printf "Address to read is:      0x%X\n"  $LM32_ADDRESS
+   printf "Address to write is:      0x%X\n"  $LM32_ADDRESS
 fi
 
 eb-write $TARGET $LM32_ADDRESS/$LM32_ALIGN $2

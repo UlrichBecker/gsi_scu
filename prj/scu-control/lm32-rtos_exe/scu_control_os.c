@@ -409,12 +409,6 @@ void main( void )
 
    initializeGlobalPointers();
 
-  /*!
-   * Will need by usleep_init()
-   */
-   timer_init(1);
-   usleep_init();
-
    /*
     * Creating the main task. 
     */

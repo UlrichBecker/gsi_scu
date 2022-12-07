@@ -273,7 +273,7 @@ extern MIL_TASK_DATA_T g_aMilTaskData[5];
  * @param scub_adr Baseaddress of SCU- bus.
  * @param pFgList Pointer to function generator list.
  */
-void scanScuBusFgsViaMil( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList );
+void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList );
 
 /*! ---------------------------------------------------------------------------
  * @brief Scans the MIL extension (MIL-PIGGY) for function generators 

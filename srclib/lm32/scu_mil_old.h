@@ -48,19 +48,9 @@
 //extern int usleep(useconds_t usec);
 
 /*!
- * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
- * @see MIL_BLOCK_SIZE
- */
-
-
-/*!
  * @defgroup MIL_INTERFACE Functions and constants for MIL-bus.
  * @{
  */
-
-
-int scub_write_mil_blk(volatile unsigned short *base, int slot, short *data, short fc_ifc_addr);
-int scub_write_mil(volatile unsigned short *base, int slot, short data, short fc_ifc_addr);
 
 int write_mil(volatile unsigned int *base, short data, short fc_ifk_addr);
 int read_mil(volatile unsigned int *base, short *data, short fc_ifk_addr);
@@ -72,15 +62,12 @@ int status_mil(volatile unsigned int *base, unsigned short *status);
  */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
 int scub_status_mil(volatile unsigned short *base, int slot, unsigned short *status);
-
-int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc_addr );
-int scub_read_mil( uint16_t *base, const unsigned int slot, uint16_t *data, const unsigned int fc_ifc_addr );
-
+int scub_read_mil(volatile unsigned short *base, int slot, short *data, short fc_ifc_addr);
 int set_task_mil(volatile unsigned int *base, unsigned char task, short fc_ifc_addr);
 int get_task_mil(volatile unsigned int *base, unsigned char task, short *data);
 int scub_set_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short fc_ifc_addr);
 int scub_get_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short *data);
-int scub_reset_mil( uint16_t* base, int slot);
+int scub_reset_mil(volatile unsigned short *base, int slot);
 int reset_mil(volatile unsigned *base);
 
 
@@ -101,7 +88,7 @@ int reset_mil(volatile unsigned *base);
 #define MIL_SIO3_D_RCVD   0xe00
 #define MIL_SIO3_D_ERR    0xe10
 #define MIL_SIO3_TX_REQ   0xe20
-
+#define CALC_OFFS(SLOT)   (((SLOT) * (1 << 16))) // from slot 1 to slot 12
 #define TASKMIN           1
 #define TASKMAX           254
 #define TASK_TIMEOUT 150
@@ -173,7 +160,32 @@ int reset_mil(volatile unsigned *base);
 
 #define MIL_BLOCK_SIZE 6 //!<@brief MIL data block length in 16-bit words (uint16_t).
 
+/*!
+ * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
+ * @see MIL_BLOCK_SIZE
+ */
+static
+inline int scub_write_mil_blk(volatile unsigned short *base, int slot, short *data, short fc_ifc_addr) {
+  int i;
+  atomic_on();
+  base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA] = data[0];
+  base[CALC_OFFS(slot) + MIL_SIO3_TX_CMD] = fc_ifc_addr;
 
+  for (i = 1; i < MIL_BLOCK_SIZE; i++) {
+      base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA] = data[i];
+  }
+  atomic_off();
+  return OKAY;
+}
+
+static
+inline int scub_write_mil(volatile unsigned short *base, int slot, short data, short fc_ifc_addr) {
+    atomic_on();
+    base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA ] = data;
+    base[CALC_OFFS(slot) + MIL_SIO3_TX_CMD] = fc_ifc_addr;
+    atomic_off();
+    return OKAY;
+}
 
 /***********************************************************
  ***********************************************************

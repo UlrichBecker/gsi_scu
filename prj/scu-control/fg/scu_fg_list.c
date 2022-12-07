@@ -202,7 +202,7 @@ void addDiobToFgList( const void* pScuBusBase,
  * @brief Scans the whole SCU-bus for all kinda of function generators.
  */
 ONE_TIME_CALL
-void scanScuBusFgs( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList )
+void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 {
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
    scuDaqInitialize( &g_scuDaqAdmin, pFgList );
@@ -231,7 +231,7 @@ void scanScuBusFgs( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList )
 /*! ---------------------------------------------------------------------------
  * @see scu_function_generator.h
  */
-void fgListFindAll( volatile uint16_t *scub_adr,
+void fgListFindAll( uint16_t* scub_adr,
                #ifdef CONFIG_MIL_FG
                    volatile unsigned int *mil_addr,
                #endif

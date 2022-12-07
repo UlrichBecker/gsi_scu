@@ -157,7 +157,7 @@ unsigned int milGetNumberOfFg( void )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanScuBusFgsViaMil( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList )
+void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 {
    const SCUBUS_SLAVE_FLAGS_T slotFlags =
                scuBusFindSpecificSlaves( (void*)scub_adr, SYS_CSCO, GRP_SIO2 )
@@ -189,19 +189,19 @@ void scanScuBusFgsViaMil( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList )
       {
          uint16_t ifa_id, ifa_vers, fg_vers;
          STATIC_ASSERT( sizeof( short ) == sizeof( ifa_id ) );
-         if( scub_read_mil( scub_adr, slot, (short*)&ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( scub_adr, slot, &ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
             continue;
          if( ifa_id != IFA_ID_VAL )
             continue;
 
          STATIC_ASSERT( sizeof( short ) == sizeof( ifa_vers ) );
-         if( scub_read_mil( scub_adr, slot, (short*)&ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( scub_adr, slot, &ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
             continue;
          if( ifa_vers < IFA_MIN_VERSION )
             continue;
 
          STATIC_ASSERT( sizeof( short ) == sizeof( fg_vers ) );
-         if( scub_read_mil( scub_adr, slot, (short*)&fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( scub_adr, slot, &fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
             continue;
          if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
             continue;
@@ -494,13 +494,13 @@ inline int milFgDisable( const void* pScuBus,
    FG_ASSERT( !isAddacFg( socket ) );
 
    int status;
-   int16_t data;
+   uint16_t data;
 
    if( isMilScuBusFg( socket ) )
    {
       const unsigned int slot = getFgSlotNumber( socket );
 
-      if( (status = scub_read_mil( (volatile unsigned short*) pScuBus, slot,
+      if( (status = scub_read_mil( (uint16_t*)pScuBus, slot,
            &data, FC_CNTRL_RD | dev)) != OKAY )
       {
          milPrintDeviceError( status, slot, __func__ );
@@ -514,7 +514,7 @@ inline int milFgDisable( const void* pScuBus,
 
    FG_ASSERT( isMilExtentionFg( socket ) );
 
-   if( (status = read_mil( (volatile unsigned int*)pMilBus, &data,
+   if( (status = read_mil( (volatile unsigned int*)pMilBus, (int16_t*)&data,
                            FC_CNTRL_RD | dev)) != OKAY )
    {
       milPrintDeviceError( status, 0, __func__ );

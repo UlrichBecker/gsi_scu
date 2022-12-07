@@ -38,6 +38,7 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
 ifdef ADDAC_DAQ
   SOURCE += $(DAQ_LM32_DIR)/daq_main.c
 endif
+SOURCE += $(WR_DIR)/usleep.c
 
 ifdef MIL_IN_TIMER_INTERRUPT
  DEFINES += MAX_LM32_INTERRUPTS=2
@@ -66,7 +67,7 @@ include ../common_make.mk
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-#SCU_URL = scuxl0162   # with MIL and ADDAC
+SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 
