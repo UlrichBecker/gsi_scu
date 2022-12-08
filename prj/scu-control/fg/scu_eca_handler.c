@@ -11,7 +11,7 @@
 #include <scu_fg_list.h>
 #include "scu_eca_handler.h"
 
-extern volatile unsigned int* g_pScu_mil_base;
+extern void*                  g_pScu_mil_base;
 extern volatile uint16_t*     g_pScub_base;
 
 #define MIL_BROADCAST 0x20ff //TODO Who the fuck is 0x20ff documented!
@@ -122,7 +122,7 @@ inline void ecaHandler( void )
    }
 
    if( isMilDevArmed )
-      g_pScu_mil_base[MIL_SIO3_TX_CMD] = MIL_BROADCAST;
+      milPiggySet( g_pScu_mil_base, MIL_SIO3_TX_CMD, MIL_BROADCAST );
 
    /*!
     * Send broadcast start to active SIO SCI-BUS-slaves

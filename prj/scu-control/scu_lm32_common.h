@@ -132,7 +132,7 @@ extern TIME_MEASUREMENT_T g_irqTimeMeasurement;
 extern volatile uint16_t*     g_pScub_base;
 extern volatile uint32_t*     g_pScub_irq_base;
 #ifdef CONFIG_MIL_FG
-extern volatile unsigned int* g_pScu_mil_base;
+extern void*                  g_pScu_mil_base;
 extern volatile uint32_t*     g_pMil_irq_base;
 #endif
 

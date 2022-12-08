@@ -29,7 +29,7 @@
 #include <scu_bus.h>
 #include "scu_mil.h"
 
-#define CALC_OFFS(SLOT)   (((SLOT) * (1 << 16))) // from slot 1 to slot 12
+//#define CALC_OFFS(SLOT)   (((SLOT) * (1 << 16))) // from slot 1 to slot 12
 
 #ifdef CONFIG_RTOS
  #define TRANSFER_DELAY    1
@@ -41,7 +41,7 @@
  #define READY_DELAY     100
 #endif
 
-/*! ------------------------------------------------------------------------
+/*! ---------------------------------------------------------------------------
  * @brief Makes some wait states during waiting for MIL-response.
  */
 STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
@@ -58,7 +58,7 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
  */
 /***********************************************************
  ***********************************************************
- *  
+ *
  * 1st part: original MIL bus library
  *
  ***********************************************************
@@ -66,42 +66,38 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_write_mil_blk(volatile unsigned short *base, int slot, short *data, short fc_ifc_addr)
+OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
+int scub_write_mil_blk( void* pBase,
+                        const unsigned int slot,
+                        const uint16_t* pData,
+                        const unsigned int fc_ifc_addr )
 {
-   criticalSectionEnter();
-   base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA] = data[0];
-   base[CALC_OFFS(slot) + MIL_SIO3_TX_CMD] = fc_ifc_addr;
+   void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
+   criticalSectionEnter();
+   scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[0] );
+   scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
-      base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA] = data[i];
+      scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[i] );
    }
    criticalSectionExit();
+
    return OKAY;
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_write_mil(volatile unsigned short *base, int slot, short data, short fc_ifc_addr)
+int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int data, const unsigned int fc_ifc_addr)
 {
-   criticalSectionEnter();
-   base[CALC_OFFS(slot) + MIL_SIO3_TX_DATA ] = data;
-   base[CALC_OFFS(slot) + MIL_SIO3_TX_CMD] = fc_ifc_addr;
-   criticalSectionExit();
-   return OKAY;
-}
+   void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-/*! ---------------------------------------------------------------------------
- * @see scu_mil.h
- * non blocking write; uses the tx fifo
- */
-int write_mil(volatile unsigned int *base, short data, short fc_ifc_addr)
-{
    criticalSectionEnter();
-   base[MIL_SIO3_TX_DATA] = data;
-   base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
+   scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, data );
+   scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
    criticalSectionExit();
+
    return OKAY;
 }
 
@@ -133,181 +129,185 @@ int status_mil(volatile unsigned int *base, unsigned short *status)
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_status_mil(volatile unsigned short *base, int slot, unsigned short *status)
+int scub_status_mil( void* pBase, const unsigned int slot, uint16_t* pStatus )
 {
    if( slot >= SCUBUS_START_SLOT && slot <= MAX_SCU_SLAVES )
    {
-      *status = base[CALC_OFFS(slot) + MIL_SIO3_STAT];
+      *pStatus = scuBusGetSlaveValue16( scuBusGetAbsSlaveAddr( pBase, slot ), MIL_SIO3_STAT );
       return OKAY;
    }
 
    return ERROR;
 }
 
+#ifdef CONFIG_MIL_PIGGY
+/*! ---------------------------------------------------------------------------
+ * @see scu_mil.h
+ * non blocking write; uses the tx fifo
+ */
+int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr)
+{
+   criticalSectionEnter();
+   milPiggySet( base, MIL_SIO3_TX_DATA, data );
+   milPiggySet( base, MIL_SIO3_TX_CMD, fc_ifc_addr );
+   criticalSectionExit();
+   return OKAY;
+}
+
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  * blocking read; uses task slot 2
  */
-int read_mil(volatile unsigned int *base, short *data, short fc_ifc_addr)
+int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifc_addr )
 {
-  unsigned short rx_data_avail;
-  unsigned short rx_err;
-  unsigned short rx_req;
-  int timeout = 0;
+   unsigned int timeout = 0;
 
-  // write fc and addr to taskram
-  base[MIL_SIO3_TX_TASK2] = fc_ifc_addr;
+   /*
+    * write fc and addr to taskram
+    */
+   milPiggySet( pBase, MIL_SIO3_TX_TASK2, fc_ifc_addr );
 
-  // wait for task to start (tx fifo full or other tasks running)
-  rx_req = base[MIL_SIO3_TX_REQ];
-  while(!(rx_req & 0x4) && (timeout < BLOCK_TIMEOUT))
-  {
-    milWait(TRANSFER_DELAY);
-    rx_req = base[MIL_SIO3_TX_REQ];
-    timeout++;
-  }
-  if (timeout > BLOCK_TIMEOUT)
-    return RCV_TIMEOUT;
+   /*
+    * wait for task to start (tx fifo full or other tasks running)
+    */
+   while( (milPiggyGet( pBase, MIL_SIO3_TX_REQ ) & 0x4) == 0 )
+   {
+      if( timeout > BLOCK_TIMEOUT )
+         return RCV_TIMEOUT;
+      timeout++;
+      milWait( TRANSFER_DELAY );
+   }
 
-  // wait for task to finish, a read over the dev bus needs at least 40us
-  rx_data_avail = base[MIL_SIO3_D_RCVD];
-  while(!(rx_data_avail & 0x4) && (timeout < BLOCK_TIMEOUT))
-  {
-    milWait(TRANSFER_DELAY);
-    rx_data_avail = base[MIL_SIO3_D_RCVD];
-    timeout++;
-  }
-  if (timeout > BLOCK_TIMEOUT)
-    return RCV_TIMEOUT;
+   /*
+    * wait for task to finish, a read over the dev bus needs at least 40us
+    */
+   while( (milPiggyGet( pBase, MIL_SIO3_D_RCVD) & 0x4) == 0 )
+   {
+      if( timeout > BLOCK_TIMEOUT )
+         return RCV_TIMEOUT;
+      timeout++;
+      milWait( TRANSFER_DELAY );
+   }
 
-  // task finished
-  rx_err = base[MIL_SIO3_D_ERR];
-  if ((rx_data_avail & 0x4) && !(rx_err & 0x4))
-  {
-    // copy received value
-    *data = 0xffff & base[MIL_SIO3_RX_TASK2];
-    return OKAY;
-  }
-  else
-  {
-    // dummy read resets available and error bits
-    *data = base[MIL_SIO3_RX_TASK2];
-    return RCV_TIMEOUT;
-  }
+   /*
+    * task finished
+    */
+   *pData = milPiggyGet( pBase, MIL_SIO3_RX_TASK2 );
+   if( (milPiggyGet( pBase, MIL_SIO3_D_ERR ) & 0x4) != 0 )
+      return RCV_TIMEOUT;
+
+   return OKAY;
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  * non-blocking
  */
-int set_task_mil(volatile unsigned int *base, unsigned char task, short fc_ifc_addr)
+int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr )
 {
-  if ((task < TASKMIN) || (task > TASKMAX))
-    return RCV_TASK_ERR;
-  
-  // write fc and addr to taskram
-  base[MIL_SIO3_TX_TASK1 + task - 1] = fc_ifc_addr;
-   
-  return OKAY;
+   if( (task < TASKMIN) || (task > TASKMAX) )
+      return RCV_TASK_ERR;
+
+   /*
+    * write fc and addr to taskram
+    */
+   milPiggySet( pBase, MIL_SIO3_TX_TASK1 + task - TASKMIN, fc_ifc_addr );
+   return OKAY;
 }
 
 // blocks until data is available or timeout occurs
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int get_task_mil(volatile unsigned int *base, unsigned char task, short *data)
+int get_task_mil( void* pBase, const unsigned int task, int16_t* pData )
 {
-  unsigned short rx_data_avail;
-  unsigned short rx_err;
-  unsigned int reg_offset;
-  unsigned int bit_offset;
+   if( (task < TASKMIN) || (task > TASKMAX) )
+      return RCV_TASK_ERR;
 
-  if ((task < TASKMIN) || (task > TASKMAX))
-    return RCV_TASK_ERR;
+   /*
+    * fetch avail and err bits
+    */
+   const unsigned int regOffset = task / 16;
+   const unsigned int bitMask   = (1 << (task % 16));
 
-  // fetch avail and err bits
-  reg_offset = task / 16;
-  bit_offset = task % 16;
-  rx_data_avail = base[MIL_SIO3_D_RCVD + reg_offset];
-  // return if data is not available yet
-  if(!(rx_data_avail & (1 << bit_offset)))
-    return RCV_TASK_BSY;
+   /*
+    * Return by RCV_TASK_BSY if data is not available yet
+    */
+   if( (milPiggyGet( pBase, MIL_SIO3_D_RCVD + regOffset ) & bitMask) == 0 )
+      return RCV_TASK_BSY;
 
-  rx_err   = base[MIL_SIO3_D_ERR + reg_offset];
-  if ((rx_data_avail & (1 << bit_offset)) && !(rx_err & (1 << bit_offset)))
-  {
-    // copy received value
-    *data = 0xffff & base[MIL_SIO3_RX_TASK1 + task - 1];
-    return OKAY;
-  }
-  else
-  {
-    // dummy read resets available and error bits
-    *data = 0xffff & base[MIL_SIO3_RX_TASK1 + task - 1];
-    if ((*data & 0xffff) == 0xdead)
+
+   *pData = milPiggyGet( pBase, MIL_SIO3_RX_TASK1 + task - TASKMIN );
+
+   /*
+    * Return by OKAY if no error.
+    */
+   if( (milPiggyGet( pBase, MIL_SIO3_D_ERR + regOffset) & bitMask) == 0 )
+      return OKAY;
+
+   if( *pData == 0xDEAD )
       return RCV_TIMEOUT;
-    else if ((*data & 0xffff) == 0xbabe)
+
+   if( *pData == 0xBABE )
       return RCV_PARITY;
-    else
-      return RCV_ERROR;
-  }
+
+   return RCV_ERROR;
 }
+#endif /* CONFIG_MIL_PIGGY */
 
 // non-blocking
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_set_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short fc_ifc_addr)
+int scub_set_task_mil( void* pBase, const unsigned int slot,
+                       const unsigned int task, const unsigned int fc_ifc_addr )
 {
-  if ((task < TASKMIN) || (task > TASKMAX))
-    return RCV_TASK_ERR;
+   if( (task < TASKMIN) || (task > TASKMAX) )
+      return RCV_TASK_ERR;
 
-  // write fc and addr to taskram
-  base[CALC_OFFS(slot) + MIL_SIO3_TX_TASK1 + task - 1] = fc_ifc_addr;
-
-  return OKAY;
+  /*
+   * write fc and addr to taskram
+   */
+   scuBusSetSlaveValue16( scuBusGetAbsSlaveAddr( pBase, slot ),
+                          MIL_SIO3_TX_TASK1 + task - TASKMIN, fc_ifc_addr );
+   return OKAY;
 }
 
 // blocks until data is available or timeout occurs
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_get_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short *data)
+int scub_get_task_mil( const void* pBase, const unsigned int slot, const unsigned int task, int16_t* pData )
 {
-  unsigned short rx_data_avail;
-  unsigned short rx_err;
-  unsigned int reg_offset;
-  unsigned int bit_offset;
+   if( (task < TASKMIN) || (task > TASKMAX) )
+      return RCV_TASK_ERR;
 
-  if ((task < TASKMIN) || (task > TASKMAX))
-    return RCV_TASK_ERR;
+   const unsigned int regOffset = task / 16;
+   const unsigned int bitMask   = (1 << (task % 16));
 
-  // fetch avail and err bits
-  reg_offset = task / 16;
-  bit_offset = task % 16;
-  rx_data_avail = base[CALC_OFFS(slot) + MIL_SIO3_D_RCVD + reg_offset];
-  // return if data is not available yet
-  if(!(rx_data_avail & (1 << bit_offset)))
-    return RCV_TASK_BSY;
-  
-  rx_err  = base[CALC_OFFS(slot) + MIL_SIO3_D_ERR + reg_offset];
-  if ((rx_data_avail & (1 << bit_offset)) && !(rx_err & (1 << bit_offset)))
-  {
-    // copy received value
-    *data = 0xffff & base[CALC_OFFS(slot) + MIL_SIO3_RX_TASK1 + task - 1];
-    return OKAY;
-  }
-  else
-  {
-    // dummy read resets available and error bits
-    *data = 0xffff & base[CALC_OFFS(slot) + MIL_SIO3_RX_TASK1 + task - 1];
-    if ((*data & 0xffff) == 0xdead)
+   const void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
+
+   /*
+    * Return by RCV_TASK_BSY if data is not available yet
+    */
+   if( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_RCVD + regOffset ) & bitMask) == 0 )
+      return RCV_TASK_BSY;
+
+   *pData = scuBusGetSlaveValue16( pSlave, MIL_SIO3_RX_TASK1 + task - TASKMIN );
+
+   /*
+    * Return by OKAY if no error.
+    */
+   if( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_ERR + regOffset) & bitMask) == 0 )
+      return OKAY;
+
+   if( *pData == 0xDEAD )
       return RCV_TIMEOUT;
-    else if ((*data & 0xffff) == 0xbabe)
+
+   if( *pData == 0xBABE )
       return RCV_PARITY;
-    else
-      return RCV_ERROR;
-  }
+
+   return RCV_ERROR;
 }
 
 
@@ -389,24 +389,22 @@ int scub_reset_mil( uint16_t* base, int slot )
    return OKAY; 
 }
 
+#ifdef CONFIG_MIL_PIGGY
 /* reset all task slots */
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int reset_mil(volatile unsigned *base)
+void reset_mil( void* base )
 {
-//  unsigned short data;
-//  int i;
-  base[MIL_SIO3_RST] = 0x0;
-  milWait(RESET_DELAY);
-  base[MIL_SIO3_RST] = 0xff;
-  milWait(READY_DELAY);      // added by db; if not, an subsequent write/read results in an error -3
-
-  return OKAY;
-  //for (i = TASKMIN; i <= TASKMAX; i++) {
-    //data = 0xffff & base[MIL_SIO3_RX_TASK1 + i - 1];
-  //}
+   milPiggySet( base, MIL_SIO3_RST, 0x00 );
+   milWait( RESET_DELAY );
+   milPiggySet( base, MIL_SIO3_RST, 0xFF );
+   /*
+    * added by db; if not, an subsequent write/read results in an error -3
+    */
+   milWait( READY_DELAY );
 }
+#endif
 
 /***********************************************************
  ***********************************************************
@@ -418,7 +416,7 @@ int reset_mil(volatile unsigned *base)
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int16_t writeDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t  fctCode, uint16_t  data)
+int writeDevMil( void* base, uint16_t ifbAddr, uint16_t fctCode, const unsigned int data)
 {
   // just a wrapper for the function of the original library
   // replace code once original library becomes deprecated
@@ -427,13 +425,13 @@ int16_t writeDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t  fctCod
 
   fc_ifb_addr = ifbAddr | (fctCode << 8);
 
-  return (int16_t)write_mil((unsigned int *)base, (short)data, (short)fc_ifb_addr);
+  return write_mil( base, data, fc_ifb_addr);
 } // writeDevMil
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int16_t readDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t  fctCode, uint16_t  *data)
+int16_t readDevMil( void* base, uint16_t  ifbAddr, uint16_t  fctCode, uint16_t* pData )
 {
   // just a wrapper for the function of the original library
   // replace code once original library becomes deprecated
@@ -442,18 +440,18 @@ int16_t readDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t  fctCode
 
   fc_ifb_addr = ifbAddr | (fctCode << 8);
 
-  return (int16_t)read_mil((unsigned int *)base, (short *)data, (short)fc_ifb_addr);
+  return (int16_t)read_mil( base, pData, fc_ifb_addr);
 } //writeDevMil
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int16_t echoTestDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t data)
+int16_t echoTestDevMil( void* base, uint16_t  ifbAddr, uint16_t data)
 {
   int32_t  busStatus;
   uint16_t rData = 0x0;
 
-  busStatus = writeDevMil(base, ifbAddr, FC_WR_IFC_ECHO, data);
+  busStatus = writeDevMil( base, ifbAddr, FC_WR_IFC_ECHO, data);
   if (busStatus != MIL_STAT_OK)
      return busStatus;
 
@@ -470,18 +468,13 @@ int16_t echoTestDevMil(volatile uint32_t *base, uint16_t  ifbAddr, uint16_t data
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int16_t resetPiggyDevMil(volatile uint32_t *base)
+int resetPiggyDevMil( void* base)
 {
-  int32_t  busStatus;
-  
   // just a wrapper for the function of the original library
   // replace code once original library becomes deprecated
 
-  busStatus = reset_mil((unsigned int *)base);
-  if (busStatus != OKAY)
-     return MIL_STAT_ERROR;
-  else 
-     return MIL_STAT_OK;
+  reset_mil( base );
+  return MIL_STAT_OK;
 } //resetPiggyDevMil
 
 /*! ---------------------------------------------------------------------------

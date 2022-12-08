@@ -31,7 +31,7 @@
 extern FG_CHANNEL_T           g_aFgChannels[MAX_FG_CHANNELS];
 extern volatile uint16_t*     g_pScub_base;
 #ifdef CONFIG_MIL_FG
-extern volatile unsigned int* g_pScu_mil_base;
+extern void*                  g_pScu_mil_base;
 #endif
 #ifdef DEBUG_SAFTLIB
   #warning "DEBUG_SAFTLIB is defined! This could lead to timing problems!"
@@ -155,7 +155,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
                          g_shared.oSaftLib.oFg.aMacros,
                          (void*)g_pScub_base
                         #ifdef CONFIG_MIL_FG
-                         ,(void*)g_pScu_mil_base
+                         ,g_pScu_mil_base
                         #endif
                        );
        #ifdef CONFIG_USE_SENT_COUNTER

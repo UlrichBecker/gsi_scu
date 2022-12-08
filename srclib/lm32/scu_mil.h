@@ -47,6 +47,8 @@
 
 //extern int usleep(useconds_t usec);
 
+#define CONFIG_MIL_PIGGY
+
 /*!
  * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
  * @see MIL_BLOCK_SIZE
@@ -58,12 +60,32 @@
  * @{
  */
 
+#ifdef CONFIG_MIL_PIGGY
+/*! ---------------------------------------------------------------------------
+ * @brief Reads a value from the MIL- extension board (piggy)
+ */
+STATIC inline ALWAYS_INLINE
+uint32_t milPiggyGet( const void* pBase, const unsigned int offset )
+{
+   return ((uint32_t* volatile)pBase)[offset];
+}
 
-int scub_write_mil_blk(volatile unsigned short *base, int slot, short *data, short fc_ifc_addr);
-int scub_write_mil(volatile unsigned short *base, int slot, short data, short fc_ifc_addr);
+/*! ---------------------------------------------------------------------------
+ * @brief Writes a value in the MIL- extension board (piggy)
+ */
+STATIC inline ALWAYS_INLINE
+void milPiggySet( void* pBase, const unsigned int offset, const uint32_t value )
+{
+   ((uint32_t* volatile)pBase)[offset] = value;
+}
+#endif
 
-int write_mil(volatile unsigned int *base, short data, short fc_ifk_addr);
-int read_mil(volatile unsigned int *base, short *data, short fc_ifk_addr);
+int scub_write_mil_blk( void* pBase, const unsigned int slot, const uint16_t* pData, const unsigned int fc_ifc_addr);
+int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int data, const unsigned int fc_ifc_addr);
+
+int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr) ;
+int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifk_addr);
+
 int status_mil(volatile unsigned int *base, unsigned short *status);
 
 /*!
@@ -71,17 +93,18 @@ int status_mil(volatile unsigned int *base, unsigned short *status);
  * @see MIL_BLOCK_SIZE
  */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
-int scub_status_mil(volatile unsigned short *base, int slot, unsigned short *status);
+int scub_status_mil( void* pBase, const unsigned int slot, uint16_t* pStatus );
 
 int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc_addr );
 int scub_read_mil( uint16_t *base, const unsigned int slot, uint16_t *data, const unsigned int fc_ifc_addr );
 
-int set_task_mil(volatile unsigned int *base, unsigned char task, short fc_ifc_addr);
-int get_task_mil(volatile unsigned int *base, unsigned char task, short *data);
-int scub_set_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short fc_ifc_addr);
-int scub_get_task_mil(volatile unsigned short int *base, int slot, unsigned char task, short *data);
+int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr );
+int get_task_mil( void *pBase, const unsigned int task, int16_t* pData);
+
+int scub_set_task_mil( void* pBase, const unsigned int slot, const unsigned int task, const unsigned int fc_ifc_addr );
+int scub_get_task_mil( const void* pBase, const unsigned int slot, const unsigned int task, int16_t* pData );
 int scub_reset_mil( uint16_t* base, int slot);
-int reset_mil(volatile unsigned *base);
+void reset_mil( void* base );
 
 
 
@@ -224,31 +247,31 @@ int reset_mil(volatile unsigned *base);
 #define  MIL_FC_RD_IFC_ECHO FC_RD_IFC_ECHO
 
 /***********************************************************
-* routines for MIL device bus (Canon socket)      
+* routines for MIL device bus (Canon socket)
 ************************************************************/
 
 //!@brief write to MIL device bus; returns error code
-int16_t writeDevMil(volatile uint32_t *base,            //!<@brief Wishbone address seen from the CPUs perspective
+int writeDevMil( void* base,            //!<@brief Wishbone address seen from the CPUs perspective
                     uint16_t  ifbAddr,                  //!<@brief MIL address of interface board
                     uint16_t  fctCode,                  //!<@brief function code
-                    uint16_t  data                      //!<@brief data
+                    const unsigned int  data                      //!<@brief data
                     );
 
 //!@brief read from MIL device bus; returns error code
-int16_t readDevMil(volatile uint32_t *base,             //!<@brief Wishbone address seen from the CPUs perspective
+int16_t readDevMil(void*     base,             //!<@brief Wishbone address seen from the CPUs perspective
                    uint16_t  ifbAddr,                   //!<@brief MIL address of interface board
                    uint16_t  fctCode,                   //!<@brief function code
-                   uint16_t  *data                      //!<@brief data
+                   uint16_t* pData                      //!<@brief data
                    );
 
 //!@brief write data to the echo register of a MIL device, then read and compare the data; returns error code
-int16_t echoTestDevMil(volatile uint32_t *base,         //!<@brief Wishbone address seen from the CPUs perspective
-                    uint16_t  ifbAddr,                  //!<@brief MIL address of interface board
-                    uint16_t  data                      //!<@brief data
-                    );
+int16_t echoTestDevMil( void* base,         //!<@brief Wishbone address seen from the CPUs perspective
+                       uint16_t  ifbAddr,      //!<@brief MIL address of interface board
+                       uint16_t  data           //!<@brief data
+                      );
 
 //!@brief reset device bus part of MIL piggy
-int16_t resetPiggyDevMil(volatile uint32_t *base);      //!<@brief Wishbone address seen from the CPUs perspective
+int resetPiggyDevMil( void* base);      //!<@brief Wishbone address seen from the CPUs perspective
 
 /***********************************************************
 * routines for MIL event bus receiver (bipolar LEMO socket)

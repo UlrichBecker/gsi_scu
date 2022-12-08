@@ -44,7 +44,7 @@ volatile uint32_t*     g_pScub_irq_base   = NULL;
  * @brief Base pointer of MIL extension macro
  * @see initializeGlobalPointers
  */
-volatile unsigned int* g_pScu_mil_base    = NULL;
+void* g_pScu_mil_base    = NULL;
 
 /*!
  * @brief Base pointer of IRQ controller for dev bus extension
@@ -82,7 +82,7 @@ void initializeGlobalPointers( void )
       die( "Interrupt control for SCU-bus not found!" );
 
 #ifdef CONFIG_MIL_FG
-   g_pScu_mil_base = (unsigned int*)find_device_adr( GSI, SCU_MIL );
+   g_pScu_mil_base = (void*)find_device_adr( GSI, SCU_MIL );
    if( (int)g_pScu_mil_base == ERROR_NOT_FOUND )
       die( "MIL-bus not found!" );
 

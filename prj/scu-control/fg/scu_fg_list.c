@@ -231,9 +231,9 @@ void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 /*! ---------------------------------------------------------------------------
  * @see scu_function_generator.h
  */
-void fgListFindAll( uint16_t* scub_adr,
+void fgListFindAll( void* scub_adr,
                #ifdef CONFIG_MIL_FG
-                   volatile unsigned int *mil_addr,
+                   void* mil_addr,
                #endif
                    FG_MACRO_T* pFgList, uint64_t *ext_id )
 {

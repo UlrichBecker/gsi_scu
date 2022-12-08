@@ -273,14 +273,13 @@ extern MIL_TASK_DATA_T g_aMilTaskData[5];
  * @param scub_adr Baseaddress of SCU- bus.
  * @param pFgList Pointer to function generator list.
  */
-void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList );
+void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList );
 
 /*! ---------------------------------------------------------------------------
  * @brief Scans the MIL extension (MIL-PIGGY) for function generators 
  *        and put all found FGs in the function- generator list. 
  */
-void scanExtMilFgs( volatile unsigned int *mil_addr,
-                    FG_MACRO_T* pFgList, uint64_t *ext_id );
+void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of all found MIL- function generators after
@@ -314,8 +313,8 @@ bool milHandleClearHandlerState( const void* pScuBus, const void* pMilBus,
  * @param dev Device number of the concerning FG-device
  * @retval OKAY Action was successful
  */
-void milFgPrepare( const void* pScuBus,
-                   const void* pMilBus,
+void milFgPrepare( void* pScuBus,
+                   void* pMilBus,
                    const unsigned int socket,
                    const unsigned int dev );
 
@@ -330,8 +329,8 @@ void milFgPrepare( const void* pScuBus,
  * @param channel Channel number of the concerned function generator.
  * @retval OKAY Action was successful.
  */
-void milFgStart( const void* pScuBus,
-                 const void* pMilBus,
+void milFgStart( void* pScuBus,
+                 void* pMilBus,
                  const FG_PARAM_SET_T* pPset,
                  const unsigned int socket,
                  const unsigned int dev,
@@ -345,15 +344,15 @@ void milFgStart( const void* pScuBus,
  * @param socket Socket number containing location and device type
  * @param dev Device number
  */
-void milFgDisableIrq( const void* pScuBus,
-                      const void* pMilBus,
+void milFgDisableIrq( void* pScuBus,
+                      void* pMilBus,
                       const unsigned int socket,
                       const unsigned int dev );
 
 /*! ---------------------------------------------------------------------------
  */
-int milFgDisable( const void* pScuBus,
-                  const void* pMilBus,
+int milFgDisable( void* pScuBus,
+                  void* pMilBus,
                   unsigned int socket,
                   unsigned int dev );
 

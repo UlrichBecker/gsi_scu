@@ -20,7 +20,7 @@ extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
 
 extern volatile uint16_t*     g_pScub_base;
-extern volatile unsigned int* g_pScu_mil_base;
+extern void*                  g_pScu_mil_base;
 
 #ifdef _CONFIG_VARIABLE_MIL_GAP_READING
    unsigned int g_gapReadingTime = DEFAULT_GAP_READING_INTERVAL;
@@ -157,7 +157,7 @@ unsigned int milGetNumberOfFg( void )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList )
+void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
 {
    const SCUBUS_SLAVE_FLAGS_T slotFlags =
                scuBusFindSpecificSlaves( (void*)scub_adr, SYS_CSCO, GRP_SIO2 )
@@ -172,7 +172,7 @@ void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList )
    SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags )
    {
    #ifndef _CONFIG_IRQ_ENABLE_IN_START_FG
-      scuBusEnableSlaveInterrupt( (void*)scub_adr, slot );
+      scuBusEnableSlaveInterrupt( scub_adr, slot );
    #endif
 
       /*
@@ -188,19 +188,17 @@ void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList )
       for( uint32_t ifa_adr = 0; ifa_adr < IFK_MAX_ADR; ifa_adr++ )
       {
          uint16_t ifa_id, ifa_vers, fg_vers;
-         STATIC_ASSERT( sizeof( short ) == sizeof( ifa_id ) );
+
          if( scub_read_mil( scub_adr, slot, &ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
             continue;
          if( ifa_id != IFA_ID_VAL )
             continue;
 
-         STATIC_ASSERT( sizeof( short ) == sizeof( ifa_vers ) );
          if( scub_read_mil( scub_adr, slot, &ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
             continue;
          if( ifa_vers < IFA_MIN_VERSION )
             continue;
 
-         STATIC_ASSERT( sizeof( short ) == sizeof( fg_vers ) );
          if( scub_read_mil( scub_adr, slot, &fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
             continue;
          if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
@@ -215,11 +213,11 @@ void scanScuBusFgsViaMil( uint16_t* scub_adr, FG_MACRO_T* pFgList )
    } /* SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags ) */
 }
 
+#ifdef CONFIG_MIL_PIGGY
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanExtMilFgs( volatile unsigned int *mil_addr,
-                    FG_MACRO_T* pFgList, uint64_t *ext_id )
+void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id )
 {
   /*
    * Check only for "ifks", if there is a macro found and a mil extension
@@ -242,20 +240,17 @@ void scanExtMilFgs( volatile unsigned int *mil_addr,
    {
       uint16_t ifa_id, ifa_vers, fg_vers;
 
-      STATIC_ASSERT( sizeof( short ) == sizeof( ifa_id ) );
-      if( read_mil( mil_addr, (short*)&ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
+      if( read_mil( mil_addr, &ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
          continue;
       if( ifa_id != IFA_ID_VAL )
          continue;
 
-      STATIC_ASSERT( sizeof( short ) == sizeof( ifa_vers ) );
-      if( read_mil( mil_addr, (short*)&ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
+      if( read_mil( mil_addr, &ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
          continue;
       if( ifa_vers < IFA_MIN_VERSION )
          continue;
 
-      STATIC_ASSERT( sizeof( short ) == sizeof( fg_vers ) );
-      if( read_mil( mil_addr, (short*)&fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
+      if( read_mil( mil_addr, &fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
          continue;
       if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
          continue;
@@ -266,6 +261,7 @@ void scanExtMilFgs( volatile unsigned int *mil_addr,
       fgListAdd( DEV_MIL_EXT, ifa_adr, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
    }
 }
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Initializes the register set for MIL function generator.
@@ -342,8 +338,8 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgPrepare( const void* pScuBus,
-                          const void* pMilBus,
+inline void milFgPrepare( void* pScuBus,
+                          void* pMilBus,
                           const unsigned int socket,
                           const unsigned int dev )
 {
@@ -379,19 +375,19 @@ inline void milFgPrepare( const void* pScuBus,
   /*
    * Enable data request
    */
-   write_mil( (volatile unsigned int*) pMilBus, 1 << 13, FC_IRQ_MSK | dev );
+   write_mil( pMilBus, 1 << 13, FC_IRQ_MSK | dev );
 
    /*
     * Set MIL-DAC in FG mode
     */
-   write_mil( (volatile unsigned int*) pMilBus, 0x1, FC_IFAMODE_WR | dev);
+   write_mil( pMilBus, 0x1, FC_IFAMODE_WR | dev);
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgStart( const void* pScuBus,
-                        const void* pMilBus,
+inline void milFgStart( void* pScuBus,
+                        void* pMilBus,
                         const FG_PARAM_SET_T* pPset,
                         const unsigned int socket,
                         const unsigned int dev,
@@ -444,12 +440,9 @@ inline void milFgStart( const void* pScuBus,
    /*
     * Still in block mode !
     */
-   write_mil( (volatile unsigned int*)pMilBus,
-              cntrl_reg_wr,
-              FC_CNTRL_WR | dev );
+   write_mil( pMilBus, cntrl_reg_wr, FC_CNTRL_WR | dev );
 
-   write_mil( (volatile unsigned int*)pMilBus,
-              cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
+   write_mil( pMilBus, cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
 
    #if __GNUC__ >= 9
      #pragma GCC diagnostic pop
@@ -461,8 +454,8 @@ inline void milFgStart( const void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgDisableIrq( const void* pScuBus,
-                             const void* pMilBus,
+inline void milFgDisableIrq( void* pScuBus,
+                             void* pMilBus,
                              const unsigned int socket,
                              const unsigned int dev )
 {
@@ -478,16 +471,15 @@ inline void milFgDisableIrq( const void* pScuBus,
    else
    {
       //write_mil((volatile unsigned int* )pMilBus, 0x0, FC_COEFF_A_WR | dev);  //ack drq
-      write_mil( (volatile unsigned int* )pMilBus,
-                  0x0, FC_IRQ_MSK | dev);
+      write_mil( pMilBus, 0x0, FC_IRQ_MSK | dev);
    }
 }
 
 /*! ---------------------------------------------------------------------------
  * scu_fg_macros.h
  */
-inline int milFgDisable( const void* pScuBus,
-                         const void* pMilBus,
+inline int milFgDisable( void* pScuBus,
+                         void* pMilBus,
                          unsigned int socket,
                          unsigned int dev )
 {
@@ -514,16 +506,14 @@ inline int milFgDisable( const void* pScuBus,
 
    FG_ASSERT( isMilExtentionFg( socket ) );
 
-   if( (status = read_mil( (volatile unsigned int*)pMilBus, (int16_t*)&data,
+   if( (status = read_mil( pMilBus, &data,
                            FC_CNTRL_RD | dev)) != OKAY )
    {
       milPrintDeviceError( status, 0, __func__ );
       return status;
    }
 
-   write_mil( (volatile unsigned int*)pMilBus,
-               data & ~(0x2),
-              FC_CNTRL_WR | dev );
+   write_mil( pMilBus, data & ~(0x2), FC_CNTRL_WR | dev );
 
    return status;
 }
@@ -1027,7 +1017,7 @@ STATIC inline void feedMilFg( const unsigned int socket,
       * Send FG-data via SCU-bus-slave MIL adapter "SIO"
       */
       scub_write_mil_blk( g_pScub_base, getFgSlotNumber( socket ),
-                                   (short*)&milFgRegs, FC_BLK_WR | devNum );
+                                   (uint16_t*)&milFgRegs, FC_BLK_WR | devNum );
    }
  #if __GNUC__ >= 9
    #pragma GCC diagnostic pop
