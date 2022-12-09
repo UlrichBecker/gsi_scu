@@ -11,8 +11,8 @@
 #include <scu_fg_list.h>
 #include "scu_eca_handler.h"
 
-extern void*                  g_pScu_mil_base;
-extern volatile uint16_t*     g_pScub_base;
+extern void* g_pScu_mil_base;
+extern void* g_pScub_base;
 
 #define MIL_BROADCAST 0x20ff //TODO Who the fuck is 0x20ff documented!
 
@@ -66,7 +66,7 @@ void initEcaQueue( void )
             ESC_NORMAL, g_eca.pQueue, g_eca.tag );
 }
 
-#define OFFS(SLOT) ((SLOT) * (1 << 16))
+//#define OFFS(SLOT) ((SLOT) * (1 << 16))
 
 #ifdef _CONFIG_ECA_BY_MSI
   #define ECA_ATOMIC_SECTION() 
@@ -133,11 +133,13 @@ inline void ecaHandler( void )
    {  /*
        * Select active SIO slaves.
        */
-      g_pScub_base[OFFS(0) + MULTI_SLAVE_SEL] = active_sios;
+     // g_pScub_base[OFFS(0) + MULTI_SLAVE_SEL] = active_sios;
+      scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), MULTI_SLAVE_SEL, active_sios );
       /*
        * Send broadcast.
        */
-      g_pScub_base[OFFS(13) + MIL_SIO3_TX_CMD] = MIL_BROADCAST;
+      //g_pScub_base[OFFS(13) + MIL_SIO3_TX_CMD] = MIL_BROADCAST;
+      scuBusSetSlaveValue16( scuBusGetBroadcastAddr( g_pScub_base ), MIL_SIO3_TX_CMD, MIL_BROADCAST );
    }
 
   // mprintf( "SIO: %08b\n", active_sios );

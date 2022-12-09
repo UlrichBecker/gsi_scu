@@ -18,12 +18,12 @@
 
 #define CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ
 
-extern volatile uint16_t*     g_pScub_base;
-extern volatile uint32_t*     g_pScub_irq_base;
+extern void*               g_pScub_base;
+extern volatile uint32_t*  g_pScub_irq_base;
 
 #ifdef CONFIG_MIL_FG
-extern void*                  g_pScu_mil_base;
-extern volatile uint32_t*     g_pMil_irq_base;
+extern void*               g_pScu_mil_base;
+extern volatile uint32_t*  g_pMil_irq_base;
 
 typedef enum
 {
@@ -178,7 +178,8 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
       const uint16_t slot = getFgSlotNumber( socket ) - SCUBUS_START_SLOT;
       ATOMIC_SECTION()
       {
-         g_pScub_base[GLOBAL_IRQ_ENA] = 0x20;
+         //g_pScub_base[GLOBAL_IRQ_ENA] = 0x20;
+         scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), GLOBAL_IRQ_ENA, 0x20 );
          g_pScub_irq_base[MSI_CHANNEL_SELECT] = slot;
          g_pScub_irq_base[MSI_SOCKET_NUMBER]  = slot;
          g_pScub_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[0];
@@ -234,17 +235,17 @@ void fgEnableChannel( const unsigned int channel )
        * Note: In the case of ADDAC/ACU-FGs the socket-number is equal
        *       to the slot number.
        */
-      pAddagFgRegs = addacFgPrepare( (void*)g_pScub_base,
+      pAddagFgRegs = addacFgPrepare( g_pScub_base,
                                      socket, dev,
                                      g_shared.oSaftLib.oFg.aRegs[channel].tag );
 #ifdef CONFIG_MIL_FG
    }
    else
    {
-      if( milHandleClearHandlerState( (void*)g_pScub_base, (void*)g_pScu_mil_base, socket ) )
+      if( milHandleClearHandlerState( g_pScub_base, g_pScu_mil_base, socket ) )
          return;
 
-      milFgPrepare( (void*)g_pScub_base, (void*)g_pScu_mil_base, socket, dev );
+      milFgPrepare( g_pScub_base, g_pScu_mil_base, socket, dev );
    }
 #endif
 
@@ -263,10 +264,10 @@ void fgEnableChannel( const unsigned int channel )
       }
       else
       {
-         milFgStart( (void*)g_pScub_base,
-                     (void*)g_pScu_mil_base,
-                      &pset,
-                      socket, dev, channel );
+         milFgStart( g_pScub_base,
+                     g_pScu_mil_base,
+                     &pset,
+                     socket, dev, channel );
       }
    #endif /* CONFIG_MIL_FG */
    #ifdef CONFIG_USE_SENT_COUNTER
@@ -305,13 +306,13 @@ void fgDisableChannel( const unsigned int channel )
        * Note: In the case if ADDAC/ACU- function generator the slot number
        *       is equal to the socket number.
        */
-      addacFgDisable( (void*)g_pScub_base, socket, dev );
+      addacFgDisable( g_pScub_base, socket, dev );
 #ifdef CONFIG_MIL_FG
    }
    else
    {
-      status = milFgDisable( (void*)g_pScub_base,
-                             (void*)g_pScu_mil_base,
+      status = milFgDisable( g_pScub_base,
+                             g_pScu_mil_base,
                              socket, dev );
       if( status != OKAY )
          return;
@@ -363,12 +364,12 @@ STATIC inline void fgDisableInterrupt( const unsigned int channel )
       * In the case of ADDAC/ACU-FGs the socket-number is equal to the
       * slot number, so it's not necessary to extract the slot number here.
       */
-      addacFgDisableIrq( (void*)g_pScub_base, socket, dev );
+      addacFgDisableIrq( g_pScub_base, socket, dev );
 #ifdef CONFIG_MIL_FG
       return;
    }
 
-   milFgDisableIrq( (void*)g_pScub_base, (void*)g_pScu_mil_base, socket, dev );
+   milFgDisableIrq( g_pScub_base, g_pScu_mil_base, socket, dev );
 #endif
 }
 

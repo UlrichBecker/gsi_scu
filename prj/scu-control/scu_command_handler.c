@@ -28,10 +28,10 @@
 #endif
 
 
-extern FG_CHANNEL_T           g_aFgChannels[MAX_FG_CHANNELS];
-extern volatile uint16_t*     g_pScub_base;
+extern FG_CHANNEL_T   g_aFgChannels[MAX_FG_CHANNELS];
+extern void*          g_pScub_base;
 #ifdef CONFIG_MIL_FG
-extern void*                  g_pScu_mil_base;
+extern void*          g_pScu_mil_base;
 #endif
 #ifdef DEBUG_SAFTLIB
   #warning "DEBUG_SAFTLIB is defined! This could lead to timing problems!"

@@ -84,6 +84,23 @@ STATIC inline void* scuBusGetAbsSlaveAddr( const void* pScuBusBase,
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS
+ */
+STATIC inline void* scuBusGetSysAddr( const void* pScuBusBase )
+{
+   return &(((uint8_t*)pScuBusBase)[0]);
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup SCU_BUS
+ */
+STATIC inline void* scuBusGetBroadcastAddr( const void* pScuBusBase )
+{
+   return &(((uint8_t*)pScuBusBase)[SCUBUS_SLAVE_ADDR_SPACE * (MAX_SCU_SLAVES + 1)]);
+}
+
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup SCU_BUS
  * @brief Returns a pointer of a 16 bit slave device register by index.
  * @param pScuBusBase Base address of SCU bus.
  *                    Obtained by find_device_adr(GSI, SCU_BUS_MASTER);

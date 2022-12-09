@@ -120,7 +120,7 @@ int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int status_mil(volatile unsigned int *base, unsigned short *status)
+int status_mil(volatile unsigned int *base, unsigned short *status )
 {
    *status = base[MIL_SIO3_STAT];
    return OKAY;
@@ -129,7 +129,7 @@ int status_mil(volatile unsigned int *base, unsigned short *status)
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_status_mil( void* pBase, const unsigned int slot, uint16_t* pStatus )
+int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStatus )
 {
    if( slot >= SCUBUS_START_SLOT && slot <= MAX_SCU_SLAVES )
    {

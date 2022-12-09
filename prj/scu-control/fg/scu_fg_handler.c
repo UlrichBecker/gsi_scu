@@ -22,8 +22,8 @@
 /*!
  * @see scu_main.c
  */
-extern volatile uint16_t*     g_pScub_base;
-extern FG_CHANNEL_T           g_aFgChannels[MAX_FG_CHANNELS];
+extern void*        g_pScub_base;
+extern FG_CHANNEL_T g_aFgChannels[MAX_FG_CHANNELS];
 
 #define DAC_FG_MODE   0x0010
 
@@ -382,7 +382,7 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
 void handleAdacFg( const unsigned int slot,
                    const BUS_BASE_T fgAddrOffset )
 {
-   FG_REGISTER_T* pFgRegs = getFgRegisterPtrByOffsetAddr( (void*)g_pScub_base,
+   FG_REGISTER_T* pFgRegs = getFgRegisterPtrByOffsetAddr( g_pScub_base,
                                                           slot, fgAddrOffset );
    const unsigned int channel = pFgRegs->cntrl_reg.bv.number;
 

@@ -99,7 +99,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    uint16_t pendingIrqs;
 
    TRACE_MIL_DRQ( "2\n" );
-   while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
+   while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
    {
       if( (pendingIrqs & FG1_IRQ) != 0 )
       {

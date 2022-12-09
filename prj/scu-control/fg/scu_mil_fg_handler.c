@@ -19,8 +19,8 @@
 extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
 
-extern volatile uint16_t*     g_pScub_base;
-extern void*                  g_pScu_mil_base;
+extern void*  g_pScub_base;
+extern void*  g_pScu_mil_base;
 
 #ifdef _CONFIG_VARIABLE_MIL_GAP_READING
    unsigned int g_gapReadingTime = DEFAULT_GAP_READING_INTERVAL;
@@ -300,7 +300,7 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
    if( isMilScuBusFg( socket ) )
    {
       const unsigned int slot = getFgSlotNumber( socket );
-      scub_status_mil( (volatile unsigned short*) pScuBus, slot, &dreq_status );
+      scub_status_mil( pScuBus, slot, &dreq_status );
       slaveFlags = scuBusGetSlaveFlag( slot );
    }
    else if( isMilExtentionFg( socket ) )
@@ -360,12 +360,12 @@ inline void milFgPrepare( void* pScuBus,
      /*
       * Enable sending of data request.
       */
-      scub_write_mil( (volatile unsigned short*) pScuBus, slot, 1 << 13, FC_IRQ_MSK | dev );
+      scub_write_mil( pScuBus, slot, 1 << 13, FC_IRQ_MSK | dev );
 
      /*
       * Set MIL-DAC in FG mode
       */
-      scub_write_mil( (volatile unsigned short*) pScuBus, slot, 0x1, FC_IFAMODE_WR | dev );
+      scub_write_mil( pScuBus, slot, 0x1, FC_IFAMODE_WR | dev );
 
       return;
    }
@@ -412,19 +412,19 @@ inline void milFgStart( void* pScuBus,
    {
       const unsigned int slot = getFgSlotNumber( socket );
 
-      scub_write_mil_blk( (volatile unsigned short*) pScuBus,
+      scub_write_mil_blk( pScuBus,
                           slot,
-                          (short*)&milFgRegs,
+                          (uint16_t*)&milFgRegs,
                           FC_BLK_WR | dev );
 
      /*
       * Still in block mode !
       */
-      scub_write_mil( (volatile unsigned short*) pScuBus,
+      scub_write_mil( pScuBus,
                       slot,
                       cntrl_reg_wr, FC_CNTRL_WR | dev);
 
-      scub_write_mil( (volatile unsigned short*) pScuBus,
+      scub_write_mil( pScuBus,
                       slot,
                       cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
 
@@ -433,7 +433,7 @@ inline void milFgStart( void* pScuBus,
 
    FG_ASSERT( isMilExtentionFg( socket ) );
 
-   write_mil_blk( (volatile unsigned int*)pMilBus,
+   write_mil_blk( pMilBus,
                   (short*)&milFgRegs,
                   FC_BLK_WR | dev );
 
@@ -464,7 +464,7 @@ inline void milFgDisableIrq( void* pScuBus,
 
    if( isMilScuBusFg( socket ) )
    {
-      scub_write_mil( (volatile unsigned short*)pScuBus,
+      scub_write_mil( pScuBus,
                       getFgSlotNumber( socket ),
                       0x0, FC_IRQ_MSK | dev);
    }
@@ -492,14 +492,14 @@ inline int milFgDisable( void* pScuBus,
    {
       const unsigned int slot = getFgSlotNumber( socket );
 
-      if( (status = scub_read_mil( (uint16_t*)pScuBus, slot,
+      if( (status = scub_read_mil( pScuBus, slot,
            &data, FC_CNTRL_RD | dev)) != OKAY )
       {
          milPrintDeviceError( status, slot, __func__ );
          return status;
       }
 
-      scub_write_mil( (volatile unsigned short*) pScuBus, slot,
+      scub_write_mil(  pScuBus, slot,
                        data & ~(0x2), FC_CNTRL_WR | dev);
       return status;
    }

@@ -33,7 +33,7 @@
 #endif
 
 #ifndef CONFIG_DAQ_SINGLE_APP
- extern volatile uint16_t* g_pScub_base;
+ extern void* g_pScub_base;
  QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 #endif
 
@@ -63,7 +63,7 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices
    }
    int ret = daqBusFindAndInitializeAll( pDaqDevices, pScuBusBase );
 #else
-   int ret = daqBusFindAndInitializeAll( pDaqDevices, (void*)g_pScub_base, pFgList );
+   int ret = daqBusFindAndInitializeAll( pDaqDevices, g_pScub_base, pFgList );
 #endif
    if( ret < 0 )
    {

@@ -93,7 +93,7 @@ int status_mil(volatile unsigned int *base, unsigned short *status);
  * @see MIL_BLOCK_SIZE
  */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
-int scub_status_mil( void* pBase, const unsigned int slot, uint16_t* pStatus );
+int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStatus );
 
 int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc_addr );
 int scub_read_mil( uint16_t *base, const unsigned int slot, uint16_t *data, const unsigned int fc_ifc_addr );

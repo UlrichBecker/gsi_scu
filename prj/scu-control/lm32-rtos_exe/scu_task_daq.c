@@ -40,7 +40,7 @@
 STATIC TaskHandle_t mg_taskDaqHandle = NULL;
 
 #ifndef _CONFIG_DAQ_MAIN
-extern volatile uint16_t* g_pScub_base;
+extern void* g_pScub_base;
 DAQ_ADMIN_T g_scuDaqAdmin;
 
 
@@ -51,7 +51,7 @@ QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T )
  */
 int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList )
 {
-   const int ret = daqBusFindAndInitializeAll( pDaqDevices, (void*)g_pScub_base, pFgList );
+   const int ret = daqBusFindAndInitializeAll( pDaqDevices, g_pScub_base, pFgList );
    if( ret < 0 )
    {
       scuLog( LM32_LOG_ERROR, ESC_ERROR "Error in finding ADDAC-DAQs!\n" ESC_NORMAL );

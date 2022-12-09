@@ -31,7 +31,7 @@
  * @brief Base pointer of SCU bus.
  * @see initializeGlobalPointers
  */
-volatile uint16_t*     g_pScub_base       = NULL;
+void*                  g_pScub_base       = NULL;
 
 /*!
  * @brief Base pointer of irq controller for SCU bus
@@ -73,7 +73,7 @@ void initializeGlobalPointers( void )
     * Additional periphery needed for SCU.
     */
 
-   g_pScub_base = (volatile uint16_t*)find_device_adr( GSI, SCU_BUS_MASTER );
+   g_pScub_base = find_device_adr( GSI, SCU_BUS_MASTER );
    if( (int)g_pScub_base == ERROR_NOT_FOUND )
       die( "SCU-bus not found!" );
 
