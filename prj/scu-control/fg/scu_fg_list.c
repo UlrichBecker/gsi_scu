@@ -232,14 +232,15 @@ void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
  * @see scu_function_generator.h
  */
 void fgListFindAll( void* scub_adr,
-               #ifdef CONFIG_MIL_FG
+               #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                    void* mil_addr,
                #endif
-                   FG_MACRO_T* pFgList, uint64_t *ext_id )
+                   FG_MACRO_T* pFgList,
+                  uint64_t *ext_id )
 {
    fgListReset( pFgList );
    scanScuBusFgs( scub_adr, pFgList );
-#ifdef CONFIG_MIL_FG
+#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
    scanExtMilFgs( mil_addr, pFgList, ext_id );
 #endif
 }
@@ -251,7 +252,7 @@ void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
                      const unsigned int channel,
                      FG_MACRO_T* pFgList,
                      const void* pScuBus
-                   #ifdef CONFIG_MIL_FG
+                   #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                    , const void* pMilBus
                    #endif
                    )
@@ -286,19 +287,25 @@ void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
       return;
    }
 
+#ifdef CONFIG_MIL_PIGGY
    if( isMilScuBusFg( socket ) )
    {
+#else
+      
+#endif
       const unsigned int slot = getFgSlotNumber( socket );
       scub_reset_mil( (unsigned short*)pScuBus, slot );
       scub_write_mil( (unsigned short*)pScuBus, slot, FG_RESET, FC_CNTRL_WR | dev );
       return;
+#ifdef CONFIG_MIL_PIGGY
    }
 
    /* MIL- extension */
    FG_ASSERT( isMilExtentionFg( socket ) );
    reset_mil( (unsigned int*)pMilBus );
    write_mil( (unsigned int*)pMilBus, FG_RESET, FC_CNTRL_WR | dev );
-#endif
+#endif /* ifdef CONFIG_MIL_PIGGY */
+#endif /* ifdef CONFIG_MIL_FG */
 }
 
 /*================================== EOF ====================================*/

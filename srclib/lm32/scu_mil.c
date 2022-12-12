@@ -140,6 +140,8 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
    return ERROR;
 }
 
+#define TR_BIT_MASK (1 << 2)
+
 #ifdef CONFIG_MIL_PIGGY
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
@@ -170,7 +172,7 @@ int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifc_addr )
    /*
     * wait for task to start (tx fifo full or other tasks running)
     */
-   while( (milPiggyGet( pBase, MIL_SIO3_TX_REQ ) & 0x4) == 0 )
+   while( (milPiggyGet( pBase, MIL_SIO3_TX_REQ ) & TR_BIT_MASK) == 0 )
    {
       if( timeout > BLOCK_TIMEOUT )
          return RCV_TIMEOUT;
@@ -181,7 +183,7 @@ int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifc_addr )
    /*
     * wait for task to finish, a read over the dev bus needs at least 40us
     */
-   while( (milPiggyGet( pBase, MIL_SIO3_D_RCVD) & 0x4) == 0 )
+   while( (milPiggyGet( pBase, MIL_SIO3_D_RCVD ) & TR_BIT_MASK) == 0 )
    {
       if( timeout > BLOCK_TIMEOUT )
          return RCV_TIMEOUT;
@@ -193,7 +195,11 @@ int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifc_addr )
     * task finished
     */
    *pData = milPiggyGet( pBase, MIL_SIO3_RX_TASK2 );
-   if( (milPiggyGet( pBase, MIL_SIO3_D_ERR ) & 0x4) != 0 )
+
+   /*
+    * Checking whether an error has been occurred.
+    */
+   if( (milPiggyGet( pBase, MIL_SIO3_D_ERR ) & TR_BIT_MASK) != 0 )
       return RCV_TIMEOUT;
 
    return OKAY;
@@ -326,7 +332,7 @@ int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc
    /*
     * wait for task to start (tx fifo full or other tasks running)
     */
-   while( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_TX_REQ ) & 0x4) == 0 )
+   while( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_TX_REQ ) & TR_BIT_MASK) == 0 )
    {
       if( timeout > BLOCK_TIMEOUT )
          return RCV_TIMEOUT;
@@ -337,7 +343,7 @@ int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc
    /*
     * wait for task to finish, a read over the dev bus needs at least 40us
     */
-   while( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_RCVD ) & 0x4) == 0 )
+   while( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_RCVD ) & TR_BIT_MASK) == 0 )
    {
       if( timeout > BLOCK_TIMEOUT )
          return RCV_TIMEOUT;
@@ -350,7 +356,10 @@ int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc
     */
    *pData = scuBusGetSlaveValue16( pSlave, MIL_SIO3_RX_TASK2 );
 
-   if( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_ERR ) & 0x4) != 0 )
+   /*
+    * Checking whether an error has been occurred.
+    */
+   if( (scuBusGetSlaveValue16( pSlave, MIL_SIO3_D_ERR ) & TR_BIT_MASK) != 0 )
       return RCV_TIMEOUT;
 
    return OKAY;
@@ -359,7 +368,7 @@ int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_read_mil( uint16_t *base, const unsigned int slot, uint16_t* pData, const unsigned int fc_ifc_addr )
+int scub_read_mil( void* base, const unsigned int slot, uint16_t* pData, const unsigned int fc_ifc_addr )
 {
    return scuBusSlaveReadMil( scuBusGetAbsSlaveAddr( base, slot ), pData, fc_ifc_addr );
 }
@@ -404,7 +413,7 @@ void reset_mil( void* base )
     */
    milWait( READY_DELAY );
 }
-#endif
+#endif /* ifdef CONFIG_MIL_PIGGY */
 
 /***********************************************************
  ***********************************************************
@@ -413,6 +422,7 @@ void reset_mil( void* base )
  *
  ***********************************************************
  ***********************************************************/
+#ifdef CONFIG_MIL_PIGGY
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
@@ -442,6 +452,7 @@ int16_t readDevMil( void* base, uint16_t  ifbAddr, uint16_t  fctCode, uint16_t* 
 
   return (int16_t)read_mil( base, pData, fc_ifb_addr);
 } //writeDevMil
+#endif /* ifdef CONFIG_MIL_PIGGY */
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h

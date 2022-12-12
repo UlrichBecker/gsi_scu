@@ -206,7 +206,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             break;
          }
 
-     #ifdef CONFIG_MIL_FG
+     #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
          case ADDR_DEVBUS:
          { /*
             * Message from MIL- extention bus respectively device-bus.
@@ -227,7 +227,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             queuePushWatched( &g_queueMilFg, &milMsg );
             break;
          }
-     #endif /* ifdef CONFIG_MIL_FG */
+     #endif /* if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY ) */
 
          default:
          {
@@ -430,9 +430,13 @@ void main( void )
 
    scuLog( LM32_LOG_INFO, "g_oneWireBase.pWr is:   0x%p\n", g_oneWireBase.pWr );
    scuLog( LM32_LOG_INFO, "g_oneWireBase.pUser is: 0x%p\n", g_oneWireBase.pUser );
+#ifdef CONFIG_MIL_PIGGY
    scuLog( LM32_LOG_INFO, "g_pScub_irq_base is:    0x%p\n", g_pScub_irq_base );
+#endif
 #ifdef CONFIG_MIL_FG
+ #ifdef CONFIG_MIL_PIGGY
    scuLog( LM32_LOG_INFO, "g_pMil_irq_base is:     0x%p\n", g_pMil_irq_base );
+ #endif
    initEcaQueue();
 #endif
 

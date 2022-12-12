@@ -15,7 +15,10 @@
    #error This module is for the target LM32 only!
 #endif
 
-#include "scu_shared_mem.h"
+#include <scu_shared_mem.h>
+#ifdef CONFIG_MIL_FG
+ #include <scu_mil.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,7 +105,7 @@ void addDiobToFgList( const void* pScuBusBase,
  *        this SCU.
  */
 void fgListFindAll( void* base_adr,
-                  #ifdef CONFIG_MIL_FG
+                  #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                     void* mil_base,
                   #endif
                     FG_MACRO_T* fglist,
@@ -115,7 +118,7 @@ void fgResetAndInit( FG_CHANNEL_REG_T* cr,
                      const unsigned int channel,
                      FG_MACRO_T* macro,
                      const void* scub_base
-                   #ifdef CONFIG_MIL_FG
+                   #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                    , const void* devb_base
                    #endif
                    );

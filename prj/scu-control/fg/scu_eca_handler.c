@@ -11,7 +11,9 @@
 #include <scu_fg_list.h>
 #include "scu_eca_handler.h"
 
+#ifdef CONFIG_MIL_PIGGY
 extern void* g_pScu_mil_base;
+#endif
 extern void* g_pScub_base;
 
 #define MIL_BROADCAST 0x20ff //TODO Who the fuck is 0x20ff documented!
@@ -88,8 +90,9 @@ inline void ecaHandler( void )
    if( !ecaTestTagAndPop( g_eca.pQueue, g_eca.tag ) )
       return;
 
-
+#ifdef CONFIG_MIL_PIGGY
    bool                 isMilDevArmed = false;
+#endif
    SCUBUS_SLAVE_FLAGS_T active_sios   = 0; /* bitmap with active sios */
 
    /*
@@ -110,19 +113,25 @@ inline void ecaHandler( void )
        * Armed function generator found...
        */
       const unsigned int socket = getSocket( channel );
+   #ifdef CONFIG_MIL_PIGGY
       if( isMilExtentionFg( socket ) )
       {
          isMilDevArmed = true;
          continue;
       }
+   #else
+      FG_ASSERT( !isMilExtentionFg( socket ) );
+   #endif
 
       const unsigned int slot = getFgSlotNumber( socket );
       if( (slot != 0) && isMilScuBusFg( socket ) )
          active_sios |= scuBusGetSlaveFlag( slot );
    }
 
+#ifdef CONFIG_MIL_PIGGY
    if( isMilDevArmed )
       milPiggySet( g_pScu_mil_base, MIL_SIO3_TX_CMD, MIL_BROADCAST );
+#endif
 
    /*!
     * Send broadcast start to active SIO SCI-BUS-slaves

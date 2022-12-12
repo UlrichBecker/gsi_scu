@@ -1,19 +1,6 @@
-#ifndef __SCU_MIL_H_
-#define __SCU_MIL_H_
-
-#include <stdint.h>
-#include <board.h>
-#include <mprintf.h>
-#include <syscon.h>
-#ifdef _CONFIG_OLD_IRQ
- #include <aux.h>
-#else
- #include <lm32Interrupts.h>
-#endif
-
 /*!***********************************************************
  * @file scu_mil.h MIL bus library
- * @author  Wolfgang Panschow
+ * @author  Wolfgang Panschow, Ulrich Becker
  * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/PerfOpt
  * This library works but has two issues:
  * 
@@ -36,6 +23,15 @@
  * is encouraged.
  ***********************************************************/
 
+#ifndef __SCU_MIL_H_
+#define __SCU_MIL_H_
+
+#include <stdint.h>
+#include <board.h>
+#include <mprintf.h>
+#include <syscon.h>
+#include <lm32Interrupts.h>
+
 /***********************************************************
  ***********************************************************
  *  
@@ -43,9 +39,9 @@
  *
  ***********************************************************
  ***********************************************************/
-
-
-//extern int usleep(useconds_t usec);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define CONFIG_MIL_PIGGY
 
@@ -78,28 +74,33 @@ void milPiggySet( void* pBase, const unsigned int offset, const uint32_t value )
 {
    ((uint32_t* volatile)pBase)[offset] = value;
 }
-#endif
-
-int scub_write_mil_blk( void* pBase, const unsigned int slot, const uint16_t* pData, const unsigned int fc_ifc_addr);
-int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int data, const unsigned int fc_ifc_addr);
 
 int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr) ;
 int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifk_addr);
 
 int status_mil(volatile unsigned int *base, unsigned short *status);
 
+int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
+
+int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr );
+int get_task_mil( void *pBase, const unsigned int task, int16_t* pData);
+
+#endif /* ifdef CONFIG_MIL_PIGGY */
+
+int scub_write_mil_blk( void* pBase, const unsigned int slot, const uint16_t* pData, const unsigned int fc_ifc_addr);
+int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int data, const unsigned int fc_ifc_addr);
+
+
 /*!
  * @brief Writs a data block of 16 bit data words to the mil device.
  * @see MIL_BLOCK_SIZE
  */
-int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
+
 int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStatus );
 
 int scuBusSlaveReadMil( void* pSlave, uint16_t* pData, const unsigned int fc_ifc_addr );
-int scub_read_mil( uint16_t *base, const unsigned int slot, uint16_t *data, const unsigned int fc_ifc_addr );
+int scub_read_mil( void* base, const unsigned int slot, uint16_t *data, const unsigned int fc_ifc_addr );
 
-int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr );
-int get_task_mil( void *pBase, const unsigned int task, int16_t* pData);
 
 int scub_set_task_mil( void* pBase, const unsigned int slot, const unsigned int task, const unsigned int fc_ifc_addr );
 int scub_get_task_mil( const void* pBase, const unsigned int slot, const unsigned int task, int16_t* pData );
@@ -461,4 +462,8 @@ int16_t disableLemoEvtMil(volatile uint32_t *base,      //!<@brief Wishbone addr
 
 //@}
 
+#ifdef __cplusplus
+}
 #endif
+#endif
+/* ================================= EOF ====================================*/

@@ -39,7 +39,7 @@ void*                  g_pScub_base       = NULL;
  */
 volatile uint32_t*     g_pScub_irq_base   = NULL;
 
-#ifdef CONFIG_MIL_FG
+#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
 /*!
  * @brief Base pointer of MIL extension macro
  * @see initializeGlobalPointers
@@ -81,7 +81,7 @@ void initializeGlobalPointers( void )
    if( (int)g_pScub_irq_base == ERROR_NOT_FOUND )
       die( "Interrupt control for SCU-bus not found!" );
 
-#ifdef CONFIG_MIL_FG
+#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
    g_pScu_mil_base = (void*)find_device_adr( GSI, SCU_MIL );
    if( (int)g_pScu_mil_base == ERROR_NOT_FOUND )
       die( "MIL-bus not found!" );
@@ -135,7 +135,7 @@ void scanFgs( void )
   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 #endif
    fgListFindAll( g_pScub_base,
-              #ifdef CONFIG_MIL_FG
+              #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                  g_pScu_mil_base,
               #endif
                  g_shared.oSaftLib.oFg.aMacros,

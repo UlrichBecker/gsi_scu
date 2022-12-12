@@ -170,7 +170,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          */
          queuePushWatched( &g_queueMilFg, &milMsg );
       }
-   #endif
+   #endif /* ifdef CONFIG_MIL_FG */
 
    #ifdef CONFIG_SCU_DAQ_INTEGRATION
       if( (queueScuBusIrq.pendingIrqs & ((1 << DAQ_IRQ_DAQ_FIFO_FULL) | (1 << DAQ_IRQ_HIRES_FINISHED))) != 0 )
@@ -212,7 +212,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
                evPushWatched( &g_ecaEvent );
                break;
             }
-         #endif
+         #endif /* ifdef CONFIG_MIL_FG */
 
            /*
             * Message from SCU- bus.
@@ -229,7 +229,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             queuePushWatched( &g_queueSaftCmd, &m.msg );
             break;
          }
-     #ifdef CONFIG_MIL_FG
+     #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
          case ADDR_DEVBUS:
          { /*
             * Message from MIL- extention bus respectively device-bus.
@@ -250,7 +250,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             queuePushWatched( &g_queueMilFg, &milMsg );
             break;
          }
-     #endif /* ifdef CONFIG_MIL_FG */
+     #endif /* if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY ) */
          default:
          {
             FG_ASSERT( false );
@@ -303,7 +303,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
    scuLog( LM32_LOG_INFO, "g_pScub_irq_base is:    0x%p\n", g_pScub_irq_base );
 
 #ifdef CONFIG_MIL_FG
+ #ifdef CONFIG_MIL_PIGGY
    scuLog( LM32_LOG_INFO, "g_pMil_irq_base is:     0x%p\n", g_pMil_irq_base );
+ #endif
    initEcaQueue();
 #endif
 

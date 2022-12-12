@@ -188,7 +188,7 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
 #ifdef CONFIG_MIL_FG
       return;
    }
-
+#ifdef CONFIG_MIL_PIGGY
    if( !isMilExtentionFg( socket ) )
       return;
 
@@ -200,7 +200,8 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
       g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[2];
       g_pMil_irq_base[MSI_ENABLE]         = (1 << MIL_DRQ);
    }
-#endif
+#endif /* ifdef CONFIG_MIL_PIGGY */
+#endif /* ifdef CONFIG_MIL_FG */
 }
 
 /*! ---------------------------------------------------------------------------
