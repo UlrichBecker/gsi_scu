@@ -133,10 +133,8 @@ inline void ecaHandler( void )
       milPiggySet( g_pScu_mil_base, MIL_SIO3_TX_CMD, MIL_BROADCAST );
 #endif
 
-   /*!
+   /*
     * Send broadcast start to active SIO SCI-BUS-slaves
-    * @todo Remove this indexed SCU-bus access by encapsulated
-    *       hardware access!
     */
    if( active_sios != 0 ) ECA_ATOMIC_SECTION()
    {  /*
