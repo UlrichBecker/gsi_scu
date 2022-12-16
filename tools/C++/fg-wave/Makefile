@@ -49,7 +49,13 @@ INCLUDE_DIRS += $(SCU_DIR)/fg
 
 # LIBS += pthread
 LIBS += stdc++
-# LIBS += m
+ LIBS += m
+#LIBS += a
+#LIBS += gcc
+LIBS += c
+LIBS += gcc_eh
+
+#NO_LTO=1
 
 # CALL_ARGS = ../../../gsi_scu/sinus-test.txt
 #CALL_ARGS = sinus-test500.fgw -c

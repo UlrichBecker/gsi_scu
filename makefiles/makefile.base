@@ -157,7 +157,7 @@ endif
 
 GENERATED_DIR ?= $(dir $(MIAN_MODULE))generated
 INCLUDE_DIRS  += $(GENERATED_DIR)
-DEPLOY_DIR    ?= ./deploy_$(CPU)
+DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)
 WORK_DIR      ?= $(DEPLOY_DIR)/work
 TARGET_DIR    ?= $(DEPLOY_DIR)/result
 ASM_DIR       ?= $(DEPLOY_DIR)/asm

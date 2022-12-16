@@ -35,23 +35,34 @@ LD_FLAGS += $(ARG_LIBS)
 
 DOX_INPUT += $(MAKEFILE_DIR)/makefile.native
 
+ifdef OECORE_SDK_VERSION
+  ifndef SDKTARGETSYSROOT
+     $(error Make variable SDKTARGETSYSROOT not defined!)
+  endif
+  DEPLOY_APPENDIX = _sdk_$(OECORE_SDK_VERSION)
+endif
+
 include $(MAKEFILE_DIR)/makefile.base
 
-CC      = $(GCC_BIN_DIR)gcc -std=c11
-CXX     = $(GCC_BIN_DIR)g++ -std=c++11
-LD      = $(GCC_BIN_DIR)gcc
-OBJCPY  = $(GCC_BIN_DIR)objcopy
-OBJDUMP = $(GCC_BIN_DIR)objdump
-SIZE    = $(GCC_BIN_DIR)size
-AS      = $(GCC_BIN_DIR)gcc
-AR      = $(GCC_BIN_DIR)gcc-ar rcs
+SDKTARGETSYSROOT ?= /
+
+CC_STD  ?= c11
+CXX_STD ?= c++11
+
+CC      = $(GCC_BIN_DIR)$(TARGET_PREFIX)gcc -std=$(CC_STD)  --sysroot=$(SDKTARGETSYSROOT)  
+CXX     = $(GCC_BIN_DIR)$(TARGET_PREFIX)g++ -std=$(CXX_STD) --sysroot=$(SDKTARGETSYSROOT) 
+LD      = $(GCC_BIN_DIR)$(TARGET_PREFIX)gcc --sysroot=$(SDKTARGETSYSROOT)
+OBJCPY  = $(GCC_BIN_DIR)$(TARGET_PREFIX)objcopy 
+OBJDUMP = $(GCC_BIN_DIR)$(TARGET_PREFIX)objdump
+SIZE    = $(GCC_BIN_DIR)$(TARGET_PREFIX)size
+AS      = $(GCC_BIN_DIR)$(TARGET_PREFIX)gcc
+AR      = $(GCC_BIN_DIR)$(TARGET_PREFIX)gcc-ar rcs
 CPP     = $(CC) -E
-NM      = $(GCC_BIN_DIR)nm
-STRIP   = $(GCC_BIN_DIR)strip
-STRINGS = $(GCC_BIN_DIR)strings
-
-
-
+NM      = $(GCC_BIN_DIR)$(TARGET_PREFIX)nm
+STRIP   = $(GCC_BIN_DIR)$(TARGET_PREFIX)strip
+STRINGS = $(GCC_BIN_DIR)$(TARGET_PREFIX)strings
+GDB     = $(GCC_BIN_DIR)$(TARGET_PREFIX)gdb
+ 
 ifndef IS_LIBRARY
 $(BIN_FILE): $(OBJ_FILES) $(ADDITIONAL_LD_DEPENDENCES)
 	$(LD_F) -o $@ $(OBJ_FILES) $(ADDITIONAL_OBJECTS) $(LD_FLAGS)
