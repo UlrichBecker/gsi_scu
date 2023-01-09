@@ -459,11 +459,10 @@ inline void milFgStart( void* pScuBus,
    write_mil( pMilBus, cntrl_reg_wr, FC_CNTRL_WR | dev );
 
    write_mil( pMilBus, cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
-
+#endif
    #if __GNUC__ >= 9
      #pragma GCC diagnostic pop
    #endif
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
