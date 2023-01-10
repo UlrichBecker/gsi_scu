@@ -167,6 +167,18 @@
  */
 #define MERGE_HIGH_LOW( high, low ) ((low) | ((high) << BIT_SIZEOF(low)))
 
+/*!
+ * @brief Macro swaps the upper and lower 32-bit parts of the given 64-bit value.
+ */
+#define SWAP_HALVES_OF_64( value64 ) \
+   MERGE_HIGH_LOW( GET_LOWER_HALF( value64 ), (uint32_t)GET_UPPER_HALF( value64 ) )
+
+/*!
+ * @brief Macro swaps the upper and lower 16-bit parts of the given 32-bit value.
+ */
+#define SWAP_HALVES_OF_32( value32 ) \
+   MERGE_HIGH_LOW( GET_LOWER_HALF( value32 ), (uint16_t)GET_UPPER_HALF( value32 ) )
+   
 #ifndef __GNUC__
   #warning "Compiler isn't a GNU- compiler! Therefore it's not guaranteed that the following macro-definition PACKED_SIZE will work."
 #endif
