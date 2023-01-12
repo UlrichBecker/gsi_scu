@@ -260,8 +260,7 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
    SYSLOG_FIFO_ITEM_T item =
    {
    #if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-      .timestamp = MERGE_HIGH_LOW( GET_LOWER_HALF( timestamp ),
-                         (uint32_t)GET_UPPER_HALF( timestamp ) ),
+      .timestamp = SWAP_HALVES_OF_64( timestamp ),
    #else
       .timestamp = timestamp,
    #endif

@@ -797,7 +797,7 @@ STATIC inline void pushDaqData( FG_MACRO_T fgMacro,
     * E.g. the 16 bit set- and actual values are reversed, that is correct.
     * See also daq_eb_ram_buffer.hpp and daq_eb_ram_buffer.cpp.
     */
-   pl.item.timestamp = MERGE_HIGH_LOW( GET_LOWER_HALF( timestamp ), (uint32_t)GET_UPPER_HALF( timestamp ) );
+   pl.item.timestamp = SWAP_HALVES_OF_64( timestamp );
    pl.item.setValue  = actValue;                   /* yes, it's swapped with setValue */
    pl.item.actValue  = GET_UPPER_HALF( setValue ); /* yes, it's swapped with actValue */
    pl.item.fgMacro   = convertByteEndian_FG_MACRO_T( fgMacro );

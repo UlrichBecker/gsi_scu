@@ -351,6 +351,11 @@ vStartFirstTask:
    LOAD_ADDR r1, __atomic_section_nesting_count
    sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
  #endif
+  /*
+   * The critical section nesting counter __atomic_section_nesting_count
+   * becomes zero by the C-function pxPortInitialiseStack()
+   * implemented in port.c.
+   */
    ENABLE_INTERRUPTS_BY_ERET
    RESTORE_CONTEXT
    bi _restoreRemainingRegistersAndERET
@@ -384,8 +389,8 @@ vPortYieldLm32:
 #ifndef CONFIG_SAVE_ASNC
    /*
     * __atomic_section_nesting_count--;
-    * When the nesting counter becomes restored then it's not necessary
-    * to decrement it here.
+    * When the nesting counter becomes restored (CONFIG_SAVE_ASNC is defined)
+    * then it's not necessary to decrement it here.
     */
    LOAD_ADDR r1, __atomic_section_nesting_count
    lw        r2, (r1+0)
@@ -418,7 +423,7 @@ vPortInterruptHandler:
    sw        __cscf, r1         /* and store it in stack. */
    mvi       r1, SIGINT         /* Argument for C-function _irq_entry (will ignored)*/
    calli     _irq_entry         /* Call this C- callback function */
-   RESTORE_CONTEXT              /* Restore all registers except R1. */
+   RESTORE_CONTEXT              /* Restore all registers except R1, R2 and SP. */
    ENABLE_INTERRUPTS_BY_ERET
    bi _restoreRemainingRegistersAndERET
 .size vPortInterruptHandler, .-vPortInterruptHandler

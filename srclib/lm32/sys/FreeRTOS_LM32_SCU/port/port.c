@@ -164,7 +164,8 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * for each task. Macro: __asnc
     * __atomic_section_nesting_count
     * https://www.freertos.org/FreeRTOS_Support_Forum_Archive/November_2005/freertos_uxCriticalNesting_1386799.html
-    * It has to be initialized by zero.
+    * It has to be initialized by zero,
+    * so that __atomic_section_nesting_count becomes zero.
     */
    CHECK_STACK_POSITION( STK_ASNC );
    PUSH_STACK( 0 );
