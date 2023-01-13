@@ -62,6 +62,16 @@
  #include <string.h>
 #endif
 
+#ifdef CONFIG_SAVE_ASNC
+ #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+   #error portCRITICAL_NESTING_IN_TCB shall not be defined with 1 when CONFIG_SAVE_ASNC defined!
+ #endif
+#else
+ #if ( portCRITICAL_NESTING_IN_TCB == 0 )
+   #error portCRITICAL_NESTING_IN_TCB has to be defined with 1 when CONFIG_SAVE_ASNC is not defined!
+ #endif
+#endif
+
 
 STATIC_ASSERT( ALIGN == sizeof(portSTACK_TYPE) );
 STATIC_ASSERT( OS_STACK_DWORD_SIZE <= configMINIMAL_STACK_SIZE );
