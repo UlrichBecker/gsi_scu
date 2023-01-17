@@ -1540,7 +1540,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                   */
                   continue;
                }
-               TRACE_MIL_DRQ( "4 %d\n", channel );
+               TRACE_MIL_DRQ( "C %d\n", channel );
                /*
                 * Writing the next polynomial data set to the concerning function
                 * generator in non blocking mode.

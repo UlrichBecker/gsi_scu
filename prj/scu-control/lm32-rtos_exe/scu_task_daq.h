@@ -66,8 +66,16 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum );
  */
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
 
-
+/*! ---------------------------------------------------------------------------
+ * @brief Stops the DAQ-task if running.
+ * @see daqTaskResume
+ */
 void daqTaskSuspend( void );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Resumes the stopped DAQ-task.
+ * @see daqTaskSuspend
+ */
 void daqTaskResume( void );
 
 

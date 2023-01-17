@@ -116,7 +116,6 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       { /*
          * MIL-SIO function generator recognized. 
          */
-         TRACE_MIL_DRQ( "3\n" );
          const MIL_QEUE_T milMsg =
          { /*
             * The slot number is in any cases not zero.
@@ -130,6 +129,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
         /*!
          * @see milTask
          */
+         TRACE_MIL_DRQ( "3\n" );
          queuePushWatched( &g_queueMilFg, &milMsg );
       }
    #endif
@@ -168,7 +168,6 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
    while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
    {
       TRACE_MIL_DRQ( "1\n" );
-      //mprintf( "a=%04X\n", m.adr );
       switch( GET_LOWER_HALF( m.adr )  )
       {
          case ADDR_SCUBUS:
@@ -224,6 +223,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
            /*!
             * @see milDeviceHandler
             */
+            TRACE_MIL_DRQ("4\n");
             queuePushWatched( &g_queueMilFg, &milMsg );
             break;
          }
