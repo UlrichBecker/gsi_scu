@@ -79,7 +79,7 @@
 extern "C" {
 #endif
 
-#define    CONFIG_TRACE_MIL_DRQ
+//#define    CONFIG_TRACE_MIL_DRQ
 
 #ifdef CONFIG_TRACE_MIL_DRQ
    #define TRACE_MIL_DRQ( arg... ) mprintf( arg );

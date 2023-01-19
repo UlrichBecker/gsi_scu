@@ -7,14 +7,14 @@
  * Outsourced from scu_main.c
  */
 
+#define CONFIG_TASK_RAM_TAB
+
 #ifndef __DOCFSM__
   #include <scu_fg_macros.h>
   #include <scu_fg_list.h>
   #include <scu_syslog.h>
 #endif
-
 #include "scu_mil_fg_handler.h"
-
 #ifdef CONFIG_MIL_DAQ_USE_RAM
 extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
@@ -44,6 +44,23 @@ extern void*  g_pScu_mil_base;
 #endif
 
 QUEUE_CREATE_STATIC( g_queueMilFg,  MAX_FG_CHANNELS, MIL_QEUE_T );
+
+#ifdef CONFIG_TASK_RAM_TAB
+
+/*!
+ * @ingroup MIL_FSM
+ * @brief Task-RAM offset for the beginning of the ID-range of
+ *        the function generators
+ */
+#define TASK_RAM_FG_OFFSET 0
+
+/*!
+ * @ingroup MIL_FSM
+ * @brief Allocation table for the task-RAM IDs.
+ * The index of this table is the function generator channel number.
+ */
+STATIC uint8_t mg_taskRamIdTab[MAX_FG_CHANNELS];
+#endif /* ifdef CONFIG_TASK_RAM_TAB */
 
 #ifdef CONFIG_MIL_WAIT
    #define INIT_WAITING_TIME .waitingTime      = 0LL,
@@ -156,15 +173,20 @@ unsigned int milGetNumberOfFg( void )
    return numOfMilFg;
 }
 
+STATIC_ASSERT( IFK_MAX_ADR < 0xFF );
+
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
+void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
 {
    const SCUBUS_SLAVE_FLAGS_T slotFlags =
-               scuBusFindSpecificSlaves( (void*)scub_adr, SYS_CSCO, GRP_SIO2 )
-             | scuBusFindSpecificSlaves( (void*)scub_adr, SYS_CSCO, GRP_SIO3 );
+               scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO2 )
+             | scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO3 );
 
+   /*
+    * No SOI-slaves found on SCU-bus?
+    */
    if( slotFlags == 0 )
       return;
 
@@ -174,7 +196,7 @@ void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
    SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags )
    {
    #ifndef _CONFIG_IRQ_ENABLE_IN_START_FG
-      scuBusEnableSlaveInterrupt( scub_adr, slot );
+      scuBusEnableSlaveInterrupt( pScuBus, slot );
    #endif
 
       /*
@@ -185,23 +207,26 @@ void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
       /*
        * Resetting all task-slots of this SCU-bus slave.
        */
-      scub_reset_mil( scub_adr, slot );
+      scub_reset_mil( pScuBus, slot );
 
-      for( uint32_t ifa_adr = 0; ifa_adr < IFK_MAX_ADR; ifa_adr++ )
+   #ifdef CONFIG_TASK_RAM_TAB
+      unsigned int taskId = TASK_RAM_FG_OFFSET + TASKMIN;
+   #endif
+      for( uint32_t dev = 0; dev < IFK_MAX_ADR; dev++ )
       {
          uint16_t ifa_id, ifa_vers, fg_vers;
 
-         if( scub_read_mil( scub_adr, slot, &ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( pScuBus, slot, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
             continue;
          if( ifa_id != IFA_ID_VAL )
             continue;
 
-         if( scub_read_mil( scub_adr, slot, &ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( pScuBus, slot, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
             continue;
          if( ifa_vers < IFA_MIN_VERSION )
             continue;
 
-         if( scub_read_mil( scub_adr, slot, &fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
+         if( scub_read_mil( pScuBus, slot, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
             continue;
          if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
             continue;
@@ -209,8 +234,15 @@ void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
          /*
           * All three proves has been passed, so it can add it to the FG-list.
           */
-         fgListAdd( DEV_SIO | slot, ifa_adr, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
-         //scub_write_mil(scub_adr, slot, 0x100, 0x12 << 8 | ifa_adr); // clear PUR
+      #ifdef CONFIG_TASK_RAM_TAB
+         const int c = fgListAdd( DEV_SIO | slot, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList ) - 1;
+         FG_ASSERT( c >= 0 );
+         FG_ASSERT( c < ARRAY_SIZE(mg_taskRamIdTab) );
+         mg_taskRamIdTab[c] = (uint8_t)taskId++;
+      #else
+         fgListAdd( DEV_SIO | slot, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
+      #endif
+         //scub_write_mil(pScuBus, slot, 0x100, 0x12 << 8 | dev); // clear PUR
       }
    } /* SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags ) */
 }
@@ -219,7 +251,7 @@ void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id )
+void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
 {
   /*
    * Check only for "ifks", if there is a macro found and a mil extension
@@ -227,32 +259,34 @@ void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id )
    * + mil extension is recognized by a valid 1wire id
    * + mil extension has a 1wire temp sensor with family if 0x42
    */
-   if( !(((int)mil_addr != ERROR_NOT_FOUND) && (((int)*ext_id & 0xff) == 0x42)) )
+   if( !(((int)pMilBus != ERROR_NOT_FOUND) && (((int)*pExtId & 0xff) == 0x42)) )
       return;
 
    /*
     * reset all task-slots by reading value back
     */
-   reset_mil( mil_addr );
-
+   reset_mil( pMilBus );
+#ifdef CONFIG_TASK_RAM_TAB
+   unsigned int taskId = TASK_RAM_FG_OFFSET + TASKMIN;
+#endif
    /*
     * Probing of all potential MIL-function-generatirs.
     */
-   for( uint32_t ifa_adr = 0; ifa_adr < IFK_MAX_ADR; ifa_adr++ )
+   for( uint32_t dev = 0; dev < IFK_MAX_ADR; dev++ )
    {
       uint16_t ifa_id, ifa_vers, fg_vers;
 
-      if( read_mil( mil_addr, &ifa_id, IFA_ID << 8 | ifa_adr ) != OKAY )
+      if( read_mil( pMilBus, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
          continue;
       if( ifa_id != IFA_ID_VAL )
          continue;
 
-      if( read_mil( mil_addr, &ifa_vers, IFA_VERS << 8 | ifa_adr ) != OKAY )
+      if( read_mil( pMilBus, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
          continue;
       if( ifa_vers < IFA_MIN_VERSION )
          continue;
 
-      if( read_mil( mil_addr, &fg_vers, 0xA6 << 8 | ifa_adr ) != OKAY )
+      if( read_mil( pMilBus, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
          continue;
       if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
          continue;
@@ -260,7 +294,14 @@ void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id )
       /*
        * All three proves has been passed, so it can add it to the FG-list.
        */
-      fgListAdd( DEV_MIL_EXT, ifa_adr, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
+   #ifdef CONFIG_TASK_RAM_TAB
+      const int c = fgListAdd( DEV_MIL_EXT, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList ) - 1;
+      FG_ASSERT( c >= 0 );
+      FG_ASSERT( c < ARRAY_SIZE(mg_taskRamIdTab) );
+      mg_taskRamIdTab[c] = (uint8_t)taskId++;
+   #else
+      fgListAdd( DEV_MIL_EXT, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
+   #endif
    }
 }
 #endif /* ifdef CONFIG_MIL_PIGGY */
@@ -726,10 +767,15 @@ unsigned int getMilTaskNumber( const MIL_TASK_DATA_T* pMilTaskData,
 #ifndef __DOXYGEN__
    STATIC_ASSERT( (TASKMIN + ARRAY_SIZE( g_aMilTaskData ) * ARRAY_SIZE( g_aMilTaskData[0].aFgChannels )) <= TASKMAX );
 #endif
+#ifdef CONFIG_TASK_RAM_TAB
+   FG_ASSERT( channel < ARRAY_SIZE( mg_taskRamIdTab ));
+   return mg_taskRamIdTab[channel];
+#else
    // TODO At the moment that isn't a clean solution it wastes to much task numbers in the task-RAM.
    //      The goal is a maximum of 16 possible task numbers in the range from 1 to 16 per SIO device.
   // return TASKMIN + channel + getMilTaskId( pMilTaskData );
    return TASKMIN + channel + getMilTaskId( pMilTaskData ) * ARRAY_SIZE( g_aMilTaskData[0].aFgChannels );
+#endif
 }
 
 

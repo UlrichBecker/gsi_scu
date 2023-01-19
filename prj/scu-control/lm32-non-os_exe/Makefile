@@ -18,7 +18,7 @@ TARGET       := scu_control
  SCU_MIL := 1
 # MIL_GAP := 1
 
-MIL_DAQ_USE_DDR3 := 1
+# MIL_DAQ_USE_DDR3 := 1
 
 ifdef SCU_MIL
  MIL_IN_TIMER_INTERRUPT := 1

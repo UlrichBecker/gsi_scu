@@ -270,16 +270,16 @@ extern MIL_TASK_DATA_T g_aMilTaskData[5];
 /*! ---------------------------------------------------------------------------
  * @brief Scanns the SCU- bus for SIO-slaves with commected MIL- function
  *        generators, and put all found FGs in the function- generator list. 
- * @param scub_adr Baseaddress of SCU- bus.
+ * @param pScuBus Baseaddress of SCU- bus.
  * @param pFgList Pointer to function generator list.
  */
-void scanScuBusFgsViaMil( void* scub_adr, FG_MACRO_T* pFgList );
+void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList );
 
 /*! ---------------------------------------------------------------------------
  * @brief Scans the MIL extension (MIL-PIGGY) for function generators 
  *        and put all found FGs in the function- generator list. 
  */
-void scanExtMilFgs( void* mil_addr, FG_MACRO_T* pFgList, uint64_t* ext_id );
+void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of all found MIL- function generators after
