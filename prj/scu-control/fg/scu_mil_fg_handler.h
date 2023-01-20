@@ -265,8 +265,6 @@ typedef struct
    FG_CHANNEL_TASK_T aFgChannels[ARRAY_SIZE(g_aFgChannels)];
 } MIL_TASK_DATA_T;
 
-extern MIL_TASK_DATA_T g_aMilTaskData[5];
-
 /*! ---------------------------------------------------------------------------
  * @brief Scanns the SCU- bus for SIO-slaves with commected MIL- function
  *        generators, and put all found FGs in the function- generator list. 

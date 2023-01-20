@@ -40,7 +40,7 @@ extern void*  g_pScu_mil_base;
      MIL_TASK_DATA_T* pTask;
   } MIL_GAP_READ_T;
 
-  MIL_GAP_READ_T mg_aReadGap[ ARRAY_SIZE( g_aMilTaskData[0].aFgChannels ) ];
+  MIL_GAP_READ_T mg_aReadGap[ ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels ) ];
 #endif
 
 QUEUE_CREATE_STATIC( g_queueMilFg,  MAX_FG_CHANNELS, MIL_QEUE_T );
@@ -71,7 +71,7 @@ STATIC uint8_t mg_taskRamIdTab[MAX_FG_CHANNELS];
 /*! ---------------------------------------------------------------------------
  * @ingroup MIL_FSM
  * @brief Initializer of a single MIL task
- * @see g_aMilTaskData
+ * @see mg_aMilTaskData
  */
 #define MIL_TASK_DATA_ITEM_INITIALIZER      \
 {                                           \
@@ -92,7 +92,7 @@ STATIC uint8_t mg_taskRamIdTab[MAX_FG_CHANNELS];
  * @ingroup MIL_FSM
  * @brief Memory space and pre-initializing of MIL-task data.
  */
-MIL_TASK_DATA_T g_aMilTaskData[5] =
+STATIC MIL_TASK_DATA_T mg_aMilTaskData[5] =
 {
    MIL_TASK_DATA_ITEM_INITIALIZER,
    MIL_TASK_DATA_ITEM_INITIALIZER,
@@ -101,7 +101,7 @@ MIL_TASK_DATA_T g_aMilTaskData[5] =
    MIL_TASK_DATA_ITEM_INITIALIZER
 };
 
-STATIC_ASSERT( TASKMAX >= (ARRAY_SIZE( g_aMilTaskData ) + MAX_FG_CHANNELS-1 + TASKMIN));
+STATIC_ASSERT( TASKMAX >= (ARRAY_SIZE( mg_aMilTaskData ) + MAX_FG_CHANNELS-1 + TASKMIN));
 
 /*
  * Mil-library uses "short" rather than "uint16_t"! :-(
@@ -589,24 +589,24 @@ inline int milFgDisable( void* pScuBus,
  */
 void milInitTasks( void )
 {
-   for( unsigned int i = 0; i < ARRAY_SIZE( g_aMilTaskData ); i++ )
+   for( unsigned int i = 0; i < ARRAY_SIZE( mg_aMilTaskData ); i++ )
    {
-      g_aMilTaskData[i].state             = ST_WAIT;
-      g_aMilTaskData[i].lastMessage.slot  = INVALID_SLAVE_NR;
-      g_aMilTaskData[i].lastMessage.time  = 0LL;
-      g_aMilTaskData[i].lastChannel       = 0;
-      g_aMilTaskData[i].timeoutCounter    = 0;
+      mg_aMilTaskData[i].state             = ST_WAIT;
+      mg_aMilTaskData[i].lastMessage.slot  = INVALID_SLAVE_NR;
+      mg_aMilTaskData[i].lastMessage.time  = 0LL;
+      mg_aMilTaskData[i].lastChannel       = 0;
+      mg_aMilTaskData[i].timeoutCounter    = 0;
    #ifdef CONFIG_MIL_WAIT
-      g_aMilTaskData[i].waitingTime       = 0LL;
+      mg_aMilTaskData[i].waitingTime       = 0LL;
    #endif
    #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
-      g_aMilTaskData[i].irqDurationTime   = 0LL;
+      mg_aMilTaskData[i].irqDurationTime   = 0LL;
    #endif
-      for( unsigned int j = 0; j < ARRAY_SIZE( g_aMilTaskData[0].aFgChannels ); j++ )
+      for( unsigned int j = 0; j < ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels ); j++ )
       {
-         g_aMilTaskData[i].aFgChannels[j].irqFlags     = 0;
-         g_aMilTaskData[i].aFgChannels[j].setvalue     = 0;
-         g_aMilTaskData[i].aFgChannels[j].daqTimestamp = 0LL;
+         mg_aMilTaskData[i].aFgChannels[j].irqFlags     = 0;
+         mg_aMilTaskData[i].aFgChannels[j].setvalue     = 0;
+         mg_aMilTaskData[i].aFgChannels[j].daqTimestamp = 0LL;
       }
    }
 #ifdef CONFIG_MIL_DAQ_USE_RAM
@@ -651,25 +651,25 @@ STATIC const char* state2string( const FG_STATE_T state )
  */
 void dbgPrintMilTaskData( void )
 {
-   for( unsigned int i = 0; i < ARRAY_SIZE( g_aMilTaskData ); i++ )
+   for( unsigned int i = 0; i < ARRAY_SIZE( mg_aMilTaskData ); i++ )
    {
-      mprintf( "FSM-state[%u]: %s\n",          i, state2string( g_aMilTaskData[i].state ));
-      mprintf( "slave_nr[%u]: 0x%08X\n",       i, g_aMilTaskData[i].slave_nr );
-      mprintf( "lastChannel[%u]: %u\n",        i, g_aMilTaskData[i].lastChannel );
-      mprintf( "timeoutCounter[%u]: %u\n",   i, g_aMilTaskData[i].timeoutCounter );
-      mprintf( "waitingTime[%u]: 0x%08X%08X\n", i, (uint32_t)GET_UPPER_HALF(g_aMilTaskData[i].waitingTime),
-                                                  (uint32_t)GET_LOWER_HALF(g_aMilTaskData[i].waitingTime) );
+      mprintf( "FSM-state[%u]: %s\n",          i, state2string( mg_aMilTaskData[i].state ));
+      mprintf( "slave_nr[%u]: 0x%08X\n",       i, mg_aMilTaskData[i].slave_nr );
+      mprintf( "lastChannel[%u]: %u\n",        i, mg_aMilTaskData[i].lastChannel );
+      mprintf( "timeoutCounter[%u]: %u\n",   i, mg_aMilTaskData[i].timeoutCounter );
+      mprintf( "waitingTime[%u]: 0x%08X%08X\n", i, (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].waitingTime),
+                                                  (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].waitingTime) );
    #ifdef CONFIG_READ_MIL_TIME_GAP
-      mprintf( "gapReadingTime[%u]: %08X%08X\n", i, (uint32_t)GET_UPPER_HALF(g_aMilTaskData[i].gapReadingTime),
-                                                    (uint32_t)GET_LOWER_HALF(g_aMilTaskData[i].gapReadingTime) );
+      mprintf( "gapReadingTime[%u]: %08X%08X\n", i, (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].gapReadingTime),
+                                                    (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].gapReadingTime) );
    #endif
-      for( unsigned int j = 0; j < ARRAY_SIZE( g_aMilTaskData[0].aFgChannels ); j++ )
+      for( unsigned int j = 0; j < ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels ); j++ )
       {
-         mprintf( "\tirqFlags[%u][%u]: 0x%04X\n", i, j, g_aMilTaskData[i].aFgChannels[j].irqFlags );
-         mprintf( "\tsetvalue[%u][%u]: %u\n", i, j, g_aMilTaskData[i].aFgChannels[j].setvalue );
+         mprintf( "\tirqFlags[%u][%u]: 0x%04X\n", i, j, mg_aMilTaskData[i].aFgChannels[j].irqFlags );
+         mprintf( "\tsetvalue[%u][%u]: %u\n", i, j, mg_aMilTaskData[i].aFgChannels[j].setvalue );
          mprintf( "\tdaqTimestamp[%u][%u]: 0x%08X%08X\n", i, j,
-                   (uint32_t)GET_UPPER_HALF(g_aMilTaskData[i].aFgChannels[j].daqTimestamp),
-                   (uint32_t)GET_LOWER_HALF(g_aMilTaskData[i].aFgChannels[j].daqTimestamp) );
+                   (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].aFgChannels[j].daqTimestamp),
+                   (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].aFgChannels[j].daqTimestamp) );
       }
    }
 }
@@ -723,9 +723,9 @@ void fgMilClearHandlerState( const unsigned int socket )
  */
 bool isMilFsmInST_WAIT( void )
 {
-   for( unsigned int i = 0; i < ARRAY_SIZE( g_aMilTaskData ); i++ )
+   for( unsigned int i = 0; i < ARRAY_SIZE( mg_aMilTaskData ); i++ )
    {
-      if( g_aMilTaskData[i].state != ST_WAIT )
+      if( mg_aMilTaskData[i].state != ST_WAIT )
          return false;
    }
    return true;
@@ -736,8 +736,8 @@ bool isMilFsmInST_WAIT( void )
  */
 void suspendGapReading( void )
 {
-   for( unsigned int i = 0; i < ARRAY_SIZE( g_aMilTaskData ); i++ )
-      g_aMilTaskData[i].lastMessage.slot = INVALID_SLAVE_NR;
+   for( unsigned int i = 0; i < ARRAY_SIZE( mg_aMilTaskData ); i++ )
+      mg_aMilTaskData[i].lastMessage.slot = INVALID_SLAVE_NR;
 }
 #endif // if defined( CONFIG_READ_MIL_TIME_GAP ) && !defined(__DOCFSM__)
 
@@ -749,7 +749,7 @@ void suspendGapReading( void )
  */
 inline STATIC unsigned int getMilTaskId( const MIL_TASK_DATA_T* pMilTaskData )
 {
-   return (((unsigned int)pMilTaskData) - ((unsigned int)g_aMilTaskData))
+   return (((unsigned int)pMilTaskData) - ((unsigned int)mg_aMilTaskData))
                                              / sizeof( MIL_TASK_DATA_T );
 }
 
@@ -765,7 +765,7 @@ unsigned int getMilTaskNumber( const MIL_TASK_DATA_T* pMilTaskData,
                                 const unsigned int channel )
 {
 #ifndef __DOXYGEN__
-   STATIC_ASSERT( (TASKMIN + ARRAY_SIZE( g_aMilTaskData ) * ARRAY_SIZE( g_aMilTaskData[0].aFgChannels )) <= TASKMAX );
+   STATIC_ASSERT( (TASKMIN + ARRAY_SIZE( mg_aMilTaskData ) * ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels )) <= TASKMAX );
 #endif
 #ifdef CONFIG_TASK_RAM_TAB
    FG_ASSERT( channel < ARRAY_SIZE( mg_taskRamIdTab ));
@@ -774,7 +774,7 @@ unsigned int getMilTaskNumber( const MIL_TASK_DATA_T* pMilTaskData,
    // TODO At the moment that isn't a clean solution it wastes to much task numbers in the task-RAM.
    //      The goal is a maximum of 16 possible task numbers in the range from 1 to 16 per SIO device.
   // return TASKMIN + channel + getMilTaskId( pMilTaskData );
-   return TASKMIN + channel + getMilTaskId( pMilTaskData ) * ARRAY_SIZE( g_aMilTaskData[0].aFgChannels );
+   return TASKMIN + channel + getMilTaskId( pMilTaskData ) * ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels );
 #endif
 }
 
@@ -928,7 +928,7 @@ STATIC void printTimeoutMessage( register MIL_TASK_DATA_T* pMilTaskData )
 /*
  * A little bit of paranoia doesn't hurt too much. ;-)
  */
-STATIC_ASSERT( MAX_FG_CHANNELS == ARRAY_SIZE( g_aMilTaskData[0].aFgChannels ) );
+STATIC_ASSERT( MAX_FG_CHANNELS == ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels ) );
 STATIC_ASSERT( MAX_FG_CHANNELS == ARRAY_SIZE( g_aFgChannels ));
 
 /*! ---------------------------------------------------------------------------
@@ -1417,7 +1417,7 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
  * @ingroup TASK
  * @ingroup MIL_FSM
  * @brief FSM of a single MIL-task.
- * @see g_aMilTaskData
+ * @see mg_aMilTaskData
  * @see https://github.com/UlrichBecker/DocFsm
  * @dotfile scu_mil_fg_handler.gv State graph for this function
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/ScuSio
@@ -1430,7 +1430,7 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
  *       "function-generator-announcement-signal", before the function generator
  *       issued a new analog signal.
  *
- * @param pMilData Pointer to a single element of array: g_aMilTaskData
+ * @param pMilData Pointer to a single element of array: mg_aMilTaskData
  */
 STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 {
@@ -1830,9 +1830,9 @@ void milExecuteTasks( void )
    ramRingSharedSynchonizeReadIndex( &g_shared.mDaq.memAdmin );
 #endif
 
-   for( unsigned int i = 0; i < ARRAY_SIZE(g_aMilTaskData); i++ )
+   for( unsigned int i = 0; i < ARRAY_SIZE(mg_aMilTaskData); i++ )
    {
-      milTask( &g_aMilTaskData[i] );
+      milTask( &mg_aMilTaskData[i] );
    }
 }
 
