@@ -34,7 +34,7 @@ if [ ! -n "$SCU_TARGET_LIST" ]
 then
    SCU_TARGET_LIST="scuxl0035"
    SCU_TARGET_LIST=$SCU_TARGET_LIST" scuxl0212"
-   SCU_TARGET_LIST=$SCU_TARGET_LIST" scuxl0107"
+   SCU_TARGET_LIST=$SCU_TARGET_LIST" scuxl0162"
 fi
 
 SCU_NFS_BASE_DIR="/common/export/fesa/local/"

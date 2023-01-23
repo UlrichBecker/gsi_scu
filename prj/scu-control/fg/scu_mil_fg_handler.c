@@ -769,7 +769,7 @@ unsigned int getMilTaskNumber( const MIL_TASK_DATA_T* pMilTaskData,
 #endif
 #ifdef CONFIG_TASK_RAM_TAB
    FG_ASSERT( channel < ARRAY_SIZE( mg_taskRamIdTab ));
-   return mg_taskRamIdTab[channel];
+   return mg_taskRamIdTab[channel]; // + getMilTaskId( pMilTaskData ) * ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels );
 #else
    // TODO At the moment that isn't a clean solution it wastes to much task numbers in the task-RAM.
    //      The goal is a maximum of 16 possible task numbers in the range from 1 to 16 per SIO device.
@@ -1225,11 +1225,9 @@ void milHandleAndWrite( register MIL_TASK_DATA_T* pMilTaskData,
                 pMilTaskData->aFgChannels[channel].irqFlags,
                 &(pMilTaskData->aFgChannels[channel].setvalue) );
 
-  // mprintf( "%02b\n", pMilTaskData->aFgChannels[channel].irqFlags );
    /*
     * Clear IRQ pending and end block transfer.
     */
-#if 1
 #ifdef CONFIG_MIL_PIGGY
    if( pMilTaskData->lastMessage.slot != 0 )
    {
@@ -1242,7 +1240,6 @@ void milHandleAndWrite( register MIL_TASK_DATA_T* pMilTaskData,
       return;
    }
    write_mil( g_pScu_mil_base, 0, dev | FC_IRQ_ACT_WR );
-#endif
 #endif
 }
 

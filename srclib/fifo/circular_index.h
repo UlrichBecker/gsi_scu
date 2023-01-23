@@ -79,11 +79,16 @@ typedef struct PACKED_SIZE
     */
    RAM_RING_INDEX_T end;
 } RAM_RING_INDEXES_T;
-#ifndef __DOXYGEN__
+
 STATIC_ASSERT( sizeof(RAM_RING_INDEXES_T) == 4 * sizeof(RAM_RING_INDEX_T));
 STATIC_ASSERT( offsetof( RAM_RING_INDEXES_T, start ) <
                offsetof( RAM_RING_INDEXES_T, end ));
-#endif
+
+/*! ---------------------------------------------------------------------------
+ * @brief Resets respectively clears the ring buffer
+ * @param pThis Pointer to the ring index object
+ */
+void ramRingReset( RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of currently used memory items
@@ -97,11 +102,7 @@ RAM_RING_INDEX_T ramRingGetSize( const RAM_RING_INDEXES_T* pThis );
  * @param pThis Pointer to the ring index object
  * @return Number of free memory items.
  */
-STATIC inline
-RAM_RING_INDEX_T ramRingGetRemainingCapacity( const RAM_RING_INDEXES_T* pThis )
-{
-   return pThis->capacity - ramRingGetSize( pThis );
-}
+RAM_RING_INDEX_T ramRingGetRemainingCapacity( const RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Adds a value to the write index.
@@ -138,26 +139,12 @@ void ramRingIncReadIndex( RAM_RING_INDEXES_T* pThis )
 }
 
 /*! ---------------------------------------------------------------------------
- * @brief Resets respectively clears the ring buffer
- * @param pThis Pointer to the ring index object
- */
-STATIC inline void ramRingReset( register RAM_RING_INDEXES_T* pThis )
-{
-   pThis->start = 0;
-   pThis->end   = 0;
-}
-
-/*! ---------------------------------------------------------------------------
  * @brief Returns the current absolute read index for a read access to the
  *        physical memory.
  * @param pThis Pointer to the ring index object
  * @return Index value for read access.
  */
-STATIC inline
-RAM_RING_INDEX_T ramRingGetReadIndex( register RAM_RING_INDEXES_T* pThis )
-{
-   return pThis->start + pThis->offset;
-}
+RAM_RING_INDEX_T ramRingGetReadIndex( const RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of items beginning at the read index until to the
@@ -168,12 +155,7 @@ RAM_RING_INDEX_T ramRingGetReadIndex( register RAM_RING_INDEXES_T* pThis )
  * @param pThis Pointer to the ring index object
  * @return Number of items which can read until the upper border of the buffer.
  */
-STATIC inline
-RAM_RING_INDEX_T ramRingGetUpperReadSize( register RAM_RING_INDEXES_T* pThis )
-{
-   RAM_ASSERT( pThis->capacity > 0 );
-   return pThis->capacity - pThis->start;
-}
+RAM_RING_INDEX_T ramRingGetUpperReadSize( const RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of items beginning at the read index until to the
@@ -184,22 +166,7 @@ RAM_RING_INDEX_T ramRingGetUpperReadSize( register RAM_RING_INDEXES_T* pThis )
  * @param pThis Pointer to the ring index object
  * @return Number of items which can write until the upper border of the buffer.
  */
-STATIC inline
-RAM_RING_INDEX_T ramRingGetUpperWriteSize( register RAM_RING_INDEXES_T* pThis )
-{
-   RAM_ASSERT( pThis->capacity > 0 );
-   if( pThis->end == pThis->capacity )
-   { /*
-      * In the case the buffer was full the write index has been set to a
-      * invalid value (maximum capacity) to distinguishing between full
-      * and empty.
-      * But in this case the read index has the correct value.
-      */
-      return ramRingGetUpperReadSize( pThis );
-   }
-   return pThis->capacity - pThis->end;
-}
-
+RAM_RING_INDEX_T ramRingGetUpperWriteSize( const RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the current absolute write-index for a write access to the
@@ -207,22 +174,7 @@ RAM_RING_INDEX_T ramRingGetUpperWriteSize( register RAM_RING_INDEXES_T* pThis )
  * @param pThis Pointer to the ring index object
  * @return Index value for write access.
  */
-STATIC inline
-RAM_RING_INDEX_T ramRingGetWriteIndex( register RAM_RING_INDEXES_T* pThis )
-{ /*
-   * Is the buffer full?
-   */
-   if( pThis->end == pThis->capacity )
-   { /*
-      * In the case the buffer was full the write index has been set to a
-      * invalid value (maximum capacity) to distinguishing between full
-      * and empty.
-      * But in this case the read index has the correct value.
-      */
-      return ramRingGetReadIndex( pThis );
-   }
-   return pThis->end + pThis->offset;
-}
+RAM_RING_INDEX_T ramRingGetWriteIndex( const RAM_RING_INDEXES_T* pThis );
 
 /*============= Index administration for shared memory ======================*/
 /*! ---------------------------------------------------------------------------
@@ -239,16 +191,13 @@ typedef struct PACKED_SIZE
    /*!
     * @brief Holds the number of memory items which has been read by the
     *        client.
-    * 
     * This will also need for a handshaking transfer.
     */
    RAM_RING_INDEX_T   wasRead;
 } RAM_RING_SHARED_INDEXES_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( RAM_RING_SHARED_INDEXES_T, indexes ) == 0 );
 STATIC_ASSERT( offsetof( RAM_RING_SHARED_INDEXES_T, wasRead ) == sizeof( RAM_RING_INDEXES_T ));
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SHARED_MEMORY
