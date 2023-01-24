@@ -19,12 +19,13 @@
 #define CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ
 
 extern void*               g_pScub_base;
-extern volatile uint32_t*  g_pScub_irq_base;
+extern void*               g_pScub_irq_base;
 
-#ifdef CONFIG_MIL_FG
+#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
 extern void*               g_pScu_mil_base;
-extern volatile uint32_t*  g_pMil_irq_base;
-
+extern void*               g_pMil_irq_base;
+#endif
+#ifdef CONFIG_MIL_FG
 typedef enum
 {
    MIL_INL = 0x00,
@@ -168,7 +169,7 @@ STATIC inline void sendSignalArmed( const unsigned int channel )
  * @see fgDisableInterrupt
  */
 STATIC inline
-void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
+void enableMeassageSignaledInterrupts( const unsigned int socket )
 {
 #ifdef CONFIG_MIL_FG
    if( isAddacFg( socket ) || isMilScuBusFg( socket ) )
@@ -178,12 +179,11 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
       const uint16_t slot = getFgSlotNumber( socket ) - SCUBUS_START_SLOT;
       ATOMIC_SECTION()
       {
-         //g_pScub_base[GLOBAL_IRQ_ENA] = 0x20;
          scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), GLOBAL_IRQ_ENA, 0x20 );
-         g_pScub_irq_base[MSI_CHANNEL_SELECT] = slot;
-         g_pScub_irq_base[MSI_SOCKET_NUMBER]  = slot;
-         g_pScub_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[0];
-         g_pScub_irq_base[MSI_ENABLE]         = (1 << slot);
+         SET_REG32( g_pScub_irq_base, MSI_CHANNEL_SELECT, slot );
+         SET_REG32( g_pScub_irq_base, MSI_SOCKET_NUMBER, slot );
+         SET_REG32( g_pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)pMyMsi)[0] );
+         SET_REG32( g_pScub_irq_base, MSI_ENABLE, 1 << slot );
       }
 #ifdef CONFIG_MIL_FG
       return;
@@ -194,11 +194,10 @@ void scuBusEnableMeassageSignaledInterrupts( const unsigned int socket )
 
    ATOMIC_SECTION()
    {
-      g_pMil_irq_base[MSI_CHANNEL_SELECT] = MIL_DRQ;
-      g_pMil_irq_base[MSI_SOCKET_NUMBER]  = MIL_DRQ;
-      //g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)pMyMsi + 0x20;
-      g_pMil_irq_base[MSI_DEST_ADDR]      = (uint32_t)&((MSI_LIST_T*)pMyMsi)[2];
-      g_pMil_irq_base[MSI_ENABLE]         = (1 << MIL_DRQ);
+      SET_REG32( g_pMil_irq_base, MSI_CHANNEL_SELECT, MIL_DRQ );
+      SET_REG32( g_pMil_irq_base, MSI_SOCKET_NUMBER,  MIL_DRQ );
+      SET_REG32( g_pMil_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)pMyMsi)[2] );
+      SET_REG32( g_pMil_irq_base, MSI_ENABLE, 1 << MIL_DRQ );
    }
 #endif /* ifdef CONFIG_MIL_PIGGY */
 #endif /* ifdef CONFIG_MIL_FG */
@@ -217,7 +216,7 @@ void fgEnableChannel( const unsigned int channel )
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
             __func__, channel, socket, dev );
 
-   scuBusEnableMeassageSignaledInterrupts( socket );
+   enableMeassageSignaledInterrupts( socket );
 
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
    wdtReset( channel );
@@ -346,7 +345,7 @@ void fgDisableChannel( const unsigned int channel )
  * @brief disables the generation of irqs for the specified channel
  *  SIO and MIL extension stop generating irqs
  *  @param channel number of the channel from 0 to MAX_FG_CHANNELS-1
- * @see scuBusEnableMeassageSignaledInterrupts
+ * @see enableMeassageSignaledInterrupts
  */
 STATIC inline void fgDisableInterrupt( const unsigned int channel )
 {

@@ -130,10 +130,10 @@ extern TIME_MEASUREMENT_T g_irqTimeMeasurement;
 #endif
 
 extern void*               g_pScub_base;
-extern volatile uint32_t*  g_pScub_irq_base;
+extern void*               g_pScub_irq_base;
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
 extern void*               g_pScu_mil_base;
-extern volatile uint32_t*  g_pMil_irq_base;
+extern void*               g_pMil_irq_base;
 #endif
 
 /*!

@@ -42,7 +42,7 @@ bool evPush( EVENT_T* pEvent )
 {
    if( pEvent->counter >= pEvent->capacity )
       return false;
-   
+
    pEvent->counter++;
    return true;
 }

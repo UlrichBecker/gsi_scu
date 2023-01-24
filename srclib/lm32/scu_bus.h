@@ -115,6 +115,7 @@ STATIC inline uint16_t* scuBusGetSlaveRegisterPtr16( const void* pAbsSlaveAddr,
    SCUBUS_ASSERT( index < (SCUBUS_SLAVE_ADDR_SPACE / sizeof(uint16_t)) );
 
    return &((uint16_t* volatile)pAbsSlaveAddr)[index];
+   //return &__REGX_ACCESS( uint16_t, pAbsSlaveAddr, index );
 }
 
 /*! ---------------------------------------------------------------------------

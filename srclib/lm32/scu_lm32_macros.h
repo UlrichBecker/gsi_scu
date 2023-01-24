@@ -44,6 +44,15 @@
 
 /*! ---------------------------------------------------------------------------
  * @ingroup HELPER_MACROS
+ * @brief Macro makes a memory mapped access on a hardware register.
+ * @param T Data-type of the concerning register (alignment-type)
+ * @param p Memory base address of register
+ * @param n Address-offset in alignment-units
+ */
+#define __REGX_ACCESS( T, p, n )    ((T volatile *)(p))[n]
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup HELPER_MACROS
  * @ingroup PATCH
  * @brief Base macro for accessing to wishbone devices via members of device
  *        objects.
@@ -58,7 +67,34 @@
  * @param m Name of member variable.
  */
 #define __WB_ACCESS( TO, TA, p, m ) \
-   ((TA volatile *)p)[offsetof( TO, m ) / sizeof(TA)]
+    __REGX_ACCESS( TA, p, (offsetof( TO, m ) / sizeof(TA)) )
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup HELPER_MACROS
+ * @brief Writes a 32-bit value in a memory mapped hardware register.
+ * @param p Memory base address of register
+ * @param n Address-offset in 32-bit-units (index)
+ * @param v 32-bit value to write
+ */
+#define SET_REG32( p, n, v ) __REGX_ACCESS( uint32_t, p, n ) = (v)
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup HELPER_MACROS
+ * @brief Writes a 16-bit value in a memory mapped hardware register.
+ * @param p Memory base address of register
+ * @param n Address-offset in 32-bit-units (index)
+ * @param v 16-bit value to write
+ */
+#define SET_REG16( p, n, v ) __REGX_ACCESS( uint16_t, p, n ) = (v)
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup HELPER_MACROS
+ * @brief Writes a 8-bit value in a memory mapped hardware register.
+ * @param p Memory base address of register
+ * @param n Address-offset in 8-bit-units (index)
+ * @param v 8-bit value to write
+ */
+#define SET_REG8( p, n, v ) __REGX_ACCESS( uint8_t, p, n ) = (v)
 
 
 /*! ---------------------------------------------------------------------------

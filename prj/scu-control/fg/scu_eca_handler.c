@@ -140,12 +140,11 @@ inline void ecaHandler( void )
    {  /*
        * Select active SIO slaves.
        */
-     // g_pScub_base[OFFS(0) + MULTI_SLAVE_SEL] = active_sios;
       scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), MULTI_SLAVE_SEL, active_sios );
+
       /*
        * Send broadcast.
        */
-      //g_pScub_base[OFFS(13) + MIL_SIO3_TX_CMD] = MIL_BROADCAST;
       scuBusSetSlaveValue16( scuBusGetBroadcastAddr( g_pScub_base ), MIL_SIO3_TX_CMD, MIL_BROADCAST );
    }
 

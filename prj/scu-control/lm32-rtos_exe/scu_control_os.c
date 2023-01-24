@@ -142,7 +142,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 
    queueScuBusIrq.slot = slot;
 
-   while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags((void*)g_pScub_base, slot )) != 0)
+   while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
    {
       if( (queueScuBusIrq.pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
       {

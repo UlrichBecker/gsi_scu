@@ -103,10 +103,6 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
    */
    printSwIrqCode( code, value );
    lm32Log( LM32_LOG_CMD, "MSI command: %s( %u )\n", fgCommand2String( code ), value );
-#ifdef CONFIG_USE_HISTORY
-   if( code != FG_OP_PRINT_HISTORY )
-      hist_addx( HISTORY_XYZ_MODULE, fgCommand2String( code ), value );
-#endif
 
   /*
    * Verifying the command parameter for all commands with a
@@ -131,12 +127,9 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       #else
          mprintf( ESC_ERROR "Value %d out of range!\n" ESC_NORMAL, value );
       #endif
-      #ifdef CONFIG_USE_HISTORY
-         hist_addx( HISTORY_XYZ_MODULE, "ERROR: Value out of range!", value );
-      #endif
-         /*
-          * signal done to saftlib
-          */
+        /*
+         * signal done to saftlib
+         */
          g_shared.oSaftLib.oFg.busy = 0;
          return;
       }
@@ -160,7 +153,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
                        );
        #ifdef CONFIG_USE_SENT_COUNTER
          g_aFgChannels[value].param_sent = 0;
-      #endif
+       #endif
          break;
       }
 

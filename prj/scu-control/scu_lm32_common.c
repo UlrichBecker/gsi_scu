@@ -31,13 +31,13 @@
  * @brief Base pointer of SCU bus.
  * @see initializeGlobalPointers
  */
-void*                  g_pScub_base       = NULL;
+void* g_pScub_base       = NULL;
 
 /*!
  * @brief Base pointer of irq controller for SCU bus
  * @see initializeGlobalPointers
  */
-volatile uint32_t*     g_pScub_irq_base   = NULL;
+void* g_pScub_irq_base   = NULL;
 
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
 /*!
@@ -50,7 +50,7 @@ void* g_pScu_mil_base    = NULL;
  * @brief Base pointer of IRQ controller for dev bus extension
  * @see initializeGlobalPointers
  */
-volatile uint32_t*     g_pMil_irq_base    = NULL;
+void* g_pMil_irq_base    = NULL;
 #endif
 
 /*====================== Begin of shared memory area ========================*/
@@ -77,7 +77,7 @@ void initializeGlobalPointers( void )
    if( (int)g_pScub_base == ERROR_NOT_FOUND )
       die( "SCU-bus not found!" );
 
-   g_pScub_irq_base = (volatile uint32_t*)find_device_adr( GSI, SCU_IRQ_CTRL );
+   g_pScub_irq_base = (uint32_t*)find_device_adr( GSI, SCU_IRQ_CTRL );
    if( (int)g_pScub_irq_base == ERROR_NOT_FOUND )
       die( "Interrupt control for SCU-bus not found!" );
 
@@ -86,7 +86,7 @@ void initializeGlobalPointers( void )
    if( (int)g_pScu_mil_base == ERROR_NOT_FOUND )
       die( "MIL-bus not found!" );
 
-   g_pMil_irq_base = (volatile uint32_t*)find_device_adr( GSI, MIL_IRQ_CTRL );
+   g_pMil_irq_base = (uint32_t*)find_device_adr( GSI, MIL_IRQ_CTRL );
    if( (int)g_pMil_irq_base == ERROR_NOT_FOUND )
       die( "Interrupt control for MIL-bus not found!" );
 #endif
