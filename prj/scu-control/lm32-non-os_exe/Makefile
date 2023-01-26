@@ -68,7 +68,7 @@ include ../common_make.mk
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 
