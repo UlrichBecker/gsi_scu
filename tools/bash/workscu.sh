@@ -19,6 +19,13 @@ CON_SCRIPT=__scuCon.sh
 
 SCU_TOOL_DIR="/opt/nfsinit/global/tools/"
 
+if [ "${HOSTNAME:0:5}" = "asl74" ]
+then
+   IS_ON_ASL=true
+else
+   IS_ON_ASL=false
+fi
+
 #------------------------------------------------------------------------------
 die()
 {
@@ -30,7 +37,12 @@ die()
 checkTarget()
 {
    [ ! -n "$1" ] && die "Missing target URL!"
-   ping -c1 $1 2>/dev/null 1>/dev/null
+   if $IS_ON_ASL
+   then
+      ping -c1 $1 2>/dev/null 1>/dev/null
+   else
+      ssh ${GSI_USERNAME}@${ASL_URL} "ping -c1 $1 2>/dev/null 1>/dev/null"
+   fi
    [ "$?" != '0' ] && die "Target \"$1\" not found!"
 }
 
@@ -86,34 +98,19 @@ __EOH__
 }
 
 #------------------------------------------------------------------------------
-outFTools()
+generateScript()
 {
-   cat << __EOT__
-#!/bin/sh
-ssh -t root@$SCU_URL "export ENV=${SCU_TOOL_DIR}fe_scripts/fe_environment.sh; cd ${SCU_TOOL_DIR}; sh -i"
-__EOT__
+   echo '#!/bin/sh' > $1
+   if $IS_ON_ASL
+   then
+      echo -e $2 >> $1
+   else
+      echo -e "ssh -t ${GSI_USERNAME}@${ASL_URL} '$2'" >> $1
+   fi
+   chmod +x $1
 }
 
 #------------------------------------------------------------------------------
-outFLog()
-{
-   cat << __EOT__
-#!/bin/sh
-ssh -t root@$SCU_URL "${SCU_TOOL_DIR}slogf.sh; sh -i"
-__EOT__
-}
-
-#------------------------------------------------------------------------------
-outLm32Console()
-{
-   cat << __EOT__
-#!/bin/sh
-ssh -t root@$SCU_URL "eb-console dev/wbm0; sh -i"
-__EOT__
-}
-
-#------------------------------------------------------------------------------
-
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -150,46 +147,19 @@ then
    die "Missing SCU name!"
 fi
 
-
-if [ "${HOSTNAME:0:5}" = "asl74" ]
+if [ -x "$(which konsole)" ]
 then
-   #
-   # Script is running on ASL-cluster
-   #
-   SCU_URL=$1
-   checkTarget $SCU_URL
-
-   if [ -x "$(which konsole)" ]
-   then
-      CONSOLE="konsole -e"
-   elif [ -x "$(which xfce4-terminal)" ]
-   then
-      CONSOLE="xfce4-terminal -x"
-   else
-      die "Console application not found!"
-   fi
-
-   outFTools >> $TOOL_SCRIPT
-   chmod +x $TOOL_SCRIPT
-
-   outFLog >> $LOG_SCRIPT
-   chmod +x $LOG_SCRIPT
-
-   outLm32Console >> $CON_SCRIPT
-   chmod +x $CON_SCRIPT
-
-   $CONSOLE ./$TOOL_SCRIPT &
-   $CONSOLE ./$LOG_SCRIPT &
-   $CONSOLE ./$CON_SCRIPT &
-
-   sleep 3
-   rm ./$TOOL_SCRIPT
-   rm ./$LOG_SCRIPT
-   rm ./$CON_SCRIPT
+   CONSOLE="konsole -e"
+elif [ -x "$(which xfce4-terminal)" ]
+then
+   CONSOLE="xfce4-terminal -x"
 else
-   #
-   # Script ts running on remote-PC
-   #
+   die "Console application not found!"
+fi
+
+
+if ! $IS_ON_ASL
+then
    if [ ! -n "$GSI_USERNAME" ]
    then
       echo "GSI username: "
@@ -199,9 +169,27 @@ else
    then
       ASL_NO=744
    fi
-   ASL_URL=asl${ASL_NO}.acc.gsi.de
-   echo "Recursive call on asl${ASL_NO}:"
-   ssh -x -t ${GSI_USERNAME}@${ASL_URL} $(basename $0) $1
 fi
+
+SCU_URL=$1
+ASL_URL=asl${ASL_NO}.acc.gsi.de
+checkTarget $SCU_URL
+
+TOOL_CMD="ssh -t root@${SCU_URL} \"export ENV=${SCU_TOOL_DIR}fe_scripts/fe_environment.sh; cd ${SCU_TOOL_DIR}; sh -i\""
+LOG_CMD="ssh -t root@${SCU_URL} \"${SCU_TOOL_DIR}slogf.sh; sh -i\""
+CON_CMD="ssh -t root@${SCU_URL} \"eb-console dev/wbm0; sh -i\""
+
+generateScript $TOOL_SCRIPT "$TOOL_CMD"
+generateScript $LOG_SCRIPT "$LOG_CMD"
+generateScript $CON_SCRIPT "$CON_CMD"
+
+$CONSOLE ./$TOOL_SCRIPT &
+$CONSOLE ./$LOG_SCRIPT  &
+$CONSOLE ./$CON_SCRIPT  &
+
+sleep 3
+rm ./$TOOL_SCRIPT
+rm ./$LOG_SCRIPT
+rm ./$CON_SCRIPT
 
 #=================================== EOF ======================================
