@@ -33,7 +33,7 @@ endif
 
 LIBS += stdc++
 
-#DEBUG = 1
+DEBUG = 1
 
 CALL_ARGS = scuxl0035 -v
 

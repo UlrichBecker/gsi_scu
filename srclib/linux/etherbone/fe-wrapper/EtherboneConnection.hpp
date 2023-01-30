@@ -13,6 +13,8 @@
 
 #define CONFIG_EB_USE_NORMAL_MUTEX
 
+#define CONFIG_IMPLEMENT_DDR3_WRITE
+
 #ifdef CONFIG_EB_USE_NORMAL_MUTEX
   #include <mutex>
 #else
@@ -128,6 +130,25 @@ namespace FeSupport {
                       const eb_user_data_t pData,
                       const etherbone::format_t format,
                       const uint size = 1 );
+
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+          /*!
+           * @brief Copies a data array of 64 bit items on the DDR3-RAM
+           *
+           * Unfortunately this function is necessary because the writing of
+           * the SCU DDR3-memory needs a special handling. \n
+           * In contrast to other devices the upper 32 bit of the 64 bit
+           * memory unit of DDR3 has to write first and than the lower 32 bit.
+           *
+           * @author Ulrich Becker
+           * @param eb_address Address to write to
+           * @param pData Array of data to write
+           * @param size Length in 64 bit items of data array.
+           */
+          void ddr3Write( const etherbone::address_t eb_address,
+                          const uint64_t* pData,
+                          const uint size = 1 );
+#endif
 
           /*!
            * \brief Writes a single etherbone value to the bus.

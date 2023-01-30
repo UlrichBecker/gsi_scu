@@ -541,6 +541,69 @@ void EtherboneConnection::write( const address_t eb_address,
    }
 }
 
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+/*! ---------------------------------------------------------------------------
+ * @author Ulrich Becker
+ * @see EtherboneConnection.hpp
+ */
+void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
+                                     const uint64_t* pData,
+                                     const uint size )
+{
+   /*
+    * A size of zero is legal but there is nothing to do.
+    */
+   if( size == 0 )
+      return;
+   /*
+    * Initializing the argument object of the callback function "__onEbSocked"
+    */
+   EB_USER_CB_T userObj( size * sizeof(uint64_t) / sizeof(uint32_t) );
+   eb_status_t status;
+
+   {
+      SCOPED_MUTEX_T lock(_sysMu);
+
+      Cycle eb_cycle;
+      if( (status = eb_cycle.open( eb_device_, &userObj, __onEbSocked)) != EB_OK )
+      {
+         EB_THROW_CYC_OPEN_ERROR( status );
+      }
+
+      for( uint i = 0; i < userObj.m_len; i++ )
+      {
+         const uint j = ((i % 2) == 0)? i+1 : i-1;
+
+         eb_cycle.write( eb_address + j * sizeof(uint32_t),
+                         sizeof(uint32_t) | EB_LITTLE_ENDIAN,
+                         reinterpret_cast<const uint32_t*>(pData)[j] );
+      }
+
+      if( (status = eb_cycle.close()) != EB_OK )
+      {
+         EB_THROW_CYC_CLOSE_ERROR( status );
+      }
+
+      do
+      {
+         run();
+         if( userObj.isFinished() )
+            break;
+      }
+      while( onSockedPoll() );
+   } // End of Mutex scope.
+
+   /*
+    * Checking whether an error in the callback function "__onEbSocked"
+    * has occurred.
+    */
+   if( userObj.getStatus() != EB_OK )
+   {
+      EB_THROW_CB_ERROR( userObj.getStatus() );
+   }
+}
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @author Ulrich Becker
  * @see EtherboneConnection.hpp
