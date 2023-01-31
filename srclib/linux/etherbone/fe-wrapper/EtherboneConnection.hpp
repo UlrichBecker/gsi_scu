@@ -92,11 +92,16 @@ namespace FeSupport {
            * @param format Or-link of endian convention and data format
            *               (8, 16, 32 or 64) bit.
            * @param size Length of data array.
+           * @param incWbAddr If true (default) the eb-address will increment
+           *                  by the data-access size by each wb-access,
+           *                  otherwise (false) all accesses will make on
+           *                  the same eb-address.
            */
           void read( const etherbone::address_t eb_address,
                      eb_user_data_t pData,
                      const etherbone::format_t format,
-                     const uint size = 1 );
+                     const uint size = 1,
+                     const bool incWbAddr = true );
 
           /*!
            * \brief Reads a value from the bus in etherbone format.
@@ -125,11 +130,16 @@ namespace FeSupport {
            * @param format Or-link of endian convention and data format
            *               (8, 16, 32 or 64) bit.
            * @param size Length of data array.
+           * @param incWbAddr If true (default) the eb-address will increment
+           *                  by the data-access size by each wb-access,
+           *                  otherwise (false) all accesses will make on
+           *                  the same eb-address.
            */
           void write( const etherbone::address_t eb_address,
                       const eb_user_data_t pData,
                       const etherbone::format_t format,
-                      const uint size = 1 );
+                      const uint size = 1,
+                      const bool incWbAddr = true );
 
 #ifdef CONFIG_IMPLEMENT_DDR3_WRITE
           /*!

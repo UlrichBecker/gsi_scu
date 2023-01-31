@@ -37,6 +37,7 @@ static const uint64_t g_testArray[10] =
 class EB_CONNECTION: public EtherboneConnection
 {
     etherbone::address_t m_ddr3If1Addr;
+    etherbone::address_t m_ddr3If2Addr;
 public:
    EB_CONNECTION( std::string netaddress, uint timeout = EB_DEFAULT_TIMEOUT );
    ~EB_CONNECTION( void );
@@ -45,6 +46,9 @@ public:
    void     ddr3Write( const uint i, const uint64_t* pData, uint len );
    uint64_t ddr3Read( const uint i );
    void     ddr3Read( const uint i, uint64_t* pData, const uint len );
+   void     ddr3BurstRead( const uint i, uint64_t* pData, const uint len );
+   uint     getIf1Addr( void ) { return m_ddr3If1Addr; }
+   uint     getIf2Addr( void ) { return m_ddr3If2Addr; }
 };
 
 /* ----------------------------------------------------------------------------
@@ -54,6 +58,7 @@ EB_CONNECTION::EB_CONNECTION( std::string netaddress, uint timeout )
 {
    connect();
    m_ddr3If1Addr = findDeviceBaseAddress( EB::gsiId, EB::wb_ddr3ram );
+   m_ddr3If2Addr = findDeviceBaseAddress( EB::gsiId, EB::wb_ddr3ram2 );
 }
 
 /* ----------------------------------------------------------------------------
@@ -83,7 +88,7 @@ void EB_CONNECTION::ddr3Write( const uint i, uint64_t value64 )
  */
 void EB_CONNECTION::ddr3Write( const uint i, const uint64_t* pData, uint len )
 {
-   EtherboneConnection::ddr3Write( m_ddr3If1Addr + i, pData, len );
+   EtherboneConnection::ddr3Write( m_ddr3If1Addr + i * sizeof(uint64_t), pData, len );
 }
 
 /* ----------------------------------------------------------------------------
@@ -109,8 +114,17 @@ void EB_CONNECTION::ddr3Read( const uint i, uint64_t* pData, const uint len )
 
 /* ----------------------------------------------------------------------------
  */
+void EB_CONNECTION::ddr3BurstRead( const uint i, uint64_t* pData, const uint len )
+{
+}
+
+/* ----------------------------------------------------------------------------
+ */
 bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
 {
+   cout << "IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
+        << uppercase << roEbc.getIf1Addr() + i << endl;
+
    cout << "writing pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
         << uppercase << pattern << endl;
    roEbc.ddr3Write( i, pattern );
@@ -125,7 +139,7 @@ bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
       return true;
    }
 
-   cout << ESC_FG_GREEN ESC_BOLD "Pass!" ESC_NORMAL << endl;
+   cout << ESC_FG_GREEN ESC_BOLD "Pass!" ESC_NORMAL "\n" << endl;
    return false;
 }
 
@@ -133,19 +147,23 @@ bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
  */
 bool arrayTest( EB_CONNECTION& roEbc, const uint offset )
 {
-   cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray) << " items." << endl;
+   cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
+        << " items at IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
+        << uppercase << roEbc.getIf1Addr() + offset << endl;
 
    roEbc.ddr3Write( offset, g_testArray, ARRAY_SIZE(g_testArray) );
 
    uint64_t targetArray[ARRAY_SIZE(g_testArray)];
    ::memset( targetArray, 0, sizeof(targetArray) );
-
+    cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
+   roEbc.ddr3Read( offset, targetArray, ARRAY_SIZE(targetArray) );
 
    if( ::memcmp( targetArray, g_testArray, sizeof(g_testArray) ) != 0 )
    {
       cout << ESC_FG_RED "Failed!" ESC_NORMAL << endl;
       return true;
    }
+
    cout << ESC_FG_GREEN ESC_BOLD "Pass!" ESC_NORMAL << endl;
    return false;
 }
@@ -160,8 +178,9 @@ void run( std::string& ebName )
    ioTest( oEbc, 1, 0x1122334455667788 );
    ioTest( oEbc, 1, 0xAAAAAAAA55555555 );
    ioTest( oEbc, 1, 0xF0F0F0F0F0F0F0F0 );
+   ioTest( oEbc, 1, 0xFFFFFFFF00000000 );
 
-   arrayTest( oEbc, 10000000 );
+   arrayTest( oEbc, 1000000 );
 }
 
 //=============================================================================

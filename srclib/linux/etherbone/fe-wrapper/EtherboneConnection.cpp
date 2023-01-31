@@ -484,7 +484,8 @@ inline data_t getValueByFormat( const eb_user_data_t pData,
 void EtherboneConnection::write( const address_t eb_address,
                                  const eb_user_data_t pData,
                                  const format_t format,
-                                 const uint size )
+                                 const uint size,
+                                 const bool incWbAddr )
 {
    /*
     * A size of zero is legal but there is nothing to do.
@@ -509,7 +510,8 @@ void EtherboneConnection::write( const address_t eb_address,
          EB_THROW_CYC_OPEN_ERROR( status );
       }
 
-      for( uint i = 0, j = 0; i < size; i++, j += wide )
+      const uint addrInc = incWbAddr? wide : 0;
+      for( uint i = 0, j = 0; i < size; i++, j += addrInc )
       {
          eb_cycle.write( eb_address + j, format,
                          getValueByFormat( pData, wide, i ));
@@ -611,7 +613,8 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
 void EtherboneConnection::read( const address_t eb_address,
                                 eb_user_data_t pData,
                                 const format_t format,
-                                const uint size )
+                                const uint size,
+                                const bool incWbAddr )
 {
    /*
     * A size of zero is legal but there is nothing to do.
@@ -625,7 +628,7 @@ void EtherboneConnection::read( const address_t eb_address,
    EB_USER_CB_T userObj( size, pData );
 
    eb_status_t status;
-   const std::size_t wide = format & EB_DATAX;
+   const std::size_t wide = incWbAddr? format & EB_DATAX : 0;
 
    {
       SCOPED_MUTEX_T lock(_sysMu);

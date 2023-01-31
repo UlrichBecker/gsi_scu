@@ -90,11 +90,19 @@ private:
               eb_user_data_t pData,
               const etherbone::format_t format,
               const uint size );
-   
+
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+   void ddr3Write( const etherbone::address_t eb_address,
+                   const uint64_t* pData,
+                   const uint size );
+
+#else
    void write( const etherbone::address_t eb_address,
                const eb_user_data_t pData,
                const etherbone::format_t format,
                const uint size );
+#endif
+
 
    uint readLm32( char* pData, std::size_t len,
                   const std::size_t offset );
@@ -103,7 +111,7 @@ private:
 
    void updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& );
 
-   void setResponse( uint n );
+   void setResponse( uint64_t n );
 
    void readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len );
 

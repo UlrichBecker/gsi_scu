@@ -217,6 +217,7 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
             << "\nCapacity:       " << m_capacity << endl;
    }
 
+   assert( (m_offset * sizeof(mmu::RAM_PAYLOAD_T)) % sizeof(SYSLOG_MEM_ITEM_T) == 0 );
    m_fifoAdminBase = m_offset * sizeof(mmu::RAM_PAYLOAD_T) + m_oMmu.getBase();
 
    m_offset   += SYSLOG_FIFO_ADMIN_SIZE;
@@ -289,6 +290,27 @@ void Lm32Logd::read( const etherbone::address_t eb_address,
 
 /*! ---------------------------------------------------------------------------
  */
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+void Lm32Logd::ddr3Write( const etherbone::address_t eb_address,
+                          const uint64_t* pData,
+                          const uint size )
+{
+   assert( m_oMmu.getEb()->isConnected() );
+   try
+   {
+      m_oMmu.getEb()->ddr3Write( eb_address, pData, size );
+   }
+   catch( std::exception& e )
+   {
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << e.what() << endl;
+      }
+      throw e;
+   }
+}
+#else
 void Lm32Logd::write( const etherbone::address_t eb_address,
                       const eb_user_data_t pData,
                       const etherbone::format_t format,
@@ -309,7 +331,7 @@ void Lm32Logd::write( const etherbone::address_t eb_address,
       throw e;
    }
 }
-
+#endif
 /*! ---------------------------------------------------------------------------
  */
 int Lm32Logd::readKey( void )
@@ -342,13 +364,19 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
 
 /*! ---------------------------------------------------------------------------
  */
-void Lm32Logd::setResponse( uint n )
+void Lm32Logd::setResponse( uint64_t n )
 {
    DEBUG_MESSAGE_M_FUNCTION( n );
+   static_assert( offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ) % sizeof( SYSLOG_MEM_ITEM_T ) == 0, "" );
 
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+   ddr3Write( m_fifoAdminBase + offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ),
+              &n, 1 );
+#else
    write( m_fifoAdminBase + offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ),
           static_cast<eb_user_data_t>(&n),
           EB_DATA32 | EB_LITTLE_ENDIAN, 2 );
+#endif
 }
 
 constexpr uint LM32_MEM_SIZE = 147456;
@@ -499,7 +527,6 @@ void Lm32Logd::readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len )
          len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t) );
    sysLogFifoAddToReadIndex( &m_fiFoAdmin, len );
 }
-
 
 /*! ---------------------------------------------------------------------------
  */
