@@ -133,7 +133,7 @@ typedef struct PACKED_SIZE
    /*!
     * @brief Field for optional parameter(s).
     */
-   uint32_t  param[8];
+   uint32_t  param[4];
 } SYSLOG_FIFO_ITEM_T;
 
 STATIC_ASSERT( sizeof(SYSLOG_FIFO_ITEM_T) % sizeof(SYSLOG_MEM_ITEM_T) == 0 );
