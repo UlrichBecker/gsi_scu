@@ -112,7 +112,7 @@ void mmuReadItem( const MMU_ADDR_T index, MMU_ITEM_T* pItem )
             MMU_ITEMSIZE );
 }
 
-#define _CONFIG_MMU_PATCH
+//#define _CONFIG_MMU_PATCH
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_MMU
@@ -142,6 +142,7 @@ void mmuWriteItem( const MMU_ADDR_T index, const MMU_ITEM_T* pItem )
       mmuReadItem( index, &resp );
    }
    while( memcmp( pItem, &resp, sizeof( resp ) ) != 0 );
+   #warning MMU-patch has compiled!
 #else
    mmuWrite( MMU_LIST_START + index,
             ((MMU_ACCESS_T*)pItem)->item,

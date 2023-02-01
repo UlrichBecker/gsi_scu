@@ -180,7 +180,7 @@ void run( std::string& ebName )
    ioTest( oEbc, 1, 0xF0F0F0F0F0F0F0F0 );
    ioTest( oEbc, 1, 0xFFFFFFFF00000000 );
 
-   arrayTest( oEbc, 1000000 );
+   arrayTest( oEbc, 2000000 );
 }
 
 //=============================================================================

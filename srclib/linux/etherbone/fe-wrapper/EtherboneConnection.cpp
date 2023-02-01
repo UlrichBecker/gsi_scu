@@ -485,7 +485,7 @@ void EtherboneConnection::write( const address_t eb_address,
                                  const eb_user_data_t pData,
                                  const format_t format,
                                  const uint size,
-                                 const bool incWbAddr )
+                                 uint modWbAddrOfs )
 {
    /*
     * A size of zero is legal but there is nothing to do.
@@ -500,6 +500,8 @@ void EtherboneConnection::write( const address_t eb_address,
 
    eb_status_t status;
    const std::size_t wide = format & EB_DATAX;
+   if( modWbAddrOfs == 0 )
+       modWbAddrOfs = wide * size;
 
    {
       SCOPED_MUTEX_T lock(_sysMu);
@@ -510,8 +512,7 @@ void EtherboneConnection::write( const address_t eb_address,
          EB_THROW_CYC_OPEN_ERROR( status );
       }
 
-      const uint addrInc = incWbAddr? wide : 0;
-      for( uint i = 0, j = 0; i < size; i++, j += addrInc )
+      for( uint i = 0, j = 0; i < size; i++, j = (j + wide) % modWbAddrOfs )
       {
          eb_cycle.write( eb_address + j, format,
                          getValueByFormat( pData, wide, i ));
@@ -550,7 +551,8 @@ void EtherboneConnection::write( const address_t eb_address,
  */
 void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
                                      const uint64_t* pData,
-                                     const uint size )
+                                     const uint size,
+                                     uint modWbAddrOfs )
 {
    /*
     * A size of zero is legal but there is nothing to do.
@@ -561,6 +563,10 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
     * Initializing the argument object of the callback function "__onEbSocked"
     */
    EB_USER_CB_T userObj( size * sizeof(uint64_t) / sizeof(uint32_t) );
+
+   if( modWbAddrOfs == 0 )
+      modWbAddrOfs = userObj.m_len;
+
    eb_status_t status;
 
    {
@@ -575,8 +581,9 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
       for( uint i = 0; i < userObj.m_len; i++ )
       {
          const uint j = ((i % 2) == 0)? i+1 : i-1;
+         const uint k = j % modWbAddrOfs;
 
-         eb_cycle.write( eb_address + j * sizeof(uint32_t),
+         eb_cycle.write( eb_address + k * sizeof(uint32_t),
                          sizeof(uint32_t) | EB_LITTLE_ENDIAN,
                          reinterpret_cast<const uint32_t*>(pData)[j] );
       }
@@ -614,7 +621,7 @@ void EtherboneConnection::read( const address_t eb_address,
                                 eb_user_data_t pData,
                                 const format_t format,
                                 const uint size,
-                                const bool incWbAddr )
+                                uint modWbAddrOfs )
 {
    /*
     * A size of zero is legal but there is nothing to do.
@@ -628,7 +635,9 @@ void EtherboneConnection::read( const address_t eb_address,
    EB_USER_CB_T userObj( size, pData );
 
    eb_status_t status;
-   const std::size_t wide = incWbAddr? format & EB_DATAX : 0;
+   const std::size_t wide = format & EB_DATAX;
+   if( modWbAddrOfs == 0 )
+      modWbAddrOfs = wide * size;
 
    {
       SCOPED_MUTEX_T lock(_sysMu);
@@ -639,7 +648,7 @@ void EtherboneConnection::read( const address_t eb_address,
          EB_THROW_CYC_OPEN_ERROR( status );
       }
 
-      for( uint i = 0, j = 0; i < size; i++, j += wide )
+      for( uint i = 0, j = 0; i < size; i++, j = (j + wide) % modWbAddrOfs )
       {
          eb_cycle.read( eb_address + j, format, nullptr );
       }

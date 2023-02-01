@@ -9,10 +9,10 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.2.6
+DEFINES += VERSION=1.3
 FOR_SCU_AND_ACC := 1
 
-DEBUG = 1
+#DEBUG = 1
 #DEFINES += DEBUGLEVEL
 
 

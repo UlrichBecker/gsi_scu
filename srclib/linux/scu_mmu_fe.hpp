@@ -147,6 +147,7 @@ public:
       return m_ramBase;
    }
 
+#ifndef CONFIG_IMPLEMENT_DDR3_WRITE
   /*!
    * @brief Writes in DDR3-RAM 
    */
@@ -161,16 +162,24 @@ public:
                             format,
                             size );
    }
-
+#endif
   /*!
    * @brief Writes in DDR3-RAM 
    */
    void write( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
    {
+#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+      static_assert( sizeof(RAM_PAYLOAD_T) == sizeof(uint64_t), "" );
+      assert( m_poEtherbone->isConnected() );
+      m_poEtherbone->ddr3Write( m_ramBase + index * sizeof(RAM_PAYLOAD_T),
+                                reinterpret_cast<const uint64_t*>(pItem), len );
+#else
+      #warning This will only run with DDR3 patch!
       write( index,
              eb_user_data_t(pItem),
              sizeof( pItem->ad32[0] ) | EB_LITTLE_ENDIAN,
              len * ARRAY_SIZE( pItem->ad32 ) );
+#endif
    }
 
   /*!
