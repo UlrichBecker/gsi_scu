@@ -47,6 +47,8 @@ LIBS += stdc++
 
 CALL_ARGS = scuxl0035 -Hkv -I200 -m1000
 
+DOX_EXTRACT_PRIVATE = YES
+
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 include $(REPOSITORY_DIR)/makefiles/makefile.scun
 #=================================== EOF ======================================

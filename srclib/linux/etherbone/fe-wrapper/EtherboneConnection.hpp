@@ -92,6 +92,11 @@ namespace FeSupport {
            * @param format Or-link of endian convention and data format
            *               (8, 16, 32 or 64) bit.
            * @param size Length of data array.
+           * @param modWbAddrOfs Modulo value for increment the wb-address offset. \n
+           *                     By default (value is zero) no modulo operation
+           *                     will made (normal operation).\n
+           *                     Meaningful are the values 1 (no increment)
+           *                     for 32-bit register, or 2 for 64-bit register.
            */
           void read( const etherbone::address_t eb_address,
                      eb_user_data_t pData,
@@ -126,6 +131,11 @@ namespace FeSupport {
            * @param format Or-link of endian convention and data format
            *               (8, 16, 32 or 64) bit.
            * @param size Length of data array.
+           * @param modWbAddrOfs Modulo value for increment the wb-address offset. \n
+           *                     By default (value is zero) no modulo operation
+           *                     will made (normal operation).\n
+           *                     Meaningful are the values 1 (no increment)
+           *                     for 32-bit register, or 2 for 64-bit register.
            */
           void write( const etherbone::address_t eb_address,
                       const eb_user_data_t pData,
@@ -141,11 +151,17 @@ namespace FeSupport {
            * the SCU DDR3-memory needs a special handling. \n
            * In contrast to other devices the upper 32 bit of the 64 bit
            * memory unit of DDR3 has to write first and than the lower 32 bit.
+           * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/MacroF%C3%BCr1GbitDDR3MT41J64M16LADesSCUCarrierboards
            *
            * @author Ulrich Becker
            * @param eb_address Address to write to
            * @param pData Array of data to write
            * @param size Length in 64 bit items of data array.
+           * @param modWbAddrOfs Modulo value for increment the wb-address offset. \n
+           *                     By default (value is zero) no modulo operation
+           *                     will made (normal operation).\n
+           *                     Meaningful are the values 1 (no increment)
+           *                     for 32-bit register, or 2 for 64-bit register.
            */
           void ddr3Write( const etherbone::address_t eb_address,
                           const uint64_t* pData,

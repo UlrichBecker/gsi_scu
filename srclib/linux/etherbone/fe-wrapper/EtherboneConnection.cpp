@@ -498,16 +498,16 @@ void EtherboneConnection::write( const address_t eb_address,
     */
    EB_USER_CB_T userObj( size );
 
-   eb_status_t status;
    const std::size_t wide = format & EB_DATAX;
    if( modWbAddrOfs == 0 )
        modWbAddrOfs = wide * size;
 
-   {
+   { // Begin of mutex scope
       SCOPED_MUTEX_T lock(_sysMu);
 
-      Cycle eb_cycle;
-      if( (status = eb_cycle.open(eb_device_, &userObj, __onEbSocked)) != EB_OK )
+      eb_status_t status;
+      Cycle       eb_cycle;
+      if( (status = eb_cycle.open( eb_device_, &userObj, __onEbSocked )) != EB_OK )
       {
          EB_THROW_CYC_OPEN_ERROR( status );
       }
@@ -532,7 +532,7 @@ void EtherboneConnection::write( const address_t eb_address,
             break;
       }
       while( onSockedPoll() );
-   } // End of Mutex scope.
+   } // End of mutex scope.
 
    /*
     * Checking whether an error in the callback function "__onEbSocked"
@@ -567,13 +567,13 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
    if( modWbAddrOfs == 0 )
       modWbAddrOfs = userObj.m_len;
 
-   eb_status_t status;
 
-   {
+   { // Begin of mutex scope
       SCOPED_MUTEX_T lock(_sysMu);
 
-      Cycle eb_cycle;
-      if( (status = eb_cycle.open( eb_device_, &userObj, __onEbSocked)) != EB_OK )
+      eb_status_t status;
+      Cycle       eb_cycle;
+      if( (status = eb_cycle.open( eb_device_, &userObj, __onEbSocked )) != EB_OK )
       {
          EB_THROW_CYC_OPEN_ERROR( status );
       }
@@ -600,7 +600,7 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
             break;
       }
       while( onSockedPoll() );
-   } // End of Mutex scope.
+   } // End of mutex scope.
 
    /*
     * Checking whether an error in the callback function "__onEbSocked"
@@ -611,7 +611,7 @@ void EtherboneConnection::ddr3Write( const etherbone::address_t eb_address,
       EB_THROW_CB_ERROR( userObj.getStatus() );
    }
 }
-#endif
+#endif // ifdef CONFIG_IMPLEMENT_DDR3_WRITE
 
 /*! ---------------------------------------------------------------------------
  * @author Ulrich Becker
@@ -634,15 +634,15 @@ void EtherboneConnection::read( const address_t eb_address,
     */
    EB_USER_CB_T userObj( size, pData );
 
-   eb_status_t status;
    const std::size_t wide = format & EB_DATAX;
    if( modWbAddrOfs == 0 )
       modWbAddrOfs = wide * size;
 
-   {
+   { // Begin of mutex scope
       SCOPED_MUTEX_T lock(_sysMu);
 
-      Cycle eb_cycle;
+      eb_status_t status;
+      Cycle       eb_cycle;
       if( (status = eb_cycle.open( eb_device_, &userObj, __onEbSocked )) != EB_OK )
       {
          EB_THROW_CYC_OPEN_ERROR( status );
@@ -665,7 +665,7 @@ void EtherboneConnection::read( const address_t eb_address,
             break;
       }
       while( onSockedPoll() );
-   } // End of Mutex scope.
+   } // End of mutex scope.
 
    /*
     * Checking whether an error in the callback function "__onEbSocked"

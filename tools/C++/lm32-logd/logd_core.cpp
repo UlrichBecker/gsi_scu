@@ -33,10 +33,29 @@
  #include "logd_core.hpp"
 #endif
 
+/*!
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_DECLARE_STATE( newState, attr... ) newState
+
+/*!
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_INIT_FSM( initState, attr... ) STATE_T state = initState
+
+/*!
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_TRANSITION( target, attr... ) { state = target; break; }
+
+/*!
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_TRANSITION_NEXT( target, attr... ) { state = target; next = true; break; }
+
+/*!
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_TRANSITION_SELF( attr...) break
 
 

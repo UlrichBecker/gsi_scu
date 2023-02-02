@@ -39,8 +39,16 @@ namespace Scu
 {
 
 ///////////////////////////////////////////////////////////////////////////////
+/*!
+ * @brief Main-class of the LM32 log-system.
+ * Receives the message items of the DDR3-RAM and reads ASCII-strings of
+ * the LM32-memory.
+ */
 class Lm32Logd: public std::iostream
 {
+   /*!
+    * @brief Class contains the buffer of the output stream.
+    */
    class StringBuffer: public std::stringbuf
    {
       Lm32Logd&   m_rParent;
@@ -49,6 +57,12 @@ class Lm32Logd: public std::iostream
       StringBuffer( Lm32Logd& rParent )
          :m_rParent( rParent ) {}
 
+      /*!
+       * @brief Callback function becomes invoked by the stream manipulators
+       *        std::endl and/or std::flush.
+       * It puts the buffers content in the Linux-syslog system or to standard
+       * out or in a file.
+       */
       int sync( void ) override;
    };
 
@@ -73,25 +87,44 @@ public:
    Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine );
    ~Lm32Logd( void );
 
+   /*!
+    * @brief Functor performs the log-systems main-loop.
+    * @param rExit Reference to exit condition, if "true" so
+    *              the main-loop will left.
+    */
    void operator()( const bool& rExit );
 
+   /*!
+    * @brief Returns the last received time-stamp.
+    */
    uint64_t getLastTimestamp( void )
    {
       return m_lastTimestamp;
    }
 
+   /*!
+    * @brief Sets the error-flag for self diagnostic log-output.
+    * This flag becomes automatically reset after the output
+    * of the self diagnostic.
+    */
    void setError( void )
    {
       m_isError = true;
    }
 
 private:
+   /*!
+    * @brief Reads from the WB/EB -bus.
+    */
    void read( const etherbone::address_t eb_address,
               eb_user_data_t pData,
               const etherbone::format_t format,
               const uint size );
 
 #ifdef CONFIG_IMPLEMENT_DDR3_WRITE
+   /*!
+    * @brief Writes a array of 64-bit values via WB/EB-bus into the DDR3-RAM.
+    */
    void ddr3Write( const etherbone::address_t eb_address,
                    const uint64_t* pData,
                    const uint size );
@@ -104,21 +137,46 @@ private:
 #endif
 
 
+   /*!
+    * @brief Reads the LM32- memory
+    */
    uint readLm32( char* pData, std::size_t len,
                   const std::size_t offset );
 
+   /*!
+    * @brief Reads a zero terminated ASCII-string from the LM32-memory.
+    */
    uint readStringFromLm32( std::string& rStr, uint addr, const bool = false );
 
+   /*!
+    * @brief Reads FiFo indexes (pointer) from the DDR3-RAM.
+    */
    void updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& );
 
+   /*!
+    * @brief Writes the number of DDR3-FiFo- log-items which has been read by the log-daemon
+    *        in the DDR3-RAM, so that the LM32-app can delete them.
+    */
    void setResponse( uint64_t n );
 
+   /*!
+    * @brief Reads log-items from the DDR3-memory.
+    */
    void readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len );
 
+   /*!
+    * @brief Reads log-items from the DDR3-memory.
+    */
    void readItems( void );
 
+   /*!
+    * @brief Evaluates one log-item.
+    */
    void evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& item );
 
+   /*!
+    * @brief Reads a key from the PC-keyboard.
+    */
    int readKey( void );
 
    static bool isPaddingChar( const char c );
