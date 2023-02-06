@@ -258,8 +258,10 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
    if( m_rCmdLine.isVerbose() )
    {
       cout << "At the moment "
-            << sysLogFifoGetItemSize( &m_fiFoAdmin )
-            << " Log-items in FiFo." << endl;
+           << sysLogFifoGetItemSize( &m_fiFoAdmin )
+           << " Log-items in FiFo." << endl;
+      cout << "Up to " << GET_ARRAY_SIZE_OF_MEMBER( SYSLOG_FIFO_ITEM_T, param )
+           << " extra parameters per log-item possible." << endl;
    }
 }
 

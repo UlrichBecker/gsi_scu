@@ -26,6 +26,7 @@
 #define _LOGD_CMDLINE_HPP
 
 #include <parse_opts.hpp>
+#include <lm32_syslog_common.h>
 
 namespace Scu
 {
@@ -155,6 +156,11 @@ public:
    FILTER_FLAG_T getFilterFlags( void )
    {
       return m_filterFlags;
+   }
+
+   static const uint getMaxExtraParam( void )
+   {
+      return GET_ARRAY_SIZE_OF_MEMBER( SYSLOG_FIFO_ITEM_T, param );
    }
 
 private:

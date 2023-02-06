@@ -61,6 +61,12 @@ Options:
 -h, --help 
    This help and exit.
 
+-k, --gen-key
+   Generates a SSH-key without passphrase and copy it to the concerning SCU.
+   This option is meaningful when it's the first time accessing the concerning SCU after booting.
+   CAUTION:
+      The files "<your ASL-home-dir>/.ssh/id_rsa" and  "<your ASL-home-dir>/.ssh/id_rsa.pub" becomes overwritten!
+
 __EOH__
    exit 0
 }
@@ -111,6 +117,22 @@ generateScript()
 }
 
 #------------------------------------------------------------------------------
+generateSshKey()
+{
+   local SSH_KEY="/.ssh/id_rsa"
+
+   if $IS_ON_ASL
+   then
+      rm $HOME$SSH_KEY
+      echo -e "\n" | ssh-keygen -N "" -f$HOME$SSH_KEY && ssh-copy-id -i$HOME$SSH_KEY.pub root@$SCU_URL
+   else
+      ssh ${GSI_USERNAME}@${ASL_URL} "rm "'$HOME'"$SSH_KEY"
+      ssh ${GSI_USERNAME}@${ASL_URL} 'echo -e "\n" | ssh-keygen -N "" -f$HOME'"$SSH_KEY && ssh-copy-id -i"'$HOME'"$SSH_KEY root@$SCU_URL"
+   fi
+}
+
+#------------------------------------------------------------------------------
+GEN_SSH_KEY=false
 while [ "${1:0:1}" = "-" ]
 do
    A=${1#-}
@@ -120,11 +142,17 @@ do
          "h")
             printHelp
          ;;
+         "k")
+            GEN_SSH_KEY=true
+         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
                "help")
                   printHelp
+               ;;
+               "gen-key")
+                  GEN_SSH_KEY=true
                ;;
                "generate_doc_tagged")
                   docTagged
@@ -174,6 +202,11 @@ fi
 SCU_URL=$1
 ASL_URL=asl${ASL_NO}.acc.gsi.de
 checkTarget $SCU_URL
+
+if $GEN_SSH_KEY
+then
+   generateSshKey
+fi
 
 TOOL_CMD="ssh -t root@${SCU_URL} \"export ENV=${SCU_TOOL_DIR}fe_scripts/fe_environment.sh; cd ${SCU_TOOL_DIR}; sh -i\""
 LOG_CMD="ssh -t root@${SCU_URL} \"${SCU_TOOL_DIR}slogf.sh; sh -i\""

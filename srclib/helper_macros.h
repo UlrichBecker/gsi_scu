@@ -433,6 +433,19 @@
 })
 
 /*!
+ * @brief Get the number of arrar elements of a
+ *        arrary member variable of a struct, union or class.
+ * @param type Name of struct union or class.
+ * @param arrayMember Name of the concerning array-member variable
+ * @return Number of array elements.
+ */
+#define GET_ARRAY_SIZE_OF_MEMBER( type, arrayMember )        \
+({                                                           \
+   type __c;                                                 \
+   sizeof( __c.arrayMember ) / sizeof( __c.arrayMember[0] ); \
+})
+
+/*!
  * @brief Similar like "offsetof" but the different is
  *        this macro returns the offset after the concerning
  *        member variable and NOT before.

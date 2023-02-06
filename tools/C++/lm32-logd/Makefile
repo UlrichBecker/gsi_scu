@@ -9,7 +9,7 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.3
+DEFINES += VERSION=1.4
 FOR_SCU_AND_ACC := 1
 
 #DEBUG = 1
@@ -45,7 +45,7 @@ endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0035 -Hkv -I200 -m1000
+CALL_ARGS = scuxl0035 -Hakv -I200 -m1000
 
 DOX_EXTRACT_PRIVATE = YES
 

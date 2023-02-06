@@ -102,6 +102,8 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                  ESC_BOLD
                  "void vLm32log( const unsigned int filter, const char* format, va_list ap );\n\n"
                  ESC_NORMAL
+                 "CAUTION: The maximum number of extra parameters after parameter \"format\" per log-item is limited to "
+              << static_cast<CommandLine*>(poParser)->getMaxExtraParam() << "\n\n"
                  "Usage on ASL:\n\t"
               << poParser->getProgramName() << " [options] <SCU URL>\n\n"
                  "Usage on SCU:\n\t"
