@@ -224,5 +224,12 @@ endif
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 # Including common makefile for arbitrary LM32 software for SCU
+
 include $(REPOSITORY_DIR)/makefiles/makefile.scu
+
+
+.PHONY: testinstall
+testinstall: $(BIN_FILE)
+	cp $(BIN_FILE) /common/export/nfsinit/global/lm32-test-apps/
+
 #=================================== EOF ======================================

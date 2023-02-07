@@ -398,6 +398,7 @@ void main( void )
      while( true );
   }
 #ifdef CONFIG_USE_LM32LOG
+  mprintf( "Maximum log extra parameter: " TO_STRING(LM32_LOG_NUM_OF_PARAM) "\n" );
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
                           pCpuMsiBox,

@@ -46,6 +46,12 @@ namespace Scu
 {
 #endif
 
+/*!
+ * @ingroup LM32_LOG
+ * @brief Maximum number of additional %-parameter (like printf).
+ */
+#define LM32_LOG_NUM_OF_PARAM 8
+
 /*! ---------------------------------------------------------------------------
  * @ingroup LM32_LOG
  * @brief Filter-values for the first parameter of function lm32Log
@@ -133,7 +139,7 @@ typedef struct PACKED_SIZE
    /*!
     * @brief Field for optional parameter(s).
     */
-   uint32_t  param[4];
+   uint32_t  param[LM32_LOG_NUM_OF_PARAM];
 } SYSLOG_FIFO_ITEM_T;
 
 STATIC_ASSERT( sizeof(SYSLOG_FIFO_ITEM_T) % sizeof(SYSLOG_MEM_ITEM_T) == 0 );

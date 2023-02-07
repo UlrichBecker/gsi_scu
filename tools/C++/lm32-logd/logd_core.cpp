@@ -65,6 +65,8 @@ using namespace std;
 constexpr uint LM32_OFFSET   = 0x10000000;
 constexpr uint BUILD_ID_ADDR = LM32_OFFSET + 0x100;
 
+static_assert( EB_DATA32 == sizeof(uint32_t), "" );
+
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  * @brief Central output function.
@@ -541,11 +543,14 @@ void Lm32Logd::readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len )
    DEBUG_MESSAGE( "Read-index: " << sysLogFifoGetReadIndex( &m_fiFoAdmin ) );
 
    read( m_oMmu.getBase() +
-         sysLogFifoGetReadIndex( &m_fiFoAdmin ) *
-         sizeof(SYSLOG_MEM_ITEM_T),
+            sysLogFifoGetReadIndex( &m_fiFoAdmin ) *
+            sizeof(SYSLOG_MEM_ITEM_T),
          pData,
          EB_DATA32 | EB_LITTLE_ENDIAN,
-         len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t) );
+         //len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t)
+         len * sizeof(SYSLOG_MEM_ITEM_T) / sizeof(uint32_t)
+       );
+
    sysLogFifoAddToReadIndex( &m_fiFoAdmin, len );
 }
 

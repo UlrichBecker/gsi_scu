@@ -395,15 +395,18 @@ void main( void )
      mprintf( ESC_ERROR "ERROR Unable to get DDR3- RAM!\n" ESC_NORMAL );
      while( true );
   }
-#ifdef CONFIG_USE_MMU
+ #ifdef CONFIG_USE_LM32LOG
+  mprintf( "Maximum log extra parameter: " TO_STRING(LM32_LOG_NUM_OF_PARAM) "\n" );
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
                           pCpuMsiBox,
                           pMyMsi,
                           sizeof( SCU_SHARED_DATA_T )
           );
+ #endif
 #endif
-#endif
+
+
 
 #ifdef CONFIG_MIL_FG
    milInitTasks();
