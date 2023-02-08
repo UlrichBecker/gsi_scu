@@ -46,7 +46,9 @@ const MMU_ADDR_T MMU_LIST_START = 0;
    #include <stdio.h>
    #define mprintf printf
 #endif
-
+/*! ---------------------------------------------------------------------------
+ * @see scu_mmu.h
+ */
 void mmuPrintItem( const MMU_ITEM_T* pItem )
 {
    mprintf( "tag:    0x%04X\n"
@@ -60,10 +62,9 @@ void mmuPrintItem( const MMU_ITEM_T* pItem )
             pItem->iStart,
             pItem->length );
 }
-#else
+#else /* ifdef CONFIG_DEBUG_MMU */
 #define mmuPrintItem( item ) ((void)0)
-#endif
-
+#endif /* else ifdef CONFIG_DEBUG_MMU */
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu.h
@@ -112,42 +113,14 @@ void mmuReadItem( const MMU_ADDR_T index, MMU_ITEM_T* pItem )
             MMU_ITEMSIZE );
 }
 
-//#define _CONFIG_MMU_PATCH
-
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_MMU
  */
 void mmuWriteItem( const MMU_ADDR_T index, const MMU_ITEM_T* pItem )
 {
-#if !defined( __lm32__ ) && defined( _CONFIG_MMU_PATCH )
-   /*
-    * TODO: This is a very bad patch! Remove this ASAP!!!!
-    */
-   const MMU_ITEM_T item =
-   {
-      .tag    = pItem->tag,
-      .flags  = pItem->flags,
-      .iNext  = pItem->length,
-      .iStart = pItem->iStart,
-      .length = pItem->iNext
-   };
-
-   MMU_ITEM_T resp;
-   do
-   {
-      mmuWrite( MMU_LIST_START + index,
-               ((MMU_ACCESS_T*)&item)->item,
-               MMU_ITEMSIZE );
-
-      mmuReadItem( index, &resp );
-   }
-   while( memcmp( pItem, &resp, sizeof( resp ) ) != 0 );
-   #warning MMU-patch has compiled!
-#else
    mmuWrite( MMU_LIST_START + index,
             ((MMU_ACCESS_T*)pItem)->item,
             MMU_ITEMSIZE );
-#endif
 }
 
 /*! ---------------------------------------------------------------------------

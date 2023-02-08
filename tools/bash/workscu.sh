@@ -127,7 +127,7 @@ generateSshKey()
       echo -e "\n" | ssh-keygen -N "" -f$HOME$SSH_KEY && ssh-copy-id -i$HOME$SSH_KEY.pub root@$SCU_URL
    else
       ssh ${GSI_USERNAME}@${ASL_URL} "rm "'$HOME'"$SSH_KEY"
-      ssh ${GSI_USERNAME}@${ASL_URL} 'echo -e "\n" | ssh-keygen -N "" -f$HOME'"$SSH_KEY && ssh-copy-id -i"'$HOME'"$SSH_KEY root@$SCU_URL"
+      ssh ${GSI_USERNAME}@${ASL_URL} 'echo | ssh-keygen -N "" -f$HOME'"$SSH_KEY && echo | ssh-copy-id -i"'$HOME'"$SSH_KEY root@$SCU_URL"
    fi
 }
 
