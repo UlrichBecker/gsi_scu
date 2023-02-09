@@ -12,11 +12,12 @@
 #include <EtherboneConnection.hpp>
 #include <daqt_messages.hpp>
 #include <scu_env.hpp>
+#include <scu_ddr3_access.hpp>
 
 namespace EB = FeSupport::Scu::Etherbone;
 using namespace EB;
 using namespace std;
-
+using namespace Scu;
 
 static const uint64_t g_testArray[10] =
 {
@@ -145,18 +146,19 @@ bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
 
 /* ----------------------------------------------------------------------------
  */
-bool arrayTest( EB_CONNECTION& roEbc, const uint offset )
+bool arrayTest( RamAccess* poRam, const uint offset )
 {
-   cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
-        << " items at IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
-        << uppercase << roEbc.getIf1Addr() + offset << endl;
+ //  cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
+ //       << " items at IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
+ //       << uppercase << roEbc.getIf1Addr() + offset << endl;
 
-   roEbc.ddr3Write( offset, g_testArray, ARRAY_SIZE(g_testArray) );
+   poRam->write( offset, g_testArray, ARRAY_SIZE(g_testArray) );
 
    uint64_t targetArray[ARRAY_SIZE(g_testArray)];
    ::memset( targetArray, 0, sizeof(targetArray) );
     cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
-   roEbc.ddr3Read( offset, targetArray, ARRAY_SIZE(targetArray) );
+
+   poRam->read( offset, targetArray, ARRAY_SIZE(targetArray) );
 
    if( ::memcmp( targetArray, g_testArray, sizeof(g_testArray) ) != 0 )
    {
@@ -173,14 +175,17 @@ bool arrayTest( EB_CONNECTION& roEbc, const uint offset )
  */
 void run( std::string& ebName )
 {
+   Ddr3Access oDdr3( ebName );
+#if 0
    EB_CONNECTION oEbc( ebName );
 
    ioTest( oEbc, 1, 0x1122334455667788 );
    ioTest( oEbc, 1, 0xAAAAAAAA55555555 );
    ioTest( oEbc, 1, 0xF0F0F0F0F0F0F0F0 );
    ioTest( oEbc, 1, 0xFFFFFFFF00000000 );
+#endif
+   arrayTest( &oDdr3, 2000000 );
 
-   arrayTest( oEbc, 2000000 );
 }
 
 //=============================================================================
