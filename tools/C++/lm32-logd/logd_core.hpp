@@ -121,21 +121,12 @@ private:
               const etherbone::format_t format,
               const uint size );
 
-#ifdef CONFIG_IMPLEMENT_DDR3_WRITE
    /*!
     * @brief Writes a array of 64-bit values via WB/EB-bus into the DDR3-RAM.
     */
-   void ddr3Write( const etherbone::address_t eb_address,
-                   const uint64_t* pData,
-                   const uint size );
-
-#else
    void write( const etherbone::address_t eb_address,
-               const eb_user_data_t pData,
-               const etherbone::format_t format,
+               const uint64_t* pData,
                const uint size );
-#endif
-
 
    /*!
     * @brief Reads the LM32- memory

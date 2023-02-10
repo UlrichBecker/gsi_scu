@@ -39,22 +39,53 @@ namespace Scu
 class RamAccess: public EtherboneAccess
 {
 protected:
+   /*!
+    * @brief Constructor which uses a shared object of EtherboneConnection.
+    *        It establishes a connection if not already done.
+    * @param pEbc Pointer to object of type EtherboneConnection
+    */
    RamAccess( EBC::EtherboneConnection* pEbc )
       :EtherboneAccess( pEbc )
    {
    }
 
+   /*!
+    * @brief Constructor which creates a object of type EtherboneConnection and
+    *        establishes a connection.
+    * @param rScuName In the case this application runs on ASL, the name of the target SCU.
+    *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
+    * @param timeout Response timeout.
+    */
    RamAccess( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT )
       :EtherboneAccess( rScuName, timeout )
    {
    }
 
+   /*!
+    * @brief Destructur makes a disconnect, when this object has connected self
+    *        and destroys the object of type EtherboneConnection
+    *        if it was created by itself.
+    */
    virtual ~RamAccess( void )
    {
    }
 
 public:
+   /*!
+    * @brief Reads from DDR3 of SCU3 or from SRAM of SCU4.
+    * @param address Start-address
+    * @param pData Pointer to target memory
+    * @param len Length of data to read in 64-bit units.
+    * @param burst (for DDR3 only) If true DDR3 will read in burst mode.
+    */
    virtual void read( const uint address, uint64_t* pData, const uint len, const bool burst = false ) = 0;
+
+   /*!
+    * @brief Writes in DDR3 of SCU3 or in SRAM of SCU4.
+    * @param address Start-address
+    * @param pData Pointer to source memory.
+    * @param len Length of data to write in 64-bit units.
+    */
    virtual void write( const uint address, const uint64_t* pData, const uint len ) = 0;
 
 };
