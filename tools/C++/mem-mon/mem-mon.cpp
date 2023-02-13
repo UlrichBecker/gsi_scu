@@ -25,6 +25,7 @@
 #include <exception>
 #include <cstdlib>
 #include <daqt_messages.hpp>
+#include <scu_ddr3_access.hpp>
 #include "mem_cmdline.hpp"
 #include "mem_browser.hpp"
 
@@ -35,8 +36,8 @@ using namespace Scu::mmu;
  */
 void onUnexpectedException( void )
 {
-  ERROR_MESSAGE( "Unexpected exception occurred!" );
-  throw 0;     // throws int (in exception-specification)
+   ERROR_MESSAGE( "Unexpected exception occurred!" );
+   throw 0;     // throws int (in exception-specification)
 }
 
 
@@ -48,8 +49,15 @@ int main( int argc, char** ppArgv )
    try
    {
       CommandLine oCmdLine( argc, ppArgv );
-      mmuEb::EtherboneConnection ebc( oCmdLine() );
-      Browser browse( ebc, oCmdLine );
+
+      /*!
+       * @todo Checking in the future whether it's a SCU3 or a SCU4 and
+       *       create the appropriate object. In the case of SCU3
+       *       it's the object of DDR3-RAM like now.
+       */
+      Scu::Ddr3Access oDdr3( oCmdLine() );
+
+      Browser browse( &oDdr3, oCmdLine );
       browse( cout );
    }
    catch( std::exception& e )

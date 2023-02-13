@@ -30,10 +30,8 @@
 #define _SCU_MMU_FE_HPP
 
 #include <scu_mmu.h>
-#include <EtherboneConnection.hpp>
+#include <scu_memory.hpp>
 #include <assert.h>
-
-namespace mmuEb = FeSupport::Scu::Etherbone;
 
 namespace Scu
 {
@@ -47,24 +45,18 @@ namespace mmu
  */
 class Mmu
 {
-   mmuEb::EtherboneConnection* m_poEtherbone;
-   bool                        m_selfConnected;
-   uint                        m_ramBase;
-   
-public:
-  /*!
-   * @brief Constructor of MMU.
-   * @note When the etherbone-connection has not been established yet then
-   *       this constructor will do this.
-   * @param poEtherbone Pointer of object of type EtherboneConnection
-   */
-   Mmu( mmuEb::EtherboneConnection* poEtherbone );
+   RamAccess* m_poRam;
 
-  /*!
-   * @brief Destructor of MMU.
-   * @note When the constructor has been established the eterbone-connection,
-   *       then this destructor will disconnect the etherbone again.  
-   */
+public:
+   /*!
+    * @param poRam Pointer to object of type RamAccess.
+    */
+   Mmu( RamAccess* poRam );
+
+
+   /*!
+    * @brief Destructor of MMU.
+    */
    ~Mmu( void );
 
    /*!
@@ -72,7 +64,7 @@ public:
     */
    bool isPresent( void )
    {
-      assert( m_poEtherbone->isConnected() );
+      assert( m_poRam->isConnected() );
       return mmuIsPresent();
    }
 
@@ -81,7 +73,7 @@ public:
     */
    void clear( void )
    {
-      assert( m_poEtherbone->isConnected() );
+      assert( m_poRam->isConnected() );
       mmuDelete();
    }
 
@@ -90,7 +82,7 @@ public:
     */
    uint getNumberOfBlocks( void )
    {
-      assert( m_poEtherbone->isConnected() );
+      assert( m_poRam->isConnected() );
       return mmuGetNumberOfBlocks();
    }
 
@@ -109,7 +101,7 @@ public:
    MMU_STATUS_T allocate( const MMU_TAG_T tag, MMU_ADDR_T& rStartAddr,
                           size_t& rLen, const bool create = false )
    {
-      assert( m_poEtherbone->isConnected() );
+      assert( m_poRam->isConnected() );
       return mmuAlloc( tag, &rStartAddr, &rLen, create );
    }
 
@@ -134,9 +126,17 @@ public:
   /*!
    * @brief Returns the pointer of the object of type EtherboneConnection.
    */
-   mmuEb::EtherboneConnection* getEb( void )
+   EBC::EtherboneConnection* getEb( void )
    {
-      return m_poEtherbone;
+      return m_poRam->getEb();
+   }
+
+   /*!
+    * @brief Returns the pointer of type RamAccess.
+    */
+   RamAccess* getRamAccess( void )
+   {
+      return m_poRam;
    }
 
   /*!
@@ -144,45 +144,28 @@ public:
    */
    uint getBase( void )
    {
-      return m_ramBase;
+      assert( false );
+      return 0;
    }
 
   /*!
-   * @brief Writes in DDR3-RAM 
+   * @brief Writes in SCU-RAM
    */
    void write( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
    {
       static_assert( sizeof(RAM_PAYLOAD_T) == sizeof(uint64_t), "" );
-      assert( m_poEtherbone->isConnected() );
-
-      m_poEtherbone->ddr3Write( m_ramBase + index * sizeof(RAM_PAYLOAD_T),
-                                reinterpret_cast<const uint64_t*>(pItem), len );
+      assert( m_poRam->isConnected() );
+      m_poRam->write( index, reinterpret_cast<const uint64_t*>(pItem), len );
    }
 
   /*!
-   * @brief Read from DDR3-RAM 
-   */
-   void read( const uint index,
-              eb_user_data_t pData,
-              const etherbone::format_t format,
-              const uint size = 1 )
-   {
-      assert( m_poEtherbone->isConnected() );
-      m_poEtherbone->read( m_ramBase + index * sizeof(RAM_PAYLOAD_T),
-                           pData,
-                           format,
-                           size );
-   }
-
-  /*!
-   * @brief Read from DDR3-RAM 
+   * @brief Read from SCU-RAM
    */
    void read( MMU_ADDR_T index, RAM_PAYLOAD_T* pItem, size_t len )
    {
-      read( index,
-            pItem,
-            sizeof( pItem->ad32[0] ) | EB_LITTLE_ENDIAN,
-            len * ARRAY_SIZE( pItem->ad32 ) );
+      static_assert( sizeof(RAM_PAYLOAD_T) == sizeof(uint64_t), "" );
+      assert( m_poRam->isConnected() );
+      m_poRam->read( index, reinterpret_cast<uint64_t*>(pItem), len );
    }
 
 protected:

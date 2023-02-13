@@ -235,13 +235,22 @@ int main( int argc, char** ppArgv )
          WARNING_MESSAGE( "Can't install the signal handling for SIGTERM ! "
                           << ::strerror( errno ) );
 
-      mmuEb::EtherboneConnection oEbc( oCmdLine.getScuUrl() );
-      Lm32Logd oLog( oEbc, oCmdLine );
+      /*!
+       * @todo Checking in the future whether it's a SCU3 or a SCU4 and
+       *       create the appropriate object. In the case of SCU3
+       *       it's the object of DDR3-RAM like now.
+       */
+      Scu::Ddr3Access oDdr3( oCmdLine.getScuUrl() );
+      Lm32Logd oLog( &oDdr3, oCmdLine );
 
       if( oCmdLine.isDemonize() )
          daemonize();
 
+      /*
+       * Starting main loop...
+       */
       oLog( g_exit );
+
       if( oCmdLine.isVerbose() )
          oLog << "Process: \"" << oCmdLine.getProgramName() << "\" terminated by "
               << (g_exit? "SIGTERM":"user") << "." << endl;

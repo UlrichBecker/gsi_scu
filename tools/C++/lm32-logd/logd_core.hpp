@@ -31,6 +31,7 @@
 #include <fstream>
 #include <daqt_read_stdin.hpp>
 #include <scu_mmu_fe.hpp>
+#include <scu_ddr3_access.hpp>
 #include <lm32_syslog_common.h>
 #include "logd_cmdline.hpp"
 
@@ -84,7 +85,18 @@ class Lm32Logd: public std::iostream
    Terminal*            m_poTerminal;
 
 public:
-   Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine );
+   /*!
+    * @brief Constructor makes all necessary initialization
+    *        and prints the build-ID of the LM32-app if
+    *        in the option demanded.
+    * @param poRam Pointer to an object of the abstract memory access class.
+    * @param rCmdLine Reverence to the object of the command line parser.
+    */
+   Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine );
+
+   /*!
+    * @brief Destructor closes the sys-log of Linux if used.
+    */
    ~Lm32Logd( void );
 
    /*!
@@ -114,17 +126,16 @@ public:
 
 private:
    /*!
-    * @brief Reads from the WB/EB -bus.
+    * @brief Reads via the WB/EB-bus fron the SCU-TAM.
     */
-   void read( const etherbone::address_t eb_address,
-              eb_user_data_t pData,
-              const etherbone::format_t format,
+   void read( const uint index,
+              uint64_t* pData,
               const uint size );
 
    /*!
-    * @brief Writes a array of 64-bit values via WB/EB-bus into the DDR3-RAM.
+    * @brief Writes a array of 64-bit values via WB/EB-bus into the SCU-RAM.
     */
-   void write( const etherbone::address_t eb_address,
+   void write( const uint index,
                const uint64_t* pData,
                const uint size );
 

@@ -37,21 +37,11 @@ static Mmu* mg_pMmu = nullptr;
 
 /*! ---------------------------------------------------------------------------
  */
-Mmu::Mmu( mmuEb::EtherboneConnection* poEtherbone )
-   :m_poEtherbone( poEtherbone )
-   ,m_selfConnected( false )
-   ,m_ramBase( 0 )
+Mmu::Mmu( RamAccess* poRam )
+   :m_poRam( poRam )
 {
    assert( mg_pMmu == nullptr );
    mg_pMmu = this;
-   if( !m_poEtherbone->isConnected() )
-   {
-      m_poEtherbone->connect();
-      m_selfConnected = true;
-   }
-
-   m_ramBase = m_poEtherbone->findDeviceBaseAddress( mmuEb::gsiId, mmuEb::wb_ddr3ram );
-
 }
 
 /*! ---------------------------------------------------------------------------
@@ -60,8 +50,6 @@ Mmu::~Mmu( void )
 {
    assert( mg_pMmu == this );
    mg_pMmu = nullptr;
-   if( m_selfConnected )
-      m_poEtherbone->disconnect();
 }
 
 extern "C"
@@ -72,7 +60,7 @@ extern "C"
  */
 void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
 {
-   assert( mg_pMmu != nullptr );
+   assert( dynamic_cast<Mmu*>(mg_pMmu) != nullptr );
    mg_pMmu->write( index, pItem, len );
 }
 
@@ -81,7 +69,7 @@ void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
  */
 void mmuRead( MMU_ADDR_T index, RAM_PAYLOAD_T* pItem, size_t len )
 {
-   assert( mg_pMmu != nullptr );
+   assert( dynamic_cast<Mmu*>(mg_pMmu) != nullptr );
    mg_pMmu->read( index, pItem, len );
 }
 

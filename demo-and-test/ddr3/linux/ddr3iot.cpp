@@ -33,104 +33,17 @@ static const uint64_t g_testArray[10] =
    0x9999999999999999
 };
 
-
-///////////////////////////////////////////////////////////////////////////////
-class EB_CONNECTION: public EtherboneConnection
-{
-    etherbone::address_t m_ddr3If1Addr;
-    etherbone::address_t m_ddr3If2Addr;
-public:
-   EB_CONNECTION( std::string netaddress, uint timeout = EB_DEFAULT_TIMEOUT );
-   ~EB_CONNECTION( void );
-
-   void     ddr3Write( const uint i, uint64_t value64 );
-   void     ddr3Write( const uint i, const uint64_t* pData, uint len );
-   uint64_t ddr3Read( const uint i );
-   void     ddr3Read( const uint i, uint64_t* pData, const uint len );
-   void     ddr3BurstRead( const uint i, uint64_t* pData, const uint len );
-   uint     getIf1Addr( void ) { return m_ddr3If1Addr; }
-   uint     getIf2Addr( void ) { return m_ddr3If2Addr; }
-};
-
 /* ----------------------------------------------------------------------------
  */
-EB_CONNECTION::EB_CONNECTION( std::string netaddress, uint timeout )
-   :EtherboneConnection( netaddress, timeout )
+bool ioTest( RamAccess* poRam, uint i, uint64_t pattern )
 {
-   connect();
-   m_ddr3If1Addr = findDeviceBaseAddress( EB::gsiId, EB::wb_ddr3ram );
-   m_ddr3If2Addr = findDeviceBaseAddress( EB::gsiId, EB::wb_ddr3ram2 );
-}
-
-/* ----------------------------------------------------------------------------
- */
-EB_CONNECTION::~EB_CONNECTION( void )
-{
-   if( isConnected() )
-      disconnect();
-}
-
-/* ----------------------------------------------------------------------------
- */
-void EB_CONNECTION::ddr3Write( const uint i, uint64_t value64 )
-{
-#if 0
-   write( m_ddr3If1Addr + i * sizeof(uint64_t), &value64,
-          sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-          sizeof(uint64_t)/sizeof(uint32_t) );
-#else
-   EtherboneConnection::ddr3Write( m_ddr3If1Addr + i * sizeof(uint64_t),
-                                   &value64, 1 );
-
-#endif
-}
-
-/* ----------------------------------------------------------------------------
- */
-void EB_CONNECTION::ddr3Write( const uint i, const uint64_t* pData, uint len )
-{
-   EtherboneConnection::ddr3Write( m_ddr3If1Addr + i * sizeof(uint64_t), pData, len );
-}
-
-/* ----------------------------------------------------------------------------
- */
-uint64_t EB_CONNECTION::ddr3Read( const uint i )
-{
-   uint64_t ret = 0;
-
-   read( m_ddr3If1Addr + i * sizeof(uint64_t), &ret,
-         sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-         sizeof(uint64_t)/sizeof(uint32_t) );
-   return ret;
-}
-
-/* ----------------------------------------------------------------------------
- */
-void EB_CONNECTION::ddr3Read( const uint i, uint64_t* pData, const uint len )
-{
-   read( m_ddr3If1Addr + i * sizeof(uint64_t), pData,
-         sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-         len * sizeof(uint64_t)/sizeof(uint32_t) );
-}
-
-/* ----------------------------------------------------------------------------
- */
-void EB_CONNECTION::ddr3BurstRead( const uint i, uint64_t* pData, const uint len )
-{
-}
-
-/* ----------------------------------------------------------------------------
- */
-bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
-{
-   cout << "IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
-        << uppercase << roEbc.getIf1Addr() + i << endl;
 
    cout << "writing pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
-        << uppercase << pattern << endl;
-   roEbc.ddr3Write( i, pattern );
+        << uppercase << pattern << dec << " at index: " << i << endl;
+   poRam->write( i, &pattern, 1 );
 
-   uint64_t recPattern = roEbc.ddr3Read( i );
+   uint64_t recPattern = 0;
+   poRam->read( i, &recPattern, 1 );
    cout << "reading pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
         << uppercase << recPattern << endl;
 
@@ -148,9 +61,8 @@ bool ioTest( EB_CONNECTION& roEbc, uint i, uint64_t pattern )
  */
 bool arrayTest( RamAccess* poRam, const uint offset )
 {
- //  cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
- //       << " items at IF1-address: 0x" << setfill( '0' ) << setw( 8 ) << hex
- //       << uppercase << roEbc.getIf1Addr() + offset << endl;
+   cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
+        <<  " items"  << endl;
 
    poRam->write( offset, g_testArray, ARRAY_SIZE(g_testArray) );
 
@@ -170,22 +82,17 @@ bool arrayTest( RamAccess* poRam, const uint offset )
    return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////
 /* ----------------------------------------------------------------------------
  */
 void run( std::string& ebName )
 {
    Ddr3Access oDdr3( ebName );
-#if 0
-   EB_CONNECTION oEbc( ebName );
 
-   ioTest( oEbc, 1, 0x1122334455667788 );
-   ioTest( oEbc, 1, 0xAAAAAAAA55555555 );
-   ioTest( oEbc, 1, 0xF0F0F0F0F0F0F0F0 );
-   ioTest( oEbc, 1, 0xFFFFFFFF00000000 );
-#endif
+   ioTest( &oDdr3, 1, 0x1122334455667788 );
+   ioTest( &oDdr3, 1, 0xAAAAAAAA55555555 );
+   ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0 );
+   ioTest( &oDdr3, 1, 0xFFFFFFFF00000000 );
    arrayTest( &oDdr3, 2000000 );
-
 }
 
 //=============================================================================

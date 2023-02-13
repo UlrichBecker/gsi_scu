@@ -26,6 +26,7 @@
 #define _MEM_BROWSER_HPP
 
 #include <scu_mmu_fe.hpp>
+#include <scu_ddr3_access.hpp>
 #include "mem_cmdline.hpp"
 
 namespace Scu
@@ -38,7 +39,10 @@ class Browser: public Mmu
 {
    CommandLine& m_rCmdLine;
 public:
-   Browser( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine );
+  // Browser( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine );
+
+   Browser( RamAccess* poRam, CommandLine& rCmdLine );
+
    ~Browser( void );
 
    int operator()( std::ostream& out );

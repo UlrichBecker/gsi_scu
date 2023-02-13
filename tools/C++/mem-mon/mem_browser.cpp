@@ -31,8 +31,8 @@ using namespace std;
 
 /*!----------------------------------------------------------------------------
  */
-Browser::Browser( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine )
-   :Mmu( &roEtherbone )
+Browser::Browser( RamAccess* poRam, CommandLine& rCmdLine )
+   :Mmu( poRam )
    ,m_rCmdLine( rCmdLine )
 {
 }

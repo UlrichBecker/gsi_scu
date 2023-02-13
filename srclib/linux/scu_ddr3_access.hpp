@@ -70,6 +70,24 @@ public:
    ~Ddr3Access( void );
 
    /*!
+    * @brief Returns the interface 1 address of DDR3-RAM.
+    * @note For test and debug purposes only.
+    */
+   uint getIf1Address( void ) const
+   {
+      return m_if1Addr;
+   }
+
+   /*!
+    * @brief Returns the interface 2 address of DDR3-RAM.
+    * @note For test and debug purposes only.
+    */
+   uint getIf2Address( void ) const
+   {
+      return m_if2Addr;
+   }
+
+   /*!
     * @brief Reads data from the DDR3 memory.
     * @param address Start-index (source) of the DDR3 memory.
     * @param pData Target address in 64 bit units

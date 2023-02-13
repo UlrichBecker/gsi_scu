@@ -107,11 +107,11 @@ int Lm32Logd::StringBuffer::sync( void )
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  */
-Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine )
+Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
    :std::iostream( &m_oStrgBuffer )
    ,m_oStrgBuffer( *this )
    ,m_rCmdLine( rCmdLine )
-   ,m_oMmu( &roEtherbone )
+   ,m_oMmu( poRam )
    ,m_lastTimestamp( 0 )
    ,m_isError( false )
    ,m_isSyslogOpen( false )
@@ -148,8 +148,8 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
 
    try
    {
-      m_lm32Base = m_oMmu.getEb()->findDeviceBaseAddress( mmuEb::gsiId,
-                                                          mmuEb::lm32_ram_user );
+      m_lm32Base = m_oMmu.getEb()->findDeviceBaseAddress( EBC::gsiId,
+                                                          EBC::lm32_ram_user );
    }
    catch( std::exception& e )
    {
@@ -239,7 +239,7 @@ Lm32Logd::Lm32Logd( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLi
    }
 
    assert( (m_offset * sizeof(mmu::RAM_PAYLOAD_T)) % sizeof(SYSLOG_MEM_ITEM_T) == 0 );
-   m_fifoAdminBase = m_offset * sizeof(mmu::RAM_PAYLOAD_T) + m_oMmu.getBase();
+   m_fifoAdminBase = m_offset;
 
    m_offset   += SYSLOG_FIFO_ADMIN_SIZE;
    m_capacity -= SYSLOG_FIFO_ADMIN_SIZE;
@@ -290,15 +290,14 @@ Lm32Logd::~Lm32Logd( void )
 
 /*! ---------------------------------------------------------------------------
  */
-void Lm32Logd::read( const etherbone::address_t eb_address,
-                     eb_user_data_t pData,
-                     const etherbone::format_t format,
+void Lm32Logd::read( const uint index,
+                     uint64_t* pData,
                      const uint size )
 {
    assert( m_oMmu.getEb()->isConnected() );
    try
    {
-      m_oMmu.getEb()->read( eb_address, pData, format, size );
+      m_oMmu.getRamAccess()->read( index, pData, size );
    }
    catch( std::exception& e )
    {
@@ -313,14 +312,14 @@ void Lm32Logd::read( const etherbone::address_t eb_address,
 
 /*! ---------------------------------------------------------------------------
  */
-void Lm32Logd::write( const etherbone::address_t eb_address,
-                          const uint64_t* pData,
-                          const uint size )
+void Lm32Logd::write( const uint index,
+                      const uint64_t* pData,
+                      const uint size )
 {
    assert( m_oMmu.getEb()->isConnected() );
    try
    {
-      m_oMmu.getEb()->ddr3Write( eb_address, pData, size );
+      m_oMmu.getRamAccess()->write( index, pData, size );
    }
    catch( std::exception& e )
    {
@@ -347,9 +346,12 @@ int Lm32Logd::readKey( void )
  */
 void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
 {
-   constexpr uint LEN32 = sizeof(SYSLOG_FIFO_ADMIN_T) / sizeof(uint32_t);
+   static_assert( (sizeof(SYSLOG_FIFO_ADMIN_T) % sizeof(uint64_t) == 0 ), "" );
 
-   read( m_fifoAdminBase, &rAdmin, EB_DATA32 | EB_LITTLE_ENDIAN, LEN32 );
+   read( m_fifoAdminBase,
+         reinterpret_cast<uint64_t*>(&rAdmin),
+         sizeof(SYSLOG_FIFO_ADMIN_T) / sizeof(uint64_t) );
+
    if( (rAdmin.admin.indexes.offset   != m_offset) ||
        (rAdmin.admin.indexes.capacity != m_capacity) )
    {
@@ -370,8 +372,11 @@ void Lm32Logd::setResponse( uint64_t n )
    DEBUG_MESSAGE_M_FUNCTION( n );
    static_assert( offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ) % sizeof( SYSLOG_MEM_ITEM_T ) == 0, "" );
 
-   write( m_fifoAdminBase + offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ),
-              &n, 1 );
+   write( m_fifoAdminBase +
+            offsetof( SYSLOG_FIFO_ADMIN_T, admin.wasRead ) / sizeof( SYSLOG_MEM_ITEM_T ),
+          &n,
+          1
+        );
 }
 
 constexpr uint LM32_MEM_SIZE = 147456;
@@ -382,6 +387,7 @@ constexpr uint HIGHST_ADDR = LM32_MEM_SIZE + LM32_OFFSET;
 uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
+   static_assert( sizeof( *pData ) == EB_DATA8, "" );
 
    if( (offset-LM32_OFFSET + len) >= LM32_MEM_SIZE )
    {
@@ -389,8 +395,19 @@ uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset 
       len -= (offset-LM32_OFFSET + len) - LM32_MEM_SIZE;
    }
 
-   read( m_lm32Base + offset, pData, EB_BIG_ENDIAN | EB_DATA8, len );
-
+   try
+   {
+      m_oMmu.getEb()->read( m_lm32Base + offset, pData, EB_BIG_ENDIAN | EB_DATA8, len );
+   }
+   catch( std::exception& e )
+   {
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << e.what() << endl;
+      }
+      throw e;
+   }
    return len;
 }
 
@@ -409,7 +426,13 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
 
    if( !gsi::isInRange( addr, LM32_OFFSET, HIGHST_ADDR ) )
    {
-      throw std::runtime_error( "String address is corrupt!" );
+      string errTxt = "String address is corrupt!";
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << errTxt << endl;
+      }
+      throw std::runtime_error( errTxt );
    }
 
    enum STATE_T
@@ -514,14 +537,9 @@ void Lm32Logd::readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len )
    DEBUG_MESSAGE_M_FUNCTION( " len = " << len );
    DEBUG_MESSAGE( "Read-index: " << sysLogFifoGetReadIndex( &m_fiFoAdmin ) );
 
-   read( m_oMmu.getBase() +
-            sysLogFifoGetReadIndex( &m_fiFoAdmin ) *
-            sizeof(SYSLOG_MEM_ITEM_T),
-         pData,
-         EB_DATA32 | EB_LITTLE_ENDIAN,
-         //len * sizeof(SYSLOG_FIFO_ITEM_T) / sizeof(uint32_t)
-         len * sizeof(SYSLOG_MEM_ITEM_T) / sizeof(uint32_t)
-       );
+   read( sysLogFifoGetReadIndex( &m_fiFoAdmin ),
+         reinterpret_cast<uint64_t*>(pData),
+         len * sizeof(SYSLOG_MEM_ITEM_T) / sizeof(uint64_t) );
 
    sysLogFifoAddToReadIndex( &m_fiFoAdmin, len );
 }

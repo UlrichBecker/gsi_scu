@@ -9,10 +9,10 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.4
+DEFINES += VERSION=1.5
 FOR_SCU_AND_ACC := 1
 
-#DEBUG = 1
+DEBUG = 1
 #DEFINES += DEBUGLEVEL
 
 
@@ -26,6 +26,8 @@ SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_mmu_fe.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
@@ -45,7 +47,7 @@ endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0035 -Hakv -I200 -m1000
+CALL_ARGS = scuxl0035 -Hbakv -I200 -m1000
 
 DOX_EXTRACT_PRIVATE = YES
 
