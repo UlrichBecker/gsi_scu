@@ -62,8 +62,7 @@
 using namespace Scu;
 using namespace std;
 
-constexpr uint LM32_OFFSET   = 0x10000000;
-constexpr uint BUILD_ID_ADDR = LM32_OFFSET + 0x100;
+constexpr uint BUILD_ID_ADDR = Lm32Access::OFFSET + 0x100;
 
 static_assert( EB_DATA32 == sizeof(uint32_t), "" );
 
@@ -112,6 +111,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
    ,m_oStrgBuffer( *this )
    ,m_rCmdLine( rCmdLine )
    ,m_oMmu( poRam )
+   ,m_oLm32( m_oMmu.getEb() )
    ,m_lastTimestamp( 0 )
    ,m_isError( false )
    ,m_isSyslogOpen( false )
@@ -146,41 +146,6 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       m_poTerminal = new Terminal;
    }
 
-   try
-   {
-      m_lm32Base = m_oMmu.getEb()->findDeviceBaseAddress( EBC::gsiId,
-                                                          EBC::lm32_ram_user );
-   }
-   catch( std::exception& e )
-   {
-      if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << e.what() << endl;
-      }
-      throw e;
-   }
-
-   /*
-    * The string addresses of LM32 comes from the perspective of the LM32.
-    * Therefore a offset correction has to made here.
-    */
-   if( m_lm32Base < LM32_OFFSET )
-   {
-      const char* text = "LM32 base address is corrupt!";
-      if( m_poTerminal != nullptr )
-         m_poTerminal->reset();
-
-      if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << text << std::flush;
-      }
-
-      throw std::runtime_error( text );
-   }
-   m_lm32Base -= LM32_OFFSET;
-
    if( m_rCmdLine.isReadBuildId() || m_rCmdLine.isAddBuildId() )
    {
       std::string idStr;
@@ -196,7 +161,6 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
 
       *this << idStr << std::flush;
    }
-
 
    if( !m_oMmu.isPresent() )
    {
@@ -233,9 +197,9 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
    if( m_rCmdLine.isVerbose() )
    {
       cout << "Found MMU-tag:  0x" << std::hex << std::uppercase << setw( 4 ) << setfill('0')
-            << (int)mmu::TAG_LM32_LOG << std::dec
-            << "\nAddress:        " << m_offset
-            << "\nCapacity:       " << m_capacity << endl;
+           << (int)mmu::TAG_LM32_LOG << std::dec
+           << "\nAddress:        " << m_offset
+           << "\nCapacity:       " << m_capacity << endl;
    }
 
    assert( (m_offset * sizeof(mmu::RAM_PAYLOAD_T)) % sizeof(SYSLOG_MEM_ITEM_T) == 0 );
@@ -379,9 +343,6 @@ void Lm32Logd::setResponse( uint64_t n )
         );
 }
 
-constexpr uint LM32_MEM_SIZE = 147456;
-constexpr uint HIGHST_ADDR = LM32_MEM_SIZE + LM32_OFFSET;
-
 /*! ---------------------------------------------------------------------------
  */
 uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset )
@@ -389,15 +350,15 @@ uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset 
    DEBUG_MESSAGE_M_FUNCTION("");
    static_assert( sizeof( *pData ) == EB_DATA8, "" );
 
-   if( (offset-LM32_OFFSET + len) >= LM32_MEM_SIZE )
+   if( (offset-Lm32Access::OFFSET + len) >= Lm32Access::MEM_SIZE )
    {
       DEBUG_MESSAGE( "End of memory, can't read full length of: " << len );
-      len -= (offset-LM32_OFFSET + len) - LM32_MEM_SIZE;
+      len -= (offset-Lm32Access::OFFSET + len) - Lm32Access::MEM_SIZE;
    }
 
    try
    {
-      m_oMmu.getEb()->read( m_lm32Base + offset, pData, EB_BIG_ENDIAN | EB_DATA8, len );
+      m_oLm32.read( offset, pData, len );
    }
    catch( std::exception& e )
    {
@@ -424,7 +385,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
 {
    DEBUG_MESSAGE_M_FUNCTION("");
 
-   if( !gsi::isInRange( addr, LM32_OFFSET, HIGHST_ADDR ) )
+   if( !gsi::isInRange( addr, Lm32Access::OFFSET, Lm32Access::MAX_ADDR ) )
    {
       string errTxt = "String address is corrupt!";
       if( m_rCmdLine.isDemonize() )
@@ -452,7 +413,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
       const uint len = readLm32( buffer, sizeof( buffer ), addr );
       for( uint i = 0; i < len; i++ )
       {
-         if( (buffer[i] == '\0') || (addr + i >= HIGHST_ADDR) )
+         if( (buffer[i] == '\0') || (addr + i >= Lm32Access::MAX_ADDR) )
          {
             DEBUG_MESSAGE( "received string: \"" << rStr.substr(rStr.length()-ret) << "\"" );
             return ret;
@@ -677,7 +638,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       rOutput += ": ";
    }
 
-   if( !gsi::isInRange( item.format, LM32_OFFSET, HIGHST_ADDR ) )
+   if( !gsi::isInRange( item.format, Lm32Access::OFFSET, Lm32Access::MAX_ADDR ) )
    {
       m_isError = true;
       *this << "Address of format string is invalid: 0x"
@@ -768,7 +729,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
                   case 'S': /* No break here! */
                   case 's':
                   {
-                     if( gsi::isInRange( item.param[ai], LM32_OFFSET, HIGHST_ADDR ) )
+                     if( gsi::isInRange( item.param[ai], Lm32Access::OFFSET, Lm32Access::MAX_ADDR ) )
                         readStringFromLm32( rOutput, item.param[ai] );
                      else
                      {

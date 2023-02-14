@@ -1,11 +1,9 @@
 /*!
- * @file scu_etherbone.cpp
- * @brief Base class foe wishbone or etherbone connections
- * @see scu_etherbone.hpp
- * @see EtherboneConnection.hpp
- * @see EtherboneConnection.cpp
+ * @file scu_lm32_access.cpp
+ * @brief Class handles the data transfer from and to the LM32-memory via
+ *        etherbone/wishbone bus.
  *
- * @date 09.02.2023
+ * @date 14.02.2023
  * @copyright (C) 2023 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
  * @author Ulrich Becker <u.becker@gsi.de>
@@ -25,52 +23,50 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#include <assert.h>
-#include "scu_etherbone.hpp"
+#include "scu_lm32_access.hpp"
 
 using namespace Scu;
 
-uint EtherboneAccess::c_useCount = 0;
+/*!----------------------------------------------------------------------------
+ */
+Lm32Access::Lm32Access( EBC::EtherboneConnection* pEbc )
+   :EtherboneAccess( pEbc )
+{
+   init();
+}
 
 /*!----------------------------------------------------------------------------
  */
-EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
-   :m_pEbc( pEbc )
-   ,m_fromExtern( true )
-   ,m_selfConnected( false )
+Lm32Access::Lm32Access( std::string& rScuName, uint timeout )
+   :EtherboneAccess( rScuName, timeout )
 {
-   assert( dynamic_cast<EBC::EtherboneConnection*>(m_pEbc) != nullptr );
-   if( !m_pEbc->isConnected() )
+   init();
+}
+
+/*!----------------------------------------------------------------------------
+ */
+void Lm32Access::init( void )
+{
+   m_baseAddress = findDeviceBaseAddress( EBC::gsiId, EBC::lm32_ram_user );
+   if( m_baseAddress < OFFSET )
    {
-      m_pEbc->connect();
-      m_selfConnected = true;
+      throw std::runtime_error( "LM32 address is corrupt!" );
    }
-   c_useCount++;
+   m_baseAddress -= OFFSET;
 }
 
 /*!----------------------------------------------------------------------------
  */
-EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
-   :m_pEbc( nullptr )
-   ,m_fromExtern( false )
-   ,m_selfConnected( true )
+void Lm32Access::write( uint addr, const void* pData, uint len, uint format )
 {
-   m_pEbc = new EBC::EtherboneConnection( rScuName, timeout );
-   m_pEbc->connect();
-   c_useCount++;
+   EtherboneAccess::write( m_baseAddress + addr, eb_user_data_t(pData), format, len );
 }
 
 /*!----------------------------------------------------------------------------
  */
-EtherboneAccess::~EtherboneAccess( void )
+void Lm32Access::read( uint addr, void* pData, uint len, uint format )
 {
-   assert( c_useCount > 0 );
-   c_useCount--;
-   if( m_selfConnected && m_pEbc->isConnected() && (c_useCount == 0) )
-      m_pEbc->disconnect();
-
-   if( !m_fromExtern )
-      delete m_pEbc;
+   EtherboneAccess::read( m_baseAddress + addr, pData, format, len );
 }
 
 //================================== EOF ======================================

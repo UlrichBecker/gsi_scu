@@ -32,6 +32,7 @@
 #include <daqt_read_stdin.hpp>
 #include <scu_mmu_fe.hpp>
 #include <scu_ddr3_access.hpp>
+#include <scu_lm32_access.hpp>
 #include <lm32_syslog_common.h>
 #include "logd_cmdline.hpp"
 
@@ -70,7 +71,7 @@ class Lm32Logd: public std::iostream
    StringBuffer         m_oStrgBuffer;
    CommandLine&         m_rCmdLine;
    mmu::Mmu             m_oMmu;
-   uint                 m_lm32Base;
+   Lm32Access           m_oLm32;
    uint                 m_fifoAdminBase;
    mmu::MMU_ADDR_T      m_offset;
    std::size_t          m_capacity;

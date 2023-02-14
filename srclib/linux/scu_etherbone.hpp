@@ -33,6 +33,10 @@
 
 namespace EBC = FeSupport::Scu::Etherbone;
 
+static_assert( sizeof( uint8_t )  == EB_DATA8,  "" );
+static_assert( sizeof( uint16_t ) == EB_DATA16, "" );
+static_assert( sizeof( uint32_t ) == EB_DATA32, "" );
+static_assert( sizeof( uint64_t ) == EB_DATA64, "" );
 
 namespace Scu
 {
@@ -44,6 +48,11 @@ namespace Scu
  */
 class EtherboneAccess
 {
+   /*!
+    * @brief Class variable is the instances counter of this class.
+    */
+   static uint               c_useCount;
+
    /*!
     * @brief Pointer to the object of type EtherboneConnection
     */

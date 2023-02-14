@@ -6,7 +6,9 @@ DAQ_LM32_DIR = $(DAQ_DIR)/lm32
 
 INCLUDE_DIRS += $(DAQ_DIR)
 
+
 SOURCE += $(DAQ_LM32_DIR)/daq.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
 SOURCE += $(SCU_LIB_SRC_DIR)/dow_crc.c
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c

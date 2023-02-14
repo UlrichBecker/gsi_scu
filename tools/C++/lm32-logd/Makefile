@@ -28,6 +28,7 @@ SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_mmu_fe.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 

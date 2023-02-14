@@ -122,7 +122,7 @@ void main( void )
             daqBusGetFoundDevices( &g_allDaq ),
             daqBusGetNumberOfAllFoundChannels( &g_allDaq ) );
 
-#define CHANNEL 4
+//#define CHANNEL 4
    DAQ_CANNEL_T* pChannel = daqBusGetChannelObjectByAbsoluteNumber( &g_allDaq, CHANNEL );
    if( pChannel == NULL )
    {
