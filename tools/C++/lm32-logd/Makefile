@@ -12,9 +12,10 @@
 DEFINES += VERSION=1.5
 FOR_SCU_AND_ACC := 1
 
-DEBUG = 1
+#DEBUG = 1
 #DEFINES += DEBUGLEVEL
-
+USE_NAMED_MUTEX := 1
+USE_STATIC_LIBS := 1
 
 MIAN_MODULE := lm32-logd.cpp
 
@@ -38,11 +39,20 @@ DEFINES += CONFIG_AUTODOC_OPTION
 DEFINES += CONFIG_SCU_USE_DDR3
 DEFINES += _GNU_SOURCE
 
- USE_STATIC_LIBS := 1
-
+ifdef USE_NAMED_MUTEX
+ LIBS += pthread
+else
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
 ifdef USE_STATIC_LIBS
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
+ endif
  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
  LIBS += etherbone
 endif
 

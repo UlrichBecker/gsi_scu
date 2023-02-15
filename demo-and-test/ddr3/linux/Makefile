@@ -11,6 +11,8 @@
 
 FOR_SCU_AND_ACC := 1
 DEBUG = 1
+USE_STATIC_LIBS := 1
+USE_NAMED_MUTEX := 1
 MIAN_MODULE := ddr3iot.cpp
 
 SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
@@ -18,8 +20,26 @@ SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
 
-ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+
+ifdef USE_NAMED_MUTEX
+ LIBS += pthread
+else
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
+ifdef USE_STATIC_LIBS
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
+ endif
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+else
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
+ LIBS += etherbone
+endif
+
 LIBS += stdc++
+
 
 INCLUDE_DIRS += $(SCU_LIB_SRC_LINUX_DIR)
 

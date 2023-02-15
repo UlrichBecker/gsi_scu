@@ -11,7 +11,8 @@
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 
 DEFINES += VERSION=1.0
-
+USE_STATIC_LIBS := 1
+# USE_NAMED_MUTEX := 1
 MIAN_MODULE := daqt.cpp
 
 SCU_DIR        = $(PRJ_DIR)/scu-control
@@ -65,14 +66,18 @@ INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
 INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
 
-
- USE_STATIC_LIBS := 1
-
+ifndef USE_NAMED_MUTEX
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
 ifdef USE_STATIC_LIBS
-# ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
- ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
+ endif
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
-# LIBS += boost_system
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
  LIBS += etherbone
 endif
 

@@ -47,7 +47,7 @@ SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 
 # NO_LTO = 1
 
-ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
+ifeq ($(shell echo $${HOSTNAME:0:4}), asl7)
    DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/daq
 endif
 

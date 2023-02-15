@@ -11,6 +11,10 @@
 
 DEFINES += VERSION=1.3
 FOR_SCU_AND_ACC := 1
+
+USE_STATIC_LIBS := 1
+USE_NAMED_MUTEX := 1
+
 MIAN_MODULE := mem-mon.cpp
 
 SOURCE += mem_browser.cpp
@@ -25,17 +29,29 @@ SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
 DEFINES += CONFIG_AUTODOC_OPTION
 DEFINES += CONFIG_SCU_USE_DDR3
-USE_STATIC_LIBS := 1
+DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
 
-ifdef USE_STATIC_LIBS
- ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+ifdef USE_NAMED_MUTEX
+ LIBS += pthread
 else
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
+ifdef USE_STATIC_LIBS
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
+ endif
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+else
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
  LIBS += etherbone
 endif
 
+
 LIBS += stdc++
 
-DEBUG = 1
+# DEBUG = 1
 
 CALL_ARGS = scuxl0035 -v
 

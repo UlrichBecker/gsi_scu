@@ -11,8 +11,6 @@
 #include <utility>      // std::pair, std::make_pair
 #include <string>
 
-#define CONFIG_EB_USE_NORMAL_MUTEX
-
 #define CONFIG_IMPLEMENT_DDR3_WRITE
 
 #ifdef CONFIG_EB_USE_NORMAL_MUTEX

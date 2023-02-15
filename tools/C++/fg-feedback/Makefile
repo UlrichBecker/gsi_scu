@@ -12,6 +12,7 @@ REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 DEFINES += VERSION=2.14
 FOR_SCU_AND_ACC := 1
 
+USE_NAMED_MUTEX := 1
 
 #DEFINES += _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 
@@ -58,6 +59,9 @@ DEFINES += CONFIG_AUTODOC_OPTION
 
 DEFINES += _BSD_SOURCE
 DEFINES += _POSIX_C_SOURCE
+ifndef USE_NAMED_MUTEX
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
 
 # DEBUG = 1
 # DEFINES += CONFIG_DAQ_TEST
@@ -82,10 +86,14 @@ INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
  USE_STATIC_LIBS := 1
 
 ifdef USE_STATIC_LIBS
-# ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
+ endif
   ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
-# LIBS += boost_system
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
  LIBS += etherbone
 endif
 
