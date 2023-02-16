@@ -9,8 +9,9 @@
 ## Date:     26.05.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-
+DEBUG = 1
 #  USE_SHARED_LIB := 1
+USE_STATIC_LIBS := 1
 
 EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone
 
@@ -38,6 +39,9 @@ ifndef USE_SHARED_LIB
  SOURCE += $(MDAQ_LINUX_DIR)/mdaq_administration.cpp
  SOURCE += $(SDAQ_LINUX_DIR)/daq_administration.cpp
  SOURCE += $(SDAQ_LINUX_DIR)/daq_interface.cpp
+ SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
+ SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+ SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
 else
  # When a library will used so the following header files
  # has to be told Doxygen explicitly.
@@ -64,9 +68,26 @@ INCLUDE_DIRS += $(DAQ_DIR)/lm32
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
 INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
-# LIBS += boost_system
 
-# ADDITIONAL_OBJECTS += /opt/gsi/3rdparty/boost/1.54.0/lib/x86_64/libboost_system.a
+ifdef USE_NAMED_MUTEX
+ LIBS += pthread
+else
+ DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
+endif
+ifdef USE_STATIC_LIBS
+ ifdef USE_NAMED_MUTEX
+  ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
+ endif
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+else
+ ifdef USE_NAMED_MUTEX
+  LIBS += boost_system
+ endif
+ LIBS += etherbone
+endif
+
+
+
 ifdef USE_SHARED_LIB
  FEEDBACK_LIB = $(DAQ_LINUX_DIR)/feedback/deploy_x86_64/result/libscu_fg_feedback.a
  ADDITIONAL_OBJECTS += $(FEEDBACK_LIB)
@@ -74,13 +95,12 @@ endif
 
 LIBS += pthread
 LIBS += stdc++
-LIBS += etherbone
 
 
 # CALL_ARGS         = "tcp/scuxl0107"
- CALL_ARGS         = "tcp/scuxl0192"
+# CALL_ARGS         = "tcp/scuxl0192"
 # CALL_ARGS         = "tcp/scuxl0212"
-# CALL_ARGS         = "tcp/scuxl0035"
+ CALL_ARGS         = "tcp/scuxl0035"
 # CALL_ARGS = "tcp/scuxl0118"
 REMOTE_CALL_ARGS  ?= "dev/wbm0"
 

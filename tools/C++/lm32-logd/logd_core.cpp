@@ -66,6 +66,7 @@ constexpr uint BUILD_ID_ADDR = Lm32Access::OFFSET + 0x100;
 
 static_assert( EB_DATA32 == sizeof(uint32_t), "" );
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  * @brief Central output function.

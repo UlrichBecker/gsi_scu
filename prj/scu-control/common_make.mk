@@ -144,11 +144,11 @@ ifdef SCU_MIL
   SOURCE += $(SCU_LIB_SRC_DIR)/fifo/scu_event.c
 endif
 ifdef ADDAC_DAQ
-  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3_lm32.c
   SOURCE += $(DAQ_LM32_DIR)/daq.c
   SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
   SOURCE += $(DAQ_LM32_DIR)/daq_command_interface_uc.c
-  SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer.c
+  SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer_lm32.c
   USE_SCU_EXTERN_RAM := 1
 endif
 ifdef USE_HISTORY

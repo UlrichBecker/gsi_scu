@@ -33,7 +33,8 @@
 #include <EtherboneConnection.hpp>
 #include <scu_assert.h>
 #ifndef CONFIG_NO_SCU_RAM
- #include <daq_ramBuffer.h>
+#include <daq_ramBuffer.h>
+#include <scu_ddr3.h>
 #endif
 #include <daq_calculations.hpp>
 

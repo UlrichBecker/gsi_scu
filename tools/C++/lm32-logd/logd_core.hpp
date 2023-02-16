@@ -40,6 +40,48 @@
 namespace Scu
 {
 
+///////////////////////////////////////////////////////////////////////////////////////
+/*! -----------------------------------------------------------------------------------
+ * @brief Specializing the LM32 access class for reading text-strings from
+ *        LM32 memory.
+ */
+class Lm32LogAccess: public Lm32Access
+{
+   void init( void )
+   {
+      if( m_baseAddress < OFFSET )
+      {
+         throw std::runtime_error( "LM32 address is corrupt!" );
+      }
+      m_baseAddress -= OFFSET;
+   }
+
+public:
+   /*!
+    * @brief Constructor which uses a shared object of EtherboneConnection.
+    *        It establishes a connection if not already done.
+    * @param pEbc Pointer to object of type EtherboneConnection
+    */
+   Lm32LogAccess( EBC::EtherboneConnection* pEbc )
+      :Lm32Access( pEbc )
+   {
+      init();
+   }
+
+   /*!
+    * @brief Constructor which creates a object of type EtherboneConnection and
+    *        establishes a connection.
+    * @param rScuName In the case this application runs on ASL, the name of the target SCU.
+    *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
+    * @param timeout Response timeout.
+    */
+   Lm32LogAccess( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT )
+      :Lm32Access( rScuName, timeout )
+   {
+      init();
+   }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 /*!
  * @brief Main-class of the LM32 log-system.
@@ -71,7 +113,7 @@ class Lm32Logd: public std::iostream
    StringBuffer         m_oStrgBuffer;
    CommandLine&         m_rCmdLine;
    mmu::Mmu             m_oMmu;
-   Lm32Access           m_oLm32;
+   Lm32LogAccess        m_oLm32;
    uint                 m_fifoAdminBase;
    mmu::MMU_ADDR_T      m_offset;
    std::size_t          m_capacity;

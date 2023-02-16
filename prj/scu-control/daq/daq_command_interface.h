@@ -35,7 +35,9 @@
 
 #include <shared_mmap.h>
 #include <scu_bus_defines.h>
-#include <daq_ramBuffer.h>
+//#include <_daq_ramBuffer.h>
+#include <circular_index.h>
+#include <daq_descriptor.h>
 #include <stdint.h>
 
 #ifdef CONFIG_SCU_DAQ_INTEGRATION

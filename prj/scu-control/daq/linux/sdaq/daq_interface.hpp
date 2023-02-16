@@ -34,6 +34,9 @@
 #include <daq_descriptor.h>
 #include <daq_eb_ram_buffer.hpp>
 #include <daq_calculations.hpp>
+#ifdef CONFIG_SCU_USE_DDR3
+#include <scu_ddr3.h>
+#endif
 
 #ifndef DAQ_DEFAULT_WB_DEVICE
    #define DAQ_DEFAULT_WB_DEVICE "dev/wbm0"
@@ -47,10 +50,37 @@
    SCU_ASSERT( channel <= c_maxChannels );                 \
 }
 
+
+
 namespace Scu
 {
 namespace daq
 {
+
+typedef struct
+{
+#ifdef CONFIG_SCU_USE_DDR3
+   /*!
+    * @brief SCU DDR3 administration object.
+    */
+   DDR3_T   ram;
+#else
+   #error Unknown RAM-object!
+   //TODO maybe in the future will use a other memory type
+#endif
+   /*!
+    * @brief Administration of fifo- indexes.
+    * @note The memory space of this object has to be within the shared
+    *       memory. \n
+    *       Therefore its a pointer in this object.
+    */
+#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
+   RAM_RING_SHARED_INDEXES_T* volatile pSharedObj;
+#else
+   RAM_RING_SHARED_OBJECT_T* volatile pSharedObj;
+#endif
+} RAM_SCU_T;
+
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ

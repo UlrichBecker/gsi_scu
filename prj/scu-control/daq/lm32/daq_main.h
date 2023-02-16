@@ -36,7 +36,7 @@
 #endif
 
 #include <daq.h>
-#include <daq_ramBuffer.h>
+#include <daq_ramBuffer_lm32.h>
 
 #ifndef CONFIG_DAQ_SINGLE_APP
  #include <scu_lm32_common.h>

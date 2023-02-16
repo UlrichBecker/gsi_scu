@@ -33,6 +33,7 @@
   #error This module is for LM32 only! 
 #endif
 
+#include <scu_ddr3_lm32.h>
 #include <scu_mmu.h>
 
 #define MMU_ASSERT DDR_ASSERT

@@ -13,6 +13,7 @@
 #endif
 #include <scu_command_handler.h>
 #ifdef CONFIG_RTOS
+  #include <FreeRTOS.h>
   #include <task.h>
 #endif
 #ifdef CONFIG_SCU_DAQ_INTEGRATION

@@ -74,6 +74,7 @@ public:
    /*!
     * @brief Constructor which uses a shared object of EtherboneConnection.
     *        It establishes a connection if not already done.
+    * @see getEb
     * @param pEbc Pointer to object of type EtherboneConnection
     */
    EtherboneAccess( EBC::EtherboneConnection* pEbc );
@@ -96,15 +97,31 @@ public:
 
    /*!
     * @brief Returns the pointer to the object of type EtherboneConnection.
+    *
+    * It can be used as argument for constructors of further objects which
+    * based on this class.
     */
    EBC::EtherboneConnection* getEb( void )
    {
       return m_pEbc;
    }
 
+   /*!
+    * @brief Returns "true" if the wishbone/etherbone connection has
+    *        been successful opened.
+    */
    bool isConnected( void )
    {
       return m_pEbc->isConnected();
+   }
+
+   /*!
+    * @brief Returns the network address respectively
+    *        the name of the wishbone device.
+    */
+   const std::string& getNetAddress( void )
+   {
+      return m_pEbc->getNetAddress();
    }
 
 protected:

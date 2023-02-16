@@ -255,7 +255,7 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
             __PUT_CHAR('-')
          else
             isNegative = true;
-         
+
          if( paddingWidth > 0 )
             paddingWidth--;
       }

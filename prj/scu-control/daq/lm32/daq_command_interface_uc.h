@@ -36,7 +36,7 @@
 #endif
 
 #include <daq.h>
-#include <daq_ramBuffer.h>
+#include <daq_ramBuffer_lm32.h>
 #ifdef CONFIG_RTOS
    #include <scu_task_daq.h>
 #else

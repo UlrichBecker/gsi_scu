@@ -59,7 +59,7 @@ bool ioTest( RamAccess* poRam, uint i, uint64_t pattern )
 
 /* ----------------------------------------------------------------------------
  */
-bool arrayTest( RamAccess* poRam, const uint offset )
+bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
 {
    cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
         <<  " items"  << endl;
@@ -70,7 +70,7 @@ bool arrayTest( RamAccess* poRam, const uint offset )
    ::memset( targetArray, 0, sizeof(targetArray) );
     cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
 
-   poRam->read( offset, targetArray, ARRAY_SIZE(targetArray) );
+   poRam->read( offset, targetArray, ARRAY_SIZE(targetArray), burst );
 
    if( ::memcmp( targetArray, g_testArray, sizeof(g_testArray) ) != 0 )
    {
@@ -92,7 +92,7 @@ void run( std::string& ebName )
    ioTest( &oDdr3, 1, 0xAAAAAAAA55555555 );
    ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0 );
    ioTest( &oDdr3, 1, 0xFFFFFFFF00000000 );
-   arrayTest( &oDdr3, 2000000 );
+   arrayTest( &oDdr3, 2000000, true );
 }
 
 //=============================================================================

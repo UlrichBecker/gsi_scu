@@ -48,11 +48,6 @@ Lm32Access::Lm32Access( std::string& rScuName, uint timeout )
 void Lm32Access::init( void )
 {
    m_baseAddress = findDeviceBaseAddress( EBC::gsiId, EBC::lm32_ram_user );
-   if( m_baseAddress < OFFSET )
-   {
-      throw std::runtime_error( "LM32 address is corrupt!" );
-   }
-   m_baseAddress -= OFFSET;
 }
 
 /*!----------------------------------------------------------------------------

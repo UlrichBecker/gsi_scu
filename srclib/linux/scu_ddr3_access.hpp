@@ -1,6 +1,10 @@
 /*!
  * @file scu_ddr3_access.hpp
  * @brief Access class for SCU- DDR3-RAM
+ *  @see
+ *  <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/MacroF%C3%BCr1GbitDDR3MT41J64M16LADesSCUCarrierboards">
+ *     DDR3 VHDL Macro der SCU3 </a>
+ *
  * @date 09.02.2023
  * @copyright (C) 2023 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

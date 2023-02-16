@@ -66,6 +66,8 @@
 #endif
 
 #include <sw_queue.h>
+#include <daq_ramBuffer_lm32.h>
+#include <daq.h>
 
 /*!
  * @defgroup MIL_FSM Functions and macros which concerns the MIL-FSM

@@ -40,6 +40,7 @@ namespace Scu
  */
 class Lm32Access: public EtherboneAccess
 {
+protected:
    /*!
     * @brief Wishbone/Etherbone base address of LM32 memory.
     */
@@ -108,6 +109,14 @@ public:
    void read( uint addr, TYPE* pData, uint len )
    {
       read( addr, pData, len, sizeof( TYPE ) | EB_BIG_ENDIAN );
+   }
+
+   /*!
+    * @brief Returns the etherbone/wishbone base address of LM32
+    */
+   uint getBaseAddress( void )
+   {
+      return m_baseAddress;
    }
 
 private:

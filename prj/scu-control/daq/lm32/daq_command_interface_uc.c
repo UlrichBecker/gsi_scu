@@ -26,7 +26,7 @@
 #include <lm32Interrupts.h>
 #include <daq_command_interface_uc.h>
 #include <scu_lm32_macros.h>
-#include <daq_ramBuffer.h>
+#include <daq_ramBuffer_lm32.h>
 #include <dbg.h>
 #ifdef DEBUGLEVEL
   #include <eb_console_helper.h>
