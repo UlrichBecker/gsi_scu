@@ -2,7 +2,7 @@
  * @file scu_ddr3_access.hpp
  * @brief Access class for SCU- DDR3-RAM
  *  @see
- *  <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/MacroF%C3%BCr1GbitDDR3MT41J64M16LADesSCUCarrierboards">
+ *   <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/MacroFür1GbitDDR3MT41J64M16LADesSCUCarrierboards">
  *     DDR3 VHDL Macro der SCU3 </a>
  *
  * @date 09.02.2023
@@ -97,7 +97,7 @@ public:
     * @param pData Target address in 64 bit units
     * @param len Length of the data array to read in 64-bit units.
     */
-   void read( const uint address, uint64_t* pData, const uint len, const bool burst = false ) override;
+   void read( uint address, uint64_t* pData, uint len, const bool burst = false ) override;
 
    /*!
     * @brief Writes data in the DDR3 - memory.

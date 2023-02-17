@@ -77,7 +77,7 @@ public:
     * @param len Length of data to read in 64-bit units.
     * @param burst (for DDR3 only) If true DDR3 will read in burst mode.
     */
-   virtual void read( const uint address, uint64_t* pData, const uint len, const bool burst = false ) = 0;
+   virtual void read( uint address, uint64_t* pData, uint len, const bool burst = false ) = 0;
 
    /*!
     * @brief Writes in DDR3 of SCU3 or in SRAM of SCU4.
