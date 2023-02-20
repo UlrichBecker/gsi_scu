@@ -35,7 +35,7 @@ static const uint64_t g_testArray[10] =
 
 /* ----------------------------------------------------------------------------
  */
-bool ioTest( RamAccess* poRam, uint i, uint64_t pattern )
+bool ioTest( RamAccess* poRam, uint i, uint64_t pattern, bool burst = false )
 {
 
    cout << "writing pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
@@ -43,7 +43,7 @@ bool ioTest( RamAccess* poRam, uint i, uint64_t pattern )
    poRam->write( i, &pattern, 1 );
 
    uint64_t recPattern = 0;
-   poRam->read( i, &recPattern, 1 );
+   poRam->read( i, &recPattern, 1, burst );
    cout << "reading pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
         << uppercase << recPattern << endl;
 
@@ -68,7 +68,7 @@ bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
 
    uint64_t targetArray[ARRAY_SIZE(g_testArray)];
    ::memset( targetArray, 0, sizeof(targetArray) );
-    cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
+   cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
 
    poRam->read( offset, targetArray, ARRAY_SIZE(targetArray), burst );
 
@@ -84,15 +84,49 @@ bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
 
 /* ----------------------------------------------------------------------------
  */
+void bigDataTest( RamAccess* poRam, uint size, bool burst )
+{
+   uint64_t* pSendBuffer = new uint64_t[size];
+
+   for( uint i = 0; i < size; i++ )
+   {
+      pSendBuffer[i] = i;
+   }
+
+   cout << "Writing array of " << dec << size << " 64 bit words." << endl;
+   poRam->write( 0, pSendBuffer, size );
+
+   uint64_t* pReceiveBuffer = new uint64_t[size];
+   ::memset( pReceiveBuffer, 0, size * sizeof(uint64_t) );
+
+   cout << "Reading array of " << dec << size << " 64 bit words." << endl;
+   poRam->read( 0, pReceiveBuffer, size, burst );
+   if( ::memcmp( pReceiveBuffer, pSendBuffer, size * sizeof(uint64_t) ) != 0 )
+      cout << ESC_FG_RED "Failed!" ESC_NORMAL << endl;
+   else
+      cout << ESC_FG_GREEN ESC_BOLD "Pass!" ESC_NORMAL << endl;
+
+
+   delete [] pSendBuffer;
+   delete [] pReceiveBuffer;
+}
+
+/* ----------------------------------------------------------------------------
+ */
 void run( std::string& ebName )
 {
    Ddr3Access oDdr3( ebName );
 
-   ioTest( &oDdr3, 1, 0x1122334455667788 );
-   ioTest( &oDdr3, 1, 0xAAAAAAAA55555555 );
-   ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0 );
-   ioTest( &oDdr3, 1, 0xFFFFFFFF00000000 );
+   ioTest( &oDdr3, 5, 0x1122334455667788, true );
+   ioTest( &oDdr3, 5, 0xAAAAAAAA55555555, true );
+
+#if 1
+   ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0, true );
+   ioTest( &oDdr3, 1, 0xFFFFFFFF00000000, true  );
+#endif
    arrayTest( &oDdr3, 2000000, true );
+
+   bigDataTest( &oDdr3,300, true );
 }
 
 //=============================================================================

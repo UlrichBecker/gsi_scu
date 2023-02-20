@@ -27,6 +27,7 @@
  */
 #include <helper_macros.h>
 #include <scu_ddr3.h>
+#include <daqt_messages.hpp>
 #include "scu_ddr3_access.hpp"
 
 using namespace Scu;
@@ -60,8 +61,61 @@ void Ddr3Access::init( void )
    assert( isConnected() );
    m_if1Addr = findDeviceBaseAddress( EBC::gsiId, EBC::wb_ddr3ram );
    m_if2Addr = findDeviceBaseAddress( EBC::gsiId, EBC::wb_ddr3ram2 );
+   flushFiFo();
 }
 
+/*-----------------------------------------------------------------------------
+ */
+void Ddr3Access::flushFiFo( void )
+{ /*
+   * Checking whether still data in FiFo.
+   */
+   const uint32_t words = readFiFoStatus() & DDR3_FIFO_STATUS_MASK_USED_WORDS;
+   if( words == 0 )
+      return;
+
+   /*
+    * FiFo isn't empty therefore it has to be flushed here by dummy-read.
+    */
+   DEBUG_MESSAGE( "Flushing DDR3-FiFo with " << words << " 64-bit items" );
+   uint64_t dummyMem[words];
+   EtherboneAccess::read( m_if2Addr
+                            + DDR3_FIFO_LOW_WORD_OFFSET_ADDR * sizeof(uint32_t),
+                          dummyMem,
+                          sizeof(uint32_t) | EB_LITTLE_ENDIAN,
+                          words * sizeof(uint64_t)/sizeof(uint32_t),
+                          sizeof(uint64_t)
+                        );
+}
+
+#ifndef CONFIG_NO_BURST_FIFO_POLL
+/*-----------------------------------------------------------------------------
+ */
+bool Ddr3Access::onBurstPoll( uint pollCount )
+{
+   if( pollCount > 0 )
+      ::usleep( 10000 );
+   if( pollCount > 100 )
+      return true;
+   return false;
+}
+#endif
+
+/*!----------------------------------------------------------------------------
+ */
+uint32_t Ddr3Access::readFiFoStatus( void )
+{
+   uint32_t status = 0;
+   EtherboneAccess::read( m_if2Addr +
+                            DDR3_FIFO_STATUS_OFFSET_ADDR * sizeof(uint32_t),
+                          &status,
+                          sizeof(uint32_t) | EB_LITTLE_ENDIAN,
+                          1
+                        );
+   return status;
+}
+
+//#define CONFIG_NO_BURST_FIFO_POLL
 /*!----------------------------------------------------------------------------
  */
 void Ddr3Access::read( uint address, uint64_t* pData, uint len, const bool burst )
@@ -79,57 +133,58 @@ void Ddr3Access::read( uint address, uint64_t* pData, uint len, const bool burst
    }
 
    /*
-    * Reading the DDR3-RAM in burst mode. //TODO!!
+    * Reading the DDR3-RAM in burst mode.
     */
    uint partLen = 0;
    while( len > 0 )
    {
       pData   += partLen;
-      address += partLen * sizeof(uint64_t);
-      partLen =  std::min( len, static_cast<uint>(DDR3_XFER_FIFO_SIZE) );
+      address += partLen; // * sizeof(uint64_t);
+      partLen =  std::min( len, (uint)5 );//static_cast<uint>(DDR3_XFER_FIFO_SIZE) );
       len     -= partLen;
-#if 1
+
       /*
        * Starting DDR3 burst mode
        */
       static_assert( DDR3_BURST_START_ADDR_REG_OFFSET+1 == DDR3_BURST_XFER_CNT_REG_OFFSET, "" );
       uint32_t start[2] = { address, partLen };
-  #if 0
       EtherboneAccess::write( m_if1Addr
-                              +  0x7fffff4,
-                             // + DDR3_BURST_START_ADDR_REG_OFFSET * sizeof(uint32_t),
+                              + DDR3_BURST_START_ADDR_REG_OFFSET * sizeof(uint32_t),
                               start,
                               sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-                              ARRAY_SIZE( start ) / 2
-                         );
-  #else
-        ddr3Write( m_if1Addr + DDR3_BURST_START_ADDR_REG_OFFSET * sizeof(uint32_t),
-                   (uint64_t*)start, 1 );
-  #endif
-#if 0
-        uint32_t rec[2] = {0,0};
-        EtherboneAccess::read( m_if1Addr + DDR3_BURST_START_ADDR_REG_OFFSET * sizeof(uint32_t),
-                               (uint64_t*)rec,
-                               sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-                               2 );
-        std::cout << std::hex << rec[0] << std::endl;
-        std::cout << std::hex << rec[1] << std::endl;
-#endif
-#endif
-#if 1
+                              ARRAY_SIZE( start )
+                            );
+
+   #ifndef CONFIG_NO_BURST_FIFO_POLL
+      /*
+       * Possibly wait till the FiFo is ready.
+       */
+      uint32_t status;
+      uint pollCount = 0;
+      do
+      {
+         if( onBurstPoll( pollCount ) )
+         {
+            throw std::runtime_error( "DDR3-timeout: burst FiFo not full!" );
+         }
+         pollCount++;
+         status = readFiFoStatus();
+      }
+      while( ((status & DDR3_FIFO_STATUS_MASK_EMPTY) != 0) &&
+             ((status & DDR3_FIFO_STATUS_MASK_USED_WORDS) != partLen) );
+   #endif
+
       /*
        * Reading the FiFo.
        */
       static_assert( DDR3_FIFO_LOW_WORD_OFFSET_ADDR+1 == DDR3_FIFO_HIGH_WORD_OFFSET_ADDR, "" );
       EtherboneAccess::read( m_if2Addr
-                              + DDR3_FIFO_LOW_WORD_OFFSET_ADDR * sizeof(uint32_t),
+                             + DDR3_FIFO_LOW_WORD_OFFSET_ADDR * sizeof(uint32_t),
                              pData,
                              sizeof(uint32_t) | EB_LITTLE_ENDIAN,
                              partLen * sizeof(uint64_t)/sizeof(uint32_t)
                              ,sizeof(uint64_t)
                            );
-#endif
-
    }
 }
 

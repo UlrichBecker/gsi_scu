@@ -107,11 +107,21 @@ public:
     */
    void write( const uint address, const uint64_t* pData, const uint len ) override;
 
+protected:
+   virtual bool onBurstPoll( uint pollCount );
+
 private:
    /*!
     * @brief Makes the common initialization for both constructors.
     */
    void init( void );
+
+   /*!
+    * @brief Returns the value of the FiFo status register.
+    */
+   uint32_t readFiFoStatus( void );
+
+   void flushFiFo( void );
 };
 
 } // namespace Scu

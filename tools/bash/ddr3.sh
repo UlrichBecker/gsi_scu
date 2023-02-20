@@ -29,9 +29,13 @@ echo "e) Readout of the  FIFO HW Data (WB DDR IF2. Address Offset 0x34)"
 echo "Each Fifo Low Word access moves the FIFO Pointer"
 echo "-----------------------------------------------------------------------------------------"
 
-wb_ddr3_if1_baseadr=$(eb-find $URL 0x651 0x20150828) wb_ddr3_if2_baseadr=$(eb-find $URL 0x651 0x20160525)
+wb_ddr3_if1_baseadr=$(eb-find $URL 0x651 0x20150828)
+wb_ddr3_if2_baseadr=$(eb-find $URL 0x651 0x20160525)
 
-echo "SCU DDR3 IF1 baseadr is:" ${wb_ddr3_if1_baseadr} echo "SCU DDR3 IF2 baseadr is:" ${wb_ddr3_if2_baseadr}
+echo "SCU DDR3 IF1 baseadr is:" ${wb_ddr3_if1_baseadr}
+echo "SCU DDR3 IF2 baseadr is:" ${wb_ddr3_if2_baseadr}
+
+
 
 if [ "$wb_ddr3_if1_baseadr" = "" ]; then
     exit
@@ -107,7 +111,7 @@ echo    "adr LW  initial Value = "$rdval
 rdval=$(eb-read  $URL             "0x$( printf "%X\n" $((adr7_HW))  )/4")
 echo    "adr HW  initial Value = "$rdval
 
-exit 0
+#exit 0
 
 echo ""
 echo ""

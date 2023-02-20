@@ -20,6 +20,7 @@ SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
 
+DEFINES += DEBUGLEVEL
 
 ifdef USE_NAMED_MUTEX
  LIBS += pthread
