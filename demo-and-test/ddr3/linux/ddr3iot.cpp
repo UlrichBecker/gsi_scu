@@ -12,12 +12,14 @@
 #include <EtherboneConnection.hpp>
 #include <daqt_messages.hpp>
 #include <scu_env.hpp>
+#include <daq_calculations.hpp>
 #include <scu_ddr3_access.hpp>
 
 namespace EB = FeSupport::Scu::Etherbone;
 using namespace EB;
 using namespace std;
 using namespace Scu;
+using namespace Scu::daq;
 
 static const uint64_t g_testArray[10] =
 {
@@ -100,15 +102,20 @@ void bigDataTest( RamAccess* poRam, uint size, bool burst )
    ::memset( pReceiveBuffer, 0, size * sizeof(uint64_t) );
 
    cout << "Reading array of " << dec << size << " 64 bit words." << endl;
+
+   uint64_t startTime = getSysMicrosecs();
    poRam->read( 0, pReceiveBuffer, size, burst );
+   startTime = getSysMicrosecs() - startTime;
+   cout << "Duration: " << startTime << " us" << endl;
+
    if( ::memcmp( pReceiveBuffer, pSendBuffer, size * sizeof(uint64_t) ) != 0 )
       cout << ESC_FG_RED "Failed!" ESC_NORMAL << endl;
    else
       cout << ESC_FG_GREEN ESC_BOLD "Pass!" ESC_NORMAL << endl;
 
 
-   delete [] pSendBuffer;
-   delete [] pReceiveBuffer;
+   delete[] pSendBuffer;
+   delete[] pReceiveBuffer;
 }
 
 /* ----------------------------------------------------------------------------
@@ -119,14 +126,13 @@ void run( std::string& ebName )
 
    ioTest( &oDdr3, 5, 0x1122334455667788, true );
    ioTest( &oDdr3, 5, 0xAAAAAAAA55555555, true );
-
-#if 1
    ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0, true );
    ioTest( &oDdr3, 1, 0xFFFFFFFF00000000, true  );
-#endif
+
    arrayTest( &oDdr3, 2000000, true );
 
-   bigDataTest( &oDdr3,300, true );
+   bigDataTest( &oDdr3,200, true );
+   bigDataTest( &oDdr3,200, false );
 }
 
 //=============================================================================

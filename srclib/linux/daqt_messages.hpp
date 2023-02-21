@@ -1,7 +1,7 @@
 /*!
  *  @file daqt_messages.hpp
  *  @brief Macros for Error and warning messages.
- *
+ *  @note Header only!
  *  @date 17.04.2019
  *  @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

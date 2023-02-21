@@ -26,6 +26,7 @@
  ******************************************************************************
  */
 #include <assert.h>
+#include <daqt_messages.hpp>
 #include "scu_etherbone.hpp"
 
 using namespace Scu;
@@ -39,6 +40,7 @@ EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
    ,m_fromExtern( true )
    ,m_selfConnected( false )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    assert( dynamic_cast<EBC::EtherboneConnection*>(m_pEbc) != nullptr );
    if( !m_pEbc->isConnected() )
    {
@@ -55,6 +57,7 @@ EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
    ,m_fromExtern( false )
    ,m_selfConnected( true )
 {
+   DEBUG_MESSAGE_M_FUNCTION( rScuName );
    m_pEbc = new EBC::EtherboneConnection( rScuName, timeout );
    m_pEbc->connect();
    c_useCount++;
@@ -64,13 +67,21 @@ EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
  */
 EtherboneAccess::~EtherboneAccess( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    assert( c_useCount > 0 );
+
    c_useCount--;
    if( m_selfConnected && m_pEbc->isConnected() && (c_useCount == 0) )
+   {
+      DEBUG_MESSAGE( "m_pEbc->disconnect();" );
       m_pEbc->disconnect();
+   }
 
    if( !m_fromExtern )
+   {
+      DEBUG_MESSAGE( "delete m_pEbc;" );
       delete m_pEbc;
+   }
 }
 
 //================================== EOF ======================================

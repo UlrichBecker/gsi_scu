@@ -25,7 +25,7 @@
 #ifndef _DAQ_CALCULATIONS_HPP
 #define _DAQ_CALCULATIONS_HPP
 
-#include <scu_control_config.h>
+//#include <scu_control_config.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdint.h>

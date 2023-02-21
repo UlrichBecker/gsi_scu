@@ -23,6 +23,7 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#include <daqt_messages.hpp>
 #include "scu_lm32_access.hpp"
 
 using namespace Scu;
@@ -47,7 +48,15 @@ Lm32Access::Lm32Access( std::string& rScuName, uint timeout )
  */
 void Lm32Access::init( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    m_baseAddress = findDeviceBaseAddress( EBC::gsiId, EBC::lm32_ram_user );
+}
+
+/*!----------------------------------------------------------------------------
+ */
+Lm32Access::~Lm32Access( void )
+{
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*!----------------------------------------------------------------------------

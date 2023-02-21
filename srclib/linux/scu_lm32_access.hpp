@@ -67,6 +67,8 @@ public:
     */
    Lm32Access( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT );
 
+   ~Lm32Access( void );
+
    /*!
     * @brief Writes data in the LM32-memory.
     * @param addr Relative target-memory address seen from LM32 perspective

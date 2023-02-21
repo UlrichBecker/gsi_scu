@@ -28,6 +28,7 @@
 #ifndef _SCU_DDR3_ACCESS_HPP
 #define _SCU_DDR3_ACCESS_HPP
 #include <scu_memory.hpp>
+#include <scu_mutex.hpp>
 
 namespace Scu
 {
@@ -48,6 +49,12 @@ class Ddr3Access: public RamAccess
     * @brief Base address of interface 2 (burst mode).
     */
    uint m_if2Addr;
+
+   /*!
+    * @brief Named mutex will used to protect the burst-transfer fore
+    *        concurrent accesses.
+    */
+   Mutex m_oMutex;
 
 public:
    /*!
@@ -108,6 +115,14 @@ public:
    void write( const uint address, const uint64_t* pData, const uint len ) override;
 
 protected:
+   /*!
+    * @brief Optional callback function becomes invoked while waiting for the transfer of
+    *        the burst transfer.
+    * @param pollCount Can be used for e.g. initializing of a timer, if the value zero,
+    *                  then it is the first call and the timer can be initialized.
+    * @retval true
+    * @retval false
+    */
    virtual bool onBurstPoll( uint pollCount );
 
 private:

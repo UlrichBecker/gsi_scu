@@ -33,23 +33,12 @@
 using namespace Scu;
 using namespace daq;
 
-
 ///////////////////////////////////////////////////////////////////////////////
-/*!----------------------------------------------------------------------------
- */
-EbRamAccess::Lm32MemAccess::Lm32MemAccess( DaqEb::EtherboneConnection* poEb )
-   :Lm32Access( poEb )
-{
-   m_baseAddress += SHARED_OFFS;
-}
-
 /*! ---------------------------------------------------------------------------
  * @see daq_eb_ram_buffer.hpp
  */
 EbRamAccess::EbRamAccess( DaqEb::EtherboneConnection* poEb )
-   :m_oLm32( poEb )
-   ,m_poRamBuffer( nullptr )
-   ,m_poEb( poEb )
+   :m_poEb( poEb )
    ,m_connectedBySelf( false )
 #ifndef CONFIG_NO_SCU_RAM
   #ifdef CONFIG_SCU_USE_DDR3
@@ -63,13 +52,6 @@ EbRamAccess::EbRamAccess( DaqEb::EtherboneConnection* poEb )
    , m_startTime( 0 )
 #endif
 {
-   /*!
-    * @todo Determining here whether its a SCU3 with DDR3-RAM
-    *       or - in future - a SCU4 with S-RAM \n
-    *       at the moment only DDR3 is known.
-    */
-   m_poRamBuffer = new Ddr3Access( m_oLm32.getEb() );
-
    if( !m_poEb->isConnected() )
    {
       m_poEb->connect();
@@ -101,12 +83,6 @@ EbRamAccess::EbRamAccess( DaqEb::EtherboneConnection* poEb )
  */
 EbRamAccess::~EbRamAccess( void )
 {
-   if( m_poRamBuffer != nullptr )
-      delete m_poRamBuffer;
-
-
-
-
    if( m_connectedBySelf )
       m_poEb->disconnect();
 }

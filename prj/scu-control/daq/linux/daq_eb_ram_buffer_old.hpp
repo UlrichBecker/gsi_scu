@@ -31,8 +31,6 @@
 
 #include <scu_control_config.h>
 #include <EtherboneConnection.hpp>
-#include <scu_lm32_access.hpp>
-#include <scu_ddr3_access.hpp>
 #include <scu_assert.h>
 #ifndef CONFIG_NO_SCU_RAM
 #include <daq_ramBuffer.h>
@@ -61,14 +59,6 @@ namespace daq
  */
 class EbRamAccess
 {
-   class Lm32MemAccess: public Lm32Access
-   {
-   public:
-      Lm32MemAccess( DaqEb::EtherboneConnection* );
-   };
-
-   Lm32MemAccess               m_oLm32;
-   RamAccess*                  m_poRamBuffer;
    DaqEb::EtherboneConnection* m_poEb;
    bool                        m_connectedBySelf;
    uint                        m_lm32SharedMemAddr;
@@ -81,7 +71,6 @@ class EbRamAccess
  #endif
  #endif
 #endif
-
 
 #ifdef CONFIG_EB_TIME_MEASSUREMENT
 public:
@@ -146,8 +135,7 @@ public:
     */
    DaqEb::EtherboneConnection* getEbPtr( void )
    {
-     // return m_poEb;
-      return m_oLm32.getEb();
+      return m_poEb;
    }
 
    /*!
@@ -157,8 +145,7 @@ public:
     */
    const std::string& getNetAddress( void )
    {
-      //return m_poEb->getNetAddress();
-      return m_oLm32.getNetAddress();
+      return m_poEb->getNetAddress();
    }
 
    /*!
@@ -174,10 +161,9 @@ public:
     * @brief Returns "true" when the etherbone/wishbone conection has been
     *        established.
     */
-   bool isConnected( void )
+   bool isConnected( void ) const
    {
-      //return m_poEb->isConnected();
-      return m_oLm32.isConnected();
+      return m_poEb->isConnected();
    }
 
 #ifdef CONFIG_EB_TIME_MEASSUREMENT
@@ -206,7 +192,7 @@ public:
     */
    void readRam( RAM_DAQ_PAYLOAD_T* pData, const std::size_t len, const uint offset )
    {
-      SCU_ASSERT( m_poRamBuffer->isConnected() );
+      SCU_ASSERT( m_poEb->isConnected() );
       SCU_ASSERT( m_ddr3TrModeBase != 0 );
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();

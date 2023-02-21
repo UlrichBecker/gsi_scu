@@ -60,6 +60,7 @@ protected:
    {
    }
 
+public:
    /*!
     * @brief Destructur makes a disconnect, when this object has connected self
     *        and destroys the object of type EtherboneConnection
@@ -69,7 +70,6 @@ protected:
    {
    }
 
-public:
    /*!
     * @brief Reads from DDR3 of SCU3 or from SRAM of SCU4.
     * @param address Start-address
