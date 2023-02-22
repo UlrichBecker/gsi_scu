@@ -32,13 +32,27 @@
 
 using namespace Scu;
 
-constexpr const char* NAME_APPENDIX = "_DDR3";
+
+/*!----------------------------------------------------------------------------
+ */
+Ddr3Access::Ddr3Mutex::Ddr3Mutex( std::string name )
+   :Mutex( name + "_DDR3" )
+{
+   DEBUG_MESSAGE_M_FUNCTION("");
+}
+
+/*!----------------------------------------------------------------------------
+ */
+Ddr3Access::Ddr3Mutex::~Ddr3Mutex( void )
+{
+   DEBUG_MESSAGE_M_FUNCTION("");
+}
 
 /*!----------------------------------------------------------------------------
  */
 Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc )
    :RamAccess( pEbc )
-   ,m_oMutex( pEbc->getNetAddress() + NAME_APPENDIX )
+   ,m_oMutex( pEbc->getNetAddress() )
 {
    init();
 }
@@ -47,7 +61,7 @@ Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc )
  */
 Ddr3Access::Ddr3Access( std::string& rScuName, uint timeout )
    :RamAccess( rScuName, timeout )
-   ,m_oMutex( rScuName + NAME_APPENDIX )
+   ,m_oMutex( rScuName )
 {
    init();
 }

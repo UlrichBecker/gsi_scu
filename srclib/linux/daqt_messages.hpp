@@ -48,7 +48,7 @@
    {                                                                          \
       std::string __f = __FILE__;                                             \
       DEBUG_MESSAGE( __FUNCTION__ <<  "(" << args << ")"                      \
-                     << " line: " << __LINE__                                 \
+                     << "\tline: " << __LINE__                                 \
                      << " file: " << __f.substr(__f.find_last_of('/')+1));    \
    }
 
@@ -60,7 +60,7 @@
                                              nullptr, nullptr, &__s );        \
       __c.pop_back();                                                         \
       DEBUG_MESSAGE( __c << "::" << __FUNCTION__ << "(" << args << ")"        \
-                     << " line: " << __LINE__                                 \
+                     << "\tline: " << __LINE__                                 \
                      << " file: " << __f.substr(__f.find_last_of('/')+1));    \
    }
 #else

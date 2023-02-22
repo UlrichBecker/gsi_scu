@@ -41,6 +41,16 @@ namespace Scu
 class Ddr3Access: public RamAccess
 {
    /*!
+    * @brief Specializing of class Scu::Mutex for DDR3 burst-transfer.
+    */
+   class Ddr3Mutex: public Mutex
+   {
+   public:
+      Ddr3Mutex( std::string name );
+      ~Ddr3Mutex( void );
+   };
+
+   /*!
     * @brief Base address of interface 1 (transparent mode).
     */
    uint m_if1Addr;
@@ -54,7 +64,7 @@ class Ddr3Access: public RamAccess
     * @brief Named mutex will used to protect the burst-transfer fore
     *        concurrent accesses.
     */
-   Mutex m_oMutex;
+   Ddr3Mutex m_oMutex;
 
 public:
    /*!
@@ -136,6 +146,9 @@ private:
     */
    uint32_t readFiFoStatus( void );
 
+   /*!
+    * @brief Flushes the FiFo
+    */
    void flushFiFo( void );
 };
 

@@ -34,10 +34,7 @@
 #include <scu_lm32_access.hpp>
 #include <scu_ddr3_access.hpp>
 #include <scu_assert.h>
-#ifndef CONFIG_NO_SCU_RAM
 #include <daq_ramBuffer.h>
-#include <scu_ddr3.h>
-#endif
 #include <daq_calculations.hpp>
 
 
@@ -56,32 +53,32 @@ namespace daq
 
 ///////////////////////////////////////////////////////////////////////////////
 /*!
- * @brief Interface class for SCU DDR3 RAM access via the class
- *        EtherboneConnection
+ * @brief Interface class for accesses to LM32 shared memory and DDR3_RAM for
+ *        SCU3 respectively in the future SRAM for SCU4
+ *        via EtherboneConnection.
  */
 class EbRamAccess
 {
+   /*!
+    * @brief Specializing the class Lm32Access for shared-memory accesses
+    *        of LM32.
+    */
    class Lm32MemAccess: public Lm32Access
    {
    public:
       Lm32MemAccess( DaqEb::EtherboneConnection* );
    };
 
+   /*!
+    * @brief Access object for LM32 shared memory.
+    */
    Lm32MemAccess               m_oLm32;
+
+   /*!
+    * @brief Pointer to access object to DDR3 for SCU3
+    *        or SRAM for SCU4
+    */
    RamAccess*                  m_poRamBuffer;
-   DaqEb::EtherboneConnection* m_poEb;
-   bool                        m_connectedBySelf;
-   uint                        m_lm32SharedMemAddr;
-
-#ifndef CONFIG_NO_SCU_RAM
- #ifdef CONFIG_SCU_USE_DDR3
-   uint                        m_ddr3TrModeBase;
- #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   uint                        m_ddr3BurstModeBase;
- #endif
- #endif
-#endif
-
 
 #ifdef CONFIG_EB_TIME_MEASSUREMENT
 public:
@@ -146,7 +143,6 @@ public:
     */
    DaqEb::EtherboneConnection* getEbPtr( void )
    {
-     // return m_poEb;
       return m_oLm32.getEb();
    }
 
@@ -157,7 +153,6 @@ public:
     */
    const std::string& getNetAddress( void )
    {
-      //return m_poEb->getNetAddress();
       return m_oLm32.getNetAddress();
    }
 
@@ -176,7 +171,6 @@ public:
     */
    bool isConnected( void )
    {
-      //return m_poEb->isConnected();
       return m_oLm32.isConnected();
    }
 
@@ -196,7 +190,6 @@ public:
    WB_ACCESS_T getWbMeasurementMinTime( USEC_T& rTimestamp, USEC_T& rDuration, std::size_t& rSize );
 #endif /* ifdef CONFIG_EB_TIME_MEASSUREMENT */
 
-#ifndef CONFIG_NO_SCU_RAM
    /*!
     * @brief Reads data from the SCU-RAM.
     * @note At the time it's the DDR3-RAM yet!
@@ -204,17 +197,13 @@ public:
     * @param len Number of RAM-items of type RAM_DAQ_PAYLOAD_T to read.
     * @param offset Offset in RAM_DAQ_PAYLOAD_T units.
     */
-   void readRam( RAM_DAQ_PAYLOAD_T* pData, const std::size_t len, const uint offset )
+   void readRam( RAM_DAQ_PAYLOAD_T* pData, std::size_t len, uint offset )
    {
-      SCU_ASSERT( m_poRamBuffer->isConnected() );
-      SCU_ASSERT( m_ddr3TrModeBase != 0 );
+      assert( m_poRamBuffer->isConnected() );
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();
    #endif
-      m_poEb->read( m_ddr3TrModeBase + offset * sizeof(RAM_DAQ_PAYLOAD_T),
-                    pData,
-                    sizeof( pData->ad32[0] ) | EB_LITTLE_ENDIAN,
-                    len * ARRAY_SIZE( pData->ad32 ) );
+      m_poRamBuffer->read( offset, reinterpret_cast<uint64_t*>(pData), len );
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * sizeof( pData->ad32 ), TIME_MEASUREMENT_T::DDR3_READ );
    #endif
@@ -228,8 +217,6 @@ public:
     * @param rIndexes Ring buffer administrator object.
     */
    void readRam( RAM_DAQ_PAYLOAD_T* pData, std::size_t len, RAM_RING_INDEXES_T& rIndexes );
-
-#endif /* ifndef CONFIG_NO_SCU_RAM */
 
    /*!
     * @brief Reads data from the LM32 shared memory area.
@@ -253,9 +240,7 @@ public:
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();
    #endif
-      m_poEb->read( m_lm32SharedMemAddr + offset, pData,
-                    EB_BIG_ENDIAN | format,
-                    len );
+      m_oLm32.read( offset, pData, len, format | EB_BIG_ENDIAN );
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * (format & 0xFF), TIME_MEASUREMENT_T::LM32_READ );
    #endif
@@ -284,9 +269,7 @@ public:
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();
    #endif
-      m_poEb->write( m_lm32SharedMemAddr + offset, pData,
-                     EB_BIG_ENDIAN | format,
-                     len );
+      m_oLm32.write( offset, pData, len, format | EB_BIG_ENDIAN );
    #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * (format & 0xFF), TIME_MEASUREMENT_T::LM32_WRITE );
    #endif
