@@ -25,7 +25,7 @@
 #ifndef _DAQT_COMMAND_LINE_HPP
 #define _DAQT_COMMAND_LINE_HPP
 #ifndef __DOCFSM__
- #include "daqt_messages.hpp"
+ #include "message_macros.hpp"
  #include "parse_opts.hpp"
  #include "daqt.hpp"
  #include "gnuplotstream.hpp"

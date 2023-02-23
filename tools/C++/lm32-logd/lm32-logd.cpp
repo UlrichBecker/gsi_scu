@@ -31,7 +31,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <string.h>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include <find_process.h>
 #include "logd_cmdline.hpp"
 #include "logd_core.hpp"

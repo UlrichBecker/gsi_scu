@@ -36,7 +36,7 @@ fesa-fg-load --dev ~kain/fgtest/aeg/gs11mu2.rmp xgs11mu3 -v
  #include <stdlib.h>
  #include <iostream>
  #include "daqt_read_stdin.hpp"
- #include "daqt_messages.hpp"
+ #include "message_macros.hpp"
  #include "daqt_read_stdin.hpp"
  #include "fb_command_line.hpp"
  #include "fb_plot.hpp"

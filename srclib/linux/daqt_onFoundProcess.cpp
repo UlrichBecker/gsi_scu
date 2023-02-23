@@ -26,7 +26,7 @@
 #include <netdb.h>
 #include <string.h>
 
-#include "daqt_messages.hpp"
+#include <message_macros.hpp>
 #include "daqt_onFoundProcess.hpp"
 
 namespace Scu

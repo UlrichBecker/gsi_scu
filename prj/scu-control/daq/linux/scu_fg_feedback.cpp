@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <daq_exception.hpp>
 #include <scu_fg_feedback.hpp>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include <string.h>
 
 using namespace Scu;
@@ -39,12 +39,14 @@ FgFeedbackChannel::Common::Throttle::Throttle( Common* pParent )
    ,m_lastForwardedValue( 0 )
    ,m_timeThreshold( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::Common::Throttle::~Throttle( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
@@ -77,12 +79,14 @@ FgFeedbackChannel::Common::Common( FgFeedbackChannel* pParent )
    ,m_oActThrottle( this )
    ,m_lastSupprTimestamp( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::Common::~Common( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
@@ -142,6 +146,7 @@ FgFeedbackChannel::AddacFb::Receive::Receive( AddacFb* pParent, const uint n )
    ,m_blockLen( 0 )
    ,m_sequence( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    assert( n > 0 );
 }
 
@@ -149,6 +154,7 @@ FgFeedbackChannel::AddacFb::Receive::Receive( AddacFb* pParent, const uint n )
  */
 FgFeedbackChannel::AddacFb::Receive::~Receive( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
@@ -236,12 +242,14 @@ FgFeedbackChannel::AddacFb::AddacFb( FgFeedbackChannel* pParent,
    ,m_expectedTimestamp( 0 )
 #endif
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::AddacFb::~AddacFb( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 #define _CONFIG_COMPARE_SEQUENCE_NR
@@ -377,12 +385,14 @@ FgFeedbackChannel::MilFb::Receive::Receive( MilFb* pParent )
    :MiLdaq::DaqCompare( pParent->m_pParent->getFgNumber() )
    ,m_pParent( pParent )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::MilFb::Receive::~Receive( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
@@ -427,12 +437,14 @@ FgFeedbackChannel::MilFb::MilFb( FgFeedbackChannel* pParent )
    :Common( pParent )
    ,m_oReceive( this )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::MilFb::~MilFb( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 #endif // ifdef CONFIG_MIL_FG
@@ -446,12 +458,15 @@ FgFeedbackChannel::FgFeedbackChannel( const uint fgNumber )
       ,m_pCommon( nullptr )
       ,m_lastTimestamp( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION( fgNumber );
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackChannel::~FgFeedbackChannel( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( m_fgNumber );
+
    if( m_pParent != nullptr )
       m_pParent->unregisterChannel( this );
 
@@ -553,6 +568,8 @@ FgFeedbackDevice::FgFeedbackDevice( const uint socket )
    :m_poDevice( nullptr )
    ,m_pParent( nullptr )
 {
+   DEBUG_MESSAGE_M_FUNCTION( socket );
+
    if( ::isAddacFg( socket ) )
    {
       DEBUG_MESSAGE( "Creating ADDAC-device on slot: " << ::getFgSlotNumber( socket ) );
@@ -579,6 +596,8 @@ FgFeedbackDevice::FgFeedbackDevice( const uint socket )
  */
 FgFeedbackDevice::~FgFeedbackDevice( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
+
    if( m_pParent != nullptr )
        m_pParent->unregisterDevice( this );
 
@@ -832,6 +851,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqEb::EtherboneConnection* 
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
 {
+   DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
 }
 
@@ -847,6 +867,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILISEC )
 {
+   DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
 }
 
@@ -854,8 +875,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
  */
 FgFeedbackAdministration::~FgFeedbackAdministration( void )
 {
-   DEBUG_MESSAGE( "Destructor of " <<
-                 __func__ << "( " << getScuDomainName() << " )" );
+   DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
 
    for( const auto& pDev: m_lDevList )
       pDev->m_pParent = nullptr;

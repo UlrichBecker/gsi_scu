@@ -26,7 +26,7 @@
  ******************************************************************************
  */
 #include <assert.h>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include "scu_etherbone.hpp"
 
 using namespace Scu;

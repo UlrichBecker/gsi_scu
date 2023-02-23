@@ -1,6 +1,8 @@
 /*!
  *  @file daq_eb_ram_buffer.hpp
- *  @brief Linux whishbone/etherbone interface for accessing the SCU-DDR3 RAM
+ *  @brief Linux whishbone/etherbone interface for accessing the
+ *         LM32 shared memory and the
+ *         DDR3-RAM for SCU3 or -- in future -- SRAM for SCU4.
  *
  *  @see scu_ramBuffer.h
  *
@@ -63,16 +65,16 @@ class EbRamAccess
     * @brief Specializing the class Lm32Access for shared-memory accesses
     *        of LM32.
     */
-   class Lm32MemAccess: public Lm32Access
+   class Lm32ShMemAccess: public Lm32Access
    {
    public:
-      Lm32MemAccess( DaqEb::EtherboneConnection* );
+      Lm32ShMemAccess( DaqEb::EtherboneConnection* );
    };
 
    /*!
     * @brief Access object for LM32 shared memory.
     */
-   Lm32MemAccess               m_oLm32;
+   Lm32ShMemAccess             m_oLm32;
 
    /*!
     * @brief Pointer to access object to DDR3 for SCU3
@@ -80,7 +82,7 @@ class EbRamAccess
     */
    RamAccess*                  m_poRamBuffer;
 
-#ifdef CONFIG_EB_TIME_MEASSUREMENT
+#ifdef CONFIG_EB_TIME_MEASSUREMENT /*========================================*/
 public:
     struct TIME_MEASUREMENT_T
     {
@@ -98,10 +100,10 @@ public:
        WB_ACCESS_T m_eAccess;
 
        TIME_MEASUREMENT_T( const USEC_T duration )
-        :m_duration( duration )
-        ,m_timestamp( 0 )
-        ,m_dataSize( 0 )
-        ,m_eAccess( UNKNOWN ) {}
+          :m_duration( duration )
+          ,m_timestamp( 0 )
+          ,m_dataSize( 0 )
+          ,m_eAccess( UNKNOWN ) {}
     };
 
     struct MAX_DURATION: public TIME_MEASUREMENT_T
@@ -120,7 +122,7 @@ private:
     MAX_DURATION               m_oMaxDuration;
     MIN_DURATION               m_oMinDuration;
     USEC_T                     m_startTime;
-#endif /* #ifdef CONFIG_EB_TIME_MEASSUREMENT */
+#endif /* #ifdef CONFIG_EB_TIME_MEASSUREMENT ================================*/
 
 public:
 
@@ -174,7 +176,7 @@ public:
       return m_oLm32.isConnected();
    }
 
-#ifdef CONFIG_EB_TIME_MEASSUREMENT
+#ifdef CONFIG_EB_TIME_MEASSUREMENT /*========================================*/
 private:
 
    void startTimeMeasurement( void )
@@ -278,5 +280,5 @@ public:
 
 } // namespace daq
 } // namespace Scu
-#endif // ifndef _DAQ_EB_RAM_BUFFER_HPP
+#endif /* _DAQ_EB_RAM_BUFFER_HPP */
 //================================== EOF ======================================

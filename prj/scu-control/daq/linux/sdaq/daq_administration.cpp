@@ -32,7 +32,7 @@
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
 #include <sys/time.h>
 #endif
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 
 using namespace Scu;
 using namespace daq;

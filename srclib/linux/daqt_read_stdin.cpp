@@ -24,7 +24,7 @@
  */
 #include <stdlib.h>
 #include <daqt_read_stdin.hpp>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 
 /*! ---------------------------------------------------------------------------
  */

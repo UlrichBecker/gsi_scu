@@ -34,9 +34,6 @@
 #include <daq_descriptor.h>
 #include <daq_eb_ram_buffer.hpp>
 #include <daq_calculations.hpp>
-#ifdef CONFIG_SCU_USE_DDR3
-#include <scu_ddr3.h>
-#endif
 
 #ifndef DAQ_DEFAULT_WB_DEVICE
    #define DAQ_DEFAULT_WB_DEVICE "dev/wbm0"
@@ -58,17 +55,7 @@ namespace daq
 {
 
 typedef struct
-{
-#ifdef CONFIG_SCU_USE_DDR3
-   /*!
-    * @brief SCU DDR3 administration object.
-    */
-   DDR3_T   ram;
-#else
-   #error Unknown RAM-object!
-   //TODO maybe in the future will use a other memory type
-#endif
-   /*!
+{  /*!
     * @brief Administration of fifo- indexes.
     * @note The memory space of this object has to be within the shared
     *       memory. \n

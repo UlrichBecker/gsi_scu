@@ -23,7 +23,7 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include "scu_lm32_access.hpp"
 
 using namespace Scu;

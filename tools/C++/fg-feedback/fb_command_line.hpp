@@ -26,7 +26,7 @@
 #define _FB_COMMAND_LINE_HPP
 
 #ifndef __DOCFSM__
- #include "daqt_messages.hpp"
+ #include "message_macros.hpp"
  #include "parse_opts.hpp"
  #include "fg-feedback.hpp"
  #include "gnuplotstream.hpp"

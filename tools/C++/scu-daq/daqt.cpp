@@ -23,7 +23,7 @@
  ******************************************************************************
  */
 #include "daqt.hpp"
-#include "daqt_messages.hpp"
+#include "message_macros.hpp"
 #include "daqt_command_line.hpp"
 #include "daqt_attributes.hpp"
 #include "daqt_read_stdin.hpp"

@@ -30,7 +30,7 @@
 #include <daq_access.hpp>
 #include <scu_bus_defines.h>
 #include <scu_function_generator.h>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include <daq_ring_admin.h>
 #include <daq_fg_allocator.h>
 #include <watchdog_poll.hpp>

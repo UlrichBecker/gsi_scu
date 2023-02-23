@@ -32,6 +32,10 @@ SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
 SOURCE += $(GNU_PLOT_STREAM_DIR)/gnuplotstream.cpp
 SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_onFoundProcess.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
+
 
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c

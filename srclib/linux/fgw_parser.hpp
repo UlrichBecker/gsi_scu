@@ -35,7 +35,7 @@
  #include <limits.h>
  #include <daq_calculations.hpp>
  #include <daq_exception.hpp>
- #include <daqt_messages.hpp>
+ #include <message_macros.hpp>
  #include <scu_function_generator.h>
 #endif
 

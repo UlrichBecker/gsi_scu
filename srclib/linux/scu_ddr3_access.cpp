@@ -27,7 +27,7 @@
  */
 #include <helper_macros.h>
 #include <scu_ddr3.h>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include "scu_ddr3_access.hpp"
 
 using namespace Scu;

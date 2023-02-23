@@ -29,7 +29,7 @@
  #include <syslog.h>
  #include <scu_mmu_tag.h>
  #include <daq_calculations.hpp>
- #include <daqt_messages.hpp>
+ #include <message_macros.hpp>
  #include "logd_core.hpp"
 #endif
 

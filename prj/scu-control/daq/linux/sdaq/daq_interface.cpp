@@ -28,7 +28,7 @@
 #include <daq_interface.hpp>
 #include <scu_shared_mem.h>
 #ifdef CONFIG_DAQ_TEST
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #endif
 
 #ifndef DEBUG_MESSAGE

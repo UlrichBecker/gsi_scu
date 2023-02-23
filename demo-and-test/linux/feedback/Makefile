@@ -10,7 +10,7 @@
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 DEBUG = 1
-#  USE_SHARED_LIB := 1
+# USE_SHARED_LIB := 1
 USE_STATIC_LIBS := 1
 
 EB_SRC= $(DAQ_DIR)/feSupport/scu/etherbone

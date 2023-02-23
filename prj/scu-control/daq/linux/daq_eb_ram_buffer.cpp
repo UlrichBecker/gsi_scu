@@ -1,7 +1,8 @@
 /*!
  *  @file daq_eb_ram_buffer.cpp
- *  @brief Linux whishbone/etherbone interface for accessing the SCU-DDR3 RAM
- *
+ *  @brief Linux whishbone/etherbone interface for accessing the
+ *         LM32 shared memory and the
+ *         DDR3-RAM for SCU3 or -- in future -- SRAM for SCU4.
  *  @see scu_ramBuffer.h
  *
  *  @see scu_ddr3.h
@@ -35,7 +36,7 @@
 #include <shared_mmap.h>
 
 #include <dbg.h>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 
 
 using namespace Scu;
@@ -44,7 +45,7 @@ using namespace daq;
 ///////////////////////////////////////////////////////////////////////////////
 /*!----------------------------------------------------------------------------
  */
-EbRamAccess::Lm32MemAccess::Lm32MemAccess( DaqEb::EtherboneConnection* poEb )
+EbRamAccess::Lm32ShMemAccess::Lm32ShMemAccess( DaqEb::EtherboneConnection* poEb )
    :Lm32Access( poEb )
 {
    /*
@@ -108,7 +109,7 @@ void EbRamAccess::readRam( RAM_DAQ_PAYLOAD_T* pData,
    rIndexes = indexes;
 }
 
-#ifdef CONFIG_EB_TIME_MEASSUREMENT
+#ifdef CONFIG_EB_TIME_MEASSUREMENT //==========================================
    #ifdef COMFIG_EB_TIME_MEASSUREMENT_TO_STDERR
      #warning "Timemeasurment output to stderr is active"
    #endif
@@ -182,6 +183,6 @@ EbRamAccess::getWbMeasurementMinTime( USEC_T& rTimestamp, USEC_T& rDuration, std
    return ret;
 }
 
-#endif // ifdef CONFIG_EB_TIME_MEASSUREMENT
+#endif // ifdef CONFIG_EB_TIME_MEASSUREMENT ===================================
 
-//================================== EOF =======================================
+//================================== EOF ======================================
