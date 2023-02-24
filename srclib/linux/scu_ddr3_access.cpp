@@ -50,8 +50,9 @@ Ddr3Access::Ddr3Mutex::~Ddr3Mutex( void )
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc )
+Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc, int burstLimit )
    :RamAccess( pEbc )
+   ,m_burstLimit( burstLimit )
    ,m_oMutex( pEbc->getNetAddress() )
 {
    init();
@@ -59,8 +60,9 @@ Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc )
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Access( std::string& rScuName, uint timeout )
+Ddr3Access::Ddr3Access( std::string& rScuName, int burstLimit, uint timeout )
    :RamAccess( rScuName, timeout )
+   ,m_burstLimit( burstLimit )
    ,m_oMutex( rScuName )
 {
    init();
@@ -138,13 +140,13 @@ uint32_t Ddr3Access::readFiFoStatus( void )
 #define CONFIG_NO_BURST_FIFO_POLL
 /*!----------------------------------------------------------------------------
  */
-void Ddr3Access::read( uint address, uint64_t* pData, uint len, const bool burst )
+void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
 {
-   if( !burst )
+   if( (m_burstLimit == NEVER_BURST) || (static_cast<int>(len) < m_burstLimit) )
    { /*
       * Reading the DDR3-RAM in transparent mode.
       */
-      EtherboneAccess::read( m_if1Addr + address * sizeof(uint64_t),
+      EtherboneAccess::read( m_if1Addr + index64 * sizeof(uint64_t),
                              pData,
                              sizeof(uint32_t) | EB_LITTLE_ENDIAN,
                              len * sizeof(uint64_t)/sizeof(uint32_t)
@@ -155,22 +157,25 @@ void Ddr3Access::read( uint address, uint64_t* pData, uint len, const bool burst
    /*
     * Reading the DDR3-RAM in burst mode.
     */
+   assert( m_burstLimit != NEVER_BURST );
    uint partLen = 0;
    while( len > 0 )
    {
       pData   += partLen;
-      address += partLen;
+      index64 += partLen;
       partLen =  std::min( len, static_cast<uint>(DDR3_XFER_FIFO_SIZE) );
       len     -= partLen;
 
       /*
        * Starting DDR3 burst mode
        */
-      uint32_t start[2] = { address, partLen };
+      uint32_t start[2] = { index64, partLen };
       static_assert( sizeof(start) == sizeof(uint64_t), "" );
       static_assert( DDR3_BURST_START_ADDR_REG_OFFSET+1 == DDR3_BURST_XFER_CNT_REG_OFFSET, "" );
-      {
+
+      { /* Begin of mutex-scope. */
          AutoUnlock autoUnlock( m_oMutex );
+
          EtherboneAccess::write( m_if1Addr
                                  + DDR3_BURST_START_ADDR_REG_OFFSET * sizeof(uint32_t),
                                  start,
@@ -205,18 +210,18 @@ void Ddr3Access::read( uint address, uint64_t* pData, uint len, const bool burst
                                 + DDR3_FIFO_LOW_WORD_OFFSET_ADDR * sizeof(uint32_t),
                                 pData,
                                 sizeof(uint32_t) | EB_LITTLE_ENDIAN,
-                                partLen * sizeof(uint64_t)/sizeof(uint32_t)
-                                ,sizeof(uint64_t)
+                                partLen * sizeof(uint64_t)/sizeof(uint32_t),
+                                sizeof(uint64_t)
                               );
-      }
+      } /* End of mutex scope */
    }
 }
 
 /*!----------------------------------------------------------------------------
  */
-void Ddr3Access::write( const uint address, const uint64_t* pData, const uint len )
+void Ddr3Access::write( const uint index64, const uint64_t* pData, const uint len )
 {
-   ddr3Write( m_if1Addr + address * sizeof(uint64_t), pData, len );
+   ddr3Write( m_if1Addr + index64 * sizeof(uint64_t), pData, len );
 }
 
 //================================== EOF ======================================

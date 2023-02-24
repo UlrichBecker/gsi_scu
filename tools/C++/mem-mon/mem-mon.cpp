@@ -24,7 +24,7 @@
  */
 #include <exception>
 #include <cstdlib>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include <scu_ddr3_access.hpp>
 #include "mem_cmdline.hpp"
 #include "mem_browser.hpp"

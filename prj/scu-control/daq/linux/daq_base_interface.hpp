@@ -206,6 +206,22 @@ public:
    virtual ~DaqBaseInterface( void );
 
    /*!
+    * @brief Returns the currently used burst-limit for DDR3 reading.
+    */
+   int getBurstLimit( void )
+   {
+      return m_poEbAccess->getBurstLimit();
+   }
+
+   /*!
+    * @brief Sets a new burst-limit for DDR3 reading.
+    */
+   void setBurstLimit( int burstLimit = Ddr3Access::NEVER_BURST )
+   {
+      m_poEbAccess->setBurstLimit( burstLimit );
+   }
+
+   /*!
     * @brief returns a pointer of the object of type DaqEb::EtherboneConnection
     */
    DaqEb::EtherboneConnection* getEbPtr( void ) const

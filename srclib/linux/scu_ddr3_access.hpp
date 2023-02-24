@@ -61,27 +61,44 @@ class Ddr3Access: public RamAccess
    uint m_if2Addr;
 
    /*!
-    * @brief Named mutex will used to protect the burst-transfer fore
+    * @brief Number of 64-bit words in transparent-mode until
+    *        reading in burst-mode.
+    */
+   int  m_burstLimit;
+
+   /*!
+    * @brief Named mutex will used to protect the burst-transfer for
     *        concurrent accesses.
     */
    Ddr3Mutex m_oMutex;
 
 public:
+   constexpr static int ALWAYS_BURST = 0;
+   constexpr static int NEVER_BURST  = -1;
+
    /*!
     * @brief Constructor which uses a shared object of EtherboneConnection.
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
+    * @param burstLimit Number of 64-bit words in transparent-mode until
+    *                   reading in burst-mode.\n
+    *                   Value of -1 (default) means never reading in burst-mode.\n
+    *                   Value of 0 means always reading in in burst-mode.
     */
-   Ddr3Access( EBC::EtherboneConnection* pEbc );
+   Ddr3Access( EBC::EtherboneConnection* pEbc, int burstLimit = NEVER_BURST );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and
     *        establishes a connection.
     * @param rScuName In the case this application runs on ASL, the name of the target SCU.
     *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
-    * @param timeout Response timeout.
+    * @param burstLimit Number of 64-bit words in transparent-mode until
+    *                   reading in burst-mode.\n
+    *                   Value of -1 (default) means never reading in burst-mode.\n
+    *                   Value of 0 means always reading in in burst-mode.
+    * @param timeout Etherbone response timeout.
     */
-   Ddr3Access( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT );
+   Ddr3Access( std::string& rScuName, int burstLimit = NEVER_BURST, uint timeout = EB_DEFAULT_TIMEOUT );
 
    /*!
     * @brief Destructur makes a disconnect, when this object has connected self
@@ -109,20 +126,36 @@ public:
    }
 
    /*!
+    * @brief Returns the currently used burst-limit for DDR3 reading.
+    */
+   int getBurstLimit( void )
+   {
+      return m_burstLimit;
+   }
+
+   /*!
+    * @brief Sets a new burst-limit for DDR3 reading.
+    */
+   void setBurstLimit( int burstLimit = NEVER_BURST )
+   {
+      m_burstLimit = burstLimit;
+   }
+
+   /*!
     * @brief Reads data from the DDR3 memory.
-    * @param address Start-index (source) of the DDR3 memory.
+    * @param index64 Start-index (offset) in 64-bit words.
     * @param pData Target address in 64 bit units
     * @param len Length of the data array to read in 64-bit units.
     */
-   void read( uint address, uint64_t* pData, uint len, const bool burst = false ) override;
+   void read( uint index64, uint64_t* pData, uint len ) override;
 
    /*!
     * @brief Writes data in the DDR3 - memory.
-    * @param address Start-index (target) of the DDR3 memory.
+    * @param index64 Start-index (offset) in 64-bit words..
     * @param pData Source address in 64 bit units.
     * @param len Length of the data array to write in 64-bit units.
     */
-   void write( const uint address, const uint64_t* pData, const uint len ) override;
+   void write( const uint index64, const uint64_t* pData, const uint len ) override;
 
 protected:
    /*!

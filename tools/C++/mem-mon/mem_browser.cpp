@@ -23,7 +23,7 @@
  ******************************************************************************
  */
 #include <iomanip>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include "mem_browser.hpp"
 
 using namespace Scu::mmu;

@@ -90,6 +90,31 @@ EbRamAccess::~EbRamAccess( void )
 /*! ---------------------------------------------------------------------------
  * @see daq_eb_ram_buffer.hpp
  */
+int EbRamAccess::getBurstLimit( void )
+{
+   if( dynamic_cast<Ddr3Access*>(m_poRamBuffer) != nullptr )
+      return static_cast<Ddr3Access*>(m_poRamBuffer)->getBurstLimit();
+
+   DEBUG_MESSAGE( "Function: " << __FUNCTION__ << " not available no using DDR3 !" );
+   return Ddr3Access::NEVER_BURST;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see daq_eb_ram_buffer.hpp
+ */
+void EbRamAccess::setBurstLimit( int burstLimit )
+{
+   if( dynamic_cast<Ddr3Access*>(m_poRamBuffer) != nullptr )
+   {
+      static_cast<Ddr3Access*>(m_poRamBuffer)->setBurstLimit( burstLimit );
+      return;
+   }
+   DEBUG_MESSAGE( "Function: " << __FUNCTION__ << " not available no using DDR3 !" );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see daq_eb_ram_buffer.hpp
+ */
 void EbRamAccess::readRam( RAM_DAQ_PAYLOAD_T* pData,
                            std::size_t len,
                            RAM_RING_INDEXES_T& rIndexes

@@ -72,20 +72,19 @@ public:
 
    /*!
     * @brief Reads from DDR3 of SCU3 or from SRAM of SCU4.
-    * @param address Start-address
+    * @param index64 Start-index (offset) in 64-bit words.
     * @param pData Pointer to target memory
     * @param len Length of data to read in 64-bit units.
-    * @param burst (for DDR3 only) If true DDR3 will read in burst mode.
     */
-   virtual void read( uint address, uint64_t* pData, uint len, const bool burst = false ) = 0;
+   virtual void read( uint index64, uint64_t* pData, uint len ) = 0;
 
    /*!
     * @brief Writes in DDR3 of SCU3 or in SRAM of SCU4.
-    * @param address Start-address
+    * @param index64 Start-index (offset) in 64-bit words.
     * @param pData Pointer to source memory.
     * @param len Length of data to write in 64-bit units.
     */
-   virtual void write( const uint address, const uint64_t* pData, const uint len ) = 0;
+   virtual void write( const uint index64, const uint64_t* pData, const uint len ) = 0;
 
 };
 

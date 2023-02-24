@@ -176,6 +176,16 @@ public:
       return m_oLm32.isConnected();
    }
 
+   /*!
+    * @brief Returns the currently used burst-limit for DDR3 reading.
+    */
+   int getBurstLimit( void );
+
+   /*!
+    * @brief Sets a new burst-limit for DDR3 reading.
+    */
+   void setBurstLimit( int burstLimit = Ddr3Access::NEVER_BURST );
+
 #ifdef CONFIG_EB_TIME_MEASSUREMENT /*========================================*/
 private:
 

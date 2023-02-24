@@ -23,7 +23,7 @@
  ******************************************************************************
  */
 #include <scu_env.hpp>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include "mem_cmdline.hpp"
 
 //namespace Scu
