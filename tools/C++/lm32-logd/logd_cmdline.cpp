@@ -24,6 +24,7 @@
  */
 #include <scu_env.hpp>
 #include <message_macros.hpp>
+#include <scu_ddr3_access.hpp>
 #include "logd_cmdline.hpp"
 
 using namespace std;
@@ -399,7 +400,29 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     "and exit.\n"
                     "NOTE: This option will work in any cases doesn't matter as the LM32- application\n"
                     "supports the logging or not."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         uint burstLimit;
+         if( readInteger( burstLimit, poParser->getOptArg() ) )
+            return -1;
+         static_cast<CommandLine*>(poParser)->m_burstLimit = burstLimit;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'u',
+      .m_longOpt  = "burst-limit",
+      .m_helpText = "PARAM specifies the number of 64-bit words at which DDR3-RAM"
+                    " is read in burst mode.\n"
+                    "If the value is zero, then the DDR3-RAM is always read out in"
+                    " burst mode.\n"
+                    "Burst mode is never used by default.\n"
+                    "If the DDR3-RAM is not involved in the data transfer,"
+                    " then this option has no effect."
    }
+
 }; // CommandLine::c_optList
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,6 +462,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_readBuildId( false )
    ,m_interval( DEFAULT_INTERVAL )
    ,m_maxItemsPerInterval( DEFAULT_MAX_ITEMS )
+   ,m_burstLimit( Ddr3Access::NEVER_BURST )
    ,m_filterFlags( 0 )
 {
    DEBUG_MESSAGE_M_FUNCTION("");

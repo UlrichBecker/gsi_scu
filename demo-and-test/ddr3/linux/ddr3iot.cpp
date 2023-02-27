@@ -10,7 +10,7 @@
 #include <string.h>
 #include <eb_console_helper.h>
 #include <EtherboneConnection.hpp>
-#include <daqt_messages.hpp>
+#include <message_macros.hpp>
 #include <scu_env.hpp>
 #include <daq_calculations.hpp>
 #include <scu_ddr3_access.hpp>
@@ -39,15 +39,19 @@ static const uint64_t g_testArray[10] =
  */
 bool ioTest( RamAccess* poRam, uint i, uint64_t pattern, bool burst = false )
 {
+   if( dynamic_cast<Ddr3Access*>(poRam) != nullptr )
+      static_cast<Ddr3Access*>(poRam)->setBurstLimit( burst? Ddr3Access::ALWAYS_BURST : Ddr3Access::NEVER_BURST );
+   else
+      burst = false;
 
    cout << "writing pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
         << uppercase << pattern << dec << " at index: " << i << endl;
    poRam->write( i, &pattern, 1 );
 
    uint64_t recPattern = 0;
-   poRam->read( i, &recPattern, 1, burst );
+   poRam->read( i, &recPattern, 1 );
    cout << "reading pattern: 0x" << setfill( '0' ) << setw( 16 ) << hex
-        << uppercase << recPattern << endl;
+        << uppercase << recPattern << (burst? " burst":" transparent") << endl;
 
    if( pattern != recPattern )
    {
@@ -61,8 +65,13 @@ bool ioTest( RamAccess* poRam, uint i, uint64_t pattern, bool burst = false )
 
 /* ----------------------------------------------------------------------------
  */
-bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
+bool arrayTest( RamAccess* poRam, const uint offset, bool burst = false )
 {
+   if( dynamic_cast<Ddr3Access*>(poRam) != nullptr )
+      static_cast<Ddr3Access*>(poRam)->setBurstLimit( burst? Ddr3Access::ALWAYS_BURST : Ddr3Access::NEVER_BURST );
+   else
+      burst = false;
+
    cout << "Writing array of " << dec << ARRAY_SIZE(g_testArray)
         <<  " items"  << endl;
 
@@ -70,9 +79,10 @@ bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
 
    uint64_t targetArray[ARRAY_SIZE(g_testArray)];
    ::memset( targetArray, 0, sizeof(targetArray) );
-   cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items." << endl;
+   cout << "Reading array of " << dec << ARRAY_SIZE(targetArray) << " items."
+   << (burst? " burst":" transparent") << endl;
 
-   poRam->read( offset, targetArray, ARRAY_SIZE(targetArray), burst );
+   poRam->read( offset, targetArray, ARRAY_SIZE(targetArray) );
 
    if( ::memcmp( targetArray, g_testArray, sizeof(g_testArray) ) != 0 )
    {
@@ -88,6 +98,11 @@ bool arrayTest( RamAccess* poRam, const uint offset, const bool burst = false )
  */
 void bigDataTest( RamAccess* poRam, uint size, bool burst )
 {
+   if( dynamic_cast<Ddr3Access*>(poRam) != nullptr )
+      static_cast<Ddr3Access*>(poRam)->setBurstLimit( burst? Ddr3Access::ALWAYS_BURST : Ddr3Access::NEVER_BURST );
+   else
+      burst = false;
+
    uint64_t* pSendBuffer = new uint64_t[size];
 
    for( uint i = 0; i < size; i++ )
@@ -101,10 +116,11 @@ void bigDataTest( RamAccess* poRam, uint size, bool burst )
    uint64_t* pReceiveBuffer = new uint64_t[size];
    ::memset( pReceiveBuffer, 0, size * sizeof(uint64_t) );
 
-   cout << "Reading array of " << dec << size << " 64 bit words." << endl;
+   cout << "Reading array of " << dec << size << " 64 bit words."
+        << (burst? " burst":" transparent") << endl;
 
    uint64_t startTime = getSysMicrosecs();
-   poRam->read( 0, pReceiveBuffer, size, burst );
+   poRam->read( 0, pReceiveBuffer, size );
    startTime = getSysMicrosecs() - startTime;
    cout << "Duration: " << startTime << " us" << endl;
 
@@ -131,8 +147,9 @@ void run( std::string& ebName )
 
    arrayTest( &oDdr3, 2000000, true );
 
-   bigDataTest( &oDdr3,200, true );
-   bigDataTest( &oDdr3,200, false );
+   constexpr uint SIZE = 300;
+   bigDataTest( &oDdr3, SIZE, false );
+   bigDataTest( &oDdr3, SIZE, true );
 }
 
 //=============================================================================

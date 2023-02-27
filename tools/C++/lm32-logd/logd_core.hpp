@@ -167,6 +167,16 @@ public:
       m_isError = true;
    }
 
+   /*!
+    * @brief Sets the burst-limit in 64-bit words when a DDR3-RAM is used,
+    *        otherwise this function is without effect.
+    * @param burstLimit Number of 64-bit data words at when the
+    *                   burst reading becomes active.\n
+    *                   The value of zero miens that the burst reading
+    *                   is always active.
+    */
+   void setBurstLimit( int burstLimit );
+
 private:
    /*!
     * @brief Reads via the WB/EB-bus fron the SCU-TAM.

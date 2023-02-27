@@ -143,10 +143,32 @@ int main( const int argc, const char** ppArgv )
        */
       FgFeedbackAdministration myScu( &ebConnection, false );
 
+
+      /*
+       * The following command is optional and has only an effect if the DDR3-RAM
+       * involved in the data-transfer.
+       * The value of zero respectively Ddr3Access::ALWAYS_BURST effects that all
+       * data transfers via DDR3-RAM are in burst reading mode.
+       * The value of -1 respectively Ddr3Access::NEVER_BURST effects that all
+       * data transfers via DDR3-RAM are in the transparent reading mode that is
+       * the default mode as well.
+       * A value for example of 42 effects that only data-blocks which have
+       * more or equal than 42 64-bit-words becomes read in the burst-mode all blocks
+       * with have a number of 64-bit words lower than 42 becomes read in transparent-mode.
+       *
+       * Please refer also the following wiki:
+       * https://www-acc.gsi.de/wiki/Hardware/Intern/MacroFür1GbitDDR3MT41J64M16LADesSCUCarrierboards
+       *
+       * Uncomment it you will enable the DDR3-burst reading.
+       */
+      //myScu.getEbAccess()->setBurstLimit( Ddr3Access::ALWAYS_BURST );
+
+
       /*!
        * Uncomment this if you will not the history of the data-buffer.
        */
      // myScu.clearBuffer();
+
 
       /*
        * After the successful generating of the object "myScu" some information

@@ -9,10 +9,10 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.5
+DEFINES += VERSION=1.6
 FOR_SCU_AND_ACC := 1
 
-DEBUG = 1
+#DEBUG = 1
 #DEFINES += DEBUGLEVEL
 USE_NAMED_MUTEX := 1
 USE_STATIC_LIBS := 1

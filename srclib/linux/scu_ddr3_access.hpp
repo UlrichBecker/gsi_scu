@@ -29,6 +29,7 @@
 #define _SCU_DDR3_ACCESS_HPP
 #include <scu_memory.hpp>
 #include <scu_mutex.hpp>
+#include <message_macros.hpp>
 
 namespace Scu
 {
@@ -138,6 +139,7 @@ public:
     */
    void setBurstLimit( int burstLimit = NEVER_BURST )
    {
+      DEBUG_MESSAGE_M_FUNCTION( burstLimit );
       m_burstLimit = burstLimit;
    }
 

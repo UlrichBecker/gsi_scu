@@ -56,6 +56,7 @@ private:
    bool          m_readBuildId;
    uint          m_interval;
    uint          m_maxItemsPerInterval;
+   int           m_burstLimit;
    FILTER_FLAG_T m_filterFlags;
    std::string   m_scuUrl;
    std::string   m_logFile;
@@ -161,6 +162,11 @@ public:
    static const uint getMaxExtraParam( void )
    {
       return GET_ARRAY_SIZE_OF_MEMBER( SYSLOG_FIFO_ITEM_T, param );
+   }
+
+   int getBurstLimit( void )
+   {
+      return m_burstLimit;
    }
 
 private:

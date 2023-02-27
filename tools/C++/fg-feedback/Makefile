@@ -9,7 +9,7 @@
 ## Date:     09.10.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-DEFINES += VERSION=2.14
+DEFINES += VERSION=3.0
 FOR_SCU_AND_ACC := 1
 
 USE_NAMED_MUTEX := 1
@@ -67,7 +67,8 @@ ifndef USE_NAMED_MUTEX
  DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
 endif
 
-# DEBUG = 1
+#DEBUG = 1
+#DEFINES += CONFIG_DEBUG_MESSAGES
 # DEFINES += CONFIG_DAQ_TEST
 # DEFINES += NDEBUG
 # DEFINES += CONFIG_DAQ_DEBUG
@@ -130,7 +131,7 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 # CALL_ARGS = scuxl0035 -vS
 # CALL_ARGS = scuxl0035 -aN
 #CALL_ARGS = scuxl0212 -aqzt1 -I200 -T"X11 size 800,150"
-CALL_ARGS = scuxl0035 -azt1 -I200 -T"X11 size 800,150"
+CALL_ARGS = scuxl0035 -azt1 -I200 -T"X11 size 800,150"  -u0
 #CALL_ARGS = scuxl0162 -azt1 -I200 -T"X11 size 800,150"
 
 # CALL_ARGS = scuxl0035 -vy

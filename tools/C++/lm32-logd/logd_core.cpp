@@ -163,6 +163,8 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       *this << idStr << std::flush;
    }
 
+   setBurstLimit( m_rCmdLine.getBurstLimit() );
+
    if( !m_oMmu.isPresent() )
    {
       const char* text = "MMU not present!";
@@ -250,6 +252,16 @@ Lm32Logd::~Lm32Logd( void )
    {
       DEBUG_MESSAGE( "Closing syslog." );
       ::closelog();
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void Lm32Logd::setBurstLimit( int burstLimit )
+{
+   if( dynamic_cast<Ddr3Access*>(m_oMmu.getRamAccess()) != nullptr )
+   {
+      static_cast<Ddr3Access*>(m_oMmu.getRamAccess())->setBurstLimit( burstLimit );
    }
 }
 

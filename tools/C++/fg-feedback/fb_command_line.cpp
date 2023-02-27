@@ -674,6 +674,10 @@ vector<OPTION> CommandLine::c_optList =
          readTwoIntegerParameters( pCmdLine->m_maxEbCycleDataLen,
                                    pCmdLine->m_blockReadEbCycleGapTimeUs,
                                    pCmdLine->getOptArg() );
+         DEBUG_MESSAGE( "m_maxEbCycleDataLen: "
+                        << pCmdLine->m_maxEbCycleDataLen
+                        << "m_blockReadEbCycleGapTimeUs: "
+                        << pCmdLine->m_blockReadEbCycleGapTimeUs );
          return 0;
       }),
       .m_hasArg   = OPTION::REQUIRED_ARG,
@@ -708,6 +712,7 @@ vector<OPTION> CommandLine::c_optList =
          uint pollWaitingTime;
          if( readInteger( pollWaitingTime, poParser->getOptArg() ) )
             return -1;
+         DEBUG_MESSAGE( "poll-interval: " << pollWaitingTime );
          static_cast<CommandLine*>(poParser)->m_distributeDataPollIntervall = pollWaitingTime;
          return 0;
       }),
@@ -748,6 +753,32 @@ vector<OPTION> CommandLine::c_optList =
       .m_helpText = "Pairing of set and actual value for non-MIL DAQs will made by"
                     " block- sequence number of the device descriptor,\n"
                     "by default the pairing will made by WR- timestamp."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         uint burstLimit;
+         if( readInteger( burstLimit, poParser->getOptArg() ) )
+            return -1;
+         DEBUG_MESSAGE( "burst limit: " << burstLimit );
+         FgFeedbackAdministration* pAllDaq = getDaqAdministration( static_cast<CommandLine*>(poParser) );
+         if( pAllDaq == nullptr )
+            return -1;
+         assert( pAllDaq->getEbAccess() != nullptr );
+         pAllDaq->getEbAccess()->setBurstLimit( burstLimit );
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'u',
+      .m_longOpt  = "burst-limit",
+      .m_helpText = "PARAM specifies the number of 64-bit words at which DDR3-RAM"
+                    " is read in burst mode.\n"
+                    "If the value is zero, then the DDR3-RAM is always read out in"
+                    " burst mode.\n"
+                    "Burst mode is never used by default.\n"
+                    "If the DDR3-RAM is not involved in the data transfer,"
+                    " then this option has no effect."
    }
 };
 

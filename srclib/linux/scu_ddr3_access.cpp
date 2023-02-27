@@ -27,7 +27,6 @@
  */
 #include <helper_macros.h>
 #include <scu_ddr3.h>
-#include <message_macros.hpp>
 #include "scu_ddr3_access.hpp"
 
 using namespace Scu;
@@ -157,13 +156,14 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
    /*
     * Reading the DDR3-RAM in burst mode.
     */
+   constexpr uint MAX_PART_LEN = DDR3_XFER_FIFO_SIZE * sizeof(uint32_t) / sizeof(uint64_t) - 1;
    assert( m_burstLimit != NEVER_BURST );
    uint partLen = 0;
    while( len > 0 )
    {
       pData   += partLen;
       index64 += partLen;
-      partLen =  std::min( len, static_cast<uint>(DDR3_XFER_FIFO_SIZE) );
+      partLen =  std::min( len, MAX_PART_LEN );
       len     -= partLen;
 
       /*
@@ -199,7 +199,7 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
             status = readFiFoStatus();
          }
          while( ((status & DDR3_FIFO_STATUS_MASK_EMPTY) != 0) &&
-             ((status & DDR3_FIFO_STATUS_MASK_USED_WORDS) != partLen) );
+                ((status & DDR3_FIFO_STATUS_MASK_USED_WORDS) != partLen) );
       #endif
 
          /*
