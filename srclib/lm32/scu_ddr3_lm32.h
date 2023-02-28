@@ -221,6 +221,36 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
                    DDR3_POLL_FT poll
                  );
 
+/*! --------------------------------------------------------------------------
+ * @brief Callback function becomes invoked within function ddr3ReadBurst
+ *        by every received 64-bit data word.
+ * @param pPl Pointer to received 64 data word.
+ * @param index Index of received data word.
+ * @param pPrivate Pointer to optional private data.
+ */
+typedef void (*DDR3_ON_BURST_FT)( DDR3_PAYLOAD_T* pPl,
+                                  unsigned int index,
+                                  void* pPrivate
+                                );
+
+/*! --------------------------------------------------------------------------
+ * @brief Reads the DDR3-memory in burst mode by using a callback function
+ *        for each received 64-bit data word.
+ * @param pThis Pointer to the DDR3 object
+ * @param index64 Start offset in 64-bit words,
+ * @param len64 Expected number of 64 -bit words to read.
+ * @param onData Pointer to callback function which becomes invoked by each
+ *               received 64-bit data word.
+ * @param pPrivate Pointer for private data of callback function onData.
+ * @retval <0  Error
+ * @retval ==0 Ok
+ */
+int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
+                                  unsigned int len64,
+                                  DDR3_ON_BURST_FT onData,
+                                  void* pPrivate
+                 );
+
 #endif /* ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS */
 #endif
 /*================================== EOF ====================================*/

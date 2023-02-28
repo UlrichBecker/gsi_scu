@@ -32,7 +32,7 @@
 #include <dbg.h>
 
 /*! ---------------------------------------------------------------------------
- * @see scu_ddr3.h
+ * @see scu_ddr3_lm32.h
  */
 int ddr3init( register DDR3_T* pThis  )
 {
@@ -56,6 +56,20 @@ int ddr3init( register DDR3_T* pThis  )
       DBPRINT1( "DBG: ERROR: DDR3: Can't find address of WB_DDR3_if2 !\n" );
       return -1;
    }
+
+   /*
+    * Making the FiFo empty if not empty;
+    */
+   unsigned int size = ddr3GetFifoStatus( pThis ) & DDR3_FIFO_STATUS_MASK_USED_WORDS;
+   for( unsigned int i = 0; i < size; i++ )
+   {
+      uint32_t dummy = pThis->pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
+      dummy = pThis->pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
+      /*
+       * Suppresses the not-used warning.
+       */
+      (void) dummy;
+   }
 #endif
    return 0;
 }
@@ -74,7 +88,7 @@ DDR3_RETURN_T _ddr3PopFifo( register const DDR3_T* pThis,
 }
 
 /*! ---------------------------------------------------------------------------
- * @see scu_ddr3.h
+ * @see scu_ddr3_lm32.h
  */
 #define CONFIG_EB_BLOCK_READING
 int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
@@ -87,7 +101,7 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
    DDR_ASSERT( (word64len + start) <= DDR3_MAX_INDEX64 );
    while( word64len > 0 )
    {
-      unsigned int blkLen = min( word64len, (unsigned int)DDR3_XFER_FIFO_SIZE );
+      unsigned int blkLen = min( word64len, (unsigned int)(DDR3_XFER_FIFO_SIZE * sizeof(uint32_t)/sizeof(uint64_t)-1) );
       DBPRINT2( "DBG: blkLen: %d\n", blkLen );
       ddr3StartBurstTransfer( pThis, start, blkLen );
 
@@ -114,6 +128,40 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
    }
    DBPRINT2( "DBG: FiFo-status final: 0x%08x\n", ddr3GetFifoStatus( pThis ) );
    return pollRet;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
+                                  unsigned int len64,
+                                  DDR3_ON_BURST_FT onData,
+                                  void* pPrivate
+                 )
+{
+   DDR_ASSERT( onData != NULL );
+   unsigned int pollCount = 0;
+   unsigned int i = 0;
+   int status = 0;
+   while( len64 > 0 )
+   {
+      unsigned int partLen = min( len64, (unsigned int)(DDR3_XFER_FIFO_SIZE * sizeof(uint32_t)/sizeof(uint64_t)-1) );
+      len64 -= partLen;
+      ddr3StartBurstTransfer( pThis, index64 + i, partLen );
+      while( ((status = ddr3GetFifoStatus( pThis )) & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
+      {
+         pollCount++;
+         if( pollCount > 1000 )
+            return -1;
+      }
+      for( unsigned int j = 0; j < partLen; j++, i++ )
+      {
+         DDR3_PAYLOAD_T recPl;
+         ddr3PopFifo( pThis, &recPl );
+         onData( &recPl, i, pPrivate );
+      }
+   }
+   return status & DDR3_FIFO_STATUS_MASK_USED_WORDS;
 }
 
 #endif /* ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS */
