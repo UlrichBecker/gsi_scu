@@ -141,6 +141,8 @@ uint32_t Ddr3Access::readFiFoStatus( void )
  */
 void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
 {
+   assert( (index64 + len) <= DDR3_MAX_INDEX64 );
+
    if( (m_burstLimit == NEVER_BURST) || (static_cast<int>(len) < m_burstLimit) )
    { /*
       * Reading the DDR3-RAM in transparent mode.
@@ -156,7 +158,7 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
    /*
     * Reading the DDR3-RAM in burst mode.
     */
-   constexpr uint MAX_PART_LEN = DDR3_XFER_FIFO_SIZE * sizeof(uint32_t) / sizeof(uint64_t) - 1;
+   constexpr uint MAX_PART_LEN = DDR3_XFER_FIFO_SIZE - 1;
    assert( m_burstLimit != NEVER_BURST );
    uint partLen = 0;
    while( len > 0 )
@@ -221,6 +223,8 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
  */
 void Ddr3Access::write( const uint index64, const uint64_t* pData, const uint len )
 {
+   assert( (index64 + len) <= DDR3_MAX_INDEX64 );
+
    ddr3Write( m_if1Addr + index64 * sizeof(uint64_t), pData, len );
 }
 

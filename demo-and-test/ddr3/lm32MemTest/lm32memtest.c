@@ -102,7 +102,7 @@ void wrBurstTest( const unsigned int index, const unsigned int n )
    while( l > 0 )
    {
       parts++;
-      unsigned int partLen = min( l, (unsigned int)(DDR3_XFER_FIFO_SIZE * sizeof(uint32_t)/sizeof(uint64_t)-1) );
+      unsigned int partLen = min( l, (unsigned int)(DDR3_XFER_FIFO_SIZE-1) );
       l -= partLen;
       ddr3StartBurstTransfer( &g_ddr3, index + i, partLen );
       unsigned int pollCount = 0;

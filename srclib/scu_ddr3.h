@@ -94,7 +94,7 @@ namespace Scu
 /*!
  * @brief Maximum size of DDR3 Xfer Fifo in 64-bit words
  */
-#define DDR3_XFER_FIFO_SIZE  512
+#define DDR3_XFER_FIFO_SIZE  256
 
 /*!
  * @brief 32 bit oriented offset address of fifo status
@@ -114,7 +114,9 @@ namespace Scu
 /*!
  * @see ddr3GetFifoStatus
  */
-#define DDR3_FIFO_STATUS_MASK_USED_WORDS  0x1FF
+#define DDR3_FIFO_STATUS_MASK_USED_WORDS  0xFF
+
+STATIC_ASSERT( DDR3_FIFO_STATUS_MASK_USED_WORDS == DDR3_XFER_FIFO_SIZE -1 );
 
 /*!
  * @brief 32 bit oriented offset address of the low data fifo-register
