@@ -136,7 +136,10 @@ uint32_t Ddr3Access::readFiFoStatus( void )
    return status;
 }
 
+constexpr uint MAX_PART_LEN = DDR3_XFER_FIFO_SIZE - 1;
+
 #define CONFIG_NO_BURST_FIFO_POLL
+#define CONFIG_DDR3_PARTITIONED_RW
 /*!----------------------------------------------------------------------------
  */
 void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
@@ -147,18 +150,33 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
    { /*
       * Reading the DDR3-RAM in transparent mode.
       */
+   #ifdef CONFIG_DDR3_PARTITIONED_RW
+      uint partLen = 0;
+      while( len > 0 )
+      {
+         pData   += partLen;
+         index64 += partLen;
+         partLen =  std::min( len, MAX_PART_LEN );
+         len     -= partLen;
+         EtherboneAccess::read( m_if1Addr + index64 * sizeof(uint64_t),
+                                pData,
+                                sizeof(uint32_t) | EB_LITTLE_ENDIAN,
+                                partLen * sizeof(uint64_t)/sizeof(uint32_t)
+                              );
+      }
+   #else
       EtherboneAccess::read( m_if1Addr + index64 * sizeof(uint64_t),
                              pData,
                              sizeof(uint32_t) | EB_LITTLE_ENDIAN,
                              len * sizeof(uint64_t)/sizeof(uint32_t)
                            );
+   #endif
       return;
    }
 
    /*
     * Reading the DDR3-RAM in burst mode.
     */
-   constexpr uint MAX_PART_LEN = DDR3_XFER_FIFO_SIZE - 1;
    assert( m_burstLimit != NEVER_BURST );
    uint partLen = 0;
    while( len > 0 )
@@ -225,7 +243,22 @@ void Ddr3Access::write( const uint index64, const uint64_t* pData, const uint le
 {
    assert( (index64 + len) <= DDR3_MAX_INDEX64 );
 
+#ifdef CONFIG_DDR3_PARTITIONED_RW
+   uint workLen = len;
+   uint workIndex = index64;
+   uint64_t* pWorkData = const_cast<uint64_t*>(pData);
+   uint partLen = 0;
+   while( workLen > 0 )
+   {
+      pWorkData += partLen;
+      workIndex += partLen;
+      partLen   =  std::min( workLen, MAX_PART_LEN );
+      workLen   -= partLen;
+      ddr3Write( m_if1Addr + workIndex * sizeof(uint64_t), pWorkData, partLen );
+   }
+#else
    ddr3Write( m_if1Addr + index64 * sizeof(uint64_t), pData, len );
+#endif
 }
 
 //================================== EOF ======================================

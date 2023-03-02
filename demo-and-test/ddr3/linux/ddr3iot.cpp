@@ -147,7 +147,7 @@ void run( std::string& ebName )
 
    arrayTest( &oDdr3, 2000000, true );
 
-   constexpr uint SIZE = 300;
+   constexpr uint SIZE = 100000;
    bigDataTest( &oDdr3, SIZE, false );
    bigDataTest( &oDdr3, SIZE, true );
 }
