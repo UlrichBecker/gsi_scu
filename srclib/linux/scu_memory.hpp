@@ -71,6 +71,12 @@ public:
    }
 
    /*!
+    * @brief Returns the maximum capacity of the used memory in
+    *        addressable 64-bit units.
+    */
+   virtual uint getMaxCapacity64( void ) = 0;
+
+   /*!
     * @brief Reads from DDR3 of SCU3 or from SRAM of SCU4.
     * @param index64 Start-index (offset) in 64-bit words.
     * @param pData Pointer to target memory

@@ -106,7 +106,7 @@ public:
     *        and destroys the object of type EtherboneConnection
     *        if it was created by itself.
     */
-   ~Ddr3Access( void );
+   ~Ddr3Access( void ) override;
 
    /*!
     * @brief Returns the interface 1 address of DDR3-RAM.
@@ -142,6 +142,12 @@ public:
       DEBUG_MESSAGE_M_FUNCTION( burstLimit );
       m_burstLimit = burstLimit;
    }
+
+   /*!
+    * @brief Returns the maximum addressable capacity in 64-bit units
+    *        of DDR3-RAM.
+    */
+   uint getMaxCapacity64( void ) override;
 
    /*!
     * @brief Reads data from the DDR3 memory.

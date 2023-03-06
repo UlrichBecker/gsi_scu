@@ -30,6 +30,7 @@
 #include <scu_mmu_fe.hpp>
 
 #include <lm32_hexdump.h>
+#include <message_macros.hpp>
 
 using namespace Scu::mmu;
 
@@ -40,6 +41,7 @@ static Mmu* mg_pMmu = nullptr;
 Mmu::Mmu( RamAccess* poRam )
    :m_poRam( poRam )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    assert( mg_pMmu == nullptr );
    mg_pMmu = this;
 }
@@ -48,6 +50,7 @@ Mmu::Mmu( RamAccess* poRam )
  */
 Mmu::~Mmu( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    assert( mg_pMmu == this );
    mg_pMmu = nullptr;
 }

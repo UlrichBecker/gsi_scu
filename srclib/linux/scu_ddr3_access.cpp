@@ -109,6 +109,13 @@ void Ddr3Access::flushFiFo( void )
                         );
 }
 
+/*-----------------------------------------------------------------------------
+ */
+uint Ddr3Access::getMaxCapacity64( void )
+{
+   return DDR3_MAX_INDEX64;
+}
+
 #ifndef CONFIG_NO_BURST_FIFO_POLL
 /*-----------------------------------------------------------------------------
  */
@@ -148,7 +155,7 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
 
    if( (m_burstLimit == NEVER_BURST) || (static_cast<int>(len) < m_burstLimit) )
    { /*
-      * Reading the DDR3-RAM in transparent mode.
+      * +++ Reading the DDR3-RAM in transparent mode. +++
       */
    #ifdef CONFIG_DDR3_PARTITIONED_RW
       uint partLen = 0;
@@ -175,7 +182,7 @@ void Ddr3Access::read( uint index64, uint64_t* pData, uint len )
    }
 
    /*
-    * Reading the DDR3-RAM in burst mode.
+    * +++ Reading the DDR3-RAM in burst mode. +++
     */
    assert( m_burstLimit != NEVER_BURST );
    uint partLen = 0;

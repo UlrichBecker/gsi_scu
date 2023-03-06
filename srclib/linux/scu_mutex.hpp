@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <string.h>
 #include <string>
+#include <message_macros.hpp>
 
 namespace Scu
 {
@@ -63,6 +64,7 @@ public:
        * allowed in semaphore names.
        */
       name = name.substr( name.find_first_of( '/' ) + 1 );
+      DEBUG_MESSAGE_M_FUNCTION( name );
 
       m_pSem = ::sem_open( name.c_str(), oflag, perm, count );
       if( m_pSem == SEM_FAILED )
@@ -87,6 +89,7 @@ public:
     */
    ~Mutex( void )
    {
+      DEBUG_MESSAGE_M_FUNCTION("");
       if( m_pSem != SEM_FAILED )
       {
          ::sem_close( m_pSem );
@@ -95,6 +98,7 @@ public:
 
    /*!
     * @brief Locks a critical section at to protect it to concurrent accesses.
+    * @see Mutex::unlock
     */
    void lock( void )
    {
@@ -108,6 +112,7 @@ public:
 
    /*!
     * @brief Trying to lock a critical section.
+    * @see Mutex::unlock
     * @retval true Lock of critical section was successful.
     * @retval false Lock not possible another process has already locked before.
     */
@@ -127,6 +132,7 @@ public:
 #ifdef __USE_XOPEN2K
    /*!
     * @brief Try to lock within a defined time.
+    * @see Mutex::unlock
     * @param pTimeout Maximum waiting time,
     * @retval false Timeout.
     * @retval true Lock was successful.
@@ -146,6 +152,7 @@ public:
 
    /*!
     * @brief Try to lock within a defined time.
+    * @see Mutex::unlock
     * @param nanosecs Maximum waiting time in nanoseconds,
     * @retval false Timeout.
     * @retval true Lock was successful.
@@ -163,7 +170,10 @@ public:
 
    /*!
     * @brief Gives a locked section free.
-    * Counterpart to lock(), tryLock() and timedLock();
+    * Counterpart to lock(), () and timedLock();
+    * @see Mutex::lock
+    * @see Mutex::tryLock
+    * @see Mutex::timedLock
     */
    void unlock( void )
    {
@@ -190,6 +200,7 @@ class AutoUnlock
 public:
    /*!
     * @brief Constructor locks a critical section.
+    * @see Mutex::lock
     * @param rMutex Object of type Scu::Mutex.
     */
    AutoUnlock( Mutex& rMutex )
@@ -201,6 +212,7 @@ public:
    /*!
     * @brief Destructor makes a automatically freeing of a critical section
     *        locked by the constructor, when the valid scope will left.
+    * @see Mutex::unlock
     */
    ~AutoUnlock( void )
    {
