@@ -9,7 +9,7 @@
 ## Date:     12.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.3
+DEFINES += VERSION=2.0
 FOR_SCU_AND_ACC := 1
 
 USE_STATIC_LIBS := 1
@@ -50,9 +50,9 @@ endif
 
 LIBS += stdc++
 
-# DEBUG = 1
+ DEBUG = 1
 
-CALL_ARGS = scuxl0035 -v
+CALL_ARGS = scuxl0035 -vb
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 include $(REPOSITORY_DIR)/makefiles/makefile.scun

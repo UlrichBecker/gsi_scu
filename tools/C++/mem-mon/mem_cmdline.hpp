@@ -38,11 +38,29 @@ class CommandLine: public CLOP::PARSER
    using OPT_LIST_T = std::vector<CLOP::OPTION>;
    static OPT_LIST_T c_optList;
 
+public:
+   struct SEG_T
+   {
+      uint m_tag;
+      uint m_size;
+   };
+
+   using SEGMENT_VECTOR_T = std::vector<SEG_T>;
+
+private:
    bool              m_verbose;
    bool              m_tagInDecimal;
    bool              m_isOnScu;
    bool              m_isInBytes;
+   bool              m_doDelete;
+   bool              m_doExit;
+   uint              m_allocSize;
+   uint              m_newTag;
+   SEGMENT_VECTOR_T  m_segVector;
    std::string       m_scuUrl;
+
+   static bool readInteger( uint&, const std::string& );
+   static void readTwoIntegerParameters( uint& rParam1, uint& rParam2, const std::string& rArgStr );
 
 public:
    CommandLine( int argc, char** ppArgv );
@@ -70,6 +88,31 @@ public:
       return m_isInBytes;
    }
 
+   bool isDelete( void )
+   {
+      return m_doDelete;
+   }
+
+   bool isDoExit( void )
+   {
+      return m_doExit;
+   }
+
+   uint getRequestedSize( void )
+   {
+      return m_allocSize;
+   }
+
+   uint getNewTag( void )
+   {
+      return m_newTag;
+   }
+
+   SEGMENT_VECTOR_T& getSegmentVect( void )
+   {
+      return m_segVector;
+   }
+
    std::string& getScuUrl( void )
    {
       return m_scuUrl;
@@ -79,7 +122,8 @@ private:
    int onArgument( void ) override;
    int onErrorUnrecognizedShortOption( char unrecognized ) override;
    int onErrorUnrecognizedLongOption( const std::string& unrecognized ) override;
-
+   int onErrorShortMissingRequiredArg( void ) override;
+   int onErrorLongMissingRequiredArg( void ) override;
 }; // class CommandLine
 
 } // namespace Scu

@@ -61,6 +61,15 @@ extern "C"
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu.h
  */
+MMU_ADDR_T mmuGetMaxCapacity64( void )
+{
+   assert( dynamic_cast<Mmu*>(mg_pMmu) != nullptr );
+   return mg_pMmu->getMaxCapacity64();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_mmu.h
+ */
 void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
 {
    assert( dynamic_cast<Mmu*>(mg_pMmu) != nullptr );

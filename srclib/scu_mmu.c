@@ -222,7 +222,7 @@ MMU_STATUS_T mmuAlloc( const MMU_TAG_T tag, MMU_ADDR_T* pStartAddr,
    /*
     * Checking if enough free memory there.
     */
-   if( level + *pLen + MMU_ITEMSIZE >= MMU_MAX_INDEX )
+   if( level + *pLen + MMU_ITEMSIZE >= mmuGetMaxCapacity64() )
       return OUT_OF_MEM;
 
    /*

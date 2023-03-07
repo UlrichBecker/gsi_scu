@@ -92,7 +92,7 @@
  *          +---------------------------------------------------+
  * @endcode
  * The start-index of descriptor 4 is in this example zero, that means that no
- * further descriptors will follow.
+ * further descriptors respectively segments of payload will follow.
  * @note In the case of DDR3, indices and lengths are counted in 64-bit units.
  *       That means these numbers has to be dividable by 8, because
  *       a 64-bit type is the smallest addressable unit.
@@ -125,7 +125,6 @@ typedef unsigned int   MMU_ADDR_T;
   * @brief Datatype of the smallest addressable unit of the using memory.
   */
  typedef DDR3_PAYLOAD_T RAM_PAYLOAD_T;
- STATIC const MMU_ADDR_T MMU_MAX_INDEX = DDR3_MAX_INDEX64;
 #else
  /*!
   * @todo Code for SRAM of SCU4.
@@ -302,6 +301,28 @@ STATIC inline void mmuReadNextItem( MMU_ITEM_T* pItem )
 MMU_STATUS_T mmuAlloc( const MMU_TAG_T tag, MMU_ADDR_T* pStartAddr,
                        size_t* pLen, const bool create );
 
+/*! ---------------------------------------------------------------------------
+ * @brief Returns the total physical memory space in 64-bit units.
+ */
+#ifdef __lm32__
+STATIC inline ALWAYS_INLINE
+MMU_ADDR_T mmuGetMaxCapacity64( void )
+{
+ #ifdef CONFIG_SCU_USE_DDR3
+   return DDR3_MAX_INDEX64;
+ #else
+  /*!
+   * @todo Implement memory type for LM32 of SCU4
+   */
+  #error Memory type for LM32 not implemented yet!
+ #endif
+}
+#else
+/*!
+ * @see scu_mmu_fe.cpp
+ */
+MMU_ADDR_T mmuGetMaxCapacity64( void );
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_MMU

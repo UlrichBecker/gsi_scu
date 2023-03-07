@@ -24,6 +24,7 @@
  */
 #include <scu_env.hpp>
 #include <message_macros.hpp>
+#include <sstream>
 #include "mem_cmdline.hpp"
 
 //namespace Scu
@@ -165,9 +166,89 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_helpText = "Displays all in bytes, otherwise all will displayed\n"
                     "in the smallest addressable unit in 8 byte clusters\n"
                     "(64 bit) in the case of DDR3-RAM."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_doDelete = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'D',
+      .m_longOpt  = "delete",
+      .m_helpText = "Deletes a possible existing partition table.\n"
+                    "CAUTION: All stored data will be lost!"
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         readTwoIntegerParameters(
+                                    static_cast<CommandLine*>(poParser)->m_newTag,
+                                    static_cast<CommandLine*>(poParser)->m_allocSize,
+                                    poParser->getOptArg()
+                                 );
+         if( static_cast<CommandLine*>(poParser)->m_allocSize == 0 )
+         {
+            ERROR_MESSAGE( "A value of zero is not allowed for a memory segment!" );
+            ::exit( EXIT_FAILURE );
+         }
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'a',
+      .m_longOpt  = "malloc",
+      .m_helpText = "Allocates respectively creates a new memory segment if"
+                    " not already present.\n"
+                    "PARAM: <tag,size_in_64-bit_units>\n"
+                    "NOTE: No space before and after the comma."
    }
 }; // CommandLine::c_optList
 
+/*! ---------------------------------------------------------------------------
+*/
+bool CommandLine::readInteger( uint& rValue, const string& roStr )
+{
+   try
+   {
+      rValue = stoi( roStr, nullptr, (roStr[0] == '0' && roStr[1] == 'x')? 16 : 10 );
+   }
+   catch( std::exception& e )
+   {
+      ERROR_MESSAGE( "Integer number is expected and not that: \""
+                     << roStr << "\" !" );
+      return true;
+   }
+   return false;
+}
+
+/*! ---------------------------------------------------------------------------
+*/
+void CommandLine::readTwoIntegerParameters( uint& rParam1, uint& rParam2, const string& rArgStr )
+{
+   string single;
+   istringstream input( rArgStr );
+   for( uint i = 0; getline( input, single, ',' ); i++ )
+   {
+      if( i >= 2 )
+      {
+         ERROR_MESSAGE( "To much arguments in option!" );
+         ::exit( EXIT_FAILURE );
+      }
+      if( single.empty() )
+         continue;
+
+      if( i == 0 )
+      {
+         if( readInteger( rParam1, single ) )
+            ::exit( EXIT_FAILURE );
+         continue;
+      }
+      if( readInteger( rParam2, single ) )
+        ::exit( EXIT_FAILURE );
+   }
+}
 
 /*! ---------------------------------------------------------------------------
  */
@@ -176,6 +257,10 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_verbose( false )
    ,m_tagInDecimal( false )
    ,m_isInBytes( false )
+   ,m_doDelete( false )
+   ,m_doExit( false )
+   ,m_allocSize( 0 )
+   ,m_newTag( 0x0000 )
 {
    m_isOnScu = Scu::isRunningOnScu();
    if( m_isOnScu )
@@ -231,6 +316,23 @@ int CommandLine::onErrorUnrecognizedLongOption( const std::string& unrecognized 
    ERROR_MESSAGE( "Unknown long option: \"--" << unrecognized << "\"" );
    return 0;
 }
+
+/*! ---------------------------------------------------------------------------
+ */
+int CommandLine::onErrorShortMissingRequiredArg( void )
+{
+   ERROR_MESSAGE( "Missing argument of option: -" << getCurrentOption()->m_shortOpt );
+   return -1;
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+int CommandLine::onErrorLongMissingRequiredArg( void )
+{
+   ERROR_MESSAGE( "Missing argument of option: --" << getCurrentOption()->m_longOpt );
+   return -1;
+}
+
 
 /*! ---------------------------------------------------------------------------
  */

@@ -58,6 +58,53 @@ int main( int argc, char** ppArgv )
       Scu::Ddr3Access oDdr3( oCmdLine() );
 
       Browser browse( &oDdr3, oCmdLine );
+      if( oCmdLine.isDelete() )
+      {
+         if( browse.isPresent() )
+         {
+            if( oCmdLine.isVerbose() )
+               cout << "Deleting memory management partitions!" << endl;
+            browse.clear();
+         }
+         else
+            WARNING_MESSAGE( "No memory management found!" );
+
+         if( oCmdLine.getRequestedSize() == 0 )
+            return EXIT_SUCCESS;
+      }
+
+      if( oCmdLine.getRequestedSize() != 0 )
+      {
+         for( const auto& seg: oCmdLine.getSegmentVect() )
+         {
+            cout << seg.m_tag; //TODO!!!!
+         }
+
+         if( oCmdLine.isVerbose() )
+         {
+            cout << "Creating memory segment with tag: 0x"
+                 << hex << uppercase << oCmdLine.getNewTag()
+                 << ", size: " << dec << oCmdLine.getRequestedSize() << endl;
+         }
+         MMU_ADDR_T addr;
+         size_t len = oCmdLine.getRequestedSize();
+         const MMU_STATUS_T status = browse.allocate( oCmdLine.getNewTag(), addr, len, true );
+         if( status == ALREADY_PRESENT )
+         {
+            WARNING_MESSAGE( "Memory segment already allocated!"
+                             " Requested segment memory space: " << oCmdLine.getRequestedSize()
+                             << ", actual segment memory space: " << len );
+         }
+         else if( status != OK )
+         {
+            ERROR_MESSAGE( browse.status2String( status ) );
+            return EXIT_FAILURE;
+         }
+
+         if( oCmdLine.isDoExit() )
+            return EXIT_SUCCESS;
+      }
+
       browse( cout );
    }
    catch( std::exception& e )

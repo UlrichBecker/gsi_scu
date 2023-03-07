@@ -63,46 +63,44 @@ int Browser::operator()( std::ostream& out )
    currentItem.iNext = 0;
    uint level = 0;
 
-   const uint factor = m_rCmdLine.isInBytes()? sizeof(RAM_PAYLOAD_T) : 1;
-   const uint wide   = m_rCmdLine.isInBytes()? 9 : 8;
+   string separator;
+   if( m_rCmdLine.isVerbose() )
+   {
+      out << "\n  tag   |  begin   |   end    |   size   |  consumption\n";
+      out <<   "--------+----------+----------+----------+--------------\n";
+      separator = " |";
+   }
+   else
+      separator = ", ";
+
+   const uint factor      = m_rCmdLine.isInBytes()? sizeof(RAM_PAYLOAD_T) : 1;
+   const uint wide        = 9; //m_rCmdLine.isInBytes()? 9 : 8;
+   const uint maxCapacity = getMaxCapacity64();
    do
    {
       readNextItem( currentItem );
       if( level > 0 )
       {
-         if( m_rCmdLine.isVerbose() )
-            out << "tag: ";
          if( m_rCmdLine.isTagInDecimal() )
-             out << setw( 5 );
+            out << "  " << setw( 5 );
          else
-             out << "0x" << hex << uppercase << setw( 4 ) << setfill('0');
+            out << " 0x" << hex << uppercase << setw( 4 ) << setfill('0');
 
-         out << currentItem.tag << ",  " << dec;
+         out << currentItem.tag << separator << dec;
 
-         if( m_rCmdLine.isVerbose() )
-            out << "begin: ";
+         out << setfill( ' ' ) << setw( wide ) << currentItem.iStart * factor  << separator;
+         out << setfill( ' ' ) << setw( wide ) << (currentItem.iStart + currentItem.length) * factor << separator;
+         out << setfill( ' ' ) << setw( wide ) << currentItem.length * factor << separator;
 
-         out << setfill( ' ' ) << setw( wide ) << currentItem.iStart * factor  << ",  ";
-
-         if( m_rCmdLine.isVerbose() )
-            out << "end: ";
-         out << setfill( ' ' ) << setw( wide ) << (currentItem.iStart + currentItem.length) * factor << ",  ";
-
-         if( m_rCmdLine.isVerbose() )
-            out << "size: ";
-         out << setfill( ' ' ) << setw( wide ) << currentItem.length * factor << ",  ";
-
-         if( m_rCmdLine.isVerbose() )
-            out << "consumption: ";
          float size = (static_cast<float>( MMU_ITEMSIZE + currentItem.length) * 100.0)
-                      / static_cast<float>(MMU_MAX_INDEX);
-         out << fixed << setprecision(6) << setw( 9 ) << size << '%';
+                      / static_cast<float>(maxCapacity);
+         out << fixed << setprecision(6) << setw( 10 ) << size << '%';
 
          out << endl;
       }
       level += MMU_ITEMSIZE + currentItem.length;
    }
-   while( (currentItem.iNext != 0) && (level <= MMU_MAX_INDEX) );
+   while( (currentItem.iNext != 0) && (level <= maxCapacity) );
 
    if( currentItem.iNext != 0 )
    {
@@ -111,25 +109,25 @@ int Browser::operator()( std::ostream& out )
    }
 
    float size = (static_cast<float>(level+MMU_ITEMSIZE) * 100.0)
-                      / static_cast<float>(MMU_MAX_INDEX);
+                      / static_cast<float>(maxCapacity);
 
-   constexpr uint NETTO_MAX = MMU_MAX_INDEX-MMU_ITEMSIZE;
+   const uint NETTO_MAX = maxCapacity - MMU_ITEMSIZE;
    if( m_rCmdLine.isVerbose() )
    {
-      out << "total: "
-          << level*factor << " of " << NETTO_MAX*factor << ", "
-          << "free: " << (NETTO_MAX - level)*factor << ", "
-          << "capacity: " << MMU_MAX_INDEX*factor << ", "
+      out << "=======================================================\n";
+      out << "total:       "
+          << level * factor << " of " << NETTO_MAX *  factor << ",\n"
+          << "free:        " << (NETTO_MAX - level) * factor << ",\n"
+          << "capacity:    " << maxCapacity * factor << ",\n"
           << "consumption: " << fixed << setprecision(6) << setw( 10 ) << size << '%' << endl;
    }
    else
    {
-      out << level*factor << "/" << NETTO_MAX*factor << ", "
-          << (NETTO_MAX - level)*factor << ", "
-          << MMU_MAX_INDEX*factor << ", "
+      out << level * factor << "/" << NETTO_MAX * factor << ", "
+          << (NETTO_MAX - level) * factor << ", "
+          << maxCapacity * factor << ", "
           << fixed << setprecision(6) << setw( 10 ) << size << '%' << endl;
    }
-
 
    return 0;
 }

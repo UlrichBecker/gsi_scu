@@ -105,7 +105,7 @@ public:
       return mmuAlloc( tag, &rStartAddr, &rLen, create );
    }
 
-  /*! 
+  /*!
    * @brief Converts the status which returns the function mmuAlloc() in a
    *        ASCII-string.
    */
@@ -146,6 +146,15 @@ public:
    {
       assert( false );
       return 0;
+   }
+
+  /*!
+   * @brief Returns the maximum capacity in 64-bit units of the
+   *        actual memory.
+   */
+   MMU_ADDR_T getMaxCapacity64( void )
+   {
+      return m_poRam->getMaxCapacity64();
    }
 
   /*!
