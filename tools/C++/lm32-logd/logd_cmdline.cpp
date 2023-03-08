@@ -31,9 +31,10 @@ using namespace std;
 using namespace CLOP;
 using namespace Scu;
 
-#define DEFAULT_INTERVAL 1000
-#define DEFAULT_MAX_ITEMS 100
-#define DEFAULT_TARGET "/var/log/lm32.log"
+#define DEFAULT_INTERVAL            1000
+#define DEFAULT_MAX_ITEMS            100
+#define DEFAULT_MAX_ITEMS_IN_MEMORY 1000
+#define DEFAULT_TARGET              "/var/log/lm32.log"
 
 /*! ---------------------------------------------------------------------------
  * @brief Initializing the command line options.
@@ -147,7 +148,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
          {
             cout << TO_STRING( VERSION ) << endl;
          }
-         ::exit( EXIT_SUCCESS );
+         throw runtime_error("");
          return 0;
       }),
       .m_hasArg   = OPTION::NO_ARG,
@@ -160,20 +161,14 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       OPT_LAMBDA( poParser,
       {
          if( !static_cast<CommandLine*>(poParser)->m_isOnScu )
-         {
-            ERROR_MESSAGE( "Daemonizing only on SCU possible!" );
-            return -1;
-         }
+            throw runtime_error( "Daemonizing only on SCU possible!" );
 
          if( static_cast<CommandLine*>(poParser)->m_isDaemonized )
-         {
-            ERROR_MESSAGE( "Multiple set of daemonizing!" );
-            return -1;
-         }
+            throw runtime_error( "Multiple set of daemonizing!" );
+
          if( poParser->isOptArgPersent() )
-         {
             static_cast<CommandLine*>(poParser)->m_logFile = poParser->getOptArg();
-         }
+
          static_cast<CommandLine*>(poParser)->m_isDaemonized = true;
          return 0;
       }),
@@ -248,10 +243,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
-         uint interval;
-         if( readInteger( interval, poParser->getOptArg() ) )
-            return -1;
-         static_cast<CommandLine*>(poParser)->m_interval = interval;
+         static_cast<CommandLine*>(poParser)->m_interval = readInteger( poParser->getOptArg() );
          return 0;
       }),
       .m_hasArg   = OPTION::REQUIRED_ARG,
@@ -265,14 +257,15 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
-         uint filter;
-         if( readInteger( filter, poParser->getOptArg() ) )
-            return -1;
+         uint filter = readInteger( poParser->getOptArg() );
          if( filter >= BIT_SIZEOF( FILTER_FLAG_T ) )
          {
-            ERROR_MESSAGE( "Filter value " << filter << " out of range from 0 to "
-                           << BIT_SIZEOF( FILTER_FLAG_T ) - 1 << "!" );
-            return -1;
+            string errStr = "Filter value ";
+            errStr += filter;
+            errStr += " out of range from 0 to ";
+            errStr += (BIT_SIZEOF( FILTER_FLAG_T ) - 1);
+            errStr += " !";
+            throw std::runtime_error( errStr );
          }
          if( (static_cast<CommandLine*>(poParser)->m_filterFlags & (1 << filter)) != 0 )
             WARNING_MESSAGE( "Filter value " << filter << " is already defined." );
@@ -353,14 +346,13 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
-         uint maxItems;
-         if( readInteger( maxItems, poParser->getOptArg() ) )
-            return -1;
+         uint maxItems = readInteger( poParser->getOptArg() );
          if( maxItems < 1 )
          {
-            ERROR_MESSAGE( "A maximum of " << maxItems << " items to read per interval"
-                           " isn't meaningful!" );
-            return -1;
+            string errStr = "A maximum of ";
+            errStr += maxItems;
+            errStr += " items to read per interval isn't meaningful!";
+            throw runtime_error( errStr );
          }
          static_cast<CommandLine*>(poParser)->m_maxItemsPerInterval = maxItems;
          return 0;
@@ -404,10 +396,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
-         uint burstLimit;
-         if( readInteger( burstLimit, poParser->getOptArg() ) )
-            return -1;
-         static_cast<CommandLine*>(poParser)->m_burstLimit = burstLimit;
+         static_cast<CommandLine*>(poParser)->m_burstLimit = readInteger( poParser->getOptArg() );
          return 0;
       }),
       .m_hasArg   = OPTION::REQUIRED_ARG,
@@ -421,6 +410,23 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     "Burst mode is never used by default.\n"
                     "If the DDR3-RAM is not involved in the data transfer,"
                     " then this option has no effect."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_maxItems = readInteger( poParser->getOptArg() );
+         if( static_cast<CommandLine*>(poParser)->m_maxItems == 0 )
+            throw runtime_error( "Number of zero items isn't allowed!" );
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'M',
+      .m_longOpt  = "max-log",
+      .m_helpText = "PARAM specifies the maximum number of log messages in the SCU-RAM FiFo\n"
+                    "NOTE: This option has only an effect when the concerning memory segment\n"
+                    "      is not already allocated.\n"
+                    "The default value is: " TO_STRING(DEFAULT_MAX_ITEMS_IN_MEMORY) " message items."
    }
 
 }; // CommandLine::c_optList
@@ -428,19 +434,21 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
 */
-bool CommandLine::readInteger( uint& rValue, const string& roStr )
+uint CommandLine::readInteger( const string& roStr )
 {
+   uint retVal;
    try
    {
-      rValue = stoi( roStr );
+      retVal = stoi( roStr, nullptr, (roStr[0] == '0' && roStr[1] == 'x')? 16 : 10 );
    }
    catch( std::exception& e )
    {
-      ERROR_MESSAGE( "Integer number is expected and not that: \""
-                     << roStr << "\" !" );
-      return true;
+      std::string errStr = "Integer number is expected and not that: \"";
+      errStr += roStr;
+      errStr += "\" !";
+      throw std::runtime_error( errStr );
    }
-   return false;
+   return retVal;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -463,6 +471,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_interval( DEFAULT_INTERVAL )
    ,m_maxItemsPerInterval( DEFAULT_MAX_ITEMS )
    ,m_burstLimit( Ddr3Access::NEVER_BURST )
+   ,m_maxItems( DEFAULT_MAX_ITEMS_IN_MEMORY )
    ,m_filterFlags( 0 )
 {
    DEBUG_MESSAGE_M_FUNCTION("");

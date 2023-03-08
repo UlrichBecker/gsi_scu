@@ -136,6 +136,16 @@ STATIC void onOsSignal( int sigNo )
 } /* extern "C" */
 
 /*! ---------------------------------------------------------------------------
+ * @brief Throws a system error by evaluation of 'errno'.
+ */
+void throwSysError( string errStr )
+{
+   errStr += " ";
+   errStr += ::strerror( errno );
+   throw runtime_error( errStr );
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Daemonizes the application.
  */
 STATIC void daemonize( void )
@@ -145,8 +155,7 @@ STATIC void daemonize( void )
    pid_t pid = ::fork();
    if( pid < 0 )
    {
-      ERROR_MESSAGE( "Unable to fork! " << ::strerror( errno ) );
-      ::exit( EXIT_FAILURE );
+      throwSysError( "Unable to fork!" );
    }
    if( pid > 0 )
    {
@@ -156,33 +165,24 @@ STATIC void daemonize( void )
 
    if( ::setsid() < 0 )
    {
-      ERROR_MESSAGE( "Unable to get the session leader for the child process!  "
-                     << ::strerror( errno ) );
-      ::exit( EXIT_FAILURE );
+      throwSysError( "Unable to get the session leader for the child process!" );
    }
 
    if( ::signal( SIGCHLD, SIG_IGN ) == SIG_ERR )
    {
-      ERROR_MESSAGE( "Unable to disable signal SIGCHLD !  "
-                     << ::strerror( errno ) );
-      ::exit( EXIT_FAILURE );
+      throwSysError( "Unable to disable signal SIGCHLD !" );
    }
 
    if( ::signal( SIGHUP,  SIG_IGN ) == SIG_ERR )
    {
-      ERROR_MESSAGE( "Unable to disable signal SIGHUP !  "
-                     << ::strerror( errno ) );
-      ::exit( EXIT_FAILURE );
+      throwSysError( "Unable to disable signal SIGHUP !" );
    }
 
    ::umask( 0 );
 
    if( ::chdir( "/" ) < 0 )
    {
-      ERROR_MESSAGE( "Unable to change in directory \"/\" !  "
-                     << ::strerror( errno ) );
-
-      ::exit( EXIT_FAILURE );
+      throwSysError( "Unable to change in directory \"/\" !" );
    }
 
    ::close( 0 );
@@ -218,8 +218,7 @@ int main( int argc, char** ppArgv )
 
          if( status < 0 )
          {
-            ERROR_MESSAGE( "Error in finding concurrent process!" );
-            ::exit( EXIT_FAILURE );
+            throw std::runtime_error( "Error in finding concurrent process!" );
          }
 
          if( oCmdLine.isKillOnly() )
@@ -227,7 +226,7 @@ int main( int argc, char** ppArgv )
             if( status == 1 )
                 WARNING_MESSAGE( "No concurrent process found!" );
 
-            ::exit( EXIT_SUCCESS );
+            throw std::runtime_error("");
          }
       }
 
@@ -257,7 +256,9 @@ int main( int argc, char** ppArgv )
    }
    catch( std::exception& e )
    {
-      ERROR_MESSAGE( "std::exception occurred: \"" << e.what() << '"' );
+      if( e.what()[0] == '\0' )
+         return EXIT_SUCCESS;
+      ERROR_MESSAGE( e.what() );
       return EXIT_FAILURE;
    }
    catch( ... )

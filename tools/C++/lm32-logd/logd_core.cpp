@@ -165,24 +165,10 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
 
    setBurstLimit( m_rCmdLine.getBurstLimit() );
 
-   if( !m_oMmu.isPresent() )
-   {
-      const char* text = "MMU not present!";
-
-      if( m_poTerminal != nullptr )
-         m_poTerminal->reset();
-
-      if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << text << std::flush;
-      }
-
-      throw std::runtime_error( text );
-   }
-
-   mmu::MMU_STATUS_T status = m_oMmu.allocate( mmu::TAG_LM32_LOG, m_offset, m_capacity );
-   if( status != mmu::OK )
+   const uint reuqestedLogItems = m_rCmdLine.getMaxItemsInMemory() * SYSLOG_FIFO_ITEM_SIZE + SYSLOG_FIFO_ADMIN_SIZE;
+   m_capacity = reuqestedLogItems;
+   mmu::MMU_STATUS_T status = m_oMmu.allocate( mmu::TAG_LM32_LOG, m_offset, m_capacity, true );
+   if( !m_oMmu.isOkay( status ) )
    {
       string text = m_oMmu.status2String( status );
       if( m_poTerminal != nullptr )
@@ -195,6 +181,21 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       }
 
       throw std::runtime_error( text );
+   }
+
+   if( (status == mmu::ALREADY_PRESENT) && (reuqestedLogItems != m_capacity) )
+   {
+      string text = "Memory for log-messages already allocated by another process, bud requested maximum number of items: ";
+      text += to_string(static_cast<int>(m_rCmdLine.getMaxItemsInMemory()));
+      text += " differs from the actual number: ";
+      text += to_string(static_cast<int>(m_capacity / SYSLOG_FIFO_ITEM_SIZE));
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << text << std::flush;
+      }
+      else
+         WARNING_MESSAGE( text );
    }
 
    if( m_rCmdLine.isVerbose() )
@@ -210,7 +211,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
 
    m_offset   += SYSLOG_FIFO_ADMIN_SIZE;
    m_capacity -= SYSLOG_FIFO_ADMIN_SIZE;
-
+   //TODO Wenn selbst allokiert wurde, muss hier das RAM mit Offset und Capacity initiallisiert werden, aber nur dan!
    if( m_rCmdLine.isVerbose() )
    {
       cout << "Begin:          " << m_offset
@@ -341,6 +342,8 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
       throw std::runtime_error( text );
    }
 }
+
+
 
 /*! ---------------------------------------------------------------------------
  */

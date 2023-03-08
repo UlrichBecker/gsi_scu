@@ -57,11 +57,12 @@ private:
    uint          m_interval;
    uint          m_maxItemsPerInterval;
    int           m_burstLimit;
+   uint          m_maxItems;
    FILTER_FLAG_T m_filterFlags;
    std::string   m_scuUrl;
    std::string   m_logFile;
 
-   static bool readInteger( uint&, const std::string& );
+   static uint readInteger( const std::string& );
 
 public:
    CommandLine( int argc, char** ppArgv );
@@ -167,6 +168,11 @@ public:
    int getBurstLimit( void )
    {
       return m_burstLimit;
+   }
+
+   uint getMaxItemsInMemory( void )
+   {
+      return m_maxItems;
    }
 
 private:

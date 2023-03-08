@@ -9,11 +9,11 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.6
+DEFINES += VERSION=1.7
 FOR_SCU_AND_ACC := 1
 
-#DEBUG = 1
-#DEFINES += DEBUGLEVEL
+DEBUG = 1
+DEFINES += DEBUGLEVEL
 USE_NAMED_MUTEX := 1
 USE_STATIC_LIBS := 1
 
@@ -58,7 +58,7 @@ endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0035 -Hbakv -I200 -m1000
+CALL_ARGS = scuxl0035 -Hbakv -I200 -m1000 -M2000
 
 DOX_EXTRACT_PRIVATE = YES
 
