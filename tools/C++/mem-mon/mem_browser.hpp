@@ -38,9 +38,8 @@ namespace mmu
 class Browser: public Mmu
 {
    CommandLine& m_rCmdLine;
-public:
-  // Browser( mmuEb::EtherboneConnection& roEtherbone, CommandLine& rCmdLine );
 
+public:
    Browser( RamAccess* poRam, CommandLine& rCmdLine );
 
    ~Browser( void );

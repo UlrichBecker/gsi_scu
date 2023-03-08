@@ -49,8 +49,7 @@ void Browser::checkMmuPresent( void )
 {
    if( isPresent() )
       return;
-   ERROR_MESSAGE( "No MMU found on this SCU!" );
-   ::exit( EXIT_FAILURE );
+   throw runtime_error( "No MMU found on this SCU!" );
 }
 
 /*!----------------------------------------------------------------------------
@@ -89,7 +88,7 @@ int Browser::operator()( std::ostream& out )
          out << currentItem.tag << separator << dec;
 
          out << setfill( ' ' ) << setw( wide ) << currentItem.iStart * factor  << separator;
-         out << setfill( ' ' ) << setw( wide ) << (currentItem.iStart + currentItem.length) * factor << separator;
+         out << setfill( ' ' ) << setw( wide ) << (currentItem.iStart + currentItem.length-1) * factor << separator;
          out << setfill( ' ' ) << setw( wide ) << currentItem.length * factor << separator;
 
          float size = (static_cast<float>( MMU_ITEMSIZE + currentItem.length) * 100.0)
@@ -104,8 +103,7 @@ int Browser::operator()( std::ostream& out )
 
    if( currentItem.iNext != 0 )
    {
-      ERROR_MESSAGE( "No end of list found. MMU could be corrupt!" );
-      ::exit( EXIT_FAILURE );
+      throw runtime_error( "No end of list found. MMU could be corrupt!" );
    }
 
    float size = (static_cast<float>(level+MMU_ITEMSIZE) * 100.0)

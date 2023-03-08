@@ -69,36 +69,35 @@ int main( int argc, char** ppArgv )
          else
             WARNING_MESSAGE( "No memory management found!" );
 
-         if( oCmdLine.getRequestedSize() == 0 )
+         if( oCmdLine.getSegmentVect().empty() )
             return EXIT_SUCCESS;
       }
 
-      if( oCmdLine.getRequestedSize() != 0 )
+      if( !oCmdLine.getSegmentVect().empty() )
       {
          for( const auto& seg: oCmdLine.getSegmentVect() )
          {
-            cout << seg.m_tag; //TODO!!!!
-         }
+            if( oCmdLine.isVerbose() )
+            {
+               cout << "Creating memory segment with tag: 0x"
+                    << hex << uppercase << seg.m_tag
+                    << ", size: " << dec << seg.m_size << endl;
+            }
+            MMU_ADDR_T addr;
+            size_t len = seg.m_size;
+            const MMU_STATUS_T status = browse.allocate( seg.m_tag, addr, len, true );
+            if( (status == ALREADY_PRESENT) && (len != seg.m_size) )
+            {
+               WARNING_MESSAGE( "Memory segment 0x" << hex << uppercase << seg.m_tag << " already allocated!"
+                                " Requested segment memory space: " << dec << seg.m_size
+                                 << ", actual segment memory space: " << len );
 
-         if( oCmdLine.isVerbose() )
-         {
-            cout << "Creating memory segment with tag: 0x"
-                 << hex << uppercase << oCmdLine.getNewTag()
-                 << ", size: " << dec << oCmdLine.getRequestedSize() << endl;
-         }
-         MMU_ADDR_T addr;
-         size_t len = oCmdLine.getRequestedSize();
-         const MMU_STATUS_T status = browse.allocate( oCmdLine.getNewTag(), addr, len, true );
-         if( status == ALREADY_PRESENT )
-         {
-            WARNING_MESSAGE( "Memory segment already allocated!"
-                             " Requested segment memory space: " << oCmdLine.getRequestedSize()
-                             << ", actual segment memory space: " << len );
-         }
-         else if( status != OK )
-         {
-            ERROR_MESSAGE( browse.status2String( status ) );
-            return EXIT_FAILURE;
+            }
+            else if( !browse.isOkay( status ) )
+            {
+               ERROR_MESSAGE( browse.status2String( status ) );
+               return EXIT_FAILURE;
+            }
          }
 
          if( oCmdLine.isDoExit() )
@@ -109,7 +108,9 @@ int main( int argc, char** ppArgv )
    }
    catch( std::exception& e )
    {
-      ERROR_MESSAGE( "std::exception occurred: \"" << e.what() << '"' );
+      if( e.what()[0] == '\0' )
+         return EXIT_SUCCESS;
+      ERROR_MESSAGE( e.what() );
       return EXIT_FAILURE;
    }
    catch( ... )

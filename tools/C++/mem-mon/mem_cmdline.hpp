@@ -54,12 +54,10 @@ private:
    bool              m_isInBytes;
    bool              m_doDelete;
    bool              m_doExit;
-   uint              m_allocSize;
-   uint              m_newTag;
    SEGMENT_VECTOR_T  m_segVector;
    std::string       m_scuUrl;
 
-   static bool readInteger( uint&, const std::string& );
+   static uint readInteger( const std::string& );
    static void readTwoIntegerParameters( uint& rParam1, uint& rParam2, const std::string& rArgStr );
 
 public:
@@ -96,16 +94,6 @@ public:
    bool isDoExit( void )
    {
       return m_doExit;
-   }
-
-   uint getRequestedSize( void )
-   {
-      return m_allocSize;
-   }
-
-   uint getNewTag( void )
-   {
-      return m_newTag;
    }
 
    SEGMENT_VECTOR_T& getSegmentVect( void )

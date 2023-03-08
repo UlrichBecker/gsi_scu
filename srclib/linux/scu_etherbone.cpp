@@ -44,6 +44,7 @@ EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
    assert( dynamic_cast<EBC::EtherboneConnection*>(m_pEbc) != nullptr );
    if( !m_pEbc->isConnected() )
    {
+      DEBUG_MESSAGE( "m_pEbc->connect();" );
       m_pEbc->connect();
       m_selfConnected = true;
    }
@@ -59,6 +60,7 @@ EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
 {
    DEBUG_MESSAGE_M_FUNCTION( rScuName );
    m_pEbc = new EBC::EtherboneConnection( rScuName, timeout );
+   DEBUG_MESSAGE( "m_pEbc->connect();" );
    m_pEbc->connect();
    c_useCount++;
 }

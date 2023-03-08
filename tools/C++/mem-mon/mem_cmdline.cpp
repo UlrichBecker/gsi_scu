@@ -25,6 +25,7 @@
 #include <scu_env.hpp>
 #include <message_macros.hpp>
 #include <sstream>
+#include  <stdexcept>
 #include "mem_cmdline.hpp"
 
 //namespace Scu
@@ -78,7 +79,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
             "\t<autodocversion>1.0</autodocversion>\n"
             "</toolinfo>"
             << endl;
-            ::exit( EXIT_SUCCESS );
+            throw std::runtime_error("");
             return 0;
       }),
       .m_hasArg   = OPTION::NO_ARG,
@@ -99,7 +100,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
               << poParser->getProgramName() << " [options]\n"
               << endl;
             poParser->list( cout );
-            ::exit( EXIT_SUCCESS );
+            throw std::runtime_error("");
             return 0;
       }),
       .m_hasArg   = OPTION::NO_ARG,
@@ -132,7 +133,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
          {
             cout << TO_STRING( VERSION ) << endl;
          }
-         ::exit( EXIT_SUCCESS );
+         throw std::runtime_error("");
          return 0;
       }),
       .m_hasArg   = OPTION::NO_ARG,
@@ -183,16 +184,13 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
-         readTwoIntegerParameters(
-                                    static_cast<CommandLine*>(poParser)->m_newTag,
-                                    static_cast<CommandLine*>(poParser)->m_allocSize,
-                                    poParser->getOptArg()
-                                 );
-         if( static_cast<CommandLine*>(poParser)->m_allocSize == 0 )
+         SEG_T oSeg;
+         readTwoIntegerParameters( oSeg.m_tag, oSeg.m_size, poParser->getOptArg() );
+         if( oSeg.m_size == 0 )
          {
-            ERROR_MESSAGE( "A value of zero is not allowed for a memory segment!" );
-            ::exit( EXIT_FAILURE );
+            throw std::runtime_error("A value of zero is not allowed for a memory segment!" );
          }
+         static_cast<CommandLine*>(poParser)->m_segVector.push_back( oSeg );
          return 0;
       }),
       .m_hasArg   = OPTION::REQUIRED_ARG,
@@ -202,25 +200,41 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_helpText = "Allocates respectively creates a new memory segment if"
                     " not already present.\n"
                     "PARAM: <tag,size_in_64-bit_units>\n"
-                    "NOTE: No space before and after the comma."
+                    "NOTE: No space before and after the comma.\n"
+                    "This option can be used for multiple times."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_doExit = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'e',
+      .m_longOpt  = "exit",
+      .m_helpText = "Exit after execution of options, don't"
+                    " show the partition table."
    }
 }; // CommandLine::c_optList
 
 /*! ---------------------------------------------------------------------------
 */
-bool CommandLine::readInteger( uint& rValue, const string& roStr )
+uint CommandLine::readInteger( const string& roStr )
 {
+   uint retVal;
    try
    {
-      rValue = stoi( roStr, nullptr, (roStr[0] == '0' && roStr[1] == 'x')? 16 : 10 );
+      retVal = stoi( roStr, nullptr, (roStr[0] == '0' && roStr[1] == 'x')? 16 : 10 );
    }
    catch( std::exception& e )
    {
-      ERROR_MESSAGE( "Integer number is expected and not that: \""
-                     << roStr << "\" !" );
-      return true;
+      std::string errStr = "Integer number is expected and not that: \"";
+      errStr += roStr;
+      errStr += "\" !";
+      throw std::runtime_error( errStr );
    }
-   return false;
+   return retVal;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -233,20 +247,17 @@ void CommandLine::readTwoIntegerParameters( uint& rParam1, uint& rParam2, const 
    {
       if( i >= 2 )
       {
-         ERROR_MESSAGE( "To much arguments in option!" );
-         ::exit( EXIT_FAILURE );
+         throw std::runtime_error( "To much arguments in option!" );
       }
       if( single.empty() )
          continue;
 
       if( i == 0 )
       {
-         if( readInteger( rParam1, single ) )
-            ::exit( EXIT_FAILURE );
+         rParam1 = readInteger( single );
          continue;
       }
-      if( readInteger( rParam2, single ) )
-        ::exit( EXIT_FAILURE );
+      rParam2 = readInteger( single );
    }
 }
 
@@ -259,9 +270,8 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_isInBytes( false )
    ,m_doDelete( false )
    ,m_doExit( false )
-   ,m_allocSize( 0 )
-   ,m_newTag( 0x0000 )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    m_isOnScu = Scu::isRunningOnScu();
    if( m_isOnScu )
       m_scuUrl = "dev/wbm0";
@@ -273,6 +283,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
  */
 CommandLine::~CommandLine( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! ---------------------------------------------------------------------------
@@ -290,8 +301,7 @@ int CommandLine::onArgument( void )
 
    if( !m_scuUrl.empty() )
    {
-      ERROR_MESSAGE( "Only one argument is allowed!" );
-      ::exit( EXIT_FAILURE );
+      throw std::runtime_error( "Only one argument is allowed!" );
    }
 
    m_scuUrl = getArgVect()[getArgIndex()];
