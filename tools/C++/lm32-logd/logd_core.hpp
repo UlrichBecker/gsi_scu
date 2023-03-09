@@ -209,6 +209,12 @@ private:
    void updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& );
 
    /*!
+    * @brief Resets the log-fifo in allocated memory segment.
+    * @note CAUTION: All unread log items will be lost!
+    */
+   void resetFiFo( void );
+
+   /*!
     * @brief Writes the number of DDR3-FiFo- log-items which has been read by the log-daemon
     *        in the DDR3-RAM, so that the LM32-app can delete them.
     */

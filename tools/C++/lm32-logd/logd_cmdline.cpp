@@ -427,6 +427,22 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     "NOTE: This option has only an effect when the concerning memory segment\n"
                     "      is not already allocated.\n"
                     "The default value is: " TO_STRING(DEFAULT_MAX_ITEMS_IN_MEMORY) " message items."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_doReset = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'r',
+      .m_longOpt  = "reset",
+      .m_helpText = "Makes a fifo-reset respectively a reinitialization"
+                    " during start of this application.\n"
+                    "CAUTION: Possible stored log-data will be lost!\n"
+                    "NOTE: When the memory already has been allocated by"
+                    " the application \"mem-mon\" so this option becomes mandatory."
    }
 
 }; // CommandLine::c_optList
@@ -468,6 +484,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_isDaemonized( false )
    ,m_addBuildId( false )
    ,m_readBuildId( false )
+   ,m_doReset( false )
    ,m_interval( DEFAULT_INTERVAL )
    ,m_maxItemsPerInterval( DEFAULT_MAX_ITEMS )
    ,m_burstLimit( Ddr3Access::NEVER_BURST )

@@ -58,7 +58,7 @@ endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0035 -Hbakv -I200 -m1000 -M2000
+CALL_ARGS = scuxl0035 -Hbakvr -I200 -m1000 -M2000
 
 DOX_EXTRACT_PRIVATE = YES
 

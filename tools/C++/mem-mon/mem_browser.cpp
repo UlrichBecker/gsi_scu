@@ -112,7 +112,7 @@ int Browser::operator()( std::ostream& out )
    const uint NETTO_MAX = maxCapacity - MMU_ITEMSIZE;
    if( m_rCmdLine.isVerbose() )
    {
-      out << "=======================================================\n";
+      out << "========================================================\n";
       out << "total:       "
           << level * factor << " of " << NETTO_MAX *  factor << ",\n"
           << "free:        " << (NETTO_MAX - level) * factor << ",\n"

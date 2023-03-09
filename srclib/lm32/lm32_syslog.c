@@ -98,14 +98,22 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
    if( status != OK )
       return status;
 
-   const SYSLOG_FIFO_ADMIN_T fifoAdmin =
+   SYSLOG_FIFO_ADMIN_T fifoAdmin =
    {
       .admin.indexes.offset   = mg_adminOffset + SYSLOG_FIFO_ADMIN_SIZE,
-      .admin.indexes.capacity = numOfItems     - SYSLOG_FIFO_ADMIN_SIZE,
+      .admin.indexes.capacity = numOfItems - SYSLOG_FIFO_ADMIN_SIZE,
       .admin.indexes.start    = 0,
       .admin.indexes.end      = 0,
       .admin.wasRead          = 0
    };
+
+   /*
+    * In the case the memory segment was already allocated by the tool "mem-mon"
+    * it could be, that the allocated memory capacity isn't dividable by the
+    * size of a sys-log item. In this case it becomes dividable by sacrificing
+    * some 64-bit words.
+    */
+   fifoAdmin.admin.indexes.capacity -= (fifoAdmin.admin.indexes.capacity % SYSLOG_FIFO_ITEM_SIZE);
 
    DBPRINT1( "offset: %u\ncapacity: %u\n",
              fifoAdmin.admin.indexes.offset,
@@ -115,7 +123,6 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
 
    return status;
 }
-
 
 /*! ---------------------------------------------------------------------------
  * @ingroup LM32_LOG

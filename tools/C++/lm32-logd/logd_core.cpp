@@ -188,7 +188,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       string text = "Memory for log-messages already allocated by another process, bud requested maximum number of items: ";
       text += to_string(static_cast<int>(m_rCmdLine.getMaxItemsInMemory()));
       text += " differs from the actual number: ";
-      text += to_string(static_cast<int>(m_capacity / SYSLOG_FIFO_ITEM_SIZE));
+      text += to_string(static_cast<int>((m_capacity - SYSLOG_FIFO_ADMIN_SIZE)/SYSLOG_FIFO_ITEM_SIZE));
       if( m_rCmdLine.isDemonize() )
       {
          m_isError = true;
@@ -196,6 +196,21 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       }
       else
          WARNING_MESSAGE( text );
+   }
+
+   if( m_capacity < (SYSLOG_FIFO_ADMIN_SIZE + SYSLOG_FIFO_ITEM_SIZE) )
+   {
+      string errText = "Allocated memory of ";
+      errText += to_string( m_capacity );
+      errText += " 64-bit words is to small! At least ";
+      errText += to_string( SYSLOG_FIFO_ADMIN_SIZE + SYSLOG_FIFO_ITEM_SIZE );
+      errText += " 64-bit words shall be requested.";
+      if( m_rCmdLine.isDemonize() )
+      {
+         m_isError = true;
+         *this << errText << std::flush;
+      }
+      throw std::runtime_error( errText );
    }
 
    if( m_rCmdLine.isVerbose() )
@@ -211,7 +226,28 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
 
    m_offset   += SYSLOG_FIFO_ADMIN_SIZE;
    m_capacity -= SYSLOG_FIFO_ADMIN_SIZE;
-   //TODO Wenn selbst allokiert wurde, muss hier das RAM mit Offset und Capacity initiallisiert werden, aber nur dan!
+
+   /*
+    * In the case the memory segment was already allocated by the tool "mem-mon"
+    * it could be, that the allocated memory capacity isn't dividable by the
+    * size of a sys-log item. In this case it becomes dividable by sacrificing
+    * some 64-bit words.
+    */
+   m_capacity -= (m_capacity % SYSLOG_FIFO_ITEM_SIZE);
+
+   /*
+    * Was the memory allocated by this application,
+    * or a reset is requested by command line option?
+    */
+   if( (status == mmu::OK) || m_rCmdLine.isReset() )
+   {
+      if( m_rCmdLine.isVerbose() )
+      {
+         cout << "Resetting log-FiFo." << endl;
+      }
+      resetFiFo();
+   }
+
    if( m_rCmdLine.isVerbose() )
    {
       cout << "Begin:          " << m_offset
@@ -247,6 +283,7 @@ Lm32Logd::~Lm32Logd( void )
    }
    if( m_poTerminal != nullptr )
    {
+      m_poTerminal->reset();
       delete m_poTerminal;
    }
    if( m_isSyslogOpen )
@@ -343,7 +380,23 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
    }
 }
 
+/*! ---------------------------------------------------------------------------
+ */
+void Lm32Logd::resetFiFo( void )
+{
+   DEBUG_MESSAGE_M_FUNCTION("");
 
+   SYSLOG_FIFO_ADMIN_T fifoAdmin;
+
+   fifoAdmin.admin.indexes.offset   = m_offset;
+   fifoAdmin.admin.indexes.capacity = m_capacity;
+   ramRingReset( &fifoAdmin.admin.indexes );
+   fifoAdmin.admin.wasRead = 0;
+   fifoAdmin.__padding__ = 0;
+
+   write( m_fifoAdminBase, reinterpret_cast<uint64_t*>(&fifoAdmin),
+          sizeof(SYSLOG_FIFO_ADMIN_T) / sizeof(uint64_t) );
+}
 
 /*! ---------------------------------------------------------------------------
  */
@@ -525,7 +578,7 @@ void Lm32Logd::readItems( SYSLOG_FIFO_ITEM_T* pData, const uint len )
  */
 void Lm32Logd::readItems( void )
 {
-   DEBUG_MESSAGE_M_FUNCTION("");
+ //  DEBUG_MESSAGE_M_FUNCTION("");
 
    SYSLOG_FIFO_ADMIN_T fifoAdmin;
 

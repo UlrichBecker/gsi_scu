@@ -54,6 +54,7 @@ private:
    bool          m_isDaemonized;
    bool          m_addBuildId;
    bool          m_readBuildId;
+   bool          m_doReset;
    uint          m_interval;
    uint          m_maxItemsPerInterval;
    int           m_burstLimit;
@@ -133,6 +134,11 @@ public:
    bool isReadBuildId( void )
    {
       return m_readBuildId;
+   }
+
+   bool isReset( void )
+   {
+      return m_doReset;
    }
 
    uint getPollInterwalTime( void )
