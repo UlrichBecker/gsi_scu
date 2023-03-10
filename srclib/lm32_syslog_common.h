@@ -165,14 +165,14 @@ RAM_RING_INDEX_T sysLogFifoGetSize( const SYSLOG_FIFO_ADMIN_T* pThis )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup LM32_LOG
- * @brief Returns the number of currently used sys-log items.
+ * @brief Returns the number of currently unread sys-log items.
  * @param pThis Pointer to the shared ring indexes object.
  * @return Actual number written items
  */
 STATIC inline
 RAM_RING_INDEX_T sysLogFifoGetItemSize( const SYSLOG_FIFO_ADMIN_T* pThis )
 {
-   return sysLogFifoGetSize( pThis ) / SYSLOG_FIFO_ITEM_SIZE;
+   return (sysLogFifoGetSize( pThis ) - pThis->admin.wasRead) / SYSLOG_FIFO_ITEM_SIZE;
 }
 
 /*! ---------------------------------------------------------------------------

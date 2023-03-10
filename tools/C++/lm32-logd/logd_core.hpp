@@ -203,6 +203,7 @@ private:
     */
    uint readStringFromLm32( std::string& rStr, uint addr, const bool = false );
 
+   bool _updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& );
    /*!
     * @brief Reads FiFo indexes (pointer) from the DDR3-RAM.
     */

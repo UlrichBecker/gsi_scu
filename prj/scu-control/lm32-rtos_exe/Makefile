@@ -99,7 +99,7 @@ FG_UT = fg-$(SLOT)-$(FG_NUM)
 
 .PHONY: key
 key:
-	ssh-copy-id -i $(HOME)/.ssh/id_rsa.pub root@$(SCU_URL)
+	ssh-copy-id -f -i $(HOME)/.ssh/id_rsa.pub root@$(SCU_URL)
 
 .PHONY: cptest
 cptest:

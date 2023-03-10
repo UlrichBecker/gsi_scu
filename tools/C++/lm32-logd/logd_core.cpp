@@ -359,7 +359,7 @@ int Lm32Logd::readKey( void )
 
 /*! ---------------------------------------------------------------------------
  */
-void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
+bool Lm32Logd::_updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
 {
    static_assert( (sizeof(SYSLOG_FIFO_ADMIN_T) % sizeof(uint64_t) == 0 ), "" );
 
@@ -367,17 +367,44 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
          reinterpret_cast<uint64_t*>(&rAdmin),
          sizeof(SYSLOG_FIFO_ADMIN_T) / sizeof(uint64_t) );
 
-   if( (rAdmin.admin.indexes.offset   != m_offset) ||
-       (rAdmin.admin.indexes.capacity != m_capacity) )
+   if( rAdmin.admin.indexes.offset != m_offset )
+      return false;
+
+   if( rAdmin.admin.indexes.capacity != m_capacity )
+      return false;
+
+   return true;
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
+{
+   if( _updateFiFoAdmin( rAdmin ) )
+      return;
+
+   const char* text = "Fifo error. Trying to reinitialize FiFo.";
+
+   if( m_rCmdLine.isDemonize() )
    {
-      const char* text = "LM32 syslog fifo is corrupt!";
-      if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << text << std::endl;
-      }
-      throw std::runtime_error( text );
+      m_isError = true;
+      *this << text << std::endl;
    }
+   else
+      WARNING_MESSAGE( text );
+
+   resetFiFo();
+
+   if( _updateFiFoAdmin( rAdmin ) )
+      return;
+
+   text = "LM32 syslog FiFo is corrupt!";
+   if( m_rCmdLine.isDemonize() )
+   {
+      m_isError = true;
+      *this << text << std::endl;
+   }
+   throw std::runtime_error( text );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -732,6 +759,9 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    char paddingChar = ' ';
    uint paddingSize = 0;
 
+   /*
+    * Evaluating of the format-string.
+    */
    uint ai = 0;
    uint base = 10;
    for( uint i = 0; i < format.length(); i++ )
