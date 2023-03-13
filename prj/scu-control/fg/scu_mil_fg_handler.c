@@ -134,24 +134,15 @@ STATIC void milPrintDeviceError( const int status, const int slot, const char* m
      __MSG_ITEM( RCV_TASK_BSY );
      default:
      {
-     #ifdef CONFIG_USE_LM32LOG
         lm32Log( LM32_LOG_ERROR, "%s%d failed with code %d, message: %s" ESC_NORMAL "\n",
                                  pText, slot, status, msg);
-     #else
-        mprintf( "%s%d failed with code %d, message: %s" ESC_NORMAL "\n",
-                 pText, slot, status);
-     #endif
         return;
      }
   }
   #undef __MSG_ITEM
-#ifdef CONFIG_USE_LM32LOG
+
   lm32Log( LM32_LOG_ERROR, "%s%d failed with message %s, %s" ESC_NORMAL "\n",
                            pText, slot, pMessage, msg);
-#else
-  mprintf( "%s%d failed with message %s, %s" ESC_NORMAL "\n",
-           pText, slot, pMessage, msg);
-#endif
 }
 
 
@@ -816,11 +807,7 @@ STATIC inline void pushDaqData( FG_MACRO_T fgMacro,
    {
       if( (timestamp - lastTime) > 100000000ULL )
       {
-      #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_WARNING, ESC_WARNING "Time-gap: %d" ESC_NORMAL "\n", count++ );
-      #else
-         mprintf( ESC_WARNING "Time-gap: %d" ESC_NORMAL "\n", count++ );
-      #endif
       }
    }
    lastTime = timestamp;
@@ -909,20 +896,12 @@ STATIC inline void pushDaqData( FG_MACRO_T fgMacro,
  */
 STATIC void printTimeoutMessage( register MIL_TASK_DATA_T* pMilTaskData )
 {
-#ifdef CONFIG_USE_LM32LOG
    lm32Log( LM32_LOG_ERROR, ESC_ERROR
             "ERROR: Timeout %s: state %s, taskid %d index %d" ESC_NORMAL"\n",
             (pMilTaskData->lastMessage.slot != 0)? "dev_sio_handler" : "dev_bus_handler",
             state2string( pMilTaskData->state ),
             getMilTaskId( pMilTaskData ),
             pMilTaskData->lastChannel );
-#else
-   mprintf( ESC_ERROR "ERROR: Timeout %s: state %s, taskid %d index %d" ESC_NORMAL"\n",
-            (pMilTaskData->lastMessage.slot != 0)? "dev_sio_handler" : "dev_bus_handler",
-            state2string( pMilTaskData->state ),
-            getMilTaskId( pMilTaskData ),
-            pMilTaskData->lastChannel );
-#endif
 }
 
 /*
@@ -1148,15 +1127,9 @@ void handleMilFg( const unsigned int socket,
 
    if( channel >= ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) )
    {
-   #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
                "ERROR: %s: Channel of MIL-FG out of range: %d\n" ESC_NORMAL,
                __func__, channel );
-   #else
-      mprintf( ESC_ERROR 
-               "ERROR: %s: Channel of MIL-FG out of range: %d\n" ESC_NORMAL,
-               __func__, channel );
-   #endif
       return;
    }
 
@@ -1677,15 +1650,9 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 
          default: /* Should never be reached! */
          {
-         #ifdef CONFIG_USE_LM32LOG
             lm32Log( LM32_LOG_ERROR, ESC_ERROR
                                      "ERROR: Unknown FSM-state of %s(): %d !\n" ESC_NORMAL,
                                      __func__, pMilData->state );
-
-         #else
-            mprintf( ESC_ERROR "ERROR: Unknown FSM-state of %s(): %d !\n" ESC_NORMAL,
-                     __func__, pMilData->state );
-         #endif
             FSM_INIT_FSM( ST_WAIT, label='Initializing', color=blue );
             break;
          }

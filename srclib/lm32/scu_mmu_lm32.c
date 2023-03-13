@@ -30,6 +30,7 @@
 
 MMU_OBJ_T* mg_pMuObj = NULL;
 
+#ifdef CONFIG_SCU_USE_DDR3
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu_lm32.h
  */
@@ -66,5 +67,8 @@ void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
       ddr3write64( mg_pMuObj, index, &pItem[i] );
    }
 }
+#else
+  #error TODO mmuInit, mmuRead and mmuWrite for SCU4
+#endif
 
 /*================================== EOF ====================================*/

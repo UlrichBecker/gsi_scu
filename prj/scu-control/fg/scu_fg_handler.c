@@ -388,14 +388,9 @@ void handleAdacFg( const unsigned int slot,
 
    if( channel >= ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) )
    {
-   #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR 
                "%s: Channel of ADAC FG out of range: %d\n" ESC_NORMAL,
                __func__, channel );
-   #else
-      mprintf( ESC_ERROR "%s: Channel of ADAC FG out of range: %d\n" ESC_NORMAL,
-               __func__, channel );
-   #endif
       return;
    }
 

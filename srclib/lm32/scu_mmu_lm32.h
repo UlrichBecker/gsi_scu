@@ -33,7 +33,9 @@
   #error This module is for LM32 only! 
 #endif
 
-#include <scu_ddr3_lm32.h>
+#ifdef CONFIG_SCU_USE_DDR3
+  #include <scu_ddr3_lm32.h>
+#endif
 #include <scu_mmu.h>
 
 #define MMU_ASSERT DDR_ASSERT
@@ -46,10 +48,14 @@ namespace mmu
 {
 #endif
 
+#ifdef CONFIG_SCU_USE_DDR3
 /*!
  * @ingroup SCU_MMU
  */
 typedef DDR3_T MMU_OBJ_T;
+#else
+ #error TODO: MMU_OBJ_T for SCU4
+#endif
 
 /*!
  * @ingroup SCU_MMU

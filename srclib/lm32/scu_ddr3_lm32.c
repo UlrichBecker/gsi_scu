@@ -31,6 +31,10 @@
 #include <mini_sdb.h>
 #include <dbg.h>
 
+#ifndef CONFIG_SCU_USE_DDR3
+   #error CONFIG_SCU_USE_DDR3 has to be defined!
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */

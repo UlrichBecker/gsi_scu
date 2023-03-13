@@ -105,15 +105,9 @@ void wdtPoll( void )
       if( !fgIsStarted( i ) )
          continue;
 
-   #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
                "ERROR: MSI-timeout on fg-%u-%u channel: %u !\n" ESC_NORMAL,
                getSocket(i), getDevice(i), i );
-   #else
-      mprintf( ESC_ERROR
-               "ERROR: MSI-timeout on fg-%u-%u channel: %u !\n" ESC_NORMAL,
-               getSocket(i), getDevice(i), i );
-   #endif
    }
 }
 #endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */
@@ -133,15 +127,9 @@ inline void sendSignal( const SIGNAL_T sig, const unsigned int channel )
       MSI_BOX_SLOT_ACCESS( g_shared.oSaftLib.oFg.aRegs[channel].mbx_slot, signal ) = sig;
 
 #ifdef CONFIG_DEBUG_FG_SIGNAL
- #ifdef CONFIG_USE_LM32LOG
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
                             "Signal: %s, channel: %d sent\n" ESC_NORMAL,
             signal2String( sig ), channel );
- #else
-   #warning CONFIG_DEBUG_FG_SIGNAL is defined this will destroy the timing!
-   mprintf( ESC_DEBUG "Signal: %s, channel: %d sent\n" ESC_NORMAL,
-            signal2String( sig ), channel );
- #endif
 #endif
 }
 

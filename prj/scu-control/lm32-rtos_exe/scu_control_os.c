@@ -380,24 +380,14 @@ void main( void )
              pMyMsi,
              sizeof( SCU_SHARED_DATA_T )
           );
-#ifdef CONFIG_USE_MMU
   MMU_STATUS_T status;
-#endif
-#if defined( CONFIG_USE_MMU ) && !defined( CONFIG_USE_LM32LOG )
-  MMU_OBJ_T mmu;
-  status = mmuInit( &mmu );
-#endif
-#ifdef CONFIG_USE_LM32LOG
   status = lm32LogInit( 1000 );
-#endif
-#ifdef CONFIG_USE_MMU
   mprintf( "\nMMU- status: %s\n", mmuStatus2String( status ) );
   if( !mmuIsOkay( status ) )
   {
      mprintf( ESC_ERROR "ERROR Unable to get DDR3- RAM!\n" ESC_NORMAL );
      while( true );
   }
-#ifdef CONFIG_USE_LM32LOG
   mprintf( "Maximum log extra parameter: " TO_STRING(LM32_LOG_NUM_OF_PARAM) "\n" );
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
@@ -405,15 +395,14 @@ void main( void )
                           pMyMsi,
                           sizeof( SCU_SHARED_DATA_T )
           );
-#endif
-#endif
+
    scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Addr nesting count: 0x%p\n" ESC_NORMAL,
            &__atomic_section_nesting_count );
 
    initializeGlobalPointers();
 
    /*
-    * Creating the main task. 
+    * Creating the main task.
     */
    TASK_CREATE_OR_DIE( taskMain, 1024, TASK_PRIO_MAIN, NULL );
 

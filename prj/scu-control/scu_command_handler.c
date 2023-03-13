@@ -123,11 +123,8 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * In the case of a detected parameter error this function
          * becomes terminated.
          */
-      #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_ERROR,"Value %d out of range!\n", value );
-      #else
-         mprintf( ESC_ERROR "Value %d out of range!\n" ESC_NORMAL, value );
-      #endif
+
         /*
          * signal done to saftlib
          */
@@ -163,11 +160,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       #ifdef _CONFIG_VARIABLE_MIL_GAP_READING
          g_gapReadingTime = value;
       #else
-       #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_ERROR, "No variable MIL gap reading support!" );
-       #else
-         mprintf( ESC_ERROR "No variable MIL gap reading support!\n" ESC_NORMAL );
-       #endif
       #endif
          break;
       }
@@ -215,11 +208,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
        #ifdef CONFIG_MIL_FG
          fgMilClearHandlerState( value );
        #else
-        #ifdef CONFIG_USE_LM32LOG
-          lm32Log( LM32_LOG_ERROR, ESC_ERROR "No MIL support!\n" ESC_NORMAL );
-        #else
-          mprintf( ESC_ERROR "No MIL support!\n" ESC_NORMAL );
-        #endif
+         lm32Log( LM32_LOG_ERROR, ESC_ERROR "No MIL support!\n" ESC_NORMAL );
        #endif
          break;
       }
@@ -234,26 +223,16 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_TEMPERATURE_WATCHER )
          printTemperatures();
       #else
-       #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_WARNING, "No history support!\n" );
-       #else
-         mprintf( ESC_ERROR "No history!\n" ESC_NORMAL );
-       #endif
       #endif
          break;
       }
 
       default:
       {
-      #ifdef CONFIG_USE_LM32LOG
          lm32Log( LM32_LOG_ERROR, ESC_ERROR
                   "Error: Unknown MSI-command! op-code: 0x04%X, value: 0x%04X\n"
                   ESC_NORMAL, code, value );
-      #else
-         mprintf( ESC_ERROR
-                  "Error: Unknown MSI-command! op-code: 0x%X, value: 0x%X\n"
-                  ESC_NORMAL, code, value );
-      #endif
          break;
       }
    }

@@ -37,6 +37,7 @@
 MMU_OBJ_T g_mmuObj;
 STATIC MMU_ADDR_T mg_adminOffset = 0;
 
+#ifdef CONFIG_SCU_USE_DDR3
 /*! ---------------------------------------------------------------------------
  */
 STATIC inline void syslogWriteRam( unsigned int index, const RAM_PAYLOAD_T* pData )
@@ -54,6 +55,9 @@ STATIC inline void syslogReadRam( unsigned int index, RAM_PAYLOAD_T* pData )
    ddr3read64( &g_mmuObj, pData, index );
    criticalSectionExit();
 }
+#else
+ #error TODO syslogWriteRam and syslogReadRam for SCU4
+#endif
 
 /*! ---------------------------------------------------------------------------
  */
@@ -95,7 +99,7 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
    numOfItems += SYSLOG_FIFO_ADMIN_SIZE;
 
    status = mmuAlloc( TAG_LM32_LOG, &mg_adminOffset, &numOfItems, true );
-   if( status != OK )
+   if( !mmuIsOkay( status ) )
       return status;
 
    SYSLOG_FIFO_ADMIN_T fifoAdmin =
