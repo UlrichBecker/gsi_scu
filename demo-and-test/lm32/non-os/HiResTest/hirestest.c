@@ -118,7 +118,7 @@ void main( void )
       mprintf( "No usable DAQ found!\n" );
       return;
    }
-   mprintf( "%d DAQ found %d channels\n",
+   mprintf( "%d DAQ- devices found %d channels\n",
             daqBusGetFoundDevices( &g_allDaq ),
             daqBusGetNumberOfAllFoundChannels( &g_allDaq ) );
 
@@ -133,10 +133,10 @@ void main( void )
 
    printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
  //  daqChannelEnableExtrenTrigger( pChannel );
-  daqChannelEnableTriggerMode( pChannel );
+   daqChannelEnableTriggerMode( pChannel );
    daqChannelEnableExternTriggerHighRes( pChannel );
 
- daqChannelEnableHighResolution( pChannel );
+ //daqChannelEnableHighResolution( pChannel );
  //  daqChannelEnablePostMortem( pChannel );
    daqChannelPrintInfo( pChannel );
 
@@ -146,7 +146,7 @@ void main( void )
    {
       daqChannelEnableHighResolution( pChannel );
       unsigned int i = 0;
-      while( !daqDeviceTestAndClearHiResInt( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) ) )
+     // while( !daqDeviceTestAndClearHiResInt( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) ) )
       while( !daqChannelTestAndClearHiResIntPending( pChannel ) )
      // while( daqChannelGetPmFifoWords( pChannel ) < DAQ_FIFO_PM_HIRES_WORD_SIZE )
          i++;
@@ -156,7 +156,7 @@ void main( void )
       daqChannelPrintInfo( pChannel );
       mprintf( "Polling: %d\n", i );
       readFiFo( pChannel );
-       printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
+      printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
    }
 #endif
    mprintf( "End...\n" );

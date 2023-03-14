@@ -235,11 +235,21 @@ STATIC void taskDaq( void* pTaskData UNUSED )
  */
 void taskStartDaqIfAnyPresent( void )
 {
-   if( (mg_taskDaqHandle == NULL) && (daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs ) > 0) )
-   {
-      TASK_CREATE_OR_DIE( taskDaq, 512, TASK_PRIO_ADDAC_DAQ, &mg_taskDaqHandle );
-      //vTaskDelay( pdMS_TO_TICKS( 1 ) );
+   if( mg_taskDaqHandle != NULL )
+   { /*
+      * Task is already running.
+      */
+      return;
    }
+
+   if( daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs ) == 0 )
+   { /*
+      * No DAQ devices found, running of this task is meaningless.
+      */
+      return;
+   }
+
+   TASK_CREATE_OR_DIE( taskDaq, 512, TASK_PRIO_ADDAC_DAQ, &mg_taskDaqHandle );
 }
 
 /*! ---------------------------------------------------------------------------

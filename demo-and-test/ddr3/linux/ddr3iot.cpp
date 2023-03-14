@@ -138,18 +138,31 @@ void bigDataTest( RamAccess* poRam, uint size, bool burst )
  */
 void run( std::string& ebName )
 {
-   Ddr3Access oDdr3( ebName );
+   RamAccess* pRam;
+   try
+   {
+      pRam = new Ddr3Access( ebName );
+   }
+   //catch( BusException& e )
+   catch( std::exception& e )
+   {
+      //if( e.what().found( "VendorId" ) != 0 )
+         cout << "Test" << e.what() << endl;
+      throw e;
+   }
 
-   ioTest( &oDdr3, 5, 0x1122334455667788, true );
-   ioTest( &oDdr3, 5, 0xAAAAAAAA55555555, true );
-   ioTest( &oDdr3, 1, 0xF0F0F0F0F0F0F0F0, true );
-   ioTest( &oDdr3, 1, 0xFFFFFFFF00000000, true  );
+   ioTest( pRam, 5, 0x1122334455667788, true );
+   ioTest( pRam, 5, 0xAAAAAAAA55555555, true );
+   ioTest( pRam, 1, 0xF0F0F0F0F0F0F0F0, true );
+   ioTest( pRam, 1, 0xFFFFFFFF00000000, true  );
 
-   arrayTest( &oDdr3, 2000000, true );
+   arrayTest( pRam, 2000000, true );
 
    constexpr uint SIZE = 100000;
-   bigDataTest( &oDdr3, SIZE, false );
-   bigDataTest( &oDdr3, SIZE, true );
+   bigDataTest( pRam, SIZE, false );
+   bigDataTest( pRam, SIZE, true );
+
+   delete pRam;
 }
 
 //=============================================================================
@@ -160,7 +173,13 @@ int main( int argc, char** ppArgv )
       std::string ebName;
       if( Scu::isRunningOnScu() )
       {
-         ebName = "dev/wbm0";
+         if( argc == 2 )
+         {
+            ebName = "dev/ttyUSB";
+            ebName += ppArgv[1];
+         }
+         else
+            ebName = "dev/wbm0";
       }
       else
       {
@@ -172,6 +191,7 @@ int main( int argc, char** ppArgv )
          ebName = "tcp/";
          ebName += ppArgv[1];
       }
+      cout << "Device: " << ebName << endl;
       run( ebName );
    }
    catch( std::exception& e )

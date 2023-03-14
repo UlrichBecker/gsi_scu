@@ -200,7 +200,10 @@ public:
 
    WB_ACCESS_T getWbMeasurementMaxTime( USEC_T& rTimestamp, USEC_T& rDuration, std::size_t& rSize );
    WB_ACCESS_T getWbMeasurementMinTime( USEC_T& rTimestamp, USEC_T& rDuration, std::size_t& rSize );
-#endif /* ifdef CONFIG_EB_TIME_MEASSUREMENT */
+#else
+   #define startTimeMeasurement()
+   #define stopTimeMeasurement( a, b )
+#endif /* else ifdef CONFIG_EB_TIME_MEASSUREMENT ============================ */
 
    /*!
     * @brief Reads data from the SCU-RAM.
@@ -212,13 +215,10 @@ public:
    void readRam( RAM_DAQ_PAYLOAD_T* pData, std::size_t len, uint offset )
    {
       assert( m_poRamBuffer->isConnected() );
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
+
       startTimeMeasurement();
-   #endif
       m_poRamBuffer->read( offset, reinterpret_cast<uint64_t*>(pData), len );
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * sizeof( pData->ad32 ), TIME_MEASUREMENT_T::DDR3_READ );
-   #endif
    }
 
    /*!
@@ -249,13 +249,9 @@ public:
                   const std::size_t offset = 0,
                   const etherbone::format_t format = EB_DATA8 )
    {
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();
-   #endif
       m_oLm32.read( offset, pData, len, format | EB_BIG_ENDIAN );
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * (format & 0xFF), TIME_MEASUREMENT_T::LM32_READ );
-   #endif
    }
 
 
@@ -278,13 +274,9 @@ public:
                    const std::size_t offset = 0,
                    const etherbone::format_t format = EB_DATA8 )
    {
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
       startTimeMeasurement();
-   #endif
       m_oLm32.write( offset, pData, len, format | EB_BIG_ENDIAN );
-   #ifdef CONFIG_EB_TIME_MEASSUREMENT
       stopTimeMeasurement( len * (format & 0xFF), TIME_MEASUREMENT_T::LM32_WRITE );
-   #endif
    }
 };
 
