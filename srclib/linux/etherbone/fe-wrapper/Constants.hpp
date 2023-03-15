@@ -31,9 +31,10 @@ namespace FeSupport {
         irq_endpoint   = 0x10050082,
         irq_control    = 0x10040084,
         wb4_blockram   = 0x66cfeb52,
-        wb_ddr3ram     = 0x20150828,
-        wb_ddr3ram2    = 0x20160525,
-        lm32_ram_user  = 0x54111351
+        wb_ddr3ram     = 0x20150828, // On SCU3 only!
+        wb_ddr3ram2    = 0x20160525, // On SCU3 only!
+        lm32_ram_user  = 0x54111351,
+        wb_pseudo_sram = 0x169edcb7  // On SCU4 only!
       };
     } // namespace Etherbone
   } // namespace Scu

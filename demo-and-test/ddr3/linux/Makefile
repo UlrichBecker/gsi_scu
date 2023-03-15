@@ -19,6 +19,8 @@ SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
+
 
 DEFINES += DEBUGLEVEL
 

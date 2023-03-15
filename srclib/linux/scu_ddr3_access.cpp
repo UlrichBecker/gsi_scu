@@ -80,8 +80,13 @@ void Ddr3Access::init( void )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
    assert( isConnected() );
+
    m_if1Addr = findDeviceBaseAddress( EBC::gsiId, EBC::wb_ddr3ram );
+   DEBUG_MESSAGE( "DDR3 IF1: 0x" << std::hex << std::uppercase << m_if1Addr << std::dec );
+
    m_if2Addr = findDeviceBaseAddress( EBC::gsiId, EBC::wb_ddr3ram2 );
+   DEBUG_MESSAGE( "DDR3 IF2: 0x" << std::hex << std::uppercase << m_if2Addr << std::dec );
+
    flushFiFo();
 }
 

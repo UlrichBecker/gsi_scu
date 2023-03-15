@@ -14,6 +14,8 @@
 #include <scu_env.hpp>
 #include <daq_calculations.hpp>
 #include <scu_ddr3_access.hpp>
+#include <scu_sram_access.hpp>
+#include <BusException.hpp>
 
 namespace EB = FeSupport::Scu::Etherbone;
 using namespace EB;
@@ -138,20 +140,29 @@ void bigDataTest( RamAccess* poRam, uint size, bool burst )
  */
 void run( std::string& ebName )
 {
-   RamAccess* pRam;
+   RamAccess* pRam = nullptr;
    try
    {
       pRam = new Ddr3Access( ebName );
    }
-   //catch( BusException& e )
-   catch( std::exception& e )
+   catch( BusException& e )
    {
-      //if( e.what().found( "VendorId" ) != 0 )
-         cout << "Test" << e.what() << endl;
-      throw e;
+      string exceptText = e.what();
+      if( exceptText.find( "VendorId" ) == string::npos )
+         throw BusException( e );
+
+      pRam = new SramAccess( ebName );
    }
 
-   ioTest( pRam, 5, 0x1122334455667788, true );
+   if( dynamic_cast<Ddr3Access*>(pRam) != nullptr )
+      cout << "Using DDR3-RAM..." << endl;
+   else if( dynamic_cast<SramAccess*>(pRam) != nullptr )
+      cout << "Using S-RAM..." << endl;
+   else
+      throw BusException( "Unknown RAM" );
+
+   ioTest( pRam, 0, 0x1122334455667788, true );
+#if 1
    ioTest( pRam, 5, 0xAAAAAAAA55555555, true );
    ioTest( pRam, 1, 0xF0F0F0F0F0F0F0F0, true );
    ioTest( pRam, 1, 0xFFFFFFFF00000000, true  );
@@ -161,7 +172,7 @@ void run( std::string& ebName )
    constexpr uint SIZE = 100000;
    bigDataTest( pRam, SIZE, false );
    bigDataTest( pRam, SIZE, true );
-
+#endif
    delete pRam;
 }
 

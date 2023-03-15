@@ -37,7 +37,7 @@ namespace Scu
 ///////////////////////////////////////////////////////////////////////////////
 /*!----------------------------------------------------------------------------
  * @brief Class administrates the access functions "write" and "read" for
- *        the SCU-DDR3 memory:
+ *        the SCU3-DDR3 memory:
  */
 class Ddr3Access: public RamAccess
 {

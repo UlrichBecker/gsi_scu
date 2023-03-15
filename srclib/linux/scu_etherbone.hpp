@@ -71,6 +71,7 @@ class EtherboneAccess
    bool                      m_selfConnected;
 
 public:
+
    /*!
     * @brief Constructor which uses a shared object of EtherboneConnection.
     *        It establishes a connection if not already done.
