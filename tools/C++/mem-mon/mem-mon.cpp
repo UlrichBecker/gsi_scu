@@ -24,13 +24,17 @@
  */
 #include <exception>
 #include <cstdlib>
+#include <memory>
 #include <message_macros.hpp>
 #include <scu_ddr3_access.hpp>
+#include <scu_sram_access.hpp>
+#include <BusException.hpp>
 #include "mem_cmdline.hpp"
 #include "mem_browser.hpp"
 
 using namespace std;
 using namespace Scu::mmu;
+namespace EB = FeSupport::Scu::Etherbone;
 
 /*! ---------------------------------------------------------------------------
  */
@@ -49,15 +53,23 @@ int main( int argc, char** ppArgv )
    try
    {
       CommandLine oCmdLine( argc, ppArgv );
+      oCmdLine();
+      Scu::RamAccess* _pRam = nullptr;
+      try
+      {
+         _pRam = new Scu::Ddr3Access( oCmdLine.getScuUrl() );
+      }
+      catch( EB::BusException& e )
+      {
+         string exceptText = e.what();
+         if( exceptText.find( "VendorId" ) == string::npos )
+            throw EB::BusException( e );
 
-      /*!
-       * @todo Checking in the future whether it's a SCU3 or a SCU4 and
-       *       create the appropriate object. In the case of SCU3
-       *       it's the object of DDR3-RAM like now.
-       */
-      Scu::Ddr3Access oDdr3( oCmdLine() );
+         _pRam = new Scu::SramAccess( oCmdLine.getScuUrl() );
+      }
+      unique_ptr<Scu::RamAccess> pRam( _pRam );
 
-      Browser browse( &oDdr3, oCmdLine );
+      Browser browse( pRam.get(), oCmdLine );
       if( oCmdLine.isDelete() )
       {
          if( browse.isPresent() )

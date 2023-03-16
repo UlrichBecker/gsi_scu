@@ -9,7 +9,7 @@
 ## Date:     12.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=2.0
+DEFINES += VERSION=2.1
 FOR_SCU_AND_ACC := 1
 
 USE_STATIC_LIBS := 1
@@ -24,6 +24,7 @@ SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_mmu_fe.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
