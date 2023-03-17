@@ -24,6 +24,7 @@
  */
 #include <exception>
 #include <cstdlib>
+#include <memory>
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
@@ -32,12 +33,14 @@
 #include <errno.h>
 #include <string.h>
 #include <message_macros.hpp>
+#include <BusException.hpp>
 #include <find_process.h>
 #include "logd_cmdline.hpp"
 #include "logd_core.hpp"
 
 using namespace std;
 using namespace Scu;
+namespace EB = FeSupport::Scu::Etherbone;
 
 STATIC bool g_exit = false;
 
@@ -234,13 +237,23 @@ int main( int argc, char** ppArgv )
          WARNING_MESSAGE( "Can't install the signal handling for SIGTERM ! "
                           << ::strerror( errno ) );
 
-      /*!
-       * @todo Checking in the future whether it's a SCU3 or a SCU4 and
-       *       create the appropriate object. In the case of SCU3
-       *       it's the object of DDR3-RAM like now.
-       */
-      Scu::Ddr3Access oDdr3( oCmdLine.getScuUrl() );
-      Lm32Logd oLog( &oDdr3, oCmdLine );
+      Scu::RamAccess* _pRam = nullptr;
+      try
+      {
+         _pRam = new Scu::Ddr3Access( oCmdLine.getScuUrl() );
+         DEBUG_MESSAGE( "Using DDR3-RAM on SCU3" );
+      }
+      catch( EB::BusException& e )
+      {
+         string exceptText = e.what();
+         if( exceptText.find( "VendorId" ) == string::npos )
+            throw EB::BusException( e );
+
+         _pRam = new Scu::SramAccess( oCmdLine.getScuUrl() );
+         DEBUG_MESSAGE( "Using SRAM on SCU4" );
+      }
+      unique_ptr<Scu::RamAccess> pRam( _pRam );
+      Lm32Logd oLog( pRam.get(), oCmdLine );
 
       if( oCmdLine.isDemonize() )
          daemonize();

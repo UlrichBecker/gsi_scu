@@ -58,6 +58,7 @@ int main( int argc, char** ppArgv )
       try
       {
          _pRam = new Scu::Ddr3Access( oCmdLine.getScuUrl() );
+         DEBUG_MESSAGE( "Using DDR3-RAM on SCU3" );
       }
       catch( EB::BusException& e )
       {
@@ -66,6 +67,7 @@ int main( int argc, char** ppArgv )
             throw EB::BusException( e );
 
          _pRam = new Scu::SramAccess( oCmdLine.getScuUrl() );
+         DEBUG_MESSAGE( "Using SRAM on SCU4" );
       }
       unique_ptr<Scu::RamAccess> pRam( _pRam );
 

@@ -50,6 +50,7 @@ void Lm32Access::init( void )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
    m_baseAddress = findDeviceBaseAddress( EBC::gsiId, EBC::lm32_ram_user );
+   DEBUG_MESSAGE( "Base address of LM32: 0x" << std::hex << std::uppercase << m_baseAddress << std::dec );
 }
 
 /*!----------------------------------------------------------------------------

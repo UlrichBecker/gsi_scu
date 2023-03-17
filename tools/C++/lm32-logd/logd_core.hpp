@@ -32,6 +32,7 @@
 #include <daqt_read_stdin.hpp>
 #include <scu_mmu_fe.hpp>
 #include <scu_ddr3_access.hpp>
+#include <scu_sram_access.hpp>
 #include <scu_lm32_access.hpp>
 #include <lm32_syslog_common.h>
 #include "logd_cmdline.hpp"
