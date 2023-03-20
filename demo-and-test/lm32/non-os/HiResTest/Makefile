@@ -10,7 +10,10 @@ INCLUDE_DIRS += $(DAQ_DIR)
 SOURCE += $(DAQ_LM32_DIR)/daq.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/lm32Interrupts.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 SOURCE += $(SCU_LIB_SRC_DIR)/dow_crc.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/sw_queue.c
+SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 SOURCE += $(WR_DIR)/w1-temp.c
 

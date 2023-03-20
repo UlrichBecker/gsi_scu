@@ -295,13 +295,13 @@ void daqChannelPrintInfo( register DAQ_CANNEL_T* pThis )
             daqChannelIsHighResolutionEnabled( pThis )? g_pYes : g_pNo );
    mprintf( "    ExtTrig_nEvTrig_HiRes: %s\n",
             daqChannelGetTriggerSourceHighRes( pThis )? g_pYes : g_pNo );
-   mprintf( "  Trig_LW:  &0x%08x *0x%04x\n",
+   mprintf( "  Trig_LW:  &0x%08X *0x%04X\n",
             &__DAQ_GET_CHANNEL_REG( TRIG_LW ),
             daqChannelGetTriggerConditionLW( pThis ) );
-   mprintf( "  Trig_HW:  &0x%08x *0x%04x\n",
+   mprintf( "  Trig_HW:  &0x%08X *0x%04X\n",
             &__DAQ_GET_CHANNEL_REG( TRIG_HW ),
             daqChannelGetTriggerConditionHW( pThis ) );
-   mprintf( "  Trig_Dly: &0x%08x *0x%04x\n",
+   mprintf( "  Trig_Dly: &0x%08X *0x%04X\n",
             &__DAQ_GET_CHANNEL_REG( TRIG_DLY ),
             daqChannelGetTriggerDelay( pThis ) );
    mprintf( "  DAQ int pending:     %s\n",
@@ -1236,18 +1236,18 @@ void daqDescriptorPrintInfo( register DAQ_DESCRIPTOR_T* pThis )
                                        g_pYes : g_pNo );
    mprintf( "  DAQ mode:        %s\n", daqDescriptorWasDaq( pThis )?
                                        g_pYes : g_pNo );
-   mprintf( "  Trigger low:     0x%04x\n",
+   mprintf( "  Trigger low:     0x%04X\n",
             daqDescriptorGetTriggerConditionLW( pThis ) );
-   mprintf( "  Trigger high:    0x%04x\n",
+   mprintf( "  Trigger high:    0x%04X\n",
             daqDescriptorGetTriggerConditionHW( pThis ) );
-   mprintf( "  Trigger delay:   0x%04x\n",
+   mprintf( "  Trigger delay:   0x%04X\n",
             daqDescriptorGetTriggerDelay( pThis ) );
    mprintf( "  Seconds:       %08u\n",
             convertByteEndian_uint32_t( daqDescriptorGetTimeStampSec( pThis ) ));
    mprintf( "  Nanoseconds:   %09u\n",
             convertByteEndian_uint32_t( daqDescriptorGetTimeStampNanoSec( pThis )));
    mprintf( "  Sequence:        %d\n", daqDescriptorGetSequence( pThis ));
-   mprintf( "  CRC:             0x%02x\n", daqDescriptorGetCRC( pThis ));
+   mprintf( "  CRC:             0x%02X\n", daqDescriptorGetCRC( pThis ));
 }
 
 #endif // if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)
