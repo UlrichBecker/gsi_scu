@@ -45,6 +45,7 @@ SOURCE += $(DAQ_LINUX_DIR)/scu_fg_feedback.cpp
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
 SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 

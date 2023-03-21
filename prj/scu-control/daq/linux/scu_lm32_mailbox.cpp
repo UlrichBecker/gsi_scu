@@ -36,7 +36,10 @@ using namespace daq;
 Lm32Swi::Lm32Swi( daq::EbRamAccess* pEbAccess )
    :m_pEbAccess( pEbAccess )
 {
-   uint32_t tmpLm32MailboxSlot;
+   DEBUG_MESSAGE_M_FUNCTION( "" );
+
+  uint32_t tmpLm32MailboxSlot;
+
   m_pEbAccess->readLM32( &tmpLm32MailboxSlot, sizeof( tmpLm32MailboxSlot ),
                          offsetof( FG::SCU_SHARED_DATA_T, oSaftLib.oFg.mailBoxSlot ) );
 
@@ -69,12 +72,14 @@ Lm32Swi::Lm32Swi( daq::EbRamAccess* pEbAccess )
  */
 Lm32Swi::~Lm32Swi( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
  */
 void Lm32Swi::send( FG::FG_OP_CODE_T opCode, uint param )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "opCode: " << opCode << ", param: " << param );
    if( param > 0xFFFF )
    {
       std::string errorMessage = "Parameter of signal: ";
@@ -86,6 +91,7 @@ void Lm32Swi::send( FG::FG_OP_CODE_T opCode, uint param )
    }
 
    using SIGNAL_T = TYPEOF(MSI_SLOT_T::signal);
+
    SIGNAL_T signal = (opCode << (BIT_SIZEOF( SIGNAL_T ) / 2)) | param;
 
    m_pEbAccess->getEbPtr()->write( reinterpret_cast<etherbone::address_t>

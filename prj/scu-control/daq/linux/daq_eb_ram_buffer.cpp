@@ -35,9 +35,9 @@
  */
 #include <shared_mmap.h>
 
-#include <dbg.h>
 #include <message_macros.hpp>
-
+#include <BusException.hpp>
+#include <string>
 
 using namespace Scu;
 using namespace daq;
@@ -68,12 +68,21 @@ EbRamAccess::EbRamAccess( DaqEb::EtherboneConnection* poEb )
 #endif
 {
    DEBUG_MESSAGE_M_FUNCTION("");
-   /*!
-    * @todo Determining here whether its a SCU3 with DDR3-RAM
-    *       or - in future - a SCU4 with S-RAM \n
-    *       at the moment only DDR3 is known.
-    */
-   m_poRamBuffer = new Ddr3Access( m_oLm32.getEb() );
+
+   try
+   {
+      m_poRamBuffer = new Ddr3Access( m_oLm32.getEb() );
+      DEBUG_MESSAGE( "Using DDR3-RAM on SCU3" );
+   }
+   catch( DaqEb::BusException& e )
+   {
+      std::string exceptText = e.what();
+      if( exceptText.find( "VendorId" ) == std::string::npos )
+         throw DaqEb::BusException( e );
+
+      m_poRamBuffer = new SramAccess( m_oLm32.getEb() );
+      DEBUG_MESSAGE( "Using SRAM on SCU4" );
+   }
 }
 
 /*! ---------------------------------------------------------------------------

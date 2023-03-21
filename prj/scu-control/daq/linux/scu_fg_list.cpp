@@ -38,12 +38,14 @@ using namespace gsi;
 FgList::FgList( void )
    :m_lm32SoftwareVersion( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
  */
 FgList::~FgList( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -65,6 +67,7 @@ void FgList::scan( daq::EbRamAccess* pEbAccess )
 
 void FgList::scan( Lm32Swi* poSwi )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    /*
     * Assuming the etherbone-connection has been already established.
     */

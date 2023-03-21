@@ -9,7 +9,7 @@
 ## Date:     09.10.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-DEFINES += VERSION=3.0
+DEFINES += VERSION=3.1
 FOR_SCU_AND_ACC := 1
 
 USE_NAMED_MUTEX := 1
@@ -34,6 +34,7 @@ SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_onFoundProcess.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
 
 

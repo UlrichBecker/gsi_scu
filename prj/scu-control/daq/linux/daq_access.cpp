@@ -40,6 +40,7 @@ DaqAccess::DaqAccess( DaqEb::EtherboneConnection* poEb )
    ,m_milDaqLm32Offset( INVALID_OFFSET )
 #endif
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    probe();
 }
 
@@ -47,12 +48,14 @@ DaqAccess::DaqAccess( DaqEb::EtherboneConnection* poEb )
  */
 DaqAccess::~DaqAccess( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*!----------------------------------------------------------------------------
  */
 void DaqAccess::probe( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    uint32_t actMagicNumber;
 
    m_addacDaqLM32Offset = INVALID_OFFSET;

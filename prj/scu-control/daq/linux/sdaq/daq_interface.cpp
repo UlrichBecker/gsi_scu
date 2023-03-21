@@ -127,6 +127,7 @@ DaqInterface::DaqInterface( DaqEb::EtherboneConnection* poEtherbone,
    ,m_doReset( doReset )
    ,m_doSendCommand( doSendCommand )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    init();
 }
 
@@ -140,6 +141,7 @@ DaqInterface::DaqInterface( DaqAccess* poEbAccess,
    ,m_doReset( doReset )
    ,m_doSendCommand( doSendCommand )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    init();
 }
 
@@ -174,6 +176,7 @@ void DaqInterface::checkAddacSupport( void )
  */
 DaqInterface::~DaqInterface( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------

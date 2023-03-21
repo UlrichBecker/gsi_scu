@@ -110,7 +110,18 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
               << poParser->getProgramName() << " [options] <SCU URL>\n\n"
                  "Usage on SCU:\n\t"
               << poParser->getProgramName() << " [options]\n\n"
-                 "The key 'Esc' terminates this program\n\n"
+                 "The key 'Esc' terminates this program when it runs in non-daemon mode.\n\n"
+                 "Example in LM32 application:\n\n"
+                 "\t#include <lm32_syslog.h>\n\n"
+                 "\tvoid main( void )\n"
+                 "\t{\n"
+                 "\t   lm32LogInit( 1000 ); // Allocates a maximum of 1000 items in DDR3-buffer respectively SRAM.\n\n"
+                 "\t   lm32Log( 1, \"Hello world!\" );\n"
+                 "\t}\n\n"
+                 "NOTE: The modules " ESC_BOLD "lm32_syslog.c, scu_mmu_lm32.c, scu_mmu.c, circular_index.c\n"
+                 ESC_NORMAL "and for SCU3: " ESC_BOLD "scu_ddr3.c" ESC_NORMAL
+                 " or for SCU4: " ESC_BOLD "scu_sram.c" ESC_NORMAL
+                 " has to be linked in the concerned LM32 project.\n\n"
                  "Options:"
               << endl;
          poParser->list( cout );
@@ -183,7 +194,8 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     " if it runs on a SCU.\n"
                     "The optional parameter PARAM can be used to set a target"
                     " logfile.\nIf PARAM not set, then the LM32 messages becomes"
-                    " written in Linux-syslog."
+                    " written in Linux-syslog.\n"
+                    "Example: " ESC_BOLD "-d=/var/log/lm32.log" ESC_NORMAL
    },
    {
       OPT_LAMBDA( poParser,
@@ -195,7 +207,8 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_id       = 0,
       .m_shortOpt = 'n',
       .m_longOpt  = "notime",
-      .m_helpText = "Suppresses the output of the timestamp."
+      .m_helpText = "Suppresses the output of the timestamp.\n"
+                    "This option can be meaningful in combination of the option -c respectively --console ."
    },
    {
       OPT_LAMBDA( poParser,
@@ -350,7 +363,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
          if( maxItems < 1 )
          {
             string errStr = "A maximum of ";
-            errStr += maxItems;
+            errStr += to_string( maxItems );
             errStr += " items to read per interval isn't meaningful!";
             throw runtime_error( errStr );
          }
@@ -363,7 +376,11 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_longOpt  = "maxitems",
       .m_helpText = "PARAM=\"<number of maximum message-items per interval>\"\n"
                     "Overwrites the default number of maximum items per interval of "
-                    TO_STRING(DEFAULT_MAX_ITEMS) " with a new value."
+                    TO_STRING(DEFAULT_MAX_ITEMS) " with a new value.\n"
+                    "That means, this is the maximum number of log-items which becomes\n"
+                    "read out and evaluated per poll interval.\n"
+                    "It determines also the length of the ehterbone-cycle.\n"
+                    "The poll interval can be adjusted by the option -I respectively --interval."
    },
    {
       OPT_LAMBDA( poParser,

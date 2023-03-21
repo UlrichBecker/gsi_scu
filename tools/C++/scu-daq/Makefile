@@ -39,6 +39,11 @@ SOURCE += $(SDAQ_LINUX_DIR)/daq_administration.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_base_interface.cpp
 SOURCE += $(DAQ_LINUX_DIR)/watchdog_poll.cpp
 
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
+SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
+
 SOURCE += $(EB_FE_WRAPPER_DIR)/EtherboneConnection.cpp
 SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
@@ -112,9 +117,9 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
 # DEBUG = 1
 
-DOX_INPUT += $(DAQ_DIR)/daq_descriptor.h
-DOX_INPUT += $(DAQ_DIR)/daq_command_interface.h
-DOX_INPUT += $(DAQ_DIR)/daq_ring_admin.h
+#DOX_INPUT += $(DAQ_DIR)/daq_descriptor.h
+#DOX_INPUT += $(DAQ_DIR)/daq_command_interface.h
+#DOX_INPUT += $(DAQ_DIR)/daq_ring_admin.h
 DOX_OPTIMIZE_OUTPUT_FOR_C = "NO"
 
 

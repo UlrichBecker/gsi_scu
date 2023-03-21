@@ -35,12 +35,14 @@ using namespace std;
 DaqInterface::DaqInterface( DaqEb::EtherboneConnection* poEtherbone )
    :DaqBaseInterface( poEtherbone, c_dataTimeout )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    init();
 }
 
 DaqInterface::DaqInterface( DaqAccess* poEbAccess )
    :DaqBaseInterface( poEbAccess, c_dataTimeout )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    init();
 }
 
@@ -48,6 +50,7 @@ DaqInterface::DaqInterface( DaqAccess* poEbAccess )
  */
 DaqInterface::~DaqInterface( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------

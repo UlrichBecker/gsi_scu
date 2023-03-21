@@ -27,7 +27,6 @@
 #include <iostream>
 #include <cstddef>
 #include <unistd.h>
-#include <dbg.h>
 #include <eb_console_helper.h>
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
 #include <sys/time.h>
@@ -46,11 +45,8 @@ bool DaqChannel::SequenceNumber::compare( uint8_t sequence )
    if( m_blockLost )
    {
       m_lostCount++;
-      DBPRINT1( ESC_FG_RED
-                "DBG: ERROR: Sequence is: %d, expected: %d\n"
-                ESC_NORMAL,
-                sequence, m_sequence
-              );
+      DEBUG_MESSAGE( "ERROR: Sequence is " << sequence
+                      << ", expected: " << m_sequence );
    }
    m_continued = true;
    m_sequence = sequence;
@@ -65,15 +61,15 @@ DaqChannel::DaqChannel( const uint number )
    ,m_pParent(nullptr)
    ,m_poSequence(nullptr)
 {
+   DEBUG_MESSAGE_M_FUNCTION( "ADDAC number: " << m_number );
    SCU_ASSERT( m_number <= DaqInterface::c_maxChannels );
-   DEBUG_MESSAGE( "Constructor of ADDAC/ACU channel number: " << m_number );
 }
 
 /*! ---------------------------------------------------------------------------
  */
 DaqChannel::~DaqChannel( void )
 {
-   DEBUG_MESSAGE( "Destructor of ADDAC/ACU channel number: " << m_number );
+   DEBUG_MESSAGE_M_FUNCTION( "ADDAC number: " << m_number );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -104,6 +100,7 @@ DaqDevice::DaqDevice( const uint number )
    ,m_maxChannels( 0 )
    ,m_pParent(nullptr)
 {
+   DEBUG_MESSAGE_M_FUNCTION( number );
    SCU_ASSERT( m_deviceNumber <= DaqInterface::c_maxDevices );
 }
 
@@ -111,6 +108,7 @@ DaqDevice::DaqDevice( const uint number )
  */
 DaqDevice::~DaqDevice( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    for( const auto& channel: *this )
       unregisterChannel( channel );
 }
@@ -205,6 +203,7 @@ DaqAdministration::DaqAdministration( DaqEb::EtherboneConnection* poEtherbone,
 #endif
    ,m_poCurrentDescriptor( nullptr )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -221,12 +220,14 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess,
 #endif
    ,m_poCurrentDescriptor( nullptr )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
  */
 DaqAdministration::~DaqAdministration( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    //for( const auto& def: *this )
    //   unregisterDevice( def );
 }
@@ -402,24 +403,6 @@ DaqAdministration::getChannelBySlotNumber( const uint slotNumber,
 
    return poDevice->getChannel( channelNumber );
 }
-
-#if defined( CONFIG_SCU_USE_DDR3 ) && !defined( CONFIG_DDR3_NO_BURST_FUNCTIONS )
-/*! ---------------------------------------------------------------------------
- */
-extern "C" {
-
-static int ramReadPoll( const DDR3_T* pThis UNUSED, uint count )
-{
-   if( count >= 10 )
-   {
-      return -1;
-   }
-   usleep( 10 );
-   return 0;
-}
-
-} // extern "C"
-#endif // ifdef CONFIG_SCU_USE_DDR3
 
 /*! ---------------------------------------------------------------------------
  */
@@ -733,6 +716,7 @@ uint DaqAdministration::distributeData( void )
  */
 void DaqAdministration::reset( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    for( const auto& pDev: m_devicePtrList )
       pDev->reset();
 }

@@ -31,7 +31,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <string.h>
 #include <message_macros.hpp>
 #include <BusException.hpp>
 #include <find_process.h>

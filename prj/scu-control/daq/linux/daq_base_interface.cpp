@@ -42,7 +42,7 @@ DaqBaseInterface::DaqBaseInterface( DaqEb::EtherboneConnection* poEtherbone,
    ,m_maxEbCycleDataLen( c_defaultMaxEbCycleDataLen )
    ,m_blockReadEbCycleGapTimeUs( c_defaultBlockReadEbCycleGapTimeUs )
 {
-
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! --------------------------------------------------------------------------
@@ -58,13 +58,14 @@ DaqBaseInterface::DaqBaseInterface( DaqAccess* poEbAccess,
    ,m_maxEbCycleDataLen( c_defaultMaxEbCycleDataLen )
    ,m_blockReadEbCycleGapTimeUs( c_defaultBlockReadEbCycleGapTimeUs )
 {
-
+   DEBUG_MESSAGE_M_FUNCTION("");
 }
 
 /*! --------------------------------------------------------------------------
  */
 DaqBaseInterface::~DaqBaseInterface( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION("");
    if( m_ebAccessSelfCreated )
       delete m_poEbAccess;
 }

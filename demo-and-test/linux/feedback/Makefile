@@ -41,6 +41,7 @@ ifndef USE_SHARED_LIB
  SOURCE += $(SDAQ_LINUX_DIR)/daq_interface.cpp
  SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
  SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp
+ SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_sram_access.cpp
  SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_lm32_access.cpp
 else
  # When a library will used so the following header files

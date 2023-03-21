@@ -36,12 +36,14 @@ DaqCompare::DaqCompare( const uint iterfaceAddress )
    ,m_pParent( nullptr )
    ,m_setValueInvalid( true )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*-----------------------------------------------------------------------------
  */
 DaqCompare::~DaqCompare( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    if( m_pParent != nullptr )
    {
       m_pParent->unregisterDaqCompare( this );
@@ -56,12 +58,14 @@ DaqDevice::DaqDevice( uint location )
    ,m_location( location )
    ,m_pParent( nullptr )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*-----------------------------------------------------------------------------
  */
 DaqDevice::~DaqDevice( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    for( const auto& i: m_channelPtrList )
       i->m_pParent = nullptr;
 
@@ -149,6 +153,7 @@ DaqAdministration::DaqAdministration( DaqEb::EtherboneConnection* poEtherbone )
   ,m_middleBufferSize( 0 )
   ,m_nextReadOutTime( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    initPtr();
 }
 
@@ -163,6 +168,7 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess )
   ,m_middleBufferSize( 0 )
   ,m_nextReadOutTime( 0 )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    initPtr();
 }
 
@@ -170,6 +176,8 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess )
  */
 DaqAdministration::~DaqAdministration( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
+
    for( const auto& i: m_devicePtrList )
       i->m_pParent = nullptr;
 
@@ -246,6 +254,7 @@ bool DaqAdministration::unregisterDevice( DaqDevice* pDevice )
  */
 void DaqAdministration::reset( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    for( const auto& i: m_devicePtrList )
       i->onReset();
 }
@@ -419,6 +428,7 @@ uint DaqAdministration::distributeData( void )
 DaqAdministrationFgList::DaqAdministrationFgList( DaqEb::EtherboneConnection* poEtherbone )
    :DaqAdministration( poEtherbone )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    /*
     * Synchronizing the FG -list from lm32 shared memory only no active
     * scanning!
@@ -431,6 +441,7 @@ DaqAdministrationFgList::DaqAdministrationFgList( DaqEb::EtherboneConnection* po
 DaqAdministrationFgList::DaqAdministrationFgList( DaqAccess* poEbAccess )
    :DaqAdministration( poEbAccess )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
   /*
    * Synchronizing the FG -lit from lm32 shared memory only no active
    * scanning!
@@ -442,6 +453,7 @@ DaqAdministrationFgList::DaqAdministrationFgList( DaqAccess* poEbAccess )
  */
 DaqAdministrationFgList::~DaqAdministrationFgList( void )
 {
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 //================================== EOF ======================================

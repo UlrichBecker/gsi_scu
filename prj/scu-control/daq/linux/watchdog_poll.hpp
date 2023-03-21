@@ -26,6 +26,7 @@
 #define _WATCHDOG_POLL_HPP
 
 #include <stdint.h>
+#include <message_macros.hpp>
 
 namespace Scu
 {
@@ -47,9 +48,14 @@ public:
    Watchdog( const uint64_t timeout = 0 ):
       m_timeout( timeout ),
       m_currentLimit( 0 )
-   {}
+   {
+      DEBUG_MESSAGE_M_FUNCTION( "timeout: " << m_timeout << " us" );
+   }
 
-   ~Watchdog( void ) {}
+   ~Watchdog( void )
+   {
+      DEBUG_MESSAGE_M_FUNCTION( "timeout: " << m_timeout << " us" );
+   }
 
    /*!
     * @brief Starts the watchdog timer.

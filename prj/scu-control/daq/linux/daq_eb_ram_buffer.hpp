@@ -35,6 +35,7 @@
 #include <EtherboneConnection.hpp>
 #include <scu_lm32_access.hpp>
 #include <scu_ddr3_access.hpp>
+#include <scu_sram_access.hpp>
 #include <scu_assert.h>
 #include <daq_ramBuffer.h>
 #include <daq_calculations.hpp>

@@ -85,12 +85,12 @@ public:
       :m_socket( socket )
       ,m_deviceTyp( daq::UNKNOWN )
    {
-      DEBUG_MESSAGE( "Constructor of base device: socket: " << m_socket  );
+      DEBUG_MESSAGE_M_FUNCTION( "Socket: " << m_socket );
    }
 
    virtual ~DaqBaseDevice( void )
    {
-      DEBUG_MESSAGE( "Destructor of base device: socket: " << m_socket  );
+      DEBUG_MESSAGE_M_FUNCTION( "Socket: " << m_socket );
    }
 
    /*!
