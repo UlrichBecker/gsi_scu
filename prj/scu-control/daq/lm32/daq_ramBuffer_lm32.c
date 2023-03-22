@@ -297,12 +297,8 @@ STATIC inline ALWAYS_INLINE
 void ramFillItem( RAM_DAQ_PAYLOAD_T* pItem, const unsigned int i,
                   const DAQ_DATA_T data )
 {
-#if defined( CONFIG_SCU_USE_DDR3 ) || defined(__DOXYGEN__)
    RAM_ASSERT( i < ARRAY_SIZE( pItem->ad16 ) );
    ramSetPayload16( pItem, data, i );
-#else
-   #error Nothing implemented in function ramFillItem()!
-#endif
 }
 
 #ifdef CONFIG_DEBUG_RAM_WRITE_DATA
@@ -331,31 +327,6 @@ void publishWrittenData( register RAM_SCU_T* pThis,
 #endif
 }
 
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void ramPollAccessLock( RAM_SCU_T* pThis )
-{
-#ifdef CONFIG_DEBUG_RAM_WRITE_DATA
-   if( pThis->pSharedObj->ramAccessLock )
-   {
-      unsigned int pollCount = 0;
-      DBG_RAM_INFO( ESC_FG_MAGENTA ESC_BOLD
-                    "DBG: Enter RAM-access polling\n"
-                    ESC_NORMAL );
-      while( pThis->pSharedObj->ramAccessLock )
-      {
-         pollCount++;
-      }
-      DBG_RAM_INFO( ESC_FG_MAGENTA ESC_BOLD
-                    "DBG: Leaving RAM-access polling. %d loops\n"
-                    ESC_NORMAL, pollCount );
-   }
-#else
-   while( pThis->pSharedObj->ramAccessLock ) {}
-#endif
-}
-#endif
 //#define CONFIG_DAQ_DECREMENT
 
 /*! ---------------------------------------------------------------------------
@@ -370,8 +341,18 @@ STATIC inline
 void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
                       const bool isShort )
 {
+   /*!
+    * @brief Function pointer keeps the geter-function for remaining FiFi-data
+    *        of continuous data or post-mortem and high resolution.
+    */
    DAQ_REGISTER_T (*getRemaining)( register DAQ_CANNEL_T* );
+
+   /*!
+    * @brief Function pointer keeps the FiFo-read out function for
+    *        either continuous data or post-mortem and high resolution.
+    */
    volatile DAQ_DATA_T (*pop)( register DAQ_CANNEL_T* );
+
 #ifdef CONFIG_DAQ_SW_SEQUENCE
    uint8_t*     pSequence;
 #endif
@@ -417,27 +398,32 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
                  daqChannelGetNumber( pDaqChannel ) + 1 );
 
    if( isShort )
-   {
+   { /*
+      * Initialization for receiving of continuous DAQ-data block.
+      */
       getRemaining  = daqChannelGetDaqFifoWords;
       pop           = daqChannelPopDaqFifo;
       expectedWords = DAQ_FIFO_DAQ_WORD_SIZE_CRC;
-#ifdef CONFIG_DAQ_SW_SEQUENCE
+   #ifdef CONFIG_DAQ_SW_SEQUENCE
       pSequence     = &pDaqChannel->sequenceContinuous;
-#endif
+   #endif
    }
    else
-   {
+   { /*
+      * Initialization for receiving of high resolution or post mortem
+      * DAQ-data block,
+      */
       getRemaining  = daqChannelGetPmFifoWords;
       pop           = daqChannelPopPmFifo;
       expectedWords = DAQ_FIFO_PM_HIRES_WORD_SIZE_CRC;
-#ifdef CONFIG_DAQ_SW_SEQUENCE
+   #ifdef CONFIG_DAQ_SW_SEQUENCE
       pSequence     = &pDaqChannel->sequencePmHires;
-#endif
+   #endif
    }
 
 #ifndef CONFIG_DAQ_DECREMENT
    /*
-    * The data wort which includes the CRC isn't a part of the fifo content,
+    * The data word which includes the CRC isn't a part of the fifo content,
     * therefore we have to add it here.
     */
    remainingDataWords = getRemaining( pDaqChannel ) + 1;
@@ -453,16 +439,6 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
       daqChannelSetStatus( pDaqChannel, DAQ_RECEIVE_STATE_DATA_LOST );
       return;
    }
-#endif
-
-#ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
-   unsigned int wrIndex = (sizeof( _DAQ_WR_T ) / sizeof(DAQ_DATA_T));
-   _DAQ_WR_T wrTime;
- #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
-   wrTime.timeStamp = irqGetTimestamp();
- #else
-   wrTime.timeStamp = getWrSysTimeSafe();
- #endif
 #endif
 
    descriptorIndex = 0;
@@ -504,18 +480,6 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
             * Descriptor becomes received.
             */
             RAM_ASSERT( descriptorIndex < ARRAY_SIZE(oDescriptor.index) );
-         #ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
-           #warning "Patch of WR-timestamp in ADDAC-DAQ! Remove this asap! ASAP!!!"
-            if( (descriptorIndex >= (offsetof(_DAQ_DISCRIPTOR_STRUCT_T, wr ) / sizeof(DAQ_DATA_T))) &&
-                (wrIndex > 0)
-              )
-            {  /*
-                * Overwriting the bullshit time-stamp! :-(
-                */
-               data = wrTime.wordIndex[--wrIndex];
-            }
-         #endif
-
          #ifdef CONFIG_DAQ_SW_SEQUENCE
             if( descriptorIndex == offsetof(_DAQ_DISCRIPTOR_STRUCT_T, crcReg ) /
                                sizeof(DAQ_DATA_T) )

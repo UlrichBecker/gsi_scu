@@ -155,14 +155,11 @@ typedef struct
 #endif
 } DDR3_T;
 
-
-/*! --------------------------------------------------------------------------
+/*!
+ * @brief Payload type for DDR3-RAM.
  */
-STATIC inline
-unsigned int __ddr3GetEndianIndex16( const unsigned int i )
-{
-   return (i%2)? (i-1) : (i+1);
-}
+typedef ACCESS64_T DDR3_PAYLOAD_T;
+
 
 /*! --------------------------------------------------------------------------
  */
@@ -171,11 +168,7 @@ void ddr3SetPayload16( DDR3_PAYLOAD_T* pPl, const uint16_t d,
                        const unsigned int i )
 {
    DDR_ASSERT( i <= ARRAY_SIZE( pPl->ad16 ) );
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-   pPl->ad16[__ddr3GetEndianIndex16(i)] = d;
-#else
-   pPl->ad16[i] = d;
-#endif
+   setPayload16( pPl, d, i );
 }
 
 /*! --------------------------------------------------------------------------
@@ -184,11 +177,7 @@ STATIC inline
 uint16_t ddr3GetPayload16( DDR3_PAYLOAD_T* pPl, const unsigned int i )
 {
    DDR_ASSERT( i <= ARRAY_SIZE( pPl->ad16 ) );
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-   return pPl->ad16[__ddr3GetEndianIndex16(i)];
-#else
-   return pPl->ad16[i];
-#endif
+   return getPayload16( pPl, i );
 }
 
 /*! @} */ //End of group  SCU_DDR3

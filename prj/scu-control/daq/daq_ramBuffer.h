@@ -32,12 +32,10 @@
 #include <daq_ring_admin.h>
 
 #ifdef CONFIG_SCU_USE_DDR3
-#include <scu_ddr3.h>
+ #include <scu_ddr3.h>
 #else
-#error Unknown memory type!
+ #error Unknown memory type!
 #endif
-
-
 
 #include <daq_descriptor.h>
 
@@ -58,9 +56,6 @@ namespace Scu
 namespace daq
 {
 #endif
-
-
-
 
 /*! ---------------------------------------------------------------------------
  * @brief Calculates the start offset of the payload data in the ring-buffer
@@ -198,11 +193,7 @@ STATIC inline ALWAYS_INLINE
 void ramSetPayload16( RAM_DAQ_PAYLOAD_T* pPl, const uint16_t d,
                       const unsigned int i )
 {
-#ifdef CONFIG_SCU_USE_DDR3
-   ddr3SetPayload16( pPl, d, i );
-#else
-   #error Function ramSetPayload16() not implemented yet!
-#endif
+   setPayload16( pPl, d, i );
 }
 
 /*! --------------------------------------------------------------------------
@@ -210,27 +201,8 @@ void ramSetPayload16( RAM_DAQ_PAYLOAD_T* pPl, const uint16_t d,
 STATIC inline ALWAYS_INLINE
 uint16_t ramGetPayload16( RAM_DAQ_PAYLOAD_T* pPl, const unsigned int i )
 {
-#ifdef CONFIG_SCU_USE_DDR3
-   return ddr3GetPayload16( pPl, i );
-#else
-   #error Function ramGetPayload16() not implemented yet!
-#endif
+   return getPayload16( pPl, i );
 }
-
-
-#if (defined(__linux__) || defined(__DOXYGEN__))
-#if 0
-/*! ---------------------------------------------------------------------------
- */
-int ramReadDaqDataBlock( register RAM_SCU_T* pThis, RAM_DAQ_PAYLOAD_T* pData,
-                         unsigned int len
-                       #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-                         , RAM_DAQ_POLL_FT poll
-                       #endif
-                       );
-#endif
-#endif /* defined(__linux__) || defined(__DOXYGEN__) */
-
 
 /*! @} */ //End of group DAQ_RAM_BUFFER
 #ifdef __cplusplus

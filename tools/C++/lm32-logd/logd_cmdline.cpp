@@ -116,11 +116,11 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                  "\tvoid main( void )\n"
                  "\t{\n"
                  "\t   lm32LogInit( 1000 ); // Allocates a maximum of 1000 items in DDR3-buffer respectively SRAM.\n\n"
-                 "\t   lm32Log( 1, \"Hello world!\" );\n"
+                 "\t   lm32Log( LM32_LOG_INFO, \"Hello world!\" );\n"
                  "\t}\n\n"
                  "NOTE: The modules " ESC_BOLD "lm32_syslog.c, scu_mmu_lm32.c, scu_mmu.c, circular_index.c\n"
-                 ESC_NORMAL "and for SCU3: " ESC_BOLD "scu_ddr3.c" ESC_NORMAL
-                 " or for SCU4: " ESC_BOLD "scu_sram.c" ESC_NORMAL
+                 ESC_NORMAL "and for SCU3: " ESC_BOLD "scu_ddr3_lm32.c" ESC_NORMAL
+                 " or for SCU4: " ESC_BOLD "scu_sram_lm32.c" ESC_NORMAL
                  " has to be linked in the concerned LM32 project.\n\n"
                  "Options:"
               << endl;
