@@ -142,18 +142,6 @@ STATIC_ASSERT( DDR3_FIFO_STATUS_MASK_USED_WORDS == DDR3_XFER_FIFO_SIZE -1 );
    #define LM32_VOLATILE
 #endif
 
-/*!
- * @brief Object type of SCU internal DDR3 RAM.
- */
-typedef struct
-{
-   /*! @brief WB Base-address of transparent mode */
-   DDR3_ADDR_T pTrModeBase;
-#ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   /*! @brief WB Base-address of burst mode */
-   DDR3_ADDR_T pBurstModeBase;
-#endif
-} DDR3_T;
 
 /*!
  * @brief Payload type for DDR3-RAM.

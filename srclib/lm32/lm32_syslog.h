@@ -62,7 +62,7 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems );
  *        "lm32-logd".
  *
  * The parameter is similar like like the printf function, except the optional
- * parameters are limited by 4, all further parameters becomes ignored. \n
+ * parameters are limited by 8, all further parameters becomes ignored. \n
  * Following parameter types are possible:\n
  * %%s, %%S String. \n
  * %%c Single character. \n

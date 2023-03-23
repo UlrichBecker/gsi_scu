@@ -29,19 +29,25 @@
  */
 #ifndef _SCU_DDR3_LM32_H
 #define _SCU_DDR3_LM32_H
+#ifndef __lm32__
+  #error Module is for target Lattice Micro 32 (LM32) only!
+#endif
+
 #include <scu_ddr3.h>
 
-#ifdef CONFIG_RTOS
-  #include <lm32Interrupts.h>
-  #define ddr3Lock()   criticalSectionEnter()
-  #define ddr3Unlock() criticalSectionExit()
-#else
- /*
-  * Dummy functions when FreeRTOS will not used.
-  */
- #define ddr3Lock()
- #define ddr3Unlock()
+
+/*!
+ * @brief Object type of SCU internal DDR3 RAM.
+ */
+typedef struct
+{
+   /*! @brief WB Base-address of transparent mode */
+   DDR3_ADDR_T pTrModeBase;
+#ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
+   /*! @brief WB Base-address of burst mode */
+   DDR3_ADDR_T pBurstModeBase;
 #endif
+} DDR3_T;
 
 
 /*! ---------------------------------------------------------------------------
@@ -50,7 +56,7 @@
  * @retval 0 Initializing was successful
  * @retval <0 Error
  */
-int ddr3init( register DDR3_T* pThis );
+int ddr3init( DDR3_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Writes a 64-bit value in the DDR3 RAM
@@ -59,27 +65,9 @@ int ddr3init( register DDR3_T* pThis );
  * @param index64 64 bit aligned index
  * @param pData Pointer to the 64 bit data to write.
  */
-STATIC inline
-void ddr3write64( register const  DDR3_T* pThis,
-                           const unsigned int index64,
-                           const DDR3_PAYLOAD_T* pData )
-{
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
-   DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
-
-   register const unsigned int index32 =
-                  index64 * (sizeof(DDR3_PAYLOAD_T)/sizeof(uint32_t));
-   ddr3Lock();
-   /*
-    * CAUTION: Don't change the order of the following both
-    * code lines!
-    */
-   pThis->pTrModeBase[index32+1] = pData->ad32[1]; // DDR3 high word
-   pThis->pTrModeBase[index32+0] = pData->ad32[0]; // DDR3 low word
-
-   ddr3Unlock();
-}
+void ddr3write64( const DDR3_T* pThis,
+                  const unsigned int index64,
+                  const DDR3_PAYLOAD_T* pData );
 
 /*! ---------------------------------------------------------------------------
  * @brief Reads a 64-bit value
@@ -89,26 +77,8 @@ void ddr3write64( register const  DDR3_T* pThis,
  * @param pData Pointer to the 64-bit-target where the function should
  *              copy the data.
  */
-STATIC inline
-void ddr3read64( register const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
-                          const unsigned int index64 )
-{
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
-   DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
-
-   register const unsigned int index32 =
-                  index64 * (sizeof(DDR3_PAYLOAD_T)/sizeof(uint32_t));
-   ddr3Lock();
-   /*
-    * CAUTION: Don't change the order of the following both
-    * code lines!
-    */
-   pData->ad32[0] = pThis->pTrModeBase[index32+0]; // DDR3 low word
-   pData->ad32[1] = pThis->pTrModeBase[index32+1]; // DDR3 high word
-
-   ddr3Unlock();
-}
+void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
+                 const unsigned int index64 );
 
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
 /*! ---------------------------------------------------------------------------
@@ -119,18 +89,7 @@ void ddr3read64( register const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
  * @param pThis Pointer to the DDR3 object
  * @return Currently fifo status;
  */
-STATIC inline volatile
-uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis )
-{
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
-
-   ddr3Lock();
-   const uint32_t ret = pThis->pBurstModeBase[DDR3_FIFO_STATUS_OFFSET_ADDR];
-   ddr3Unlock();
-
-   return ret;
-}
+uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Rremoves a 64-bit data word from the button of the fifo..
@@ -138,23 +97,7 @@ uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis )
  * @see DDR3_FIFO_HIGH_WORD_OFFSET_ADDR
  * @param pThis Pointer to the DDR3 object
  */
-STATIC inline
-void ddr3PopFifo( register const DDR3_T* pThis,
-                           DDR3_PAYLOAD_T* pData )
-{
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
-
-   ddr3Lock();
-   /*
-    * CAUTION: Don't change the order of the following both
-    * code lines!
-    */
-   pData->ad32[0] = pThis->pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
-   pData->ad32[1] = pThis->pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
-
-   ddr3Unlock();
-}
+void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData );
 
 /*! ---------------------------------------------------------------------------
  * @brief Starts the burst transfer.
@@ -164,25 +107,9 @@ void ddr3PopFifo( register const DDR3_T* pThis,
  *                 has to be between [1..DDR3_XFER_FIFO_SIZE]
  * @see DDR3_XFER_FIFO_SIZE
  */
-STATIC inline
-void ddr3StartBurstTransfer( register const DDR3_T* pThis,
-                                      const unsigned int burstStartAddr,
-                                      const unsigned int burstLen )
-{
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
-   DDR_ASSERT( burstLen <= DDR3_XFER_FIFO_SIZE );
-
-   ddr3Lock();
-   /*
-    * CAUTION: Don't change the order of the following both
-    * code lines!
-    */
-   pThis->pTrModeBase[DDR3_BURST_START_ADDR_REG_OFFSET] = burstStartAddr;
-   pThis->pTrModeBase[DDR3_BURST_XFER_CNT_REG_OFFSET]   = burstLen;
-
-   ddr3Unlock();
-}
+void ddr3StartBurstTransfer( const DDR3_T* pThis,
+                             const unsigned int burstStartAddr,
+                             const unsigned int burstLen );
 
 /*! ---------------------------------------------------------------------------
  * @brief Pointer type of the optional polling-function for

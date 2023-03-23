@@ -48,7 +48,8 @@ void printFgs( void )
          break;
 
       scuLog( LM32_LOG_INFO, ESC_FG_CYAN ESC_BOLD
-              "fg-%d-%d\tver: %d output-bits: %d\n" ESC_NORMAL,
+              "%2u: fg-%u-%d\tver: %u output-bits: %u\n" ESC_NORMAL,
+              i+1,
               pFgMacro->socket,
               pFgMacro->device,
               pFgMacro->version,
@@ -290,8 +291,6 @@ void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
 #ifdef CONFIG_MIL_PIGGY
    if( isMilScuBusFg( socket ) )
    {
-#else
-      
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
       scub_reset_mil( (unsigned short*)pScuBus, slot );

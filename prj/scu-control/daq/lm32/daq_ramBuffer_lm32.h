@@ -28,6 +28,9 @@
  */
 #ifndef _DAQ_RAMBUFFER_LM32_H
 #define _DAQ_RAMBUFFER_LM32_H
+#ifndef __lm32__
+  #error Module is for target Lattice Micro 32 (LM32) only!
+#endif
 
 #include <daq_ring_admin.h>
 

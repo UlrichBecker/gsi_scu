@@ -30,15 +30,28 @@
 #include <scu_ddr3_lm32.h>
 #include <mini_sdb.h>
 #include <dbg.h>
+#include <scu_lm32_macros.h>
 
 #ifndef CONFIG_SCU_USE_DDR3
    #error CONFIG_SCU_USE_DDR3 has to be defined!
 #endif
 
+#ifdef CONFIG_RTOS
+  #include <lm32Interrupts.h>
+  #define ddr3Lock()   criticalSectionEnter()
+  #define ddr3Unlock() criticalSectionExit()
+#else
+ /*
+  * Dummy functions when FreeRTOS will not used.
+  */
+ #define ddr3Lock()
+ #define ddr3Unlock()
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-int ddr3init( register DDR3_T* pThis  )
+int ddr3init( DDR3_T* pThis  )
 {
    DDR_ASSERT( pThis != NULL );
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
@@ -78,7 +91,118 @@ int ddr3init( register DDR3_T* pThis  )
    return 0;
 }
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+void ddr3write64( const DDR3_T* pThis,
+                  const unsigned int index64,
+                  const DDR3_PAYLOAD_T* pData )
+{
+   DDR_ASSERT( pThis != NULL );
+   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
+
+   const unsigned int index32 =
+                  index64 * (sizeof(DDR3_PAYLOAD_T)/sizeof(uint32_t));
+   ddr3Lock();
+   /*
+    * CAUTION: Don't change the order of the following
+    * code lines!
+    */
+   pThis->pTrModeBase[index32+1] = pData->ad32[1]; // DDR3 high word
+   BARRIER();
+   pThis->pTrModeBase[index32+0] = pData->ad32[0]; // DDR3 low word
+   BARRIER();
+
+   ddr3Unlock();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
+                 const unsigned int index64 )
+{
+   DDR_ASSERT( pThis != NULL );
+   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
+
+   const unsigned int index32 =
+                  index64 * (sizeof(DDR3_PAYLOAD_T)/sizeof(uint32_t));
+   ddr3Lock();
+   /*
+    * CAUTION: Don't change the order of the following
+    * code lines!
+    */
+   pData->ad32[0] = pThis->pTrModeBase[index32+0]; // DDR3 low word
+   BARRIER();
+   pData->ad32[1] = pThis->pTrModeBase[index32+1]; // DDR3 high word
+   BARRIER();
+
+   ddr3Unlock();
+}
+
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis )
+{
+   DDR_ASSERT( pThis != NULL );
+   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
+
+   ddr3Lock();
+   const uint32_t ret = pThis->pBurstModeBase[DDR3_FIFO_STATUS_OFFSET_ADDR];
+   ddr3Unlock();
+
+   return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData )
+{
+   DDR_ASSERT( pThis != NULL );
+   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
+
+   ddr3Lock();
+   /*
+    * CAUTION: Don't change the order of the following
+    * code lines!
+    */
+   pData->ad32[0] = pThis->pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
+   BARRIER();
+   pData->ad32[1] = pThis->pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
+   BARRIER();
+
+   ddr3Unlock();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+void ddr3StartBurstTransfer( const DDR3_T* pThis,
+                             const unsigned int burstStartAddr,
+                             const unsigned int burstLen )
+{
+   DDR_ASSERT( pThis != NULL );
+   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   DDR_ASSERT( burstLen <= DDR3_XFER_FIFO_SIZE );
+
+   ddr3Lock();
+   /*
+    * CAUTION: Don't change the order of the following
+    * code lines!
+    */
+   pThis->pTrModeBase[DDR3_BURST_START_ADDR_REG_OFFSET] = burstStartAddr;
+   BARRIER();
+   pThis->pTrModeBase[DDR3_BURST_XFER_CNT_REG_OFFSET]   = burstLen;
+   BARRIER();
+
+   ddr3Unlock();
+}
 
 static inline
 DDR3_RETURN_T _ddr3PopFifo( register const DDR3_T* pThis,
