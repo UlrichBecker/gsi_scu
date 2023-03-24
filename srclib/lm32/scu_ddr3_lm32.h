@@ -49,35 +49,36 @@ typedef struct
 #endif
 } DDR3_T;
 
-
 /*! ---------------------------------------------------------------------------
  * @brief Initializing of DDR3 RAM
- * @param pThis Pointer to the DDR3 object
  * @retval 0 Initializing was successful
  * @retval <0 Error
  */
-int ddr3init( DDR3_T* pThis );
+int ddr3init( void );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Returns the pointer to the DDR3 object.
+ * @note For debug purposes only. 
+ */
+DDR3_T* ddr3GetObj( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Writes a 64-bit value in the DDR3 RAM
  * @see DDR3_PAYLOAD_T
- * @param pThis Pointer to the DDR3 object
  * @param index64 64 bit aligned index
  * @param pData Pointer to the 64 bit data to write.
  */
-void ddr3write64( const DDR3_T* pThis,
-                  const unsigned int index64,
+void ddr3write64( const unsigned int index64,
                   const DDR3_PAYLOAD_T* pData );
 
 /*! ---------------------------------------------------------------------------
  * @brief Reads a 64-bit value
  * @see DDR3_PAYLOAD_T
- * @param pThis Pointer to the DDR3 object
  * @param index64 64 bit aligned index
  * @param pData Pointer to the 64-bit-target where the function should
  *              copy the data.
  */
-void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
+void ddr3read64( DDR3_PAYLOAD_T* pData,
                  const unsigned int index64 );
 
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
@@ -86,18 +87,16 @@ void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
  * @see DDR3_FIFO_STATUS_MASK_EMPTY
  * @see DDR3_FIFO_STATUS_MASK_INIT_DONE
  * @see DDR3_FIFO_STATUS_MASK_USED_WORDS
- * @param pThis Pointer to the DDR3 object
  * @return Currently fifo status;
  */
-uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis );
+uint32_t ddr3GetFifoStatus( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Rremoves a 64-bit data word from the button of the fifo..
  * @see DDR3_FIFO_LOW_WORD_OFFSET_ADDR
  * @see DDR3_FIFO_HIGH_WORD_OFFSET_ADDR
- * @param pThis Pointer to the DDR3 object
  */
-void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData );
+void ddr3PopFifo( DDR3_PAYLOAD_T* pData );
 
 /*! ---------------------------------------------------------------------------
  * @brief Starts the burst transfer.
@@ -107,8 +106,7 @@ void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData );
  *                 has to be between [1..DDR3_XFER_FIFO_SIZE]
  * @see DDR3_XFER_FIFO_SIZE
  */
-void ddr3StartBurstTransfer( const DDR3_T* pThis,
-                             const unsigned int burstStartAddr,
+void ddr3StartBurstTransfer( const unsigned int burstStartAddr,
                              const unsigned int burstLen );
 
 /*! ---------------------------------------------------------------------------
@@ -118,7 +116,6 @@ void ddr3StartBurstTransfer( const DDR3_T* pThis,
  * This callback function can be used e.g.: to implement a timeout function
  * or in the case when using a OS to invoke a scheduling function.
  * @see ddr3FlushFiFo
- * @param pThis Pointer to the DDR3 object
  * @param count Number of subsequent calls of this function. E.g.: The
  *              condition (count == 0) can be used to initialize
  *              a timer.
@@ -128,12 +125,11 @@ void ddr3StartBurstTransfer( const DDR3_T* pThis,
  * @retval <0   Function ddr3FlushFiFo will terminated immediately with the
  *              return-value of this function.
  */
-typedef int (*DDR3_POLL_FT)( register const DDR3_T* pThis UNUSED,
+typedef int (*DDR3_POLL_FT)( const DDR3_T* pThis UNUSED,
                              unsigned int count UNUSED );
 
 /*! ---------------------------------------------------------------------------
  * @brief Flushes the DDR3 Fifo and writes it's content in argument pTarget
- * @param pThis Pointer to the DDR3 object
  * @param start Start-index (64-byte oriented) in fifo.
  * @param word64len Number of 64 bit words to read.
  * @param pTarget Target address. The memory-size where this address points
@@ -143,10 +139,8 @@ typedef int (*DDR3_POLL_FT)( register const DDR3_T* pThis UNUSED,
  *             @see DDR3_POLL_FT
  * @return Return status of poll-function if used.
  */
-int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
-                   unsigned int word64len, DDR3_PAYLOAD_T* pTarget,
-                   DDR3_POLL_FT poll
-                 );
+int ddr3FlushFiFo( unsigned int start, unsigned int word64len, 
+                   DDR3_PAYLOAD_T* pTarget, DDR3_POLL_FT poll );
 
 /*! --------------------------------------------------------------------------
  * @brief Callback function becomes invoked within function ddr3ReadBurst
@@ -163,7 +157,6 @@ typedef void (*DDR3_ON_BURST_FT)( DDR3_PAYLOAD_T* pPl,
 /*! --------------------------------------------------------------------------
  * @brief Reads the DDR3-memory in burst mode by using a callback function
  *        for each received 64-bit data word.
- * @param pThis Pointer to the DDR3 object
  * @param index64 Start offset in 64-bit words,
  * @param len64 Expected number of 64 -bit words to read.
  * @param onData Pointer to callback function which becomes invoked by each
@@ -172,10 +165,10 @@ typedef void (*DDR3_ON_BURST_FT)( DDR3_PAYLOAD_T* pPl,
  * @retval <0  Error
  * @retval ==0 Ok
  */
-int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
-                                  unsigned int len64,
-                                  DDR3_ON_BURST_FT onData,
-                                  void* pPrivate
+int ddr3ReadBurst( unsigned int index64,
+                   unsigned int len64,
+                   DDR3_ON_BURST_FT onData,
+                   void* pPrivate
                  );
 
 #endif /* ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS */

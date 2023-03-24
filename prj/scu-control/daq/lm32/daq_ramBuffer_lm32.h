@@ -74,22 +74,12 @@ typedef DDR3_POLL_FT   RAM_DAQ_POLL_FT;
  * @brief Generalized object type for SCU RAM buffer
  */
 typedef struct
-{
-#ifdef CONFIG_SCU_USE_DDR3
-   /*!
-    * @brief SCU DDR3 administration object.
-    */
-   DDR3_T   ram;
-#else
-   #error Unknown RAM-object!
-   //TODO maybe in the future will use a other memory type
-#endif
-   /*!
-    * @brief Administration of fifo- indexes.
-    * @note The memory space of this object has to be within the shared
-    *       memory. \n
-    *       Therefore its a pointer in this object.
-    */
+{ /*!
+   * @brief Administration of fifo- indexes.
+   * @note The memory space of this object has to be within the shared
+   *       memory. \n
+   *       Therefore its a pointer in this object.
+   */
 #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    RAM_RING_SHARED_INDEXES_T* volatile pSharedObj;
 #else
@@ -106,9 +96,9 @@ typedef struct
  * @retval <0 Error
  */
 #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-int ramInit( register RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj );
+int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj );
 #else
-int ramInit( register RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj );
+int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj );
 #endif
 
 /*! ----------------------------------------------------------------------------
@@ -132,11 +122,11 @@ int ramPushDaqDataBlock( register RAM_SCU_T* pThis,
 /*! ---------------------------------------------------------------------------
  */
 STATIC inline ALWAYS_INLINE
-void ramWriteItem( register RAM_SCU_T* pThis, const RAM_RING_INDEX_T index,
+void ramWriteItem( const RAM_RING_INDEX_T index,
                    RAM_DAQ_PAYLOAD_T* pItem )
 {
 #if defined( CONFIG_SCU_USE_DDR3 ) || defined(__DOXYGEN__)
-   ddr3write64( &pThis->ram, index, pItem );
+   ddr3write64( index, pItem );
 #else
    #error Nothing implemented in function ramWriteItem()!
 #endif

@@ -48,28 +48,37 @@
  #define ddr3Unlock()
 #endif
 
+/*!
+ * @brief Module internal handle for DDR3 accesses.
+ */
+DDR3_T mg_oDdr3 =
+{
+   .pTrModeBase    = DDR3_INVALID 
+#ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
+   ,.pBurstModeBase = DDR3_INVALID
+#endif
+};
+
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-int ddr3init( DDR3_T* pThis  )
+int ddr3init( void )
 {
-   DDR_ASSERT( pThis != NULL );
-#ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   pThis->pBurstModeBase = DDR3_INVALID;
-#endif
-   pThis->pTrModeBase = find_device_adr( GSI, WB_DDR3_if1 );
-   if( pThis->pTrModeBase == (uint32_t*)ERROR_NOT_FOUND )
+   DDR_ASSERT( mg_oDdr3.pTrModeBase == DDR3_INVALID );
+
+   mg_oDdr3.pTrModeBase = find_device_adr( GSI, WB_DDR3_if1 );
+   if( mg_oDdr3.pTrModeBase == (uint32_t*)ERROR_NOT_FOUND )
    {
-      pThis->pTrModeBase = DDR3_INVALID;
+      mg_oDdr3.pTrModeBase = DDR3_INVALID;
       DBPRINT1( "DBG: ERROR: DDR3: Can't find address of WB_DDR3_if1 !\n" );
       return -1;
    }
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   pThis->pBurstModeBase = find_device_adr( GSI, WB_DDR3_if2 );
-   if( pThis->pBurstModeBase == (uint32_t*)ERROR_NOT_FOUND )
+   mg_oDdr3.pBurstModeBase = find_device_adr( GSI, WB_DDR3_if2 );
+   if( mg_oDdr3.pBurstModeBase == (uint32_t*)ERROR_NOT_FOUND )
    {
-      pThis->pBurstModeBase = DDR3_INVALID;
-      pThis->pTrModeBase    = DDR3_INVALID;
+      mg_oDdr3.pBurstModeBase = DDR3_INVALID;
+      mg_oDdr3.pTrModeBase    = DDR3_INVALID;
       DBPRINT1( "DBG: ERROR: DDR3: Can't find address of WB_DDR3_if2 !\n" );
       return -1;
    }
@@ -77,11 +86,11 @@ int ddr3init( DDR3_T* pThis  )
    /*
     * Making the FiFo empty if not empty;
     */
-   unsigned int size = ddr3GetFifoStatus( pThis ) & DDR3_FIFO_STATUS_MASK_USED_WORDS;
+   unsigned int size = ddr3GetFifoStatus() & DDR3_FIFO_STATUS_MASK_USED_WORDS;
    for( unsigned int i = 0; i < size; i++ )
    {
-      uint32_t dummy = pThis->pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
-      dummy = pThis->pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
+      uint32_t dummy = mg_oDdr3.pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
+      dummy = mg_oDdr3.pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
       /*
        * Suppresses the not-used warning.
        */
@@ -94,12 +103,17 @@ int ddr3init( DDR3_T* pThis  )
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-void ddr3write64( const DDR3_T* pThis,
-                  const unsigned int index64,
-                  const DDR3_PAYLOAD_T* pData )
+DDR3_T* ddr3GetObj( void )
 {
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   return &mg_oDdr3;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_ddr3_lm32.h
+ */
+void ddr3write64( const unsigned int index64, const DDR3_PAYLOAD_T* pData )
+{
+   DDR_ASSERT( mg_oDdr3.pTrModeBase != DDR3_INVALID );
    DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
 
    const unsigned int index32 =
@@ -109,9 +123,9 @@ void ddr3write64( const DDR3_T* pThis,
     * CAUTION: Don't change the order of the following
     * code lines!
     */
-   pThis->pTrModeBase[index32+1] = pData->ad32[1]; // DDR3 high word
+   mg_oDdr3.pTrModeBase[index32+1] = pData->ad32[1]; // DDR3 high word first!
    BARRIER();
-   pThis->pTrModeBase[index32+0] = pData->ad32[0]; // DDR3 low word
+   mg_oDdr3.pTrModeBase[index32+0] = pData->ad32[0]; // DDR3 low word second!
    BARRIER();
 
    ddr3Unlock();
@@ -120,11 +134,9 @@ void ddr3write64( const DDR3_T* pThis,
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
-                 const unsigned int index64 )
+void ddr3read64( DDR3_PAYLOAD_T* pData, const unsigned int index64 )
 {
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   DDR_ASSERT( mg_oDdr3.pTrModeBase != DDR3_INVALID );
    DDR_ASSERT( index64 <= DDR3_MAX_INDEX64 );
 
    const unsigned int index32 =
@@ -134,9 +146,9 @@ void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
     * CAUTION: Don't change the order of the following
     * code lines!
     */
-   pData->ad32[0] = pThis->pTrModeBase[index32+0]; // DDR3 low word
+   pData->ad32[0] = mg_oDdr3.pTrModeBase[index32+0]; // DDR3 low word first!
    BARRIER();
-   pData->ad32[1] = pThis->pTrModeBase[index32+1]; // DDR3 high word
+   pData->ad32[1] = mg_oDdr3.pTrModeBase[index32+1]; // DDR3 high word second!
    BARRIER();
 
    ddr3Unlock();
@@ -147,13 +159,12 @@ void ddr3read64( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData,
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis )
+uint32_t ddr3GetFifoStatus( void )
 {
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
+   DDR_ASSERT( mg_oDdr3.pBurstModeBase != DDR3_INVALID );
 
    ddr3Lock();
-   const uint32_t ret = pThis->pBurstModeBase[DDR3_FIFO_STATUS_OFFSET_ADDR];
+   const uint32_t ret = mg_oDdr3.pBurstModeBase[DDR3_FIFO_STATUS_OFFSET_ADDR];
    ddr3Unlock();
 
    return ret;
@@ -162,19 +173,18 @@ uint32_t ddr3GetFifoStatus( register const DDR3_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData )
+void ddr3PopFifo( DDR3_PAYLOAD_T* pData )
 {
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pBurstModeBase != DDR3_INVALID );
+   DDR_ASSERT( mg_oDdr3.pBurstModeBase != DDR3_INVALID );
 
    ddr3Lock();
    /*
     * CAUTION: Don't change the order of the following
     * code lines!
     */
-   pData->ad32[0] = pThis->pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
+   pData->ad32[0] = mg_oDdr3.pBurstModeBase[DDR3_FIFO_LOW_WORD_OFFSET_ADDR];
    BARRIER();
-   pData->ad32[1] = pThis->pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
+   pData->ad32[1] = mg_oDdr3.pBurstModeBase[DDR3_FIFO_HIGH_WORD_OFFSET_ADDR];
    BARRIER();
 
    ddr3Unlock();
@@ -183,12 +193,10 @@ void ddr3PopFifo( const DDR3_T* pThis, DDR3_PAYLOAD_T* pData )
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-void ddr3StartBurstTransfer( const DDR3_T* pThis,
-                             const unsigned int burstStartAddr,
+void ddr3StartBurstTransfer( const unsigned int burstStartAddr,
                              const unsigned int burstLen )
 {
-   DDR_ASSERT( pThis != NULL );
-   DDR_ASSERT( pThis->pTrModeBase != DDR3_INVALID );
+   DDR_ASSERT( mg_oDdr3.pTrModeBase != DDR3_INVALID );
    DDR_ASSERT( burstLen <= DDR3_XFER_FIFO_SIZE );
 
    ddr3Lock();
@@ -196,9 +204,9 @@ void ddr3StartBurstTransfer( const DDR3_T* pThis,
     * CAUTION: Don't change the order of the following
     * code lines!
     */
-   pThis->pTrModeBase[DDR3_BURST_START_ADDR_REG_OFFSET] = burstStartAddr;
+   mg_oDdr3.pTrModeBase[DDR3_BURST_START_ADDR_REG_OFFSET] = burstStartAddr;
    BARRIER();
-   pThis->pTrModeBase[DDR3_BURST_XFER_CNT_REG_OFFSET]   = burstLen;
+   mg_oDdr3.pTrModeBase[DDR3_BURST_XFER_CNT_REG_OFFSET]   = burstLen;
    BARRIER();
 
    ddr3Unlock();
@@ -219,9 +227,8 @@ DDR3_RETURN_T _ddr3PopFifo( register const DDR3_T* pThis,
  * @see scu_ddr3_lm32.h
  */
 #define CONFIG_EB_BLOCK_READING
-int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
-                   unsigned int word64len, DDR3_PAYLOAD_T* pTarget,
-                   DDR3_POLL_FT poll )
+int ddr3FlushFiFo( unsigned int start, unsigned int word64len,
+                   DDR3_PAYLOAD_T* pTarget, DDR3_POLL_FT poll )
 {
    int pollRet = 0;
    unsigned int targetIndex = 0;
@@ -231,14 +238,14 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
    {
       unsigned int blkLen = min( word64len, (unsigned int)(DDR3_XFER_FIFO_SIZE * sizeof(uint32_t)/sizeof(uint64_t)-1) );
       DBPRINT2( "DBG: blkLen: %d\n", blkLen );
-      ddr3StartBurstTransfer( pThis, start, blkLen );
+      ddr3StartBurstTransfer( start, blkLen );
 
       unsigned int pollCount = 0;
-      while( (ddr3GetFifoStatus( pThis ) & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
+      while( (ddr3GetFifoStatus() & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
       {
          if( poll == NULL )
             continue;
-         pollRet = poll( pThis, pollCount );
+         pollRet = poll( &mg_oDdr3, pollCount );
          if( pollRet < 0 )
             return pollRet;
          if( pollRet > 0 )
@@ -248,23 +255,23 @@ int ddr3FlushFiFo( register const DDR3_T* pThis, unsigned int start,
 
       for( unsigned int i = 0; i < blkLen; i++ )
       {
-         ddr3PopFifo( pThis, &pTarget[targetIndex++] );
+         ddr3PopFifo( &pTarget[targetIndex++] );
       }
 
       start     += blkLen;
       word64len -= blkLen;
    }
-   DBPRINT2( "DBG: FiFo-status final: 0x%08x\n", ddr3GetFifoStatus( pThis ) );
+   DBPRINT2( "DBG: FiFo-status final: 0x%08x\n", ddr3GetFifoStatus() );
    return pollRet;
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
-int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
-                                  unsigned int len64,
-                                  DDR3_ON_BURST_FT onData,
-                                  void* pPrivate
+int ddr3ReadBurst( unsigned int index64,
+                   unsigned int len64,
+                   DDR3_ON_BURST_FT onData,
+                   void* pPrivate
                  )
 {
    DDR_ASSERT( onData != NULL );
@@ -275,8 +282,8 @@ int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
    {
       unsigned int partLen = min( len64, (unsigned int)(DDR3_XFER_FIFO_SIZE * sizeof(uint32_t)/sizeof(uint64_t)-1) );
       len64 -= partLen;
-      ddr3StartBurstTransfer( pThis, index64 + i, partLen );
-      while( ((status = ddr3GetFifoStatus( pThis )) & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
+      ddr3StartBurstTransfer( index64 + i, partLen );
+      while( ((status = ddr3GetFifoStatus()) & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
       {
          pollCount++;
          if( pollCount > 1000 )
@@ -285,7 +292,7 @@ int ddr3ReadBurst( DDR3_T* pThis, unsigned int index64,
       for( unsigned int j = 0; j < partLen; j++, i++ )
       {
          DDR3_PAYLOAD_T recPl;
-         ddr3PopFifo( pThis, &recPl );
+         ddr3PopFifo( &recPl );
          onData( &recPl, i, pPrivate );
       }
    }

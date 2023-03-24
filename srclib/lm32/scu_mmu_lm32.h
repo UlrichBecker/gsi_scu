@@ -65,7 +65,7 @@ MMU_OBJ_T* mmuGetObject( void );
 /*!
  * @ingroup SCU_MMU
  */
-MMU_STATUS_T mmuInit( MMU_OBJ_T* pMuObj );
+MMU_STATUS_T mmuInit( void );
 
 #ifdef __cplusplus
 } /* namespace mmu */

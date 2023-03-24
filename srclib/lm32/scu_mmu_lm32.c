@@ -28,18 +28,13 @@
  */
 #include <scu_mmu_lm32.h>
 
-MMU_OBJ_T* mg_pMuObj = NULL;
-
 #ifdef CONFIG_SCU_USE_DDR3
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu_lm32.h
  */
-MMU_STATUS_T mmuInit( MMU_OBJ_T* pMuObj )
+MMU_STATUS_T mmuInit( void )
 {
-   MMU_ASSERT( mg_pMuObj == NULL );
-
-   mg_pMuObj = pMuObj;
-   return (ddr3init( mg_pMuObj ) == 0)? OK : MEM_NOT_PRESENT;
+   return (ddr3init() == 0)? OK : MEM_NOT_PRESENT;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -47,11 +42,9 @@ MMU_STATUS_T mmuInit( MMU_OBJ_T* pMuObj )
  */
 void mmuRead( MMU_ADDR_T index, RAM_PAYLOAD_T* pItem, size_t len )
 {
-   MMU_ASSERT( mg_pMuObj != NULL );
-
    for( size_t i = 0; i < len; i++, index++ )
    {
-      ddr3read64( mg_pMuObj, &pItem[i], index );
+      ddr3read64( &pItem[i], index );
    }
 }
 
@@ -60,11 +53,9 @@ void mmuRead( MMU_ADDR_T index, RAM_PAYLOAD_T* pItem, size_t len )
  */
 void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
 {
-   MMU_ASSERT( mg_pMuObj != NULL );
-
    for( size_t i = 0; i < len; i++, index++ )
    {
-      ddr3write64( mg_pMuObj, index, &pItem[i] );
+      ddr3write64( index, &pItem[i] );
    }
 }
 #else

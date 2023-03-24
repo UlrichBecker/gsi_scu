@@ -36,8 +36,6 @@
 extern uint32_t __reset_count;
 
 
-DDR3_T g_ddr3;
-
 /*!----------------------------------------------------------------------------
  */
 void wrTest( const unsigned int index, const unsigned int n )
@@ -49,7 +47,7 @@ void wrTest( const unsigned int index, const unsigned int n )
       DDR3_PAYLOAD_T sendPl;
       for( unsigned int j = 0; j < ARRAY_SIZE( sendPl.ad16 ); j++ )
          sendPl.ad16[j] = i;
-      ddr3write64( &g_ddr3, index + i, &sendPl );
+      ddr3write64( index + i, &sendPl );
    }
    volatile uint64_t stopTime = getWrSysTime() - startTime;
    mprintf( "Time: %u\n", ((uint32_t*)&stopTime)[1] );
@@ -60,7 +58,7 @@ void wrTest( const unsigned int index, const unsigned int n )
    for( unsigned int i = 0; i < n; i++ )
    {
       DDR3_PAYLOAD_T recPl;
-      ddr3read64( &g_ddr3, &recPl, index + i );
+      ddr3read64( &recPl, index + i );
       for( unsigned int j = 0; j < ARRAY_SIZE( recPl.ad16 ); j++ )
       {
          if( recPl.ad16[j] != i )
@@ -88,7 +86,7 @@ void wrBurstTest( const unsigned int index, const unsigned int n )
       DDR3_PAYLOAD_T sendPl;
       for( unsigned int j = 0; j < ARRAY_SIZE( sendPl.ad16 ); j++ )
          sendPl.ad16[j] = i;
-      ddr3write64( &g_ddr3, index + i, &sendPl );
+      ddr3write64( index + i, &sendPl );
    }
    volatile uint64_t stopTime = getWrSysTime() - startTime;
    mprintf( "Time: %u\n", ((uint32_t*)&stopTime)[1] );
@@ -104,9 +102,9 @@ void wrBurstTest( const unsigned int index, const unsigned int n )
       parts++;
       unsigned int partLen = min( l, (unsigned int)(DDR3_XFER_FIFO_SIZE-1) );
       l -= partLen;
-      ddr3StartBurstTransfer( &g_ddr3, index + i, partLen );
+      ddr3StartBurstTransfer( index + i, partLen );
       unsigned int pollCount = 0;
-      while( (ddr3GetFifoStatus( &g_ddr3 ) & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
+      while( (ddr3GetFifoStatus() & DDR3_FIFO_STATUS_MASK_EMPTY) != 0 )
       {
          pollCount++;
          if( pollCount >= 1000 )
@@ -119,7 +117,7 @@ void wrBurstTest( const unsigned int index, const unsigned int n )
       for( unsigned int j = 0; j < partLen; j++, i++ )
       {
          DDR3_PAYLOAD_T recPl;
-         ddr3PopFifo( &g_ddr3, &recPl );
+         ddr3PopFifo( &recPl );
          for( unsigned int k = 0; k < ARRAY_SIZE( recPl.ad16 ); k++ )
          {
             if( recPl.ad16[k] != i )
@@ -143,13 +141,13 @@ void wrBurstTest( const unsigned int index, const unsigned int n )
 void main( void )
 {
    mprintf( ESC_XY("1","1") ESC_CLR_SCR "DDR3 performance test: %u\n", __reset_count );
-   if( ddr3init( &g_ddr3 ) < 0 )
+   if( ddr3init() < 0 )
    {
       mprintf( ESC_ERROR "Error by initializing DDR3 object!\n" ESC_NORMAL );
       while( true );
    }
    mprintf( "DDR3 IF1: 0x%08X\nDDR3 IF2: 0x%08X\n",
-            g_ddr3.pTrModeBase, g_ddr3.pBurstModeBase );
+            ddr3GetObj()->pTrModeBase, ddr3GetObj()->pBurstModeBase );
 
    wrTest( 100, 10000 );
    wrBurstTest( 200, 10000 );

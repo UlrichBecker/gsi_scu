@@ -867,7 +867,7 @@ STATIC inline void pushDaqData( FG_MACRO_T fgMacro,
     */
    for( unsigned int i = 0; i < ARRAY_SIZE(pl.ramPayload); i++ )
    {
-      ramWriteItem( &g_scuDaqAdmin.oRam, ramRingGetWriteIndex( &indexes ), &pl.ramPayload[i] );
+      ramWriteItem( ramRingGetWriteIndex( &indexes ), &pl.ramPayload[i] );
       ramRingIncWriteIndex( &indexes );
    }
 

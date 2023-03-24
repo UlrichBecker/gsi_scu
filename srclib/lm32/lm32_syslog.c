@@ -34,7 +34,6 @@
  #endif
 #endif
 
-MMU_OBJ_T g_mmuObj;
 STATIC MMU_ADDR_T mg_adminOffset = 0;
 
 #ifdef CONFIG_SCU_USE_DDR3
@@ -43,7 +42,7 @@ STATIC MMU_ADDR_T mg_adminOffset = 0;
 STATIC inline void syslogWriteRam( unsigned int index, const RAM_PAYLOAD_T* pData )
 {
    criticalSectionEnter();
-   ddr3write64( &g_mmuObj, index, pData );
+   ddr3write64( index, pData );
    criticalSectionExit();
 }
 
@@ -52,7 +51,7 @@ STATIC inline void syslogWriteRam( unsigned int index, const RAM_PAYLOAD_T* pDat
 STATIC inline void syslogReadRam( unsigned int index, RAM_PAYLOAD_T* pData )
 {
    criticalSectionEnter();
-   ddr3read64( &g_mmuObj, pData, index );
+   ddr3read64( pData, index );
    criticalSectionExit();
 }
 #else
@@ -89,7 +88,7 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
 {
    MMU_STATUS_T status;
 
-   if( (status = mmuInit( &g_mmuObj )) != OK )
+   if( (status = mmuInit()) != OK )
       return status;
 
 #ifdef CONFIG_LOG_TEST

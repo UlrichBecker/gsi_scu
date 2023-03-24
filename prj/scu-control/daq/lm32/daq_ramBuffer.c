@@ -1,5 +1,5 @@
 /*!
- *  @file daq_ramBuffer_lm32.c
+ *  @file daq_ramBuffer.c
  *  @brief Abstraction layer for handling RAM buffer for DAQ data blocks.
  *
  *  @see scu_ramBuffer.h
@@ -28,7 +28,7 @@
  */
 #include <dbg.h>
 #include <eb_console_helper.h>
-#include "daq_ramBuffer_lm32.h"
+#include <daq_ramBuffer.h>
 
 #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT) || defined( CONFIG_USE_INTERRUPT_TIMESTAMP ) || defined( CONFIG_RTOS )
    #include <lm32Interrupts.h>
@@ -46,44 +46,61 @@
  * @see scu_ramBuffer.h
  */
 #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj )
+int ramInit( register RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj
+           #ifdef __linux__
+         //   , EB_HANDLE_T* pEbHandle
+           #endif
+           )
 {
    pThis->pSharedObj = pSharedObj;
    ramRingSharedReset( pSharedObj );
 
- #ifdef CONFIG_SCU_USE_DDR3
-   return ddr3init();
+#ifdef CONFIG_SCU_USE_DDR3
+ #if defined( __linux__ ) && defined( CONFIG_NO_FE_ETHERBONE_CONNECTION)
+   return ddr3init( &pThis->ram, pEbHandle );
+ #else
+   return ddr3init( &pThis->ram );
  #endif
+#endif
 }
 #else
-int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj )
+int ramInit( register RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj
+       #if defined( __linux__ ) && defined( CONFIG_NO_FE_ETHERBONE_CONNECTION)
+           , EB_HANDLE_T* pEbHandle
+       #endif
+           )
 {
    pThis->pSharedObj = pSharedObj;
    ramRingReset( &pSharedObj->ringIndexes );   
 
- #ifdef CONFIG_SCU_USE_DDR3
-   return ddr3init();
+#ifdef CONFIG_SCU_USE_DDR3
+ #if defined( __linux__ ) && defined( CONFIG_NO_FE_ETHERBONE_CONNECTION)
+   return ddr3init( &pThis->ram, pEbHandle );
+ #else
+   return ddr3init( &pThis->ram );
  #endif
+#endif
 }
 #endif // else ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 
 //#define CONFIG_MIL_IN_TIMER_INTERRUPT
 
+#if defined(__lm32__) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
  * @brief Generalized function to read a ADDAC-DAQ-item from the
  *        shared data buffer.
  */
 STATIC inline
-void ramRreadAddacDaqItem( const RAM_RING_INDEX_T index,
+void ramRreadAddacDaqItem( RAM_SCU_T* pThis, const RAM_RING_INDEX_T index,
                            RAM_DAQ_PAYLOAD_T* pItem )
 {
 #ifdef CONFIG_SCU_USE_DDR3
  #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) || defined( CONFIG_RTOS )
    criticalSectionEnter();
-   ddr3read64( pItem, index );
+   ddr3read64( &pThis->ram, pItem, index );
    criticalSectionExit();
  #else
-   ddr3read64( pItem, index );
+   ddr3read64( &pThis->ram, pItem, index );
  #endif
 #else
    #error Nothing implemented in function ramRreadItem()!
@@ -95,15 +112,16 @@ void ramRreadAddacDaqItem( const RAM_RING_INDEX_T index,
  *        date buffer.
  */
 STATIC inline ALWAYS_INLINE
-void ramWriteAddacDaqItem( const RAM_RING_INDEX_T index,
+void ramWriteAddacDaqItem( register RAM_SCU_T* pThis,
+                           const RAM_RING_INDEX_T index,
                            RAM_DAQ_PAYLOAD_T* pItem )
 {
 #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) || defined( CONFIG_RTOS )
    criticalSectionEnter();
-   ramWriteItem( index, pItem );
+   ramWriteItem( pThis, index, pItem );
    criticalSectionExit();
 #else
-   ramWriteItem( index, pItem );
+   ramWriteItem( pThis, index, pItem );
 #endif
 }
 
@@ -167,7 +185,7 @@ RAM_DAQ_BLOCK_T ramRingGetTypeOfOldestBlock( register RAM_SCU_T* pThis )
    RAM_RING_INDEXES_T indexes = pThis->pSharedObj->ringIndexes;
 #endif
    ramRingAddToReadIndex( &indexes, RAM_DAQ_INDEX_OFFSET_OF_CHANNEL_CONTROL );
-   ramRreadAddacDaqItem( ramRingGetReadIndex( &indexes ), &item );
+   ramRreadAddacDaqItem( pThis, ramRingGetReadIndex( &indexes ), &item );
 
 #if  (DEBUGLEVEL>1)
    for( unsigned int i = 0; i < ARRAY_SIZE(item.ad16); i++ )
@@ -279,8 +297,12 @@ STATIC inline ALWAYS_INLINE
 void ramFillItem( RAM_DAQ_PAYLOAD_T* pItem, const unsigned int i,
                   const DAQ_DATA_T data )
 {
+#if defined( CONFIG_SCU_USE_DDR3 ) || defined(__DOXYGEN__)
    RAM_ASSERT( i < ARRAY_SIZE( pItem->ad16 ) );
    ramSetPayload16( pItem, data, i );
+#else
+   #error Nothing implemented in function ramFillItem()!
+#endif
 }
 
 #ifdef CONFIG_DEBUG_RAM_WRITE_DATA
@@ -309,6 +331,31 @@ void publishWrittenData( register RAM_SCU_T* pThis,
 #endif
 }
 
+#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
+/*! ---------------------------------------------------------------------------
+ */
+STATIC inline void ramPollAccessLock( RAM_SCU_T* pThis )
+{
+#ifdef CONFIG_DEBUG_RAM_WRITE_DATA
+   if( pThis->pSharedObj->ramAccessLock )
+   {
+      unsigned int pollCount = 0;
+      DBG_RAM_INFO( ESC_FG_MAGENTA ESC_BOLD
+                    "DBG: Enter RAM-access polling\n"
+                    ESC_NORMAL );
+      while( pThis->pSharedObj->ramAccessLock )
+      {
+         pollCount++;
+      }
+      DBG_RAM_INFO( ESC_FG_MAGENTA ESC_BOLD
+                    "DBG: Leaving RAM-access polling. %d loops\n"
+                    ESC_NORMAL, pollCount );
+   }
+#else
+   while( pThis->pSharedObj->ramAccessLock ) {}
+#endif
+}
+#endif
 //#define CONFIG_DAQ_DECREMENT
 
 /*! ---------------------------------------------------------------------------
@@ -323,18 +370,8 @@ STATIC inline
 void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
                       const bool isShort )
 {
-   /*!
-    * @brief Function pointer keeps the geter-function for remaining FiFi-data
-    *        of continuous data or post-mortem and high resolution.
-    */
    DAQ_REGISTER_T (*getRemaining)( register DAQ_CANNEL_T* );
-
-   /*!
-    * @brief Function pointer keeps the FiFo-read out function for
-    *        either continuous data or post-mortem and high resolution.
-    */
    volatile DAQ_DATA_T (*pop)( register DAQ_CANNEL_T* );
-
 #ifdef CONFIG_DAQ_SW_SEQUENCE
    uint8_t*     pSequence;
 #endif
@@ -380,32 +417,27 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
                  daqChannelGetNumber( pDaqChannel ) + 1 );
 
    if( isShort )
-   { /*
-      * Initialization for receiving of continuous DAQ-data block.
-      */
+   {
       getRemaining  = daqChannelGetDaqFifoWords;
       pop           = daqChannelPopDaqFifo;
       expectedWords = DAQ_FIFO_DAQ_WORD_SIZE_CRC;
-   #ifdef CONFIG_DAQ_SW_SEQUENCE
+#ifdef CONFIG_DAQ_SW_SEQUENCE
       pSequence     = &pDaqChannel->sequenceContinuous;
-   #endif
+#endif
    }
    else
-   { /*
-      * Initialization for receiving of high resolution or post mortem
-      * DAQ-data block,
-      */
+   {
       getRemaining  = daqChannelGetPmFifoWords;
       pop           = daqChannelPopPmFifo;
       expectedWords = DAQ_FIFO_PM_HIRES_WORD_SIZE_CRC;
-   #ifdef CONFIG_DAQ_SW_SEQUENCE
+#ifdef CONFIG_DAQ_SW_SEQUENCE
       pSequence     = &pDaqChannel->sequencePmHires;
-   #endif
+#endif
    }
 
 #ifndef CONFIG_DAQ_DECREMENT
    /*
-    * The data word which includes the CRC isn't a part of the fifo content,
+    * The data wort which includes the CRC isn't a part of the fifo content,
     * therefore we have to add it here.
     */
    remainingDataWords = getRemaining( pDaqChannel ) + 1;
@@ -421,6 +453,16 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
       daqChannelSetStatus( pDaqChannel, DAQ_RECEIVE_STATE_DATA_LOST );
       return;
    }
+#endif
+
+#ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
+   unsigned int wrIndex = (sizeof( _DAQ_WR_T ) / sizeof(DAQ_DATA_T));
+   _DAQ_WR_T wrTime;
+ #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
+   wrTime.timeStamp = irqGetTimestamp();
+ #else
+   wrTime.timeStamp = getWrSysTimeSafe();
+ #endif
 #endif
 
    descriptorIndex = 0;
@@ -462,6 +504,18 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
             * Descriptor becomes received.
             */
             RAM_ASSERT( descriptorIndex < ARRAY_SIZE(oDescriptor.index) );
+         #ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
+           #warning "Patch of WR-timestamp in ADDAC-DAQ! Remove this asap! ASAP!!!"
+            if( (descriptorIndex >= (offsetof(_DAQ_DISCRIPTOR_STRUCT_T, wr ) / sizeof(DAQ_DATA_T))) &&
+                (wrIndex > 0)
+              )
+            {  /*
+                * Overwriting the bullshit time-stamp! :-(
+                */
+               data = wrTime.wordIndex[--wrIndex];
+            }
+         #endif
+
          #ifdef CONFIG_DAQ_SW_SEQUENCE
             if( descriptorIndex == offsetof(_DAQ_DISCRIPTOR_STRUCT_T, crcReg ) /
                                sizeof(DAQ_DATA_T) )
@@ -524,7 +578,7 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
             /*
              * Store item in RAM.
              */
-            ramWriteAddacDaqItem( ramRingGetWriteIndex(poIndexes), &ramItem );
+            ramWriteAddacDaqItem( pThis, ramRingGetWriteIndex(poIndexes), &ramItem );
             ramRingIncWriteIndex( poIndexes );
 
             /*
@@ -662,5 +716,114 @@ int ramPushDaqDataBlock( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
    ramWriteDaqData( pThis, pDaqChannel, isShort );
    return 0;
 }
+
+#endif /* if defined(__lm32__) || defined(__DOXYGEN__) */
+///////////////////////////////////////////////////////////////////////////////
+#if (defined(__linux__) || defined(__DOXYGEN__))
+/*! ---------------------------------------------------------------------------
+ * @todo Make a cleaner separation of the software-layers.
+ */
+#if defined( CONFIG_DDR3_NO_BURST_FUNCTIONS )
+int ramReadDaqDataBlock( register RAM_SCU_T* pThis, RAM_DAQ_PAYLOAD_T* pData,
+                         unsigned int len )
+{
+#ifdef CONFIG_SCU_USE_DDR3
+   RAM_RING_INDEXES_T indexes = pThis->pSharedObj->ringIndexes;
+   EB_HANDLE_T*       pEb     = pThis->ram.pEbHandle;
+
+   EB_MEMBER_INFO_T info[len * ARRAY_SIZE( pData->ad32 )];
+   for( size_t i = 0; i < ARRAY_SIZE( info ); i++ )
+   {
+      info[i].pData = (uint8_t*)&pData[i / ARRAY_SIZE( pData->ad32 )].ad32
+                                               [i % ARRAY_SIZE( pData->ad32 )];
+      info[i].size = sizeof( pData->ad32[0] );
+   }
+
+   EB_CYCLE_OR_CB_ARG_T arg;
+   arg.aInfo   = info;
+   arg.infoLen = ARRAY_SIZE( info );
+   arg.exit    = false;
+
+   if( ebObjectReadCycleOpen(  pEb, &arg ) != EB_OK )
+   {
+      fprintf( stderr, ESC_FG_RED ESC_BOLD
+                       "Error: failed to create cycle for read: %s\n"
+                       ESC_NORMAL,
+                       ebGetStatusString( pEb ));
+      return ebGetStatus( pEb );
+   }
+
+   for( size_t i = 0; i < len; i++ )
+   { /*
+      * The read-index of the ring buffer doesn't becomes incremented
+      * continuously, therefore it's necessary to reinitialize
+      * the variable readIndex for each new iteration step.
+      */
+      size_t readIndex = pThis->ram.pTrModeBase +
+                       ramRingGetReadIndex( &indexes ) * sizeof(DDR3_PAYLOAD_T);
+      ramRingAddToReadIndex( &indexes, 1 );
+      for( size_t j = 0; j < ARRAY_SIZE( pData->ad32 ); j++  )
+      {
+         ebCycleRead( pEb, readIndex, EB_DATA32 | EB_LITTLE_ENDIAN, NULL );
+         readIndex += sizeof( pData->ad32[0] );
+      }
+   }
+
+   ebCycleClose( pEb );
+
+   while( !arg.exit )
+      ebSocketRun( pEb );
+
+   _ebSetOrStatus( pEb, &arg );
+
+   if( ebGetStatus( pEb ) == EB_OK )
+      pThis->pSharedObj->ringIndexes = indexes;
+
+   return ebGetStatus( pEb );
+#else
+   #error Unknown memory type for function: ramReadDaqDataBlock()
+#endif
+}
+#else /* if defined( CONFIG_DDR3_NO_BURST_FUNCTIONS ) */
+#warning At the moment the burst mode is slow!
+/*
+ * In the theory the burst mode should to be clearly faster than the
+ * conventional 64 bit oriented mode like above.
+ * But at the moment the libEtherbone.so seems doesn't allow a memory mapped IO
+ * respectively the access to the same address within the same EB-cycle.
+ */
+int ramReadDaqDataBlock( register RAM_SCU_T* pThis, RAM_DAQ_PAYLOAD_T* pData,
+                         unsigned int len, RAM_DAQ_POLL_FT poll )
+{
+#ifdef CONFIG_SCU_USE_DDR3
+   int ret;
+   RAM_RING_INDEXES_T indexes = pThis->pSharedObj->ringIndexes;
+   unsigned int lenToEnd = indexes.capacity - indexes.start;
+
+   if( lenToEnd < len )
+   {
+      ret = ddr3FlushFiFo( &pThis->ram, ramRingGeReadIndex( &indexes ),
+                           lenToEnd, pData, poll );
+      if( ret != EB_OK )
+         return ret;
+      ramRingAddToReadIndex( &indexes, lenToEnd );
+      len   -= lenToEnd;
+      pData += lenToEnd;
+   }
+
+   ret = ddr3FlushFiFo( &pThis->ram, ramRingGeReadIndex( &indexes ),
+                        len, pData, poll );
+   if( ret != EB_OK )
+      return ret;
+   ramRingAddToReadIndex( &indexes, len );
+   pThis->pSharedObj->ringIndexes = indexes;
+
+   return EB_OK;
+#else
+   #error Unknown memory type for function: ramReadDaqDataBlock()
+#endif
+}
+#endif /* if defined( CONFIG_DDR3_NO_BURST_FUNCTIONS ) */
+#endif /* defined(__linux__) || defined(__DOXYGEN__) */
 
 /*================================== EOF ====================================*/

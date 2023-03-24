@@ -8,8 +8,6 @@
 #include <scu_mmu_lm32.h>
 
 
-MMU_OBJ_T g_mmuObj;
-
 extern const uint32_t MMU_MAGIC;
 extern const MMU_ADDR_T MMU_LIST_START;
 
@@ -50,7 +48,7 @@ void mmuWriteItem( const MMU_ADDR_T index, const MMU_ITEM_T* pItem );
 void main( void )
 {
    mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "MMU-Test\n" );
-   if( mmuInit( &g_mmuObj ) != OK )
+   if( mmuInit() != OK )
    {
       mprintf( ESC_ERROR "ERROR Unable to get DDR3- RAM!\n" ESC_NORMAL );
       return;
