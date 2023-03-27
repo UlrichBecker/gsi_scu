@@ -29,17 +29,10 @@
 #ifndef _SCU_MMU_H
 #define _SCU_MMU_H
 
-#include <stdint.h>
-#include <helper_macros.h>
-
-#ifdef CONFIG_SCU_USE_DDR3
-  #include <scu_ddr3.h>
-#endif
-
 /*!
  * @defgroup SCU_MMU Memory Management Unit of SCU
  *
- * Memory organization in DDR3-RAM.\n
+ * Memory organization in DDR3-RAM of SCU3 respectively in SRAM of SCU4.\n
  * Each payload descriptor takes a place of 2 * 8 = 16 bytes.
  * @see MMU_ITEM_T
  * E.g.: 4 payload segments with its payload descriptors:
@@ -50,41 +43,41 @@
  *          +-------------------------+-------------------------+ start descriptor
  *          |            Padding respectively RFU               |/
  *          +------------+------------+-------------------------+
- * index 1: |   Tag 1    |  Flags 1   |      Start index 2      |\
+ * index 1> |   Tag 1    |  Flags 1   |      Start index 2      |\
  *          +------------+------------+-------------------------+ payload descriptor 1
  *          |      Start-address 1    |   Length of payload 1   |/
  *          +-------------------------+-------------------------+
- *          |///////////////////////////////////////////////////|
+ * addr 1 > |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          =//////////////////// Payload 1 ////////////////////=
  *          |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          +------------+------------+-------------------------+
- * index 2: |   Tag 2    |  Flags 2   |      Start index 3      |\
+ * index 2> |   Tag 2    |  Flags 2   |      Start index 3      |\
  *          +------------+------------+-------------------------+ payload descriptor 2
  *          |      Start-address 2    |   Length of payload 2   |/
  *          +-------------------------+-------------------------+
- *          |///////////////////////////////////////////////////|
+ * addr 2 > |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          =//////////////////// Payload 2 ////////////////////=
  *          |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          +------------+------------+-------------------------+
- * index 3: |   Tag 3    |  Flags 3   |      Start index 4      |\
+ * index 3> |   Tag 3    |  Flags 3   |      Start index 4      |\
  *          +------------+------------+-------------------------+ payload descriptor 3
  *          |      Start-address 3    |   Length of payload 3   |/
  *          +-------------------------+-------------------------+
- *          |///////////////////////////////////////////////////|
+ * addr 3 > |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          =//////////////////// Payload 3 ////////////////////=
  *          |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          +------------+------------+-------------------------+
- * index 4: |   Tag 4    |  Flags 4   |           0             |\
+ * index 4> |   Tag 4    |  Flags 4   |           0             |\
  *          +------------+------------+-------------------------+ payload descriptor 4
  *          |      Start-address 4    |   Length of payload 4   |/
  *          +-------------------------+-------------------------+
- *          |///////////////////////////////////////////////////|
+ * addr 4 > |///////////////////////////////////////////////////|
  *          |///////////////////////////////////////////////////|
  *          =//////////////////// Payload 4 ////////////////////=
  *          |///////////////////////////////////////////////////|
@@ -97,6 +90,17 @@
  *       That means these numbers has to be dividable by 8, because
  *       a 64-bit type is the smallest addressable unit.
  */
+
+#include <stdint.h>
+#include <helper_macros.h>
+#include <access64_type.h>
+#ifdef __lm32__
+ #ifdef CONFIG_SCU_USE_DDR3
+  #include <scu_ddr3.h>
+ #else
+  #include <scu_sram.h>
+ #endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,18 +123,11 @@ typedef uint16_t       MMU_TAG_T;
  */
 typedef unsigned int   MMU_ADDR_T;
 
-#ifdef CONFIG_SCU_USE_DDR3
- /*!
-  * @ingroup SCU_MMU
-  * @brief Datatype of the smallest addressable unit of the using memory.
-  */
- typedef DDR3_PAYLOAD_T RAM_PAYLOAD_T;
-#else
- /*!
-  * @todo Code for SRAM of SCU4.
-  */
- #error Memory type is unknown!
-#endif
+/*!
+ * @ingroup SCU_MMU
+ * @brief Datatype of the smallest addressable unit of the using memory.
+ */
+typedef ACCESS64_T     RAM_PAYLOAD_T;
 
 /*!
  * @ingroup SCU_MMU
@@ -311,10 +308,7 @@ MMU_ADDR_T mmuGetMaxCapacity64( void )
  #ifdef CONFIG_SCU_USE_DDR3
    return DDR3_MAX_INDEX64;
  #else
-  /*!
-   * @todo Implement memory type for LM32 of SCU4
-   */
-  #error Memory type for LM32 not implemented yet!
+   return SRAM_MAX_INDEX64;
  #endif
 }
 #else

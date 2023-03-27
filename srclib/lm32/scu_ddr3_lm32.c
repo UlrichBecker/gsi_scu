@@ -53,7 +53,7 @@
  */
 DDR3_T mg_oDdr3 =
 {
-   .pTrModeBase    = DDR3_INVALID 
+   .pTrModeBase     = DDR3_INVALID
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
    ,.pBurstModeBase = DDR3_INVALID
 #endif

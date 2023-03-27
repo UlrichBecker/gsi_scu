@@ -22,7 +22,7 @@
  */
 ECA_QUEUE_ITEM_T* ecaGetQueue( const unsigned int id )
 {
-   sdb_location ecaQeueBase[ECAQMAX];
+   sdb_location_t ecaQeueBase[ECAQMAX];
    uint32_t queueIndex = 0;
 
    find_device_multi( ecaQeueBase, &queueIndex, ARRAY_SIZE(ecaQeueBase),

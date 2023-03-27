@@ -45,6 +45,8 @@ const MMU_ADDR_T MMU_LIST_START = 0;
 #ifndef __lm32__
    #include <stdio.h>
    #define mprintf printf
+#else
+   #include <mprintf.h>
 #endif
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu.h
@@ -246,6 +248,5 @@ MMU_STATUS_T mmuAlloc( const MMU_TAG_T tag, MMU_ADDR_T* pStartAddr,
 
    return OK;
 }
-
 
 /*================================== EOF ====================================*/

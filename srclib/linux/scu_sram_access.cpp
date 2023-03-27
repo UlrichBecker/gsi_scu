@@ -23,12 +23,11 @@
  ******************************************************************************
  */
 #include <helper_macros.h>
+#include <scu_sram.h>
 #include "scu_sram_access.hpp"
 
 using namespace Scu;
 
-constexpr uint _32MB_IN_BYTE = 33554432;
-constexpr uint SRAM_MAX_INDEX64 = _32MB_IN_BYTE / sizeof(uint64_t) - 1;
 
 /*!----------------------------------------------------------------------------
  */

@@ -2,7 +2,7 @@
  *  @file scu_ddr3.h
  *  @brief Interface routines for Double Data Rate (DDR3) RAM in SCU3
  *  @note Header only
- *  @note This module is suitable for Linux and LM32 at the moment.
+ *  @note This module is suitable for Linux and LM32.
  *
  *  @see scu_ddr3.c
  *  @see

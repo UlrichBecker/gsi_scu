@@ -28,7 +28,9 @@
  */
 #include <scu_mmu_lm32.h>
 
-#ifdef CONFIG_SCU_USE_DDR3
+#ifdef CONFIG_SCU_USE_DDR3 /***** DDR3-ACCESS *********/
+#include <scu_ddr3_lm32.h>
+
 /*! ---------------------------------------------------------------------------
  * @see scu_mmu_lm32.h
  */
@@ -58,8 +60,39 @@ void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
       ddr3write64( index, &pItem[i] );
    }
 }
-#else
-  #error TODO mmuInit, mmuRead and mmuWrite for SCU4
-#endif
+
+#else /******* SRAM- ACCESS *********/
+#include <scu_sram_lm32.h>
+/*! ---------------------------------------------------------------------------
+ * @see scu_mmu_lm32.h
+ */
+MMU_STATUS_T mmuInit( void )
+{
+   return (sramInit() == 0)? OK : MEM_NOT_PRESENT;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_mmu.h
+ */
+void mmuRead( MMU_ADDR_T index, RAM_PAYLOAD_T* pItem, size_t len )
+{
+   for( size_t i = 0; i < len; i++, index++ )
+   {
+      sramRead64( &pItem[i], index );
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_mmu.h
+ */
+void mmuWrite( MMU_ADDR_T index, const RAM_PAYLOAD_T* pItem, size_t len )
+{
+   for( size_t i = 0; i < len; i++, index++ )
+   {
+      sramWite64( index, &pItem[i] );
+   }
+}
+
+#endif /* else ifdef CONFIG_SCU_USE_DDR3 */
 
 /*================================== EOF ====================================*/

@@ -27,7 +27,6 @@
  #include <scu_wr_time.h>
  #include <lm32_syslog.h>
  #include <scu_mmu_tag.h>
- #include <lm32Interrupts.h>
  #include <dbg.h>
  #ifdef CONFIG_DEBUG_LM32LOG
   #include <mprintf.h>
@@ -36,27 +35,65 @@
 
 STATIC MMU_ADDR_T mg_adminOffset = 0;
 
-#ifdef CONFIG_SCU_USE_DDR3
+#ifdef CONFIG_SCU_USE_DDR3 /***** DDR3-ACCESS *****/
+
+#ifndef __DOCFSM__
+ #include <scu_ddr3_lm32.h>
+#endif
+#ifdef CONFIG_RTOS
+/*
+ * When FreeRTOS is used then the DDR3-access functions are already within
+ * a critical section, so that isn't necessary to put it here again.
+ */
+ #define DDR3_CRITICAL_SECTION_ENTER()
+ #define DDR3_CRITICAL_SECTION_EXIT()
+#else
+  #ifndef __DOCFSM__
+   #include <lm32Interrupts.h>
+  #endif
+ #define DDR3_CRITICAL_SECTION_ENTER() criticalSectionEnter()
+ #define DDR3_CRITICAL_SECTION_EXIT()  criticalSectionExit()
+#endif
+
 /*! ---------------------------------------------------------------------------
  */
 STATIC inline void syslogWriteRam( unsigned int index, const RAM_PAYLOAD_T* pData )
 {
-   criticalSectionEnter();
+   DDR3_CRITICAL_SECTION_ENTER();
    ddr3write64( index, pData );
-   criticalSectionExit();
+   DDR3_CRITICAL_SECTION_EXIT();
 }
 
 /*! ---------------------------------------------------------------------------
  */
 STATIC inline void syslogReadRam( unsigned int index, RAM_PAYLOAD_T* pData )
 {
-   criticalSectionEnter();
+   DDR3_CRITICAL_SECTION_ENTER();
    ddr3read64( pData, index );
-   criticalSectionExit();
+   DDR3_CRITICAL_SECTION_EXIT();
 }
-#else
- #error TODO syslogWriteRam and syslogReadRam for SCU4
+
+#else /***** SRAM-ACCESS *****/
+
+#ifndef __DOCFSM__
+ #include <scu_sram_lm32.h>
 #endif
+
+/*! ---------------------------------------------------------------------------
+ */
+STATIC inline void syslogWriteRam( unsigned int index, const RAM_PAYLOAD_T* pData )
+{
+   sramWrite64( index, pData );
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+STATIC inline void syslogReadRam( unsigned int index, RAM_PAYLOAD_T* pData )
+{
+   sramRead64( pData, index );
+}
+
+#endif /* else ifdef CONFIG_SCU_USE_DDR3 */
 
 /*! ---------------------------------------------------------------------------
  */

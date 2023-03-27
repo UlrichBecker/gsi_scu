@@ -24,84 +24,102 @@
 #ifndef _SDB_IDS_H
 #define _SDB_IDS_H
 
-///////////////////////////////////////////////////////////////
-//  SBD BASE ADR IS AUTOMAPPED IN GATEWARE. USE getRootSdb() //
-///////////////////////////////////////////////////////////////
+#ifdef __cplusplus
+extern "C" {
+namespace Scu
+{
+#endif
 
-#define SDB_INTERCONNET 0x00
-#define SDB_DEVICE      0x01
-#define SDB_BRIDGE      0x02
-#define SDB_MSI         0x03
-#define SDB_EMPTY       0xFF
+/////////////////////////////////////////////////////////////////////
+//! @note SBD BASE ADR IS AUTOMAPPED IN GATEWARE. USE getRootSdb() //
+/////////////////////////////////////////////////////////////////////
 
+typedef enum
+{
+   SDB_INTERCONNET     = 0x00,
+   SDB_DEVICE          = 0x01,
+   SDB_BRIDGE          = 0x02,
+   SDB_MSI             = 0x03,
+   SDB_EMPTY           = 0xFF
+} SDB_SELECT_T;
 
+typedef enum
+{
+   ERROR_NOT_FOUND     = 0xFFFFFFFE,
+   NO_MSI              = 0XDEADBEE3,
+   OWN_MSI             = (1<<31)
+} WB_STATUS_T;
 
-#define ERROR_NOT_FOUND  0xFFFFFFFE
-#define NO_MSI           0XDEADBEE3
-#define OWN_MSI          (1<<31)
-
-
-#define GSI                   0x00000651
-#define CERN                  0x0000ce42
-
+typedef enum
+{
+   GSI                 = 0x00000651,
+   CERN                = 0x0000ce42
+} WB_VENDOR_ID_T;
 
 //MSI message forwarding box for master2master MSI
-#define MSI_MSG_BOX           0xfab0bdd8
+typedef enum
+{
+   MSI_MSG_BOX         = 0xfab0bdd8,
 
-//CPU periphery
-#define CPU_INFO_ROM          0x10040085
-#define CPU_ATOM_ACC          0x10040100
-#define CPU_SYSTEM_TIME       0x10040084
-#define CPU_TIMER_CTRL_IF     0x10040088
-#define CPU_MSI_CTRL_IF       0x10040083
-#define CPU_MSI_TGT           0x1f1a4e39
+   //CPU periphery
+   CPU_INFO_ROM        = 0x10040085,
+   CPU_ATOM_ACC        = 0x10040100,
+   CPU_SYSTEM_TIME     = 0x10040084,
+   CPU_TIMER_CTRL_IF   = 0x10040088,
+   CPU_MSI_CTRL_IF     = 0x10040083,
+   CPU_MSI_TGT         = 0x1f1a4e39,
 
-//Cluster periphery
-#define LM32_CB_CLUSTER       0x10041000
-#define CLU_INFO_ROM          0x10040086
-#define LM32_RAM_SHARED       0x81111444
-#define FTM_PRIOQ_CTRL        0x10040200
-#define FTM_PRIOQ_DATA        0x10040201
+   //Cluster periphery
+   LM32_CB_CLUSTER     = 0x10041000,
+   CLU_INFO_ROM        = 0x10040086,
+   LM32_RAM_SHARED     = 0x81111444,
+   FTM_PRIOQ_CTRL      = 0x10040200,
+   FTM_PRIOQ_DATA      = 0x10040201,
 
-//External interface to CPU RAMs & IRQs
-#define LM32_RAM_USER         0x54111351
-#define LM32_IRQ_EP           0x10050083
+   //External interface to CPU RAMs & IRQs
+   LM32_RAM_USER       = 0x54111351,
+   LM32_IRQ_EP         = 0x10050083,
 
-//Generic stuff
-#define CB_GENERIC            0xeef0b198
-#define DPRAM_GENERIC         0x66cfeb52
-#define IRQ_ENDPOINT          0x10050082
-#define PCIE_IRQ_ENDP         0x8a670e73
+   //Generic stuff
+   CB_GENERIC          = 0xeef0b198,
+   DPRAM_GENERIC       = 0x66cfeb52,
+   IRQ_ENDPOINT        = 0x10050082,
+   PCIE_IRQ_ENDP       = 0x8a670e73,
 
-//IO Devices
-#define OLED_DISPLAY          0x93a6f3c4
-#define SSD1325_SER_DRIVER    0x55d1325d
-#define ETHERBONE_MASTER      0x00000815
-#define ETHERBONE_CFG         0x68202b22
+   //IO Devices
+   OLED_DISPLAY        = 0x93a6f3c4,
+   SSD1325_SER_DRIVER  = 0x55d1325d,
+   ETHERBONE_MASTER    = 0x00000815,
+   ETHERBONE_CFG       = 0x68202b22,
 
+   ECA_EVENT           = 0x8752bf45,
+   ECA_CTRL            = 0x8752bf44,
+   TLU                 = 0x10051981,
+   WR_UART             = 0xe2d13d04,
+   WR_PPS_GEN          = 0xde0d8ced,
+   SCU_BUS_MASTER      = 0x9602eb6f,
+   SCU_IRQ_CTRL        = 0x9602eb70,
+   WB_FG_IRQ_CTRL      = 0x9602eb71,
+   MIL_IRQ_CTRL        = 0x9602eb72,
 
-#define ECA_EVENT             0x8752bf45
-#define ECA_CTRL              0x8752bf44
-#define TLU                   0x10051981
-#define WR_UART               0xe2d13d04
-#define WR_PPS_GEN            0xde0d8ced
-#define SCU_BUS_MASTER        0x9602eb6f
-#define SCU_IRQ_CTRL          0x9602eb70
-#define WB_FG_IRQ_CTRL        0x9602eb71
-#define MIL_IRQ_CTRL          0x9602eb72
+   WR_1Wire            = 0x779c5443,
+   User_1Wire          = 0x4c8a0635,
+   WB_FG_QUAD          = 0x863e07f0,
 
-#define SCU_BUS_MASTER        0x9602eb6f
-#define WR_1Wire              0x779c5443
-#define User_1Wire            0x4c8a0635
-#define WB_FG_QUAD            0x863e07f0
+   WR_CFIPFlash        = 0x12122121,
+   WB_DDR3_if1         = 0x20150828,
+   WB_DDR3_if2         = 0x20160525,
+   WB_PSEUDO_SRAM      = 0x169edcb7,
+   WR_SYS_CON          = 0xff07fc47,
+   WB_REMOTE_UPDATE    = 0x38956271,
+   WB_ASMI             = 0x48526423,
+   WB_SCU_REG          = 0xe2d13d04
+} WB_DEVICE_ID_T;
 
-#define WR_CFIPFlash          0x12122121
-#define WB_DDR3_if1           0x20150828
-#define WB_DDR3_if2           0x20160525
-#define WR_SYS_CON            0xff07fc47
-#define WB_REMOTE_UPDATE      0x38956271
-#define WB_ASMI               0x48526423
-#define WB_SCU_REG            0xe2d13d04
+#ifdef __cplusplus
+} /* namespace Scu */
+} /* extern "C" */
+#endif
 
 #endif /* ifndef _SDB_IDS_H */
 /*================================== EOF ====================================*/
