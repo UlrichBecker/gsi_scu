@@ -1,6 +1,31 @@
+/*!
+ * @file mini_sdb.h
+ * @brief Finding of Self Described Bus (SDB) device addresses.
+ * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
+ * @author Updated by Ulrich Becker <u.becker@gsi.de>
+ * @date 28.03.2023
+ ******************************************************************************
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library. If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************
+ */
 #ifndef _MINI_SDB_H
 #define _MINI_SDB_H
+#ifndef __lm32__
+ #error This module os for Lettice Micro 32 (LM32) only!
+#endif
 
+#include <helper_macros.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <sdb_ids.h>
@@ -37,29 +62,54 @@ volatile uint32_t* pCfiPFlash;
 volatile uint32_t* pDDR3_if1;
 volatile uint32_t* pDDR3_if2;
 
+STATIC_ASSERT( sizeof(WB_VENDOR_ID_T) == sizeof(uint32_t) );
+STATIC_ASSERT( sizeof(WB_DEVICE_ID_T) == sizeof(uint32_t) );
 
-typedef struct pair64
-{
-   uint32_t high;
-   uint32_t low;
-} pair64_t;
-
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
-   char reserved[63];
+#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+   uint32_t high;
+   uint32_t low;
+#else
+   uint32_t low;
+   uint32_t high;
+#endif
+} pair64_t;
+
+STATIC_ASSERT( sizeof(pair64_t) == sizeof(uint64_t) );
+
+/*!
+ * @ingroup SDB
+ */
+typedef struct
+{
+   uint8_t reserved[63];
    uint8_t record_type;
 } sdb_empty_t;
 
+STATIC_ASSERT( sizeof(sdb_empty_t) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    pair64_t  vendor_id;
    uint32_t  device_id;
    uint32_t  version;
    uint32_t  date;
-   char      name[19];
+   uint8_t   name[19];
    uint8_t   record_type;
-}  sdb_product_t;
+} sdb_product_t;
 
+STATIC_ASSERT( sizeof(sdb_product_t) == 40 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    pair64_t addr_first;
@@ -67,6 +117,11 @@ typedef struct
    sdb_product_t product;
 } sdb_component_t;
 
+STATIC_ASSERT( sizeof(sdb_component_t) == 56 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    uint32_t msi_flags;
@@ -74,6 +129,11 @@ typedef struct
    sdb_component_t sdb_component;
 } sdb_msi_t;
 
+STATIC_ASSERT( sizeof(sdb_msi_t) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    uint16_t abi_class;
@@ -83,12 +143,22 @@ typedef struct
    sdb_component_t sdb_component;
 } sdb_device_t;
 
+STATIC_ASSERT( sizeof(sdb_device_t) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    pair64_t sdb_child;
    sdb_component_t sdb_component;
 } sdb_bridge_t;
 
+STATIC_ASSERT( sizeof(sdb_bridge_t) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
    uint32_t sdb_magic;
@@ -98,6 +168,11 @@ typedef struct
    sdb_component_t sdb_component;
 } SDB_INTERCONNECT_T;
 
+STATIC_ASSERT( sizeof(SDB_INTERCONNECT_T) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef union
 {
    sdb_empty_t        empty;
@@ -107,58 +182,107 @@ typedef union
    SDB_INTERCONNECT_T interconnect;
 } sdb_record_t;
 
+STATIC_ASSERT( sizeof(sdb_record_t) == 64 );
+
+/*!
+ * @ingroup SDB
+ */
 typedef struct
 {
-   sdb_record_t* sdb;
-   uint32_t adr;
-   uint32_t msi_first;
-   uint32_t msi_last;
+   sdb_record_t* pSdb;
+   uint32_t      adr;
+   uint32_t      msi_first;
+   uint32_t      msi_last;
 } sdb_location_t;
 
+STATIC_ASSERT( sizeof(sdb_location_t) == 16 );
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
 sdb_location_t* find_device_multi( sdb_location_t* pFound_sdb,
                                    uint32_t* pIdx,
                                    const uint32_t qty,
-                                   const uint32_t venId,
-                                   const uint32_t devId );
+                                   const WB_VENDOR_ID_T venId,
+                                   const WB_DEVICE_ID_T devId );
 
-uint32_t* find_device_adr( const uint32_t venId, const uint32_t devId );
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t* find_device_adr( const WB_VENDOR_ID_T venId, const WB_DEVICE_ID_T devId );
 
+/*!----------------------------------------------------------------------------
+ */
 sdb_location_t* find_device_multi_in_subtree( sdb_location_t* pLoc,
                                               sdb_location_t* pFound_sdb,
                                               uint32_t* pIdx,
                                               const uint32_t qty,
-                                              const uint32_t venId,
-                                              const uint32_t devId );
+                                              const WB_VENDOR_ID_T venId,
+                                              const WB_DEVICE_ID_T devId );
 
-uint32_t* find_device_adr_in_subtree( sdb_location_t *pLoc,
-                                      const uint32_t venId,
-                                      const uint32_t devId );
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t* find_device_adr_in_subtree( sdb_location_t* pLoc,
+                                      const WB_VENDOR_ID_T venId,
+                                      const WB_DEVICE_ID_T devId );
 
-sdb_location_t *find_sdb_deep( sdb_record_t* pParent_sdb,
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+sdb_location_t* find_sdb_deep( sdb_record_t* pParent_sdb,
                                sdb_location_t* pFound_sdb,
                                uint32_t  base,
                                uint32_t  msi_base,
                                uint32_t  msi_last,
                                uint32_t* pIdx,
-                               const uint32_t  qty,
-                               const uint32_t  venId,
-                               const uint32_t  devId );
+                               const uint32_t qty,
+                               const WB_VENDOR_ID_T venId,
+                               const WB_DEVICE_ID_T devId );
 
-uint32_t       getSdbAdr( sdb_location_t* loc);
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t getSdbAdr( sdb_location_t* pLoc);
 
-uint32_t       getSdbAdrLast( sdb_location_t* loc );
-uint32_t       getMsiAdr( sdb_location_t* loc);
-uint32_t       getMsiAdrLast( sdb_location_t* loc );
-sdb_record_t*  getChild( sdb_location_t* loc);
-uint32_t       getMsiUpperRange( void );
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t getSdbAdrLast( sdb_location_t* pLoc );
 
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t getMsiAdr( sdb_location_t* pLoc);
 
-uint8_t*       find_device( uint32_t devid ); //DEPRECATED, USE find_device_adr INSTEAD!
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t getMsiAdrLast( sdb_location_t* pLoc );
 
-void           discoverPeriphery( void );
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+sdb_record_t* getChild( sdb_location_t* pLoc );
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint32_t getMsiUpperRange( void );
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+uint8_t* find_device( WB_DEVICE_ID_T devid ) GSI_DEPRECATED; /* USE find_device_adr INSTEAD! */
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
+void discoverPeriphery( void ); // GSI_DEPRECATED;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* ifndef _MINI_SDB_H */
+/*================================== EOF ====================================*/

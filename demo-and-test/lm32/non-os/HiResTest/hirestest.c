@@ -33,7 +33,7 @@
 
 DAQ_BUS_T g_allDaq;
 
-#define CHANNEL 2
+#define CHANNEL 0
 
 void* g_pScub_base;
 
@@ -158,7 +158,7 @@ void main( void )
    clrscr();
    mprintf( ESC_FG_MAGENTA ESC_BOLD "DAQ High Resolution test, compiler: " COMPILER_VERSION_STRING ESC_NORMAL "\n");
 
-   g_pScub_base = find_device_adr(GSI, SCU_BUS_MASTER);
+   g_pScub_base = find_device_adr( GSI, SCU_BUS_MASTER );
    if( (int)g_pScub_base == ERROR_NOT_FOUND )
    {
       mprintf( ESC_ERROR "ERROR: device address of SCU bus not found!\n" ESC_NORMAL );

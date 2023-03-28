@@ -1,6 +1,10 @@
-unsigned int sdb_add(void)
+
+#include "sdb_add.h"
+
+unsigned int sdb_add( void )
 {
     unsigned ret;
     __asm__ __volatile__(".long   0x91600800" : "=r" (ret) : :);
     return ret;
 }
+

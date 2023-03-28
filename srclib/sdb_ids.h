@@ -24,6 +24,10 @@
 #ifndef _SDB_IDS_H
 #define _SDB_IDS_H
 
+/*!
+ * @defgroup SDB Administration of Self Described Bis (SDB)
+ */
+
 #ifdef __cplusplus
 extern "C" {
 namespace Scu
@@ -34,6 +38,9 @@ namespace Scu
 //! @note SBD BASE ADR IS AUTOMAPPED IN GATEWARE. USE getRootSdb() //
 /////////////////////////////////////////////////////////////////////
 
+/*!
+ * @ingroup SDB
+ */
 typedef enum
 {
    SDB_INTERCONNET     = 0x00,
@@ -43,6 +50,9 @@ typedef enum
    SDB_EMPTY           = 0xFF
 } SDB_SELECT_T;
 
+/*!
+ * @ingroup SDB
+ */
 typedef enum
 {
    ERROR_NOT_FOUND     = 0xFFFFFFFE,
@@ -50,6 +60,10 @@ typedef enum
    OWN_MSI             = (1<<31)
 } WB_STATUS_T;
 
+/*!
+ * @ingroup SDB
+ * @brief Device ID
+ */
 typedef enum
 {
    GSI                 = 0x00000651,
@@ -57,6 +71,10 @@ typedef enum
 } WB_VENDOR_ID_T;
 
 //MSI message forwarding box for master2master MSI
+/*!
+ * @ingroup SDB
+ * @brief Device ID
+ */
 typedef enum
 {
    MSI_MSG_BOX         = 0xfab0bdd8,
