@@ -20,16 +20,19 @@
  ******************************************************************************
  */
 #include <stdio.h>
+#include <stdbool.h>
 #include "mini_sdb.h"
 #include "dbg.h"
 #include "memlayout.h"
 
+#ifndef SDB_ROOT_ADDR
 /*!
  * @ingroup SDB
  * @brief Base address of SDB
  * @todo Check whether this value will changed in SCU4!
  */
 #define SDB_ROOT_ADDR 0x91600800
+#endif
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
@@ -51,18 +54,35 @@ sdb_record_t* getSdbRoot( void )
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
- * @brief Object path to vendor and device id.
- * @see COMPARE_ID
+ * @brief Helper loop-macro for browsing all SDB devices.
  */
-#define ID_PATH sdb_component.product
+#define FOR_EACH_SDB_RECORD( pParentSdb, pCurrentSdb )      \
+   pCurrentSdb = pParentSdb;                                \
+   for( int records = pParentSdb->interconnect.sdb_records; \
+        records > 0;                                        \
+        pCurrentSdb++, records-- )
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
- * @brief Helper macro for comparing the vendor and device id.
+ * @brief Returns the SDB record type.
  */
-#define COMPARE_ID( obj, vendor, device )    \
-   ((obj.ID_PATH.vendor_id.low == vendor) && \
-    (obj.ID_PATH.device_id     == device))
+STATIC inline ALWAYS_INLINE
+SDB_SELECT_T getRecordType( sdb_record_t* pRecord )
+{
+   return (SDB_SELECT_T)pRecord->empty.record_type;
+}
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ * @brief Helper function for comparing the vendor and device id.
+ */
+STATIC inline ALWAYS_INLINE
+bool compareId( const sdb_record_t* pRecord, const WB_VENDOR_ID_T venId,
+                                             const WB_DEVICE_ID_T devId )
+{
+   return (pRecord->bridge.sdb_component.product.vendor_id.low == venId) &&
+          (pRecord->bridge.sdb_component.product.device_id == devId );
+}
 
 /*!----------------------------------------------------------------------------
  */
@@ -77,25 +97,21 @@ sdb_location_t* find_sdb_deep( sdb_record_t* pParent_sdb,
                                const WB_DEVICE_ID_T devId )
 {
    sdb_record_t* pRecord;
-   uint32_t records;
-   uint32_t i;
-   uint32_t msi_cnt = 0;
-   uint32_t msi_adr = 0;
 
-   pRecord = pParent_sdb;
-   records = pRecord->interconnect.sdb_records;
    /*
     * discover MSI address before moving on to possible next Crossbar
     */
-   for( i = 0; i < records; ++i, ++pRecord )
+   uint32_t msi_cnt = 0;
+   uint32_t msi_adr = 0;
+   FOR_EACH_SDB_RECORD( pParent_sdb, pRecord )
    {
-      if( pRecord->empty.record_type != SDB_MSI )
+      if( getRecordType( pRecord ) != SDB_MSI )
          continue;
 
       if( (pRecord->msi.msi_flags & OWN_MSI) == 0 )
          continue;
 
-      if( (msi_base == NO_MSI) || COMPARE_ID( pRecord->msi, 0, 0 ) )
+      if( (msi_base == NO_MSI) || compareId( pRecord, 0, 0 ) )
          msi_base = NO_MSI;
       else
          msi_adr = pRecord->msi.sdb_component.addr_first.low;
@@ -107,69 +123,51 @@ sdb_location_t* find_sdb_deep( sdb_record_t* pParent_sdb,
    { /*
       * This is an error, the CB layout is messed up
       */
-      DBPRINT1("Found more than 1 MSI at 0x%08x par 0x%08x\n", base, (uint32_t)(unsigned char*)pParent_sdb);
+      DBPRINT1("Found more than 1 MSI at 0x%08X par 0x%08X\n", base, (uint32_t)(unsigned char*)pParent_sdb);
       *pIdx = 0;
       return pFound_sdb;
    }
 
-   pRecord  = pParent_sdb;
-   records = pRecord->interconnect.sdb_records;
-   for( i = 0; i < records; ++i, ++pRecord )
+   FOR_EACH_SDB_RECORD( pParent_sdb, pRecord )
    {
-      if( pRecord->empty.record_type == SDB_BRIDGE )
+      switch( getRecordType( pRecord ) )
       {
-         if( COMPARE_ID( pRecord->bridge, venId, devId ) )
+         case SDB_BRIDGE: case SDB_DEVICE: case SDB_MSI:
          {
-            DBPRINT2("Target BRG at base 0x%08x 0x%08x  entry %u\n", base, base+pRecord->bridge.sdb_component.addr_first.low, *pIdx);
-            pFound_sdb[(*pIdx)].pSdb = pRecord;
-            pFound_sdb[(*pIdx)].adr  = base;
-            pFound_sdb[(*pIdx)].msi_first = msi_base + msi_adr;
-            pFound_sdb[(*pIdx)].msi_last  = msi_base + msi_adr + msi_last;
-            (*pIdx)++;
+            if( compareId( pRecord, venId, devId ) )
+            {
+               DBPRINT2("Target record at 0x%08X\n", base + pRecord->bridge.sdb_component.addr_first.low);
+               pFound_sdb[*pIdx].pSdb      = pRecord;
+               pFound_sdb[*pIdx].adr       = base;
+               pFound_sdb[*pIdx].msi_first = msi_base + msi_adr;
+               pFound_sdb[*pIdx].msi_last  = msi_base + msi_adr + msi_last;
+               (*pIdx)++;
+            }
+            
+            if( getRecordType( pRecord ) != SDB_BRIDGE )
+               break;
+            /*
+             * CAUTION: Recursive call!
+             */
+            find_sdb_deep( (sdb_record_t*)(base + pRecord->bridge.sdb_child.low),
+                           pFound_sdb,
+                           base + pRecord->bridge.sdb_component.addr_first.low,
+                           msi_base+msi_adr,
+                           msi_last,
+                           pIdx,
+                           qty,
+                           venId,
+                           devId );
+
+            break;
          }
-         /*
-          * CAUTION: Recursive call!
-          */
-         find_sdb_deep( (sdb_record_t*)(base + pRecord->bridge.sdb_child.low),
-                        pFound_sdb,
-                        base + pRecord->bridge.sdb_component.addr_first.low,
-                        msi_base+msi_adr,
-                        msi_last,
-                        pIdx,
-                        qty,
-                        venId,
-                        devId );
-      }
 
-      if( (pRecord->empty.record_type == SDB_DEVICE) && COMPARE_ID( pRecord->device, venId, devId ) )
-      {
-         DBPRINT2("Target DEV at 0x%08x\n", base + pRecord->device.sdb_component.addr_first.low);
-         pFound_sdb[(*pIdx)].pSdb = pRecord;
-         pFound_sdb[(*pIdx)].adr  = base;
-         pFound_sdb[(*pIdx)].msi_first = msi_base + msi_adr;
-         pFound_sdb[(*pIdx)].msi_last  = msi_base + msi_adr + msi_last;
-         (*pIdx)++;
-      }
-
-      /*
-       * This gets us addr_last.
-       * We need it for the upper range when programming an MSI master destination
-       */
-      if( (pRecord->empty.record_type == SDB_MSI) && COMPARE_ID( pRecord->msi, venId, devId ) )
-      {
-         DBPRINT2("Target MSI at 0x%08x\n", base + pRecord->msi.sdb_component.addr_first.low);
-         pFound_sdb[(*pIdx)].pSdb = pRecord;
-         pFound_sdb[(*pIdx)].adr  = base;
-         pFound_sdb[(*pIdx)].msi_first = msi_base + msi_adr;
-         pFound_sdb[(*pIdx)].msi_last  = msi_base + msi_adr + msi_last;
-         (*pIdx)++;
+         default: break;
       }
 
       if( *pIdx >= qty )
-      {
-         return pFound_sdb;
-      }
-   }
+         break;
+   } /* FOR_EACH_SDB_RECORD() */
    return pFound_sdb;
 }
 
@@ -177,17 +175,15 @@ sdb_location_t* find_sdb_deep( sdb_record_t* pParent_sdb,
  */
 uint32_t getMsiUpperRange( void )
 {
-   const sdb_record_t* pRecord = getSdbRoot();
-   const uint32_t      records = pRecord->interconnect.sdb_records;
-   uint32_t i;
    uint32_t msi_adr    = 0;
 
    /*
     * get upper range of MSI target
     */
-   for( i = 0; i < records; ++i, ++pRecord )
+   sdb_record_t* pRecord;
+   FOR_EACH_SDB_RECORD( getSdbRoot(), pRecord )
    {
-      if( pRecord->empty.record_type != SDB_MSI )
+      if( getRecordType( pRecord ) != SDB_MSI )
          continue;
 
       if( pRecord->msi.msi_flags != OWN_MSI )
@@ -243,8 +239,9 @@ sdb_location_t* find_device_multi_in_subtree( sdb_location_t* pLoc,
                                               const WB_VENDOR_ID_T venId,
                                               const WB_DEVICE_ID_T devId )
 {
-   //return find_sdb_deep(getChild(pLoc), pFound_sdb, getSdbAdr(pLoc), getMsiAdr(pLoc), getMsiUpperRange(), pIdx, qty, venId, devId);
-   return find_sdb_deep( getChild(pLoc), pFound_sdb, getSdbAdr(pLoc), getMsiAdr(pLoc), getMsiUpperRange(), pIdx, qty, venId, devId);
+   return find_sdb_deep( getChild(pLoc), pFound_sdb, getSdbAdr(pLoc),
+                         getMsiAdr(pLoc), getMsiUpperRange(),
+                         pIdx, qty, venId, devId);
 }
 
 /*!----------------------------------------------------------------------------
@@ -265,10 +262,10 @@ uint32_t* find_device_adr_in_subtree( sdb_location_t* pLoc, const WB_VENDOR_ID_T
  */
 uint32_t getSdbAdr( sdb_location_t* pLoc )
 {
-   if( pLoc->pSdb->empty.record_type == SDB_DEVICE )
+   if( getRecordType( pLoc->pSdb ) == SDB_DEVICE )
       return pLoc->adr + pLoc->pSdb->device.sdb_component.addr_first.low;
 
-   if( pLoc->pSdb->empty.record_type == SDB_BRIDGE )
+   if( getRecordType( pLoc->pSdb ) == SDB_BRIDGE )
       return pLoc->adr + pLoc->pSdb->bridge.sdb_component.addr_first.low;
 
    return ERROR_NOT_FOUND;

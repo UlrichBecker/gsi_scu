@@ -34,6 +34,9 @@
 extern "C" {
 #endif
 
+/*!
+ * @todo Remove all this following pointers!
+ */
 //periphery device pointers
 volatile uint32_t* pTlu; 
 volatile uint32_t* pEbm;
@@ -70,13 +73,8 @@ STATIC_ASSERT( sizeof(WB_DEVICE_ID_T) == sizeof(uint32_t) );
  */
 typedef struct
 {
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
    uint32_t high;
    uint32_t low;
-#else
-   uint32_t low;
-   uint32_t high;
-#endif
 } pair64_t;
 
 STATIC_ASSERT( sizeof(pair64_t) == sizeof(uint64_t) );
@@ -130,7 +128,8 @@ typedef struct
 } sdb_msi_t;
 
 STATIC_ASSERT( sizeof(sdb_msi_t) == 64 );
-
+STATIC_ASSERT( offsetof( sdb_empty_t, record_type ) == offsetof( sdb_msi_t, sdb_component.product.record_type ));
+   
 /*!
  * @ingroup SDB
  */
@@ -144,6 +143,7 @@ typedef struct
 } sdb_device_t;
 
 STATIC_ASSERT( sizeof(sdb_device_t) == 64 );
+STATIC_ASSERT( offsetof( sdb_empty_t, record_type ) == offsetof( sdb_device_t, sdb_component.product.record_type ));
 
 /*!
  * @ingroup SDB
@@ -155,6 +155,7 @@ typedef struct
 } sdb_bridge_t;
 
 STATIC_ASSERT( sizeof(sdb_bridge_t) == 64 );
+STATIC_ASSERT( offsetof( sdb_empty_t, record_type ) == offsetof( sdb_bridge_t, sdb_component.product.record_type ));
 
 /*!
  * @ingroup SDB
@@ -169,9 +170,12 @@ typedef struct
 } SDB_INTERCONNECT_T;
 
 STATIC_ASSERT( sizeof(SDB_INTERCONNECT_T) == 64 );
+STATIC_ASSERT( offsetof( sdb_empty_t, record_type ) == offsetof( SDB_INTERCONNECT_T, sdb_component.product.record_type ));
 
 /*!
  * @ingroup SDB
+ * @todo Remove the object sdb_component from all components of this union and
+ *       put this union together with sdb_component in a new structure!
  */
 typedef union
 {
@@ -277,6 +281,7 @@ uint8_t* find_device( WB_DEVICE_ID_T devid ) GSI_DEPRECATED; /* USE find_device_
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
+ * @todo remove this deprecated function!
  */
 void discoverPeriphery( void ); // GSI_DEPRECATED;
 

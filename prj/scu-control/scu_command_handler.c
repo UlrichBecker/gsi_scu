@@ -123,7 +123,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * In the case of a detected parameter error this function
          * becomes terminated.
          */
-         lm32Log( LM32_LOG_ERROR,"Value %d out of range!\n", value );
+         lm32Log( LM32_LOG_ERROR, "Value %d out of range!\n", value );
 
         /*
          * signal done to saftlib
