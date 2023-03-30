@@ -120,7 +120,7 @@ void wdtPoll( void )
  */
 inline void sendSignal( const SIGNAL_T sig, const unsigned int channel )
 {
-   STATIC_ASSERT( sizeof( pCpuMsiBox[0] ) == sizeof( uint32_t ) );
+   STATIC_ASSERT( sizeof( g_pCpuMsiBox[0] ) == sizeof( uint32_t ) );
    FG_ASSERT( channel < ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) );
 
    ATOMIC_SECTION()
@@ -170,7 +170,7 @@ void enableMeassageSignaledInterrupts( const unsigned int socket )
          scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), GLOBAL_IRQ_ENA, 0x20 );
          SET_REG32( g_pScub_irq_base, MSI_CHANNEL_SELECT, slot );
          SET_REG32( g_pScub_irq_base, MSI_SOCKET_NUMBER, slot );
-         SET_REG32( g_pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)pMyMsi)[0] );
+         SET_REG32( g_pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)g_pMyMsi)[0] );
          SET_REG32( g_pScub_irq_base, MSI_ENABLE, 1 << slot );
       }
 #ifdef CONFIG_MIL_FG
@@ -184,7 +184,7 @@ void enableMeassageSignaledInterrupts( const unsigned int socket )
    {
       SET_REG32( g_pMil_irq_base, MSI_CHANNEL_SELECT, MIL_DRQ );
       SET_REG32( g_pMil_irq_base, MSI_SOCKET_NUMBER,  MIL_DRQ );
-      SET_REG32( g_pMil_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)pMyMsi)[2] );
+      SET_REG32( g_pMil_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)g_pMyMsi)[2] );
       SET_REG32( g_pMil_irq_base, MSI_ENABLE, 1 << MIL_DRQ );
    }
 #endif /* ifdef CONFIG_MIL_PIGGY */

@@ -290,9 +290,11 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
+#if 0
    if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
       die( "No SYS_CON found!" );
    scuLog( LM32_LOG_INFO, "SYS_CON found on addr: 0x%p\n", BASE_SYSCON );
+#endif
 
    printCpuId();
 
@@ -376,8 +378,8 @@ void main( void )
             ;
    mprintf( text,
              __reset_count,
-             pCpuMsiBox,
-             pMyMsi,
+             g_pCpuMsiBox,
+             g_pMyMsi,
              sizeof( SCU_SHARED_DATA_T )
           );
   MMU_STATUS_T status;
@@ -391,8 +393,8 @@ void main( void )
   mprintf( "Maximum log extra parameter: " TO_STRING(LM32_LOG_NUM_OF_PARAM) "\n" );
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
-                          pCpuMsiBox,
-                          pMyMsi,
+                          g_pCpuMsiBox,
+                          g_pMyMsi,
                           sizeof( SCU_SHARED_DATA_T )
           );
 

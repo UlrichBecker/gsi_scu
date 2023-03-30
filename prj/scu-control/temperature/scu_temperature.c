@@ -19,6 +19,8 @@
  */
 ONE_WIRE_T g_oneWireBase = { NULL, NULL };
 
+unsigned char* BASE_ONEWIRE;
+
 /*! ---------------------------------------------------------------------------
  * @see scu_temperature.h
  */

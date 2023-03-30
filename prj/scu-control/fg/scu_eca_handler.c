@@ -55,7 +55,7 @@ void initEcaQueue( void )
               "Cleared actions: %d\n"
               ESC_NORMAL, valCnt, cleared );
    }
-   ecaControlSetMsiLM32TargetAddress( g_eca.pControl, (void*)pMyMsi, true );
+   ecaControlSetMsiLM32TargetAddress( g_eca.pControl, (void*)g_pMyMsi, true );
 #endif
    //!@todo Check this story with ECA-tag...
    //g_eca.tag = g_eca.pQueue->tag;

@@ -74,6 +74,8 @@ EV_CREATE_STATIC( g_ecaEvent, 16 );
 #endif
 #endif /* CONFIG_MIL_FG */
 
+unsigned char* BASE_SYSCON;
+
 /*===========================================================================*/
 /*! ---------------------------------------------------------------------------
  * @brief delay in multiples of one millisecond
@@ -374,8 +376,8 @@ void main( void )
             ;
    mprintf( text,
              __reset_count,
-             pCpuMsiBox,
-             pMyMsi,
+             g_pCpuMsiBox,
+             g_pMyMsi,
              sizeof( SCU_SHARED_DATA_T )
           );
   MMU_STATUS_T status;
@@ -389,8 +391,8 @@ void main( void )
   mprintf( "Maximum log extra parameter: " TO_STRING(LM32_LOG_NUM_OF_PARAM) "\n" );
   lm32Log( LM32_LOG_INFO, text,
                           __reset_count,
-                          pCpuMsiBox,
-                          pMyMsi,
+                          g_pCpuMsiBox,
+                          g_pMyMsi,
                           sizeof( SCU_SHARED_DATA_T )
           );
 
@@ -406,6 +408,7 @@ void main( void )
    */
    msDelayBig( 1500 );
 
+   BASE_SYSCON = (unsigned char *)find_device_adr( CERN, WR_SYS_CON );
    if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
       die( "No SYS_CON found!" );
    scuLog( LM32_LOG_INFO, "SYS_CON found on addr: 0x%p\n", BASE_SYSCON );

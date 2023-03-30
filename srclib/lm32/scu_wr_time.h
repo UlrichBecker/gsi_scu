@@ -28,15 +28,15 @@ STATIC inline uint64_t getWrSysTime( void )
 #endif
 
 #ifdef CONFIG_WR_TIME_NO_CARRY
-   return (((uint64_t)pCpuSysTime[0]) << BIT_SIZEOF(uint32_t)) | pCpuSysTime[1];
+   return (((uint64_t)g_pCpuSysTime[0]) << BIT_SIZEOF(uint32_t)) | pCpuSysTime[1];
 #else
    uint64_t time;
    do
    {
-      time = (((uint64_t)pCpuSysTime[0]) << BIT_SIZEOF(uint32_t)) |
-              pCpuSysTime[1];
+      time = (((uint64_t)g_pCpuSysTime[0]) << BIT_SIZEOF(uint32_t)) |
+              g_pCpuSysTime[1];
    }
-   while( ((volatile uint32_t*)pCpuSysTime)[0] != ((uint32_t*)&time)[0] );
+   while( ((volatile uint32_t*)g_pCpuSysTime)[0] != ((uint32_t*)&time)[0] );
    return time;
 #endif
 }

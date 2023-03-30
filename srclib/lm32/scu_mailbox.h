@@ -83,7 +83,7 @@ STATIC_ASSERT( sizeof( MSI_BOX_T ) == MSI_MAX_SLOTS * sizeof( MSI_SLOT_T ) );
  * @param M Name of slot attribute (signal or address).
  */
 #define MSI_BOX_SLOT_ACCESS( s, M ) \
-   __WB_ACCESS( MSI_BOX_T, uint32_t, pCpuMsiBox, slots[s].M )
+   __WB_ACCESS( MSI_BOX_T, uint32_t, g_pCpuMsiBox, slots[s].M )
 
 /*! ----------------------------------------------------------------------------
  * @ingroup MAILBOX

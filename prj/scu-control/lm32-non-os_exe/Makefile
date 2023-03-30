@@ -39,6 +39,7 @@ ifdef ADDAC_DAQ
   SOURCE += $(DAQ_LM32_DIR)/daq_main.c
 endif
 SOURCE += $(WR_DIR)/usleep.c
+SOURCE += $(WR_DIR)/syscon.c
 
 ifdef MIL_IN_TIMER_INTERRUPT
  DEFINES += MAX_LM32_INTERRUPTS=2

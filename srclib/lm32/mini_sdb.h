@@ -38,32 +38,11 @@ extern "C" {
  * @todo Remove all this following pointers!
  */
 //periphery device pointers
-volatile uint32_t* pTlu; 
-volatile uint32_t* pEbm;
-volatile uint32_t* pEbCfg;
-
-volatile uint32_t* pEbmLast;
-volatile uint32_t* pOledDisplay;
-volatile uint32_t* pFpqCtrl;
-volatile uint32_t* pFpqData;
-volatile uint32_t* pEca;
-volatile uint32_t* pCpuId;
-volatile uint32_t* pCpuIrqSlave;
-volatile uint32_t* pCpuAtomic;
-volatile uint32_t* pCpuSysTime;
-volatile uint32_t* pCluInfo;
-volatile uint32_t* pCpuMsiBox;
-volatile uint32_t* pMyMsi;
-volatile uint32_t* pUart;
-volatile uint32_t* pPps;
-//volatile uint32_t* BASE_UART;
-volatile uint32_t* pCluCB;
-volatile uint32_t* pOneWire;
-
-volatile uint32_t* pCfiPFlash;
-
-volatile uint32_t* pDDR3_if1;
-volatile uint32_t* pDDR3_if2;
+volatile uint32_t* g_pCpuIrqSlave;
+volatile uint32_t* g_pCpuSysTime;
+volatile uint32_t* g_pCpuMsiBox;
+volatile uint32_t* g_pMyMsi;
+//volatile unsigned char *BASE_SYSCON;
 
 STATIC_ASSERT( sizeof(WB_VENDOR_ID_T) == sizeof(uint32_t) );
 STATIC_ASSERT( sizeof(WB_DEVICE_ID_T) == sizeof(uint32_t) );
@@ -129,7 +108,7 @@ typedef struct
 
 STATIC_ASSERT( sizeof(sdb_msi_t) == 64 );
 STATIC_ASSERT( offsetof( sdb_empty_t, record_type ) == offsetof( sdb_msi_t, sdb_component.product.record_type ));
-   
+
 /*!
  * @ingroup SDB
  */
@@ -234,45 +213,7 @@ uint32_t* find_device_adr_in_subtree( sdb_location_t* pLoc,
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-sdb_location_t* find_sdb_deep( sdb_record_t* pParent_sdb,
-                               sdb_location_t* pFound_sdb,
-                               uint32_t  base,
-                               uint32_t  msi_base,
-                               uint32_t  msi_last,
-                               uint32_t* pIdx,
-                               const uint32_t qty,
-                               const WB_VENDOR_ID_T venId,
-                               const WB_DEVICE_ID_T devId );
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-uint32_t getSdbAdr( sdb_location_t* pLoc);
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-uint32_t getSdbAdrLast( sdb_location_t* pLoc );
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-uint32_t getMsiAdr( sdb_location_t* pLoc);
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-uint32_t getMsiAdrLast( sdb_location_t* pLoc );
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-sdb_record_t* getChild( sdb_location_t* pLoc );
-
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-uint32_t getMsiUpperRange( void );
+uint32_t getSdbAdr( sdb_location_t* pLoc );
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB

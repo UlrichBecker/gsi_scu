@@ -57,9 +57,9 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mini_sdb.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mprintf.c
 
 WR_SOURCE += $(WR_DIR)/uart.c
-WR_SOURCE += $(WR_DIR)/devicelist.c
-WR_SOURCE += $(WR_DIR)/syscon.c
-WR_SOURCE += $(WR_DIR)/glue.c
+# WR_SOURCE += $(WR_DIR)/devicelist.c
+# WR_SOURCE += $(WR_DIR)/syscon.c
+# WR_SOURCE += $(WR_DIR)/glue.c
 
 SOURCE += $(WR_SOURCE)
 

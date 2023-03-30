@@ -12,6 +12,7 @@
 #include "uart.h"
 
 #include <wb_uart.h>
+#include <mini_sdb.h>
 
 #define CALC_BAUD(baudrate) \
     ( ((( (unsigned long long)baudrate * 8ULL) << (16 - 7)) + \
@@ -21,7 +22,8 @@ volatile struct UART_WB *uart;
 
 void uart_init_hw()
 {
-	uart = (volatile struct UART_WB *)BASE_UART;
+	//uart = (volatile struct UART_WB *)BASE_UART;
+   uart = (volatile struct UART_WB*) find_device_adr( CERN, WR_UART );
 	uart->BCR = CALC_BAUD(UART_BAUDRATE);
 }
 

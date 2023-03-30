@@ -176,14 +176,14 @@ STATIC_ASSERT( sizeof( IRQ_MSI_T ) == IRQ_OFFS_QUE + MAX_LM32_INTERRUPTS * sizeo
  *
  * It has a logical corresponding to:
  * @code
- * ((IRQ_MSI_T*)pCpuIrqSlave)->queue[intNum].item.M
+ * ((IRQ_MSI_T*)g_pCpuIrqSlave)->queue[intNum].item.M
  * @endcode
  *
  * @param M Register name
  * @param intNum Interrupt number of the corresponding interrupt.
  */
 #define IRQ_MSI_ITEM_ACCESS( M, intNum ) \
-   __WB_ACCESS( IRQ_MSI_T, uint32_t, pCpuIrqSlave, queue[intNum].item.M )
+   __WB_ACCESS( IRQ_MSI_T, uint32_t, g_pCpuIrqSlave, queue[intNum].item.M )
 
 /*! --------------------------------------------------------------------------
  * @ingroup INTERRUPT
@@ -191,20 +191,20 @@ STATIC_ASSERT( sizeof( IRQ_MSI_T ) == IRQ_OFFS_QUE + MAX_LM32_INTERRUPTS * sizeo
  *
  * It has a logical corresponding to:
  * @code
- * ((IRQ_MSI_T*)pCpuIrqSlave)->control.M
+ * ((IRQ_MSI_T*)g_pCpuIrqSlave)->control.M
  * @endcode
  * @param M Register name
  */
 #define IRQ_MSI_CONTROL_ACCESS( M ) \
-   __WB_ACCESS( IRQ_MSI_T, uint32_t, pCpuIrqSlave, control.M )
+   __WB_ACCESS( IRQ_MSI_T, uint32_t, g_pCpuIrqSlave, control.M )
 
 #else
 #warning Direct wishbone access seems not always work!
 #define IRQ_MSI_ITEM_ACCESS( M, i ) \
-   ((IRQ_MSI_T*)pCpuIrqSlave)->queue[i].item.M
+   ((IRQ_MSI_T*)g_pCpuIrqSlave)->queue[i].item.M
 
 #define IRQ_MSI_CONTROL_ACCESS( M ) \
-   ((IRQ_MSI_T*)pCpuIrqSlave)->control.M
+   ((IRQ_MSI_T*)g_pCpuIrqSlave)->control.M
 #endif
 
 //int msiGetBoxCpuSlot( int32_t cpuIdx, uint32_t myOffs );
