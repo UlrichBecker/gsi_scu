@@ -20,11 +20,6 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
-
-#ifdef __lm32__
-  #include "uart.h"
-#endif
-
 #include <helper_macros.h>
 
 #ifndef DEFAULT_SPRINTF_LIMIT
@@ -35,6 +30,14 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @ingroup PRINTF
+ * @brief Initializes the UART for mpribtf();
+ */
+void initMprintf( void );
 #endif
 
 /*! ---------------------------------------------------------------------------

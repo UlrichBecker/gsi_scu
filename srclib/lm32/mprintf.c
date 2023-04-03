@@ -12,21 +12,93 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <helper_macros.h>
-#include <mprintf.h>
 #ifndef CONFIG_USE_LINUX_PRINTF
   #include <pp-printf.h>
 #endif
+#ifdef CONFIG_RTOS
+  #include <FreeRTOS.h>
+  #include <task.h>
+#endif
+#include <mprintf.h>
 
-#ifndef __lm32__
+#define CONFIG_MPRINTF_FOR_WINDOWS_TERMINAL
+
+#ifdef __lm32__
+#include <wb_uart.h>
+#include <mini_sdb.h>
+
+volatile struct UART_WB* mg_pUart;
+
+#ifndef CPU_CLOCK
+/*!
+ * @brief  WR Core system/CPU clock frequency in Hz
+ */
+#define CPU_CLOCK 62500000ULL
+#endif
+
+#ifndef UART_BAUDRATE
+  #define UART_BAUDRATE 115200ULL
+#endif
+
+/*!----------------------------------------------------------------------------
+ * @ingroup PRINTF
+ * @brief Helper macro calculates the baud-rate for the printf-UART.
+ */
+#define CALC_BAUD( baudrate )                                \
+   ( ((( (unsigned long long)baudrate * 8ULL) << (16 - 7)) + \
+      (CPU_CLOCK >> 8)) / (CPU_CLOCK >> 7) )
+
+/*! ---------------------------------------------------------------------------
+ * @see mptintf.h
+ */
+void initMprintf( void )
+{
+   mg_pUart = (struct UART_WB*) find_device_adr( CERN, WR_UART );
+   mg_pUart->BCR = CALC_BAUD( UART_BAUDRATE );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup PRINTF
+ * @brief Waits till the UART is ready and sends a new character.
+ */
+void STATIC inline ALWAYS_INLINE uartWriteChar( const uint32_t c )
+{
+#ifdef CONFIG_MPRINTF_FOR_WINDOWS_TERMINAL
+   if( c == '\n' )
+   { /*
+      * A MS-Windows terminal takes a line-feed literally
+      * and doesn't make a carriage return.
+      * Therefore this has to be made here.
+      */
+      uartWriteChar( '\r' );
+   }
+#endif
+
+   while( (mg_pUart->SR & UART_SR_TX_BUSY) != 0 )
+   {
+   #if defined( CONFIG_RTOS ) && defined( CONFIG_TASK_YIELD_WHEN_UART_WAITING )
+      if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
+      { /*
+         * Let's do meaningful things while the UART is still busy.
+         */
+         vPortYieldLm32();
+      }
+   #endif
+   }
+
+   mg_pUart->TDR = c;
+}
+
+#else /* ifdef __lm32__ */
   #include <stdio.h>
   /*
    * Makes it possible to debug as normal PC- application.
    */
-  STATIC inline ALWAYS_INLINE void uart_write_byte( const int c )
+  STATIC inline ALWAYS_INLINE void uartWriteChar( const uint32_t c )
   {
      putch( c );
   }
-#endif
+#endif /* /ifdef __lm32__ */
 
 
 struct _PRINTF_T;
@@ -83,7 +155,7 @@ STATIC bool addToString( PRINTF_T* pPrintfObj, const int c )
  */
 STATIC bool sendToUart( PRINTF_T* pPrintfObj UNUSED, const int c )
 {
-   uart_write_byte( c );
+   uartWriteChar( c );
    return false;
 }
 

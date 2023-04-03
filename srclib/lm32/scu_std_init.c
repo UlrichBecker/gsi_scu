@@ -7,8 +7,8 @@
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      20.05.2020
  */
-#include "mini_sdb.h"
-#include "uart.h"
+#include <mini_sdb.h>
+#include <mprintf.h>
 
 /*! ---------------------------------------------------------------------------
  * @brief Function becomes invoked immediately before the function main() by
@@ -18,15 +18,15 @@
 void __init( void )
 {
    /*
+    * Initialization of the UART, required for mprintf...
+    */
+   initMprintf();
+
+   /*
     * Get info on important Wishbone infrastructure by module mini_sdb.
     * Initialization of some global pointers.
     */
    discoverPeriphery();
-
-   /*
-    * Initialization of the UART, required for mprintf...
-    */
-   uart_init_hw();
 }
 
 /*================================== EOF ====================================*/

@@ -58,17 +58,17 @@ typedef struct
     * @brief Base address of SDB device.
     */
    uint32_t adr;
-   
-   uint32_t msi_first;
-   uint32_t msi_last;
-} sdb_location_t;
 
-STATIC_ASSERT( sizeof(sdb_location_t) == 16 );
+   uint32_t msiFirst;
+   uint32_t msiLast;
+} SDB_LOCATION_T;
+
+STATIC_ASSERT( sizeof(SDB_LOCATION_T) == 16 );
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-sdb_location_t* find_device_multi( sdb_location_t* pFound_sdb,
+SDB_LOCATION_T* find_device_multi( SDB_LOCATION_T* pFound_sdb,
                                    uint32_t* pIdx,
                                    const uint32_t qty,
                                    const WB_VENDOR_ID_T venId,
@@ -82,8 +82,8 @@ uint32_t* find_device_adr( const WB_VENDOR_ID_T venId, const WB_DEVICE_ID_T devI
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-sdb_location_t* find_device_multi_in_subtree( sdb_location_t* pLoc,
-                                              sdb_location_t* pFound_sdb,
+SDB_LOCATION_T* find_device_multi_in_subtree( SDB_LOCATION_T* pLoc,
+                                              SDB_LOCATION_T* pFound_sdb,
                                               uint32_t* pIdx,
                                               const uint32_t qty,
                                               const WB_VENDOR_ID_T venId,
@@ -92,14 +92,14 @@ sdb_location_t* find_device_multi_in_subtree( sdb_location_t* pLoc,
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-uint32_t* find_device_adr_in_subtree( sdb_location_t* pLoc,
+uint32_t* find_device_adr_in_subtree( SDB_LOCATION_T* pLoc,
                                       const WB_VENDOR_ID_T venId,
                                       const WB_DEVICE_ID_T devId );
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-uint32_t getSdbAdr( sdb_location_t* pLoc );
+uint32_t getSdbAdr( SDB_LOCATION_T* pLoc );
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB

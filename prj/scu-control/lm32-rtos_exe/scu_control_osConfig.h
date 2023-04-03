@@ -16,13 +16,13 @@
 
 //#define CONFIG_TASKS_SHOULD_YIELD
 #define CONFIG_STILL_ALIVE_SIGNAL
+#define CONFIG_TASK_YIELD_WHEN_UART_WAITING
 
 /*
  * Here is a good place to include header files that are required across
  * your application.
  */
 #include <scu_control_os.h>
-
 
 #define configMINIMAL_STACK_SIZE 64
 
