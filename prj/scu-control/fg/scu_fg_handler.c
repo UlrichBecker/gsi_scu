@@ -224,7 +224,7 @@ inline FG_REGISTER_T* addacFgPrepare( const void* pScuBus,
    * Enabling of both daq-channels for the feedback of set- and actual values
    * for this function generator channel.
    */
-   daqEnableFgFeedback( slot, dev );
+   daqEnableFgFeedback( slot, dev, tag );
 #endif
    ATOMIC_SECTION()
    { /*

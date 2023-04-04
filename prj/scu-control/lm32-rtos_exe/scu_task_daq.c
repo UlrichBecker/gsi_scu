@@ -65,7 +65,7 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList )
  *        if DAQ present.
  */
 STATIC void daqSwitchFeedback( const unsigned int slot, const unsigned int fgNum,
-                               const DAQ_FEEDBACK_ACTION_T what )
+                               const DAQ_FEEDBACK_ACTION_T what, const uint32_t tag )
 {
    criticalSectionEnter();
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
@@ -80,16 +80,20 @@ STATIC void daqSwitchFeedback( const unsigned int slot, const unsigned int fgNum
 #else
    DAQ_ASSERT( pDaqDevice != NULL );
 #endif
-   daqDevicePutFeedbackSwitchCommand( pDaqDevice, what, fgNum );
+   daqDevicePutFeedbackSwitchCommand( pDaqDevice, what, fgNum, tag );
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_task_daq.h
  */
-void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum )
+void daqEnableFgFeedback( const unsigned int slot,
+                          const unsigned int fgNum,
+                          const uint32_t tag
+                        )
 {
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
-   daqSwitchFeedback( slot, fgNum, FB_ON );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
+
+   daqSwitchFeedback( slot, fgNum, FB_ON, tag );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -98,7 +102,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
-   daqSwitchFeedback( slot, fgNum, FB_OFF );
+   daqSwitchFeedback( slot, fgNum, FB_OFF, 0 );
 }
 
 /*! ---------------------------------------------------------------------------

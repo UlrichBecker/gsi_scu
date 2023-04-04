@@ -395,6 +395,8 @@ typedef struct PACKED_SIZE
    * @brief Number of function generator.
    */
    unsigned int fgNumber;
+
+   uint32_t     tag;
 } DAQ_ACTION_ITEM_T;
 
 /*! ---------------------------------------------------------------------------
@@ -1850,7 +1852,8 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis );
  */
 void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
                                         const DAQ_FEEDBACK_ACTION_T what,
-                                        const unsigned int fgNumber
+                                        const unsigned int fgNumber,
+                                        const uint32_t tag
                                       );
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */

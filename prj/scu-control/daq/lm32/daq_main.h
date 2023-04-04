@@ -128,7 +128,10 @@ void daqExeNextDevice( void );
  * @param slot SCU-bus slot number
  * @param fgNum Function generator number 0 or 1
  */
-void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum );
+void daqEnableFgFeedback( const unsigned int slot,
+                          const unsigned int fgNum,
+                          const uint32_t tag
+                        );
 
 /*! ---------------------------------------------------------------------------
  * @brief Disables the feedback-channel for the given function generator number

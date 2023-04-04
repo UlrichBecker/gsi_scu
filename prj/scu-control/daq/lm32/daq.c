@@ -531,10 +531,11 @@ bool daqQueuePop( DAQ_FEEDBACK_T* pFeedback, DAQ_ACTION_ITEM_T* pAct )
  */
 void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
                                         const DAQ_FEEDBACK_ACTION_T what,
-                                        const unsigned int fgNumber
+                                        const unsigned int fgNumber,
+                                        const uint32_t tag
                                       )
 {
-   const DAQ_ACTION_ITEM_T act = { .action = what, .fgNumber = fgNumber };
+   const DAQ_ACTION_ITEM_T act = { .action = what, .fgNumber = fgNumber, .tag = tag };
    //if( !queuePush( &pThis->feedback.aktionBuffer, &act ) )
    if( !daqQueuePush( pThis, &act ) )
    {

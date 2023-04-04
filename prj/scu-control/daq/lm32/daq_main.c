@@ -289,11 +289,14 @@ void forEachScuDaqDevice( void )
 /*! ---------------------------------------------------------------------------
  * @see daq_main.h
  */
-void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum )
+void daqEnableFgFeedback( const unsigned int slot,
+                          const unsigned int fgNum,
+                          const uint32_t tag
+                        )
 {
   // DEBUG_FEEDBACK_ON_OFF();
 #ifdef CONFIG_USE_LM32LOG
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
 #endif
    criticalSectionEnter();
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
@@ -322,7 +325,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum )
   // daqChannelSample1msOn( &daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, 8 )->aChannel[daqGetActualDaqNumberOfFg(fgNum)] );
 #endif
 #else
-   daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_ON, fgNum );
+   daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_ON, fgNum, tag );
 #endif
 }
 
@@ -358,7 +361,7 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
       daqChannelTestAndClearDaqIntPending( pActChannel );
    }
 #else
-   daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_OFF, fgNum );
+   daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_OFF, fgNum, 0 );
 #endif
 }
 
