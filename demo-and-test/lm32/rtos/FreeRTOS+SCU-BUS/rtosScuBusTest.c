@@ -15,7 +15,7 @@
 #endif
 
 #include "eb_console_helper.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "scu_lm32_macros.h"
 #include "scu_bus.h"
 

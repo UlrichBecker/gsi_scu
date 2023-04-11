@@ -24,7 +24,7 @@
  */
 #include <daq_command_interface_uc.h>
 #include <daq_main.h>
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <eb_console_helper.h>
 #include <dbg.h>
 #include <scu_lm32_macros.h>

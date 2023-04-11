@@ -21,7 +21,7 @@
  #include <scu_mil.h>
  #include <scu_mil_fg_handler.h>
 #endif
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <scu_fg_macros.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #ifdef CONFIG_RTOS

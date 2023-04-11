@@ -28,7 +28,7 @@
  *******************************************************************************
  */
 #include <scu_ddr3_lm32.h>
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <dbg.h>
 #include <scu_lm32_macros.h>
 

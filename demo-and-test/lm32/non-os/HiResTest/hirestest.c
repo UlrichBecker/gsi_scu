@@ -23,7 +23,7 @@
  *******************************************************************************
  */
 #include <string.h>
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <daq.h>
 #include <lm32Interrupts.h>
 #include <scu_msi.h>
@@ -145,7 +145,7 @@ STATIC inline void enableMeassageSignaledInterruptsForScuBusSlave( const unsigne
    scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), GLOBAL_IRQ_ENA, 0x20 );
    SET_REG32( pScub_irq_base, MSI_CHANNEL_SELECT, slot );
    SET_REG32( pScub_irq_base, MSI_SOCKET_NUMBER, slot );
-   SET_REG32( pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)pMyMsi)[0] );
+   SET_REG32( pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)g_pMyMsi)[0] );
    SET_REG32( pScub_irq_base, MSI_ENABLE, 1 << slot );
 }
 
@@ -157,7 +157,7 @@ void main( void )
    gotoxy( 0, 0 );
    clrscr();
    mprintf( ESC_FG_MAGENTA ESC_BOLD "DAQ High Resolution test, compiler: " COMPILER_VERSION_STRING ESC_NORMAL "\n");
-
+#if 1
    g_pScub_base = find_device_adr( GSI, SCU_BUS_MASTER );
    if( (int)g_pScub_base == ERROR_NOT_FOUND )
    {
@@ -227,6 +227,7 @@ void main( void )
          printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pCurrentCannel ) );
       }
    }
+#endif
    mprintf( "End...\n" );
 }
 

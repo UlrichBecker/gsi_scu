@@ -11,7 +11,7 @@
  */
 #include <stdbool.h>
 #include <stdint.h>
-#include <helper_macros.h>
+#include <scu_lm32_macros.h>
 #ifndef CONFIG_USE_LINUX_PRINTF
   #include <pp-printf.h>
 #endif
@@ -25,9 +25,9 @@
 
 #ifdef __lm32__
 #include <wb_uart.h>
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 
-volatile struct UART_WB* mg_pUart;
+volatile struct UART_WB* volatile mg_pUart;
 
 #ifndef CPU_CLOCK
 /*!
@@ -61,7 +61,8 @@ void initMprintf( void )
  * @ingroup PRINTF
  * @brief Waits till the UART is ready and sends a new character.
  */
-void STATIC inline ALWAYS_INLINE uartWriteChar( const uint32_t c )
+OPTIMIZE( "-O0"  )
+void STATIC uartWriteChar( const uint32_t c )
 {
 #ifdef CONFIG_MPRINTF_FOR_WINDOWS_TERMINAL
    if( c == '\n' )
@@ -83,6 +84,8 @@ void STATIC inline ALWAYS_INLINE uartWriteChar( const uint32_t c )
          */
          vPortYieldLm32();
       }
+   #else
+      NOP();
    #endif
    }
 

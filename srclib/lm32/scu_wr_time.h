@@ -9,7 +9,7 @@
 #ifndef _SCU_WR_TIME_H
 #define _SCU_WR_TIME_H
 
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <scu_lm32_macros.h>
 #include <lm32Interrupts.h>
 

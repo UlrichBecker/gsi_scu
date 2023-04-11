@@ -28,7 +28,7 @@
 #ifndef _SCU_LM32TIMER_H
 #define _SCU_LM32TIMER_H
 
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <scu_lm32_macros.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -50,14 +50,6 @@ namespace gsi
  * @brief Interrupt number of timer.
  */
 #define TIMER_IRQ 1
-
-/*!
- * @ingroup SCU_LM32_TIMER
- * @brief Second argument of "find_device_adr( GSI, WB_TIMER )"
- * @note First argument is "GSI"
- * @see find_device_adr
- */
-#define WB_TIMER 0xD8BAAA13
 
 /*!
  * @ingroup SCU_LM32_TIMER

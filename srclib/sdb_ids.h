@@ -119,7 +119,8 @@ typedef enum
    WR_SYS_CON          = 0xFF07FC47,
    WB_REMOTE_UPDATE    = 0x38956271,
    WB_ASMI             = 0x48526423,
-   WB_SCU_REG          = 0xE2D13D04
+   WB_SCU_REG          = 0xE2D13D04,
+   WB_TIMER            = 0xD8BAAA13
 } WB_DEVICE_ID_T;
 
 #ifdef __cplusplus

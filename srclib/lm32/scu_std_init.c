@@ -7,7 +7,7 @@
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      20.05.2020
  */
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <mprintf.h>
 
 /*! ---------------------------------------------------------------------------

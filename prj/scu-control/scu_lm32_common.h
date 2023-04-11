@@ -44,7 +44,7 @@
  #include <scu_msi.h>
 #endif
 #include <scu_bus.h>
-#include <mini_sdb.h>
+#include <sdb_lm32.h>
 #include <board.h>
 #include <uart.h>
 #include <w1.h>

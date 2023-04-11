@@ -29,7 +29,7 @@
  */
 #ifndef __DOCFSM__
 #include <string.h>   // necessary for memset()
-#include <mini_sdb.h> // necessary for ERROR_NOT_FOUND
+#include <sdb_lm32.h> // necessary for ERROR_NOT_FOUND
 #include <dbg.h>
 #include <scu_wr_time.h>
 #ifndef CONFIG_DAQ_SINGLE_APP

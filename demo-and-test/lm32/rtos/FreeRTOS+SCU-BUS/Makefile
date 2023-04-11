@@ -11,7 +11,7 @@
 REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 
 MIAN_MODULE := rtosScuBusTest.c
-SOURCE      += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+# SOURCE      += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 SOURCE      += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
 
 # The following flag is essential so that the build system adds the
@@ -22,8 +22,7 @@ RTOS_USING_HEAP = 1
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 
-# CODE_OPTIMIZATION = 2
-
+ CODE_OPTIMIZATION = 1
 
 # When the following compiler switch is defined, then the assert-macros
 # within the FreeRTOS kernel will activated.

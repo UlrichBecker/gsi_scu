@@ -164,7 +164,7 @@ static void prvUartGatekeeperTask( void* pvParameters UNUSED )
      /*
       * Output the received string.
       */
-      puts( pcMessageToPrint );
+      mprintf( "%s", pcMessageToPrint );
 
      /*
       * Loop back to wait for the next message.

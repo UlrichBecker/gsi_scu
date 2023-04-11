@@ -26,13 +26,13 @@ RTOS_USING_HEAP = 1
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 
-CODE_OPTIMIZATION = s
+CODE_OPTIMIZATION = 0
 
 # When the following compiler switch is defined, then the assert-macros
 # within the FreeRTOS kernel will activated.
 # Meaningful in debug mode.
  DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
- DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+# DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 
 DEFINES += MAX_LM32_INTERRUPTS=2
 

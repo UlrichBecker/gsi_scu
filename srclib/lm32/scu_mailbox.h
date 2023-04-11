@@ -11,7 +11,7 @@
 
 #ifdef __lm32__
  #include <scu_lm32_macros.h>
- #include <mini_sdb.h>
+ #include <sdb_lm32.h>
 #else
  #include <helper_macros.h>
 #endif

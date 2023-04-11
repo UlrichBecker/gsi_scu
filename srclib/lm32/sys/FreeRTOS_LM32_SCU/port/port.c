@@ -55,7 +55,7 @@
 #include <eb_console_helper.h>
 
 #ifdef CONFIG_SCU
- #include <mini_sdb.h>
+ #include <sdb_lm32.h>
 #endif
 
 #ifdef CONFIG_RTOS_PEDANTIC_CHECK
