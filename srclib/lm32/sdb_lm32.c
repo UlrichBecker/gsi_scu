@@ -33,21 +33,28 @@
 #define SDB_ROOT_ADDR 0x91600800
 #endif
 
+/*
+ * Being sure that a pointer is a 32-bit value in LM32.
+ */
+STATIC_ASSERT( sizeof(void*) == sizeof(uint32_t) );
+
 /*=================== Construction of type SDB_RECORD_T =====================*/
 
 /*!
  * @ingroup SDB
+ * @brief Indicates the which record type is actual in the union.
  */
 typedef enum
 {
-   SDB_INTERCONNET     = 0x00,
-   SDB_DEVICE          = 0x01,
-   SDB_BRIDGE          = 0x02,
-   SDB_MSI             = 0x03
+   SDB_INTERCONNET = 0x00,
+   SDB_DEVICE      = 0x01,
+   SDB_BRIDGE      = 0x02,
+   SDB_MSI         = 0x03
 } SDB_RECORD_TYPE_T;
 
 /*!
  * @ingroup SDB
+ * @brief Helper type for 64-bit accesses.
  * @see SDB_PRODUCT_T
  * @see SDB_COMPONENT_T
  * @see SDB_BRIDGE_T
@@ -254,16 +261,6 @@ STATIC uint32_t getSdbAdrLast( SDB_LOCATION_T* pLoc )
 }
 #endif
 
-/*!----------------------------------------------------------------------------
- * @ingroup SDB
- */
-STATIC inline SDB_RECORD_T* getChild( SDB_LOCATION_T* pLoc )
-{
-   if( getRecordType( getSdbRecord( pLoc ) ) == SDB_BRIDGE )
-      return (SDB_RECORD_T*)( pLoc->adr + getSdbRecord( pLoc )->sdbUnion.bridge.sdbChild.low );
-   else
-      return NULL;
-}
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
@@ -461,6 +458,17 @@ uint32_t* find_device_adr( const WB_VENDOR_ID_T venId, const WB_DEVICE_ID_T devI
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
+STATIC inline SDB_RECORD_T* getChild( SDB_LOCATION_T* pLoc )
+{
+   if( getRecordType( getSdbRecord( pLoc ) ) == SDB_BRIDGE )
+      return (SDB_RECORD_T*)( pLoc->adr + getSdbRecord( pLoc )->sdbUnion.bridge.sdbChild.low );
+   else
+      return NULL;
+}
+
+/*!----------------------------------------------------------------------------
+ * @ingroup SDB
+ */
 SDB_LOCATION_T* find_device_multi_in_subtree( SDB_LOCATION_T* pLoc,
                                               SDB_LOCATION_T* pFoundSdb,
                                               uint32_t* pIdx,
@@ -468,7 +476,7 @@ SDB_LOCATION_T* find_device_multi_in_subtree( SDB_LOCATION_T* pLoc,
                                               const WB_VENDOR_ID_T venId,
                                               const WB_DEVICE_ID_T devId )
 {
-   return sdbSerarchRecursive( getChild(pLoc),
+   return sdbSerarchRecursive( getChild( pLoc ),
                                pFoundSdb,
                                getSdbAdr( pLoc ),
                                getMsiAdr( pLoc ),

@@ -1,6 +1,6 @@
 ###############################################################################
 ##                                                                           ##
-##         Makefile LM32 FG software scu_control.bin using FreeRTOS          ##
+##       Makefile LM32 FG software scu_control_os.bin using FreeRTOS         ##
 ##                                                                           ##
 ##---------------------------------------------------------------------------##
 ## File:    Makefile                                                         ##
@@ -47,11 +47,10 @@ DEFINES += MAX_LM32_INTERRUPTS=2
 
 
 # DEFINES += DEBUGLEVEL
-MIAN_MODULE    = scu_control_os.c
+MIAN_MODULE = scu_control_os.c
 
 ifdef ADDAC_DAQ
   SOURCE += scu_task_daq.c
-  #SOURCE += $(DAQ_LM32_DIR)/daq_main.c
 endif
 ifdef SCU_MIL
   SOURCE += scu_task_mil.c
@@ -62,8 +61,6 @@ ifdef USE_TEMPERATURE_WATCHER
   DEFINES   += CONFIG_USE_TEMPERATURE_WATCHER
 endif
 SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/ros_timeout.c
-
-# SOURCE += $(WR_DIR)/usleep.c
 
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 
