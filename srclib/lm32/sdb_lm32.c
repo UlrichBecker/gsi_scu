@@ -305,7 +305,7 @@ STATIC SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
    SDB_RECORD_T* pRecord;
 
    /*
-    * discover MSI address before moving on to possible next Crossbar
+    * Discover MSI address before moving on to possible next crossbar.
     */
    uint32_t msiCount = 0;
    uint32_t msiAddr = 0;

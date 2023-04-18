@@ -23,7 +23,7 @@
   #error This module is for the target Latice micro32 (LM32) only!
 #endif
 #include <stdint.h>
-#include "helper_macros.h"
+#include <helper_macros.h>
 
 /*! --------------------------------------------------------------------------
  * @ingroup OVERWRITABLE
