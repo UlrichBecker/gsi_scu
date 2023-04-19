@@ -1,4 +1,11 @@
-// TODO!
+/*!
+ * @file logtest.c
+ * @brief LM32- test application for LM32-log-system.
+ *
+ * @date      22.04.2022
+ * @copyright 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
+ * @author    Ulrich Becker <u.becker@gsi.de>
+ */
 #include <mprintf.h>
 #include <eb_console_helper.h>
 #include <stdbool.h>
@@ -7,13 +14,12 @@
 #include <scu_lm32Timer.h>
 #include <lm32Interrupts.h>
 
-
-
-
-
 #define configCPU_CLOCK_HZ   (USRCPUCLK * 1000)
 
-
+/*!----------------------------------------------------------------------------
+ * @brief Timer interrupt function to check whether the log-system is
+ *        thread-save.
+ */
 static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
 {
    static unsigned int i = 0;
@@ -22,6 +28,8 @@ static void onTimerInterrupt( const unsigned int intNum, const void* pContext )
    i++;
 }
 
+/*!----------------------------------------------------------------------------
+ */
 void main( void )
 {
    MMU_STATUS_T status;
@@ -31,7 +39,7 @@ void main( void )
    mprintf( "\n%s\n", mmuStatus2String( status ) );
    if( !mmuIsOkay( status ) )
    {
-      mprintf( ESC_ERROR "ERROR Unable to get DDR3- RAM!\n" ESC_NORMAL );
+      mprintf( ESC_ERROR "ERROR Unable to allocate RAM!\n" ESC_NORMAL );
       return;
    }
 
@@ -46,7 +54,7 @@ void main( void )
    lm32TimerEnable( pTimer );
    irqRegisterISR( TIMER_IRQ, (void*)pTimer, onTimerInterrupt );
 
-   const char* text = ESC_FG_CYAN ESC_BOLD"Das ist ein Text im LM32."ESC_NORMAL;
+   const char* text = ESC_FG_CYAN ESC_BOLD "Das ist ein Text im LM32." ESC_NORMAL;
 
    lm32Log( 0, "A: Text in lm32Log: \"%s\", %.32b %%", text, 4711 );
    lm32Log( 1, "B: Noch ein Text in lm32Log!, C = %c", 'u' );
@@ -64,6 +72,10 @@ void main( void )
       uint64_t time = getWrSysTime();
       if( time < triggerTime )
          continue;
+      /*
+       * Choosing a time which differs a bit from the timer interrupt,
+       * so that a frequency beat will appear.
+       */
       triggerTime = time + 1001100000ll;
 
       lm32Log( 5, "Count = %u -> %s", c, (c%2 == 0)? "even": "odd" );

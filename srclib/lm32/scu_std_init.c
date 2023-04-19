@@ -13,8 +13,12 @@
 /*! ---------------------------------------------------------------------------
  * @brief Function becomes invoked immediately before the function main() by
  *        the startup module crt0ScuLm32.S.
+ *
+ * In this case it becomes possible to use mprintf() immediately in
+ * function main();
  * @see crt0ScuLm32.S
  */
+OPTIMIZE( "-O0"  ) /*! @todo It seems to be necessary, but I don't know why yet... */
 void __init( void )
 {
    /*
@@ -23,7 +27,7 @@ void __init( void )
    initMprintf();
 
    /*
-    * Get info on important Wishbone infrastructure by module mini_sdb.
+    * Get info on important Wishbone infrastructure by module sdb_lm32.
     * Initialization of some global pointers.
     */
    discoverPeriphery();

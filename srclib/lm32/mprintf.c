@@ -61,7 +61,6 @@ void initMprintf( void )
  * @ingroup PRINTF
  * @brief Waits till the UART is ready and sends a new character.
  */
-OPTIMIZE( "-O0"  )
 void STATIC uartWriteChar( const uint32_t c )
 {
 #ifdef CONFIG_MPRINTF_FOR_WINDOWS_TERMINAL
@@ -84,8 +83,6 @@ void STATIC uartWriteChar( const uint32_t c )
          */
          vPortYieldLm32();
       }
-   #else
-      NOP();
    #endif
    }
 
@@ -180,7 +177,7 @@ STATIC bool sendToUart( PRINTF_T* pPrintfObj UNUSED, const int c )
  * @brief Base function for all printf variants.
  * @param pPrintfObj->putch Pointer to the character output function.
  */
-OPTIMIZE( "-O1"  )
+OPTIMIZE( "-O0"  )
 STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
 {
    /*

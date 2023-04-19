@@ -260,6 +260,10 @@ typedef enum
     return "unknown";
  }
 
+ /*!
+  * @ingroup LM32_LOG
+  * @see https://github.com/UlrichBecker/DocFsm
+  */
  #define FSM_TRANSITION_NEXT( target, attr... ) \
  {                                              \
     mprintf( "C = '%c' %s -> %s\n",             \
@@ -270,7 +274,11 @@ typedef enum
     next = true;                                \
     break;                                      \
  }
- 
+
+ /*!
+  * @ingroup LM32_LOG
+  * @see https://github.com/UlrichBecker/DocFsm
+  */
  #define FSM_TRANSITION( target, attr... )      \
  {                                              \
     mprintf( "C = '%c' %s -> %s\n",             \
@@ -286,7 +294,16 @@ typedef enum
  #define FSM_TRANSITION_NEXT( target, attr... ) { state = target; next = true; break; }
 #endif
 
+/*!
+ * @ingroup LM32_LOG
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_INIT_FSM( initState, attr... ) STATE_T state = initState
+
+/*!
+ * @ingroup LM32_LOG
+ * @see https://github.com/UlrichBecker/DocFsm
+ */
 #define FSM_TRANSITION_SELF( attr...) break
 
 STATIC_ASSERT( sizeof(char*) == sizeof(uint32_t) );
