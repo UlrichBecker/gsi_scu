@@ -61,9 +61,6 @@ void initMprintf( void );
  */
 int vprintf( const char* format, va_list ap );
 
-
-//int _p_vsprintf(char const *format,va_list ap, char* dst);
-
 /*! ---------------------------------------------------------------------------
  * @ingroup PRINTF
  * @brief Composes a string with the same text that would be printed if \n

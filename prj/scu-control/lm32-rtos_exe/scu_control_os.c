@@ -290,12 +290,6 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
-#if 0
-   if( (int)BASE_SYSCON == ERROR_NOT_FOUND )
-      die( "No SYS_CON found!" );
-   scuLog( LM32_LOG_INFO, "SYS_CON found on addr: 0x%p\n", BASE_SYSCON );
-#endif
-
    printCpuId();
 
    mmuAllocateDaqBuffer();

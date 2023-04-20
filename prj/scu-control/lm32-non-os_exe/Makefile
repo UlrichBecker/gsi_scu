@@ -18,7 +18,7 @@ TARGET       := scu_control
  SCU_MIL := 1
 # MIL_GAP := 1
 
- MIL_DAQ_USE_RAM := 1
+# MIL_DAQ_USE_RAM := 1
 
 ifdef SCU_MIL
  MIL_IN_TIMER_INTERRUPT := 1
@@ -48,7 +48,7 @@ else
  DEFINES += MAX_LM32_INTERRUPTS=1
 endif
 
-DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+#DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 #DEFINES += CONFIG_IRQ_RESET_IP_AFTER
 
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
