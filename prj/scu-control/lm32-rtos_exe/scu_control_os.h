@@ -36,7 +36,7 @@ extern "C" {
  * @defgroup RTOS_TASK Functions and macros for handling FreeRTOS tasks
  *                     respectively threads.
  */
-   
+
 /*!----------------------------------------------------------------------------
  * @ingroup RTOS_TASK
  * @brief Helper macro for creating a task.

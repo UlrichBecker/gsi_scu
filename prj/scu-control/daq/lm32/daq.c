@@ -580,7 +580,6 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
          /*
           * Command from FG-layer received?
           */
-         //if( !queuePop( &pFeedback->aktionBuffer, &act ) )
          if( !daqQueuePop( pFeedback, &act ) )
          { /*
             * No!
