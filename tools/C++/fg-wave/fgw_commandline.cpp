@@ -324,7 +324,7 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_longOpt  = "quit",
       .m_helpText = "Program will terminate immediately after plotting.\n"
                     "This is meaningful when the data has been read in via the standard input rather than a file.\n"
-                    "The disadvantage is that in this way its not possible to zoom the graph via mouse."
+                    "The disadvantage is that in this way it's not possible to zoom the graph by mouse."
    },
    {
       OPT_LAMBDA( poParser,
