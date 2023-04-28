@@ -178,7 +178,7 @@ STATIC inline void daqScanForCommands( void )
  * @ingroup RTOS_TASK
  * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
  */
-OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
+OPTIMIZE( "-O1"  ) //!@todo Necessary if LTO activated I don't know why yet!
 STATIC void taskDaq( void* pTaskData UNUSED )
 {
    taskInfoLog();
@@ -213,7 +213,7 @@ STATIC void taskDaq( void* pTaskData UNUSED )
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
          continue;
-
+      
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
       const unsigned int maxChannels = daqDeviceGetMaxChannels( pDaqDevice );
       for( unsigned int channelNumber = 0; channelNumber < maxChannels; channelNumber++ )
