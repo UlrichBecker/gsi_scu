@@ -41,7 +41,7 @@ QUEUE_CREATE_STATIC( g_daqQueue, 10, SCU_BUS_IRQ_QUEUE_T );
  */
 void _segfault(int sig)
 {
-   mprintf( ESC_FG_RED ESC_BOLD "Segmentation fault: %d\n" ESC_NORMAL, sig );
+   mprintf( ESC_ERROR "Segmentation fault: %d\n" ESC_NORMAL, sig );
    while( 1 );
 }
 
@@ -57,8 +57,8 @@ void readFiFo( DAQ_CANNEL_T* pThis )
    int i = 0;
    do
    {
-      remaining = daqChannelGetPmFifoWords( pThis );
-      volatile uint16_t data = daqChannelPopPmFifo( pThis );
+      remaining = daqChannelGetDaqFifoWords( pThis );
+      volatile uint16_t data = daqChannelPopDaqFifo( pThis );
 #if 0
       mprintf( "%d: 0x%04X, %d\n", i, data, remaining );
 #endif
@@ -152,7 +152,7 @@ void main( void )
 {
    gotoxy( 0, 0 );
    clrscr();
-   mprintf( ESC_FG_MAGENTA ESC_BOLD "DAQ High Resolution test, compiler: " COMPILER_VERSION_STRING ESC_NORMAL "\n");
+   mprintf( ESC_FG_MAGENTA ESC_BOLD "DAQ Continous test, compiler: " COMPILER_VERSION_STRING ESC_NORMAL "\n");
 #if 1
    g_pScub_base = find_device_adr( GSI, SCU_BUS_MASTER );
    if( (int)g_pScub_base == ERROR_NOT_FOUND )
@@ -175,7 +175,7 @@ void main( void )
    DAQ_CANNEL_T* pChannel = daqBusGetChannelObjectByAbsoluteNumber( &g_allDaq, CHANNEL );
    if( pChannel == NULL )
    {
-      mprintf( ESC_FG_RED "ERROR: Channel " TO_STRING( CHANNEL ) " not present!\n" ESC_NORMAL );
+      mprintf( ESC_ERROR "ERROR: Channel " TO_STRING( CHANNEL ) " not present!\n" ESC_NORMAL );
       return;
    }
    mprintf( "Using channel: " TO_STRING( CHANNEL ) "of ADDAC on slot: %u\n", daqChannelGetSlot( pChannel ) );
@@ -212,15 +212,11 @@ void main( void )
       for( unsigned int i = 0; i < 4; i++ )
       {
          DAQ_CANNEL_T* pCurrentCannel = daqDeviceGetChannelObject( pAddac, i );
-         if( !daqChannelTestAndClearHiResIntPending( pCurrentCannel ) )
+         if( !daqChannelTestAndClearDaqIntPending( pCurrentCannel ) )
             continue;
 
          daqChannelPrintInfo( pCurrentCannel );
-
-         daqChannelDisableHighResolution( pCurrentCannel );
          readFiFo( pCurrentCannel );
-         daqChannelEnableHighResolution( pCurrentCannel );
-
          printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pCurrentCannel ) );
       }
    }
