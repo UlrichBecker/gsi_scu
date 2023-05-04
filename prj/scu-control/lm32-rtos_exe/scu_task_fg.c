@@ -46,24 +46,50 @@ STATIC void taskFg( void* pTaskData UNUSED )
     */
    while( true )
    {
+   #if (configUSE_TASK_NOTIFICATIONS == 1)
+      /*
+       * Sleep till wake up by ISR.
+       */
+      if( xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY ) != pdPASS )
+         continue;
+   #endif
+      bool daqSuspended = false;
       SCU_BUS_IRQ_QUEUE_T queueFgItem;
 
-      if( queuePopSave( &g_queueFg, &queueFgItem ) )
+      while( queuePopSave( &g_queueFg, &queueFgItem ) )
       {
-         daqTaskSuspend();
+         if( !daqSuspended )
+         {
+            daqSuspended = true;
+            daqTaskSuspend();
+         }
 
          if( (queueFgItem.pendingIrqs & FG1_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG1_BASE );
 
          if( (queueFgItem.pendingIrqs & FG2_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
-
-         vTaskDelay(  1  );
-         daqTaskResume();
       }
-      TASK_YIELD();
+
+      if( daqSuspended )
+         daqTaskResume();
+
+     // TASK_YIELD();
    }
 }
+
+#if (configUSE_TASK_NOTIFICATIONS == 1)
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_fg.h
+ */
+void taskWakeupFgFromISR( void )
+{
+   if( mg_taskFgHandle != NULL )
+   {
+      xTaskNotifyFromISR( mg_taskFgHandle, 0, 0, NULL );
+   }
+}
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @see scu_task_fg.h
@@ -72,8 +98,7 @@ void taskStartFgIfAnyPresent( void )
 {
    if( (mg_taskFgHandle == NULL) && (addacGetNumberOfFg() > 0) )
    {
-      TASK_CREATE_OR_DIE( taskFg, 512, TASK_PRIO_ADDAC_FG, &mg_taskFgHandle );
-     // vTaskDelay( pdMS_TO_TICKS( 1 ) );
+      TASK_CREATE_OR_DIE( taskFg, 256, TASK_PRIO_ADDAC_FG, &mg_taskFgHandle );
    }
 }
 

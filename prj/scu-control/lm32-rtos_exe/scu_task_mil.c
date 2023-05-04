@@ -62,7 +62,6 @@ void taskStartMilIfAnyPresent( void )
    if( (mg_taskMilHandle == NULL) && (milGetNumberOfFg() > 0) )
    {
       TASK_CREATE_OR_DIE( taskMil, 1024, TASK_PRIO_MIL_FG, &mg_taskMilHandle );
-      //vTaskDelay( pdMS_TO_TICKS( 1 ) );
    }
 }
 

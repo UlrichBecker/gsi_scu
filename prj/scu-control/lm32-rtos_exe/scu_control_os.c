@@ -147,6 +147,9 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       if( (queueScuBusIrq.pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
       {
          queuePushWatched( &g_queueFg, &queueScuBusIrq );
+      #if (configUSE_TASK_NOTIFICATIONS == 1)
+         taskWakeupFgFromISR();
+      #endif
       }
 
    #ifdef CONFIG_MIL_FG

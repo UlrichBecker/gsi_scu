@@ -189,10 +189,6 @@ STATIC void taskDaq( void* pTaskData UNUSED )
     */
    while( true )
    {
-      //TASK_YIELD();
-#ifdef _CONFIG_DAQ_MAIN
-      addacDaqTask();
-#else
    #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
       /*
        * Removing old data which has been possibly read and evaluated by the
@@ -213,7 +209,7 @@ STATIC void taskDaq( void* pTaskData UNUSED )
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
          continue;
-      
+
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
       const unsigned int maxChannels = daqDeviceGetMaxChannels( pDaqDevice );
       for( unsigned int channelNumber = 0; channelNumber < maxChannels; channelNumber++ )
@@ -230,7 +226,7 @@ STATIC void taskDaq( void* pTaskData UNUSED )
             handleHiresMode( pChannel );
          }
       }
-#endif
+      //TASK_YIELD();
    }
 }
 

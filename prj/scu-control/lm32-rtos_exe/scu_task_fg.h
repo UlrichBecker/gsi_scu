@@ -50,6 +50,16 @@ void taskStartFgIfAnyPresent( void );
  */
 void taskStopFgIfRunning( void );
 
+#if (configUSE_TASK_NOTIFICATIONS == 1)
+/*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @ingroup INTERRUPT
+ * @brief Wakes up the possible sleeping ADDAC function generator task from
+ *        the interrupt routine.
+ */
+void taskWakeupFgFromISR( void );
+#endif
+
 #ifdef __cplusplus
 }
 #endif
