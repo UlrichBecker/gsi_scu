@@ -52,18 +52,20 @@ STATIC void taskFg( void* pTaskData UNUSED )
        */
       if( xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY ) != pdPASS )
          continue;
-   #endif
+   #else
       bool daqSuspended = false;
+   #endif
       SCU_BUS_IRQ_QUEUE_T queueFgItem;
 
       while( queuePopSave( &g_queueFg, &queueFgItem ) )
       {
+      #if (configUSE_TASK_NOTIFICATIONS != 1)
          if( !daqSuspended )
          {
             daqSuspended = true;
             daqTaskSuspend();
          }
-
+      #endif
          if( (queueFgItem.pendingIrqs & FG1_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG1_BASE );
 
@@ -71,8 +73,10 @@ STATIC void taskFg( void* pTaskData UNUSED )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
       }
 
+   #if (configUSE_TASK_NOTIFICATIONS != 1)
       if( daqSuspended )
          daqTaskResume();
+   #endif
 
      // TASK_YIELD();
    }

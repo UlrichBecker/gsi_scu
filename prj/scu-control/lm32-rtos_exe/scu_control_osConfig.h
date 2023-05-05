@@ -8,11 +8,6 @@
 #ifndef _SCU_CONTROLCONFIG_H
 #define _SCU_CONTROLCONFIG_H
 
-#define TASK_PRIO_MAIN        1
-#define TASK_PRIO_ADDAC_FG    1
-#define TASK_PRIO_ADDAC_DAQ   1
-#define TASK_PRIO_MIL_FG      1
-#define TASK_PRIO_TEMPERATURE 1
 
 //#define CONFIG_TASKS_SHOULD_YIELD
 #define CONFIG_STILL_ALIVE_SIGNAL
@@ -106,6 +101,20 @@
 #define INCLUDE_xTaskResumeFromISR              1
 
 /* A header file that defines trace macro can be included here. */
+
+
+#define TASK_PRIO_STD         1
+
+#define TASK_PRIO_MAIN        TASK_PRIO_STD
+#if (configUSE_TASK_NOTIFICATIONS == 1)
+ #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 1
+ #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
+#else
+ #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
+ #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
+#endif
+#define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD
+#define TASK_PRIO_TEMPERATURE TASK_PRIO_STD
 
 
 #endif /* ifndef _SCU_CONTROLCONFIG_H */

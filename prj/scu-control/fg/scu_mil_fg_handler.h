@@ -384,6 +384,13 @@ void milInitTasks( void );
 /*! ---------------------------------------------------------------------------
  * @ingroup TASK
  * @ingroup MIL_FSM
+ * @brief Returns true if all MIL-FSMs of each MIL-thread is in state "wate".
+ */
+bool milAllInWateState( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup TASK
+ * @ingroup MIL_FSM
  * @brief Non blocking execution of all MIL-threads.
  */
 void milExecuteTasks( void );

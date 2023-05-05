@@ -1772,8 +1772,20 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
    while( next );
 } /* End function milTask */
 
+/*!----------------------------------------------------------------------------
+ * @see scu_mil_fg_handler.h
+ */
+bool milAllInWateState( void )
+{
+   for( unsigned int i = 0; i < ARRAY_SIZE(mg_aMilTaskData); i++ )
+   {
+      if( mg_aMilTaskData[i].state != ST_WAIT )
+         return false;
+   }
+   return true;
+}
 
-/*-----------------------------------------------------------------------------
+/*!----------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
 void milExecuteTasks( void )
