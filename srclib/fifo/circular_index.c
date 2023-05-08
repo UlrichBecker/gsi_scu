@@ -52,8 +52,8 @@ RAM_RING_INDEX_T ramRingGetSize( const RAM_RING_INDEXES_T* pThis )
       return pThis->end - pThis->start;
 
    /*
-    * Valid payload fragmented in the upper and lower part of the allocated
-    * memory?
+    * In this case the valid payload is fragmented in the upper and lower
+    * part of the allocated memory.
     */
    return (pThis->capacity - pThis->start) + pThis->end;
 }

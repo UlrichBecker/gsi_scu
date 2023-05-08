@@ -9,10 +9,14 @@
 
 #define CONFIG_TASK_RAM_TAB
 
-#ifndef __DOCFSM__
+#ifndef __DOCFSM__ /* DOCFSM doesn't need these headers. */
   #include <scu_fg_macros.h>
   #include <scu_fg_list.h>
   #include <scu_syslog.h>
+  #ifdef CONFIG_RTOS
+    #include <FreeRTOS.h>
+    #include <scu_task_mil.h>
+  #endif
 #endif
 #include "scu_mil_fg_handler.h"
 #ifdef CONFIG_MIL_DAQ_USE_RAM
@@ -688,7 +692,13 @@ void fgMilClearHandlerState( const unsigned int socket )
      /*
       * Triggering of a software pseudo interrupt.
       */
-      ATOMIC_SECTION() queuePushWatched( &g_queueMilFg, &milMsg );
+      ATOMIC_SECTION()
+      {
+         queuePushWatched( &g_queueMilFg, &milMsg );
+      #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+         taskWakeupMil();
+      #endif
+      }
       return;
 #ifdef CONFIG_MIL_PIGGY
    }
@@ -703,9 +713,15 @@ void fgMilClearHandlerState( const unsigned int socket )
      /*
       * Triggering of a software pseudo interrupt.
       */
-      ATOMIC_SECTION() queuePushWatched( &g_queueMilFg, &milMsg );
+      ATOMIC_SECTION()
+      {
+         queuePushWatched( &g_queueMilFg, &milMsg );
+      #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+         taskWakeupMil();
+      #endif
+      }
    }
-#endif
+#endif /* CONFIG_MIL_PIGGY */
 }
 
 #if defined( CONFIG_READ_MIL_TIME_GAP ) && !defined(__DOCFSM__)
@@ -1779,8 +1795,10 @@ bool milAllInWateState( void )
 {
    for( unsigned int i = 0; i < ARRAY_SIZE(mg_aMilTaskData); i++ )
    {
+    #ifndef __DOCFSM__ /* Prevents a error message during parsing by DOCFSM */
       if( mg_aMilTaskData[i].state != ST_WAIT )
          return false;
+    #endif
    }
    return true;
 }

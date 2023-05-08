@@ -81,7 +81,6 @@ void daqTaskSuspend( void );
  */
 void daqTaskResume( void );
 
-
 /*!----------------------------------------------------------------------------
  * @ingroup RTOS_TASK
  * @brief Starts the ADDAC_DAQ task for SCU-bus DAQs if not already running or
@@ -96,6 +95,21 @@ void taskStartDaqIfAnyPresent( void );
  *        function is without effect.
  */
 void taskStopDaqIfRunning( void );
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+/*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @brief Wakes the possible sleeping ADDAC-DAQ-task from the interrupt-routine.
+ */
+void taskWakeupDaqFromISR( void );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @brief Wakes the possible sleeping ADDAC-DAQ-task.
+ */
+void taskWakeupDaq( void );
+
+#endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */
 
 #ifdef __cplusplus
 }

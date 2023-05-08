@@ -45,6 +45,22 @@ STATIC void taskMil( void* pTaskData UNUSED )
 
    while( true )
    {
+   #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+      #ifdef CONFIG_READ_MIL_TIME_GAP
+        /*
+         * When the gap reading mode is activated so the maximum sleep time of
+         * this task will be at 2 milliseconds.
+         */
+        #define MIL_TASK_WAITING_TIME pdMS_TO_TICKS( 2 )
+      #else
+        #define MIL_TASK_WAITING_TIME portMAX_DELAY
+      #endif
+      /*
+       * Sleep till wake up.
+       */
+       if( milAllInWateState() )
+          xTaskNotifyWait( pdFALSE, 0, NULL, MIL_TASK_WAITING_TIME );
+   #endif
       if( evPopSave( &g_ecaEvent ) )
       {
          ecaHandler();
@@ -72,5 +88,26 @@ void taskStopMilIfRunning( void )
 {
    taskDeleteIfRunning( &mg_taskMilHandle );
 }
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
+void taskWakeupMilFromISR( void )
+{
+   if( mg_taskMilHandle != NULL )
+      xTaskNotifyFromISR( mg_taskMilHandle, 0, 0, NULL );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
+void taskWakeupMil( void )
+{
+   if( mg_taskMilHandle != NULL )
+      xTaskNotify( mg_taskMilHandle, 0, eNoAction );
+}
+#endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */
+
 
 /*================================== EOF ====================================*/

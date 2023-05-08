@@ -46,7 +46,7 @@ STATIC void taskFg( void* pTaskData UNUSED )
     */
    while( true )
    {
-   #if (configUSE_TASK_NOTIFICATIONS == 1)
+   #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
       /*
        * Sleep till wake up by ISR.
        */
@@ -59,7 +59,7 @@ STATIC void taskFg( void* pTaskData UNUSED )
 
       while( queuePopSave( &g_queueFg, &queueFgItem ) )
       {
-      #if (configUSE_TASK_NOTIFICATIONS != 1)
+      #if (configUSE_TASK_NOTIFICATIONS != 1) || !defined( CONFIG_SLEEP_FG_TASK )
          if( !daqSuspended )
          {
             daqSuspended = true;
@@ -73,7 +73,7 @@ STATIC void taskFg( void* pTaskData UNUSED )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
       }
 
-   #if (configUSE_TASK_NOTIFICATIONS != 1)
+   #if (configUSE_TASK_NOTIFICATIONS != 1) || !defined( CONFIG_SLEEP_FG_TASK )
       if( daqSuspended )
          daqTaskResume();
    #endif

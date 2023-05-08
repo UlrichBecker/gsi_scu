@@ -102,20 +102,28 @@
 
 /* A header file that defines trace macro can be included here. */
 
+#define CONFIG_SLEEP_FG_TASK
+#define CONFIG_SLEEP_MIL_TASK
+//#define CONFIG_SLEEP_DAQ_TASK //TODO Doesn't work yet!
 
 #define TASK_PRIO_STD         1
 
 #define TASK_PRIO_MAIN        TASK_PRIO_STD
-#if (configUSE_TASK_NOTIFICATIONS == 1)
- #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 1
- #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
-#else
- #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
- #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
-#endif
 #define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD
 #define TASK_PRIO_TEMPERATURE TASK_PRIO_STD
 
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
+ #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 1
+#else
+ #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
+#endif
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+ #define TASK_PRIO_MIL_FG      TASK_PRIO_STD + 1
+#else
+ #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
+#endif
 
 #endif /* ifndef _SCU_CONTROLCONFIG_H */
 /*================================== EOF ====================================*/

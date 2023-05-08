@@ -204,6 +204,13 @@ STATIC void taskDaq( void* pTaskData UNUSED )
        */
       ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
    #endif
+   #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+      /*
+       * Sleep till wake up.
+       */
+      if( xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY ) != pdPASS )
+         continue;
+   #endif
       daqScanForCommands();
 
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
@@ -277,5 +284,25 @@ void daqTaskResume( void )
    if( mg_taskDaqHandle != NULL )
       vTaskResume( mg_taskDaqHandle );
 }
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void taskWakeupDaqFromISR( void )
+{
+   if( mg_taskDaqHandle != NULL )
+      xTaskNotifyFromISR( mg_taskDaqHandle, 0, 0, NULL );
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_daq.h
+ */
+void taskWakeupDaq( void )
+{
+   if( mg_taskDaqHandle != NULL )
+      xTaskNotify( mg_taskDaqHandle, 0, eNoAction );
+}
+#endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */
 
 /*================================== EOF ====================================*/

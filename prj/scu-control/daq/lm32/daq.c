@@ -41,6 +41,10 @@
  #include <eb_console_helper.h>
 #endif
 #endif
+#ifdef CONFIG_RTOS
+ #include <FreeRTOS.h>
+ #include <scu_task_daq.h>
+#endif
 #include "daq.h"
 #if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)
 //! @brief For debug purposes only
@@ -536,7 +540,7 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
                                       )
 {
    const DAQ_ACTION_ITEM_T act = { .action = what, .fgNumber = fgNumber, .tag = tag };
-   //if( !queuePush( &pThis->feedback.aktionBuffer, &act ) )
+
    if( !daqQueuePush( pThis, &act ) )
    {
    #ifdef CONFIG_USE_LM32LOG
@@ -547,6 +551,12 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
                daqDeviceGetSlot( pThis ) );
    #endif
    }
+#if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+   else
+   {
+      taskWakeupDaq();
+   }
+#endif
 }
 
 #define FSM_TRANSITION( s, attr... ) pFeedback->status = s

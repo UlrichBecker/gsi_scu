@@ -54,6 +54,20 @@ void taskStartMilIfAnyPresent( void );
  */
 void taskStopMilIfRunning( void );
 
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+/*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @brief Wakes the possible sleeping MIL-task from the interrupt-routine.
+ */
+void taskWakeupMilFromISR( void );
+
+/*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
+ * @brief Wakes the possible sleeping MIL-task
+ */
+void taskWakeupMil( void );
+#endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */
+
 #ifdef __cplusplus
 }
 #endif

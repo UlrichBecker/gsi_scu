@@ -147,7 +147,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       if( (queueScuBusIrq.pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
       {
          queuePushWatched( &g_queueFg, &queueScuBusIrq );
-      #if (configUSE_TASK_NOTIFICATIONS == 1)
+      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
          taskWakeupFgFromISR();
       #endif
       }
@@ -172,6 +172,9 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          * @see milTask
          */
          queuePushWatched( &g_queueMilFg, &milMsg );
+      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+         taskWakeupMilFromISR();
+      #endif
       }
    #endif /* ifdef CONFIG_MIL_FG */
 
@@ -179,6 +182,9 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       if( (queueScuBusIrq.pendingIrqs & ((1 << DAQ_IRQ_DAQ_FIFO_FULL) | (1 << DAQ_IRQ_HIRES_FINISHED))) != 0 )
       {
          queuePushWatched( &g_queueAddacDaq, &queueScuBusIrq );
+      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+         taskWakeupDaqFromISR();
+      #endif
       }
    #endif
    }
@@ -213,6 +219,9 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
                * ECA event received
                */
                evPushWatched( &g_ecaEvent );
+             #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+               taskWakeupMilFromISR();
+             #endif
                break;
             }
          #endif /* ifdef CONFIG_MIL_FG */
@@ -251,6 +260,9 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             * @see milDeviceHandler
             */
             queuePushWatched( &g_queueMilFg, &milMsg );
+         #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+            taskWakeupMilFromISR();
+         #endif
             break;
          }
      #endif /* if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY ) */
