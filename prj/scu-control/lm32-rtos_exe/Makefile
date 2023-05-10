@@ -56,6 +56,7 @@ ifdef SCU_MIL
   SOURCE += scu_task_mil.c
 endif
 SOURCE   += scu_task_fg.c
+SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
 ifdef USE_TEMPERATURE_WATCHER
   SOURCE    += scu_task_temperature.c
   DEFINES   += CONFIG_USE_TEMPERATURE_WATCHER
