@@ -63,8 +63,13 @@ void osMutexInit( OS_MUTEX_T volatile * pThis );
 
 /*! ------------------------------------------------------------------------
  * @ingroup ATOMIC
- * @brief Waits till the mutex is free and lock it if free.
- *        counterpart of osMutexUnlock
+ * @brief Waits until the mutex is free and lock it if free.
+ *        counterpart of osMutexUnlock.
+ *
+ * Nesting calls in the same task are possible.
+ *
+ * @note When this mutex is already locked by a other task then other tasks
+ *       will performed until this mutex becomes free.
  * @param pThis Pointer to the mutex-object.
  */
 void osMutexLock( OS_MUTEX_T volatile * pThis );

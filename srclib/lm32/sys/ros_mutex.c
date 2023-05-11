@@ -41,14 +41,18 @@ void osMutexInit( OS_MUTEX_T volatile * pThis )
  */
 void osMutexLock( OS_MUTEX_T volatile * pThis )
 {
+   const TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+
    portENTER_CRITICAL();
 
-   const TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
    if( pThis->lockedTask != currentTask )
    {
       while( pThis->lockedTask != NULL )
       { /*
-         * While the mutex is still locked, so the work of other tasks will do. 
+         * While the mutex is still locked, so the work of other tasks will do.
+         * That works, because the critical section is only for this task valid.
+         * The critical section nesting counter for interrupts becomes handled
+         * like a CPU-register during task change.
          */
          portYIELD();
       }

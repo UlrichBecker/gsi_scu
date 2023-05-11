@@ -59,6 +59,14 @@ typedef struct
 
 OS_MUTEX_T g_oMutex;
 
+#if 1
+   #define MUTEX_LOCK()    osMutexLock( &g_oMutex )
+   #define MUTEX_UNLOCK()  osMutexUnlock( &g_oMutex )
+#else
+   #define MUTEX_LOCK()
+   #define MUTEX_UNLOCK()
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @brief Task function in this case for both tasks.
  * @param pvParameters User tunnel, the forth parameter of function xTaskCreate.
@@ -74,14 +82,10 @@ STATIC void vTask( void* pvParameters )
    TickType_t xLastExecutionTime = xTaskGetTickCount();
 
    const unsigned int y = 7 + pUserData->number;
-   osMutexLock( &g_oMutex );
-   mprintf( ESC_XY( "55", "%d" )"*** Once! ***", y );
-   osMutexUnlock( &g_oMutex );
-   
    unsigned int count = 0;
    while( true )
    {
-      osMutexLock( &g_oMutex );
+      MUTEX_LOCK();
       {
          mprintf( ESC_XY( "1", "%d" ) ESC_CLR_LINE
                   "Task main function %d, count: %d, user data: \"%s\"",
@@ -90,13 +94,8 @@ STATIC void vTask( void* pvParameters )
                   ++count,
                   pUserData->string );
       }
-      osMutexUnlock( &g_oMutex );
+      MUTEX_UNLOCK();
       vTaskDelayUntil( &xLastExecutionTime, pdMS_TO_TICKS( 1000 ) );
-
-   #if configUSE_PREEMPTION == 0
-      vPortYield();
-      mprintf( "after vPortYield(): \"%s\"\n\n", pUserData->string );
-   #endif
    }
 }
 
@@ -119,7 +118,7 @@ TASK_DATA_T taskData2 =
 void main( void )
 {
    mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR
-            "FreeRTOS-test mprintf + ATOMIC_SECTION\n"
+            ESC_BOLD "FreeRTOS MUTEX- test\n" ESC_NORMAL
             "Compiler: " COMPILER_VERSION_STRING "\n"
             "Tick-rate:          %d Hz\n"
             "Minimal stack size: %d bytes\n"
@@ -159,7 +158,7 @@ void main( void )
    }
 
    osMutexInit( &g_oMutex );
-   
+
    vTaskStartScheduler();
 
    mprintf( ESC_ERROR "Error: This point shall never be reached!\n" ESC_NORMAL );

@@ -5,8 +5,8 @@
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      10.05.2023
  */
-#ifndef _LM32RTOSTEST1CONFIG_H
-#define _LM32RTOSTEST1CONFIG_H
+#ifndef _MUTEXTESTCONFIG_H
+#define _MUTEXTESTCONFIG_H
 
 #include <stdbool.h>
 
@@ -18,12 +18,13 @@
 //#define CONFIG_NO_RTOS_TIMER /* For test purposes only! */
 
 #define configUSE_PREEMPTION                    1
+#define configTICK_RATE_HZ                      20000
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
 #define configMINIMAL_STACK_SIZE                256//128
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
-#define configUSE_MUTEXES                       1
+#define configUSE_MUTEXES                       0
 #define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_COUNTING_SEMAPHORES           0
 #define configUSE_ALTERNATIVE_API               0 /* Deprecated! */
@@ -93,5 +94,5 @@
 #define INCLUDE_xTaskGetHandle                  0
 #define INCLUDE_xTaskResumeFromISR              1
 
-#endif /* ifndef _LM32RTOSTEST1CONFIG_H */
+#endif /* ifndef _MUTEXTESTCONFIG_H */
 /*================================== EOF ====================================*/
