@@ -23,6 +23,9 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#ifndef CONFIG_RTOS
+ #error "ERROR: Application requires FreeRTOS, macro CONFIG_RTOS has to be defined in makefile!"
+#endif
 #include <scu_lm32_common.h>
 #include <FreeRTOS.h>
 #include <lm32signal.h>

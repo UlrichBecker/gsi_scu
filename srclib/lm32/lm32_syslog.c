@@ -39,7 +39,11 @@ STATIC MMU_ADDR_T mg_adminOffset = 0;
 
 #ifndef __DOCFSM__
  #include <scu_ddr3_lm32.h>
+ #ifdef CONFIG_RTOS
+  #include <ros_mutex.h>
+ #endif
 #endif
+
 #ifdef CONFIG_RTOS
 /*
  * When FreeRTOS is used then the DDR3-access functions are already within
@@ -47,12 +51,26 @@ STATIC MMU_ADDR_T mg_adminOffset = 0;
  */
  #define DDR3_CRITICAL_SECTION_ENTER()
  #define DDR3_CRITICAL_SECTION_EXIT()
+
+ OS_MUTEX_T mg_syslogMutex;
+
+ STATIC inline ALWAYS_INLINE void syslogLock( void )
+ {
+    osMutexLock( &mg_syslogMutex );
+ }
+
+ STATIC inline ALWAYS_INLINE void syslogUnlock( void )
+ {
+    osMutexUnlock( &mg_syslogMutex );
+ }
 #else
-  #ifndef __DOCFSM__
-   #include <lm32Interrupts.h>
-  #endif
+ #ifndef __DOCFSM__
+  #include <lm32Interrupts.h>
+ #endif
  #define DDR3_CRITICAL_SECTION_ENTER() criticalSectionEnter()
  #define DDR3_CRITICAL_SECTION_EXIT()  criticalSectionExit()
+ #define syslogLock()
+ #define syslogUnlock()
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -128,6 +146,10 @@ MMU_STATUS_T lm32LogInit( unsigned int numOfItems )
    if( (status = mmuInit()) != OK )
       return status;
 
+#ifdef CONFIG_RTOS
+   osMutexInit( &mg_syslogMutex );
+#endif
+
 #ifdef CONFIG_LOG_TEST
    mmuDelete();
 #endif
@@ -171,7 +193,7 @@ STATIC inline void syslogPushItem( const SYSLOG_FIFO_ITEM_T* pItem )
 {
    SYSLOG_FIFO_ADMIN_T admin;
 
-   criticalSectionEnter();
+   syslogLock();
 
    syslogReadFifoAdmin( &admin );
 
@@ -198,7 +220,7 @@ STATIC inline void syslogPushItem( const SYSLOG_FIFO_ITEM_T* pItem )
 
    syslogWriteFifoAdmin( &admin );
 
-   criticalSectionExit();
+   syslogUnlock();
 }
 
 

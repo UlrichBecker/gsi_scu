@@ -26,6 +26,9 @@
  */
 #define _CONFIG_MIL_EV_QUEUE
 
+#ifdef CONFIG_RTOS
+ #error ERROR: This application is not for FreeRTOS!
+#endif
 #include "scu_main.h"
 #include <sys_exception.h>
 #include "scu_command_handler.h"

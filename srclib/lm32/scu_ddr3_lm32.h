@@ -33,19 +33,32 @@
   #error Module is for target Lattice Micro 32 (LM32) only!
 #endif
 
-#include <scu_ddr3.h>
+#define CONFIG_DDR3_MULTIPLE_USE
 
+#include <scu_ddr3.h>
+#if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
+  #include <ros_mutex.h>
+#endif
 
 /*!
  * @brief Object type of SCU internal DDR3 RAM.
  */
 typedef struct
-{
-   /*! @brief WB Base-address of transparent mode */
+{  /*!
+    * @brief WB Base-address of transparent mode.
+    */
    DDR3_ADDR_T pTrModeBase;
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   /*! @brief WB Base-address of burst mode */
+   /*!
+    * @brief WB Base-address of burst mode.
+    */
    DDR3_ADDR_T pBurstModeBase;
+#endif
+#if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
+   /*!
+    * @brief DDR3- access mutex.
+    */
+   OS_MUTEX_T oMutex;
 #endif
 } DDR3_T;
 

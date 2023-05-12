@@ -36,18 +36,6 @@
    #error CONFIG_SCU_USE_DDR3 has to be defined!
 #endif
 
-#ifdef CONFIG_RTOS
-  #include <lm32Interrupts.h>
-  #define ddr3Lock()   criticalSectionEnter()
-  #define ddr3Unlock() criticalSectionExit()
-#else
- /*
-  * Dummy functions when FreeRTOS will not used.
-  */
- #define ddr3Lock()
- #define ddr3Unlock()
-#endif
-
 /*!
  * @brief Module internal handle for DDR3 accesses.
  */
@@ -59,12 +47,41 @@ DDR3_T mg_oDdr3 =
 #endif
 };
 
+#if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
+#if 0
+  #include <lm32Interrupts.h>
+  #define ddr3Lock()   criticalSectionEnter()
+  #define ddr3Unlock() criticalSectionExit()
+#else
+ STATIC inline ALWAYS_INLINE void ddr3Lock( void )
+ {
+    osMutexLock( &mg_oDdr3.oMutex );
+ }
+
+ STATIC inline ALWAYS_INLINE void ddr3Unlock( void )
+ {
+    osMutexUnlock( &mg_oDdr3.oMutex );
+ }
+#endif
+#else
+ /*
+  * Dummy functions when FreeRTOS will not used.
+  */
+ #define ddr3Lock()
+ #define ddr3Unlock()
+#endif
+
+
 /*! ---------------------------------------------------------------------------
  * @see scu_ddr3_lm32.h
  */
 int ddr3init( void )
 {
    DDR_ASSERT( mg_oDdr3.pTrModeBase == DDR3_INVALID );
+
+#if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
+   osMutexInit( &mg_oDdr3.oMutex );
+#endif
 
    mg_oDdr3.pTrModeBase = find_device_adr( GSI, WB_DDR3_if1 );
    if( mg_oDdr3.pTrModeBase == (uint32_t*)ERROR_NOT_FOUND )

@@ -12,7 +12,6 @@ BASE_VERSION = 4
 SUB_VERSION  = 6.3
 
 #------------------------------------------------------------------------------
-# USE_HISTORY=1
  USE_LM32LOG=1
  USE_MMU := 1
  SCU_MIL := 1
@@ -84,7 +83,7 @@ include ../common_make.mk
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+ SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 
