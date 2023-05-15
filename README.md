@@ -87,7 +87,7 @@ Prerequisite is that the LM32-binary file is already built.
 2. Build binary file by typing: ```make```.
 3. If the binary was successful built it will be in this directory: ```gsi_scu/tools/C++/lm32-logd/deploy_x86_64/result/lm32-logd```
 
-## Building the tool ```fg-wave```. Visualization tool for ramp-files via Gnuplot without additional hardware
+## Building the tool ```fg-wave```. Visualization tool for ramp-files via [Gnuplot](http://www.gnuplot.info) without additional hardware
 1. Change in directory ```gsi_scu/tools/C++/fg-wave```.
 2. Build binary file by typing: ```make```.
 3. If the binary was successful built it will be in this directory: ```gsi_scu/tools/C++/fg-wave/deploy_x86_64/result/fg-wave```.
