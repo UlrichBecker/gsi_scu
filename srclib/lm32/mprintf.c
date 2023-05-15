@@ -16,6 +16,7 @@
   #include <pp-printf.h>
 #endif
 #ifdef CONFIG_RTOS
+  #include <lm32Interrupts.h>
   #include <FreeRTOS.h>
   #include <task.h>
 #endif
@@ -77,7 +78,7 @@ void STATIC uartWriteChar( const uint32_t c )
    while( (mg_pUart->SR & UART_SR_TX_BUSY) != 0 )
    {
    #if defined( CONFIG_RTOS ) && defined( CONFIG_TASK_YIELD_WHEN_UART_WAITING )
-      if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
+      if( !irqIsInContext() && (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) )
       { /*
          * Let's do meaningful things while the UART is still busy.
          */

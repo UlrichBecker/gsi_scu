@@ -25,12 +25,13 @@
  */
 #include <FreeRTOS.h>
 #include <task.h>
+#include <scu_function_generator.h>
 #include "scu_task_mil.h"
 
 
 STATIC TaskHandle_t mg_taskMilHandle = NULL;
 
-EV_CREATE_STATIC( g_ecaEvent, 16 );
+EV_CREATE_STATIC( g_ecaEvent, MAX_FG_CHANNELS );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup RTOS_TASK
@@ -46,20 +47,24 @@ STATIC void taskMil( void* pTaskData UNUSED )
    while( true )
    {
    #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
-      #ifdef CONFIG_READ_MIL_TIME_GAP
-        /*
-         * When the gap reading mode is activated so the maximum sleep time of
-         * this task will be at 2 milliseconds.
-         */
-        #define MIL_TASK_WAITING_TIME pdMS_TO_TICKS( 2 )
-      #else
-        #define MIL_TASK_WAITING_TIME portMAX_DELAY
-      #endif
+    #ifdef CONFIG_READ_MIL_TIME_GAP
       /*
-       * Sleep till wake up.
+       * When the gap reading mode is activated so the maximum sleep time of
+       * this task will be at 2 milliseconds.
        */
-       if( milAllInWateState() )
-          xTaskNotifyWait( pdFALSE, 0, NULL, MIL_TASK_WAITING_TIME );
+      #define MIL_TASK_WAITING_TIME pdMS_TO_TICKS( 2 )
+    #else
+      #define MIL_TASK_WAITING_TIME portMAX_DELAY
+    #endif
+      /*
+       * All MIL-FSMs in state ST_WAIT ?
+       */
+      if( milAllInWateState() )
+      { /*
+         * Sleep till wake up by interrupt or waiting time expired.
+         */
+         xTaskNotifyWait( pdFALSE, 0, NULL, MIL_TASK_WAITING_TIME );
+      }
    #endif
       if( evPopSave( &g_ecaEvent ) )
       {

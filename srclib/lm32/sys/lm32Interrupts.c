@@ -199,6 +199,7 @@ extern volatile uint16_t* g_pScuBusBase;
  */
 void _irq_entry( void )
 {
+   mg_isInContext = true;
 #ifdef CONFIG_DEBUG_BY_LOGIK_ANALYSATOR
    if( (irqGetEnableRegister() & IRQ_EIE) == 0 )
    {
@@ -225,7 +226,6 @@ void _irq_entry( void )
    IRQ_ASSERT( __atomic_section_nesting_count == 0 );
    __atomic_section_nesting_count = 1;
 #endif
-   mg_isInContext = true;
    /*!
     * @brief Copy of the interrupt pending register before reset.
     */
