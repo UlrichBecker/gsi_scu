@@ -44,6 +44,18 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```make dbg```       Builds a debugable binary-file and invokes the KDE-debugger frontend [```kdbg```](https://www.kdbg.org) if the makefile-variable ```DEBUG=1```. **Yes KDE!** That isn't exotic!
 * ```make public       Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
 
+## Some of the most important makefile variables
+* ```MIAN_MODULE```   By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file.
+                      E.g: ```MIAN_MODULE = scu_control_os.c```
+* ```SOURCE```        List of additional source files, which can be C-, cplusplus- or assembler- files.
+                      E.g.: ```SOURCE += mprintf.c```
+                            ```SOURCE += scu_task_daq.c```
+* ```DEFINES```       List of predefined macros.
+                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```
+                            ```DEFINES += MAX_LM32_INTERRUPTS=2```
+* ```INCLUDE_DIRS```  List of additional directories.
+                      E.g.: ```INCLUDE_DIRS += $(RTOS_SRC_DIR)/include```
+
 ## Building the classical "Hello world" example application for LM32
 In this example you can see how the makefile has to look for a simple LM32 application.
 1. Change in directory ```gsi_scu/demo-and-test/lm32/non-os/Hello_World```
