@@ -48,15 +48,11 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```REPOSITORY_DIR```    This variable is the most important which shall contain the path who this GIT-repository is installed.<br />
                           The following both codelines shall be include at the bottom of each mekefile:<br />
                           For LM32-applications:<br />
-                          ```
-                          REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-                          include $(REPOSITORY_DIR)/makefiles/makefile.scu
-                          ```
+                          ```REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)```<br />
+                          ```include $(REPOSITORY_DIR)/makefiles/makefile.scu```<br />
                           For Linux-applications:<br />
-                          ```
-                          REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-                          include $(REPOSITORY_DIR)/makefiles/makefile.scun
-                          ```
+                          ```REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)```<br />
+                          ```include $(REPOSITORY_DIR)/makefiles/makefile.scun```
 * ```MIAN_MODULE```       By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file. E.g.:<br />
                           ```MIAN_MODULE = scu_control_os.c```
 * ```SOURCE```            List of additional source files, which can be C-, cplusplus- or assembler- files. E.g.:<br />
