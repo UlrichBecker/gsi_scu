@@ -45,16 +45,38 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```make public       Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
 
 ## Some of the most important makefile variables
-* ```MIAN_MODULE```   By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file.<br />
-                      E.g: ```MIAN_MODULE = scu_control_os.c```
-* ```SOURCE```        List of additional source files, which can be C-, cplusplus- or assembler- files.<br />
-                      E.g.: ```SOURCE += mprintf.c```<br />
-                            ```SOURCE += scu_task_daq.c```
-* ```DEFINES```       List of predefined macros.<br />
-                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```<br />
-                            ```DEFINES += MAX_LM32_INTERRUPTS=2```
-* ```INCLUDE_DIRS```  List of additional directories.<br />
-                      E.g.: ```INCLUDE_DIRS += $(RTOS_SRC_DIR)/include```
+* ```REPOSITORY_DIR```    This variable is the most important which shall contain the path who this GIT-repository is installed.<br />
+                          The following both codelines shall be include at the bottom of each mekefile:<br />
+                          For LM32-applications:<br />
+                          ```
+                          REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
+                          include $(REPOSITORY_DIR)/makefiles/makefile.scu
+                          ```
+                          For Linux-applications:<br />
+                          ```
+                          REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
+                          include $(REPOSITORY_DIR)/makefiles/makefile.scun
+                          ```
+* ```MIAN_MODULE```       By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file. E.g.:<br />
+                          ```MIAN_MODULE = scu_control_os.c```
+* ```SOURCE```            List of additional source files, which can be C-, cplusplus- or assembler- files. E.g.:<br />
+                          ```SOURCE += mprintf.c```<br />
+                          ```SOURCE += scu_task_daq.c```
+* ```DEFINES```           List of predefined macros. E.g.:<br />
+                          ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```<br />
+                          ```DEFINES += MAX_LM32_INTERRUPTS=2```
+* ```INCLUDE_DIRS```      List of additional directories of header files. E.g.:<br />
+                          ```INCLUDE_DIRS += $(RTOS_SRC_DIR)/include```
+* ```CFLAGS```            Compiler flags. E.g.:<br />
+                          ```CFLAGS += -Wall```<br />
+                          ```CFLAGS += -Wfatal-errors```
+* ```LD_FLAGS```          Linker flags. E.g.:<br />
+                          ```LD_FLAGS += -Wl,--gc-sections```
+* ```CODE_OPTIMIZATION``` Code optimization level. E.g.:<br />
+                          ```CODE_OPTIMIZATION = s```
+* ```NO_LTO```            By default the link time optimizer is active. If this is not desired then this variable has to be initialized by one. E.g.:<br />
+                          ```NO_LTO = 1```
+
 
 ## Building the classical "Hello world" example application for LM32
 In this example you can see how the makefile has to look for a simple LM32 application.
