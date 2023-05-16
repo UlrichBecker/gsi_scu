@@ -51,7 +51,7 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
                       E.g.: ```SOURCE += mprintf.c```
                             ```SOURCE += scu_task_daq.c```
 * ```DEFINES```       List of predefined macros.
-                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```
+                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```\n
                             ```DEFINES += MAX_LM32_INTERRUPTS=2```
 * ```INCLUDE_DIRS```  List of additional directories.
                       E.g.: ```INCLUDE_DIRS += $(RTOS_SRC_DIR)/include```
