@@ -45,15 +45,15 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```make public       Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
 
 ## Some of the most important makefile variables
-* ```MIAN_MODULE```   By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file.
+* ```MIAN_MODULE```   By default the name of the sourcefile which contains the function ```main()``` this is also the name of the binary file.<br />
                       E.g: ```MIAN_MODULE = scu_control_os.c```
-* ```SOURCE```        List of additional source files, which can be C-, cplusplus- or assembler- files.
-                      E.g.: ```SOURCE += mprintf.c```
+* ```SOURCE```        List of additional source files, which can be C-, cplusplus- or assembler- files.<br />
+                      E.g.: ```SOURCE += mprintf.c```<br />
                             ```SOURCE += scu_task_daq.c```
-* ```DEFINES```       List of predefined macros.
-                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```\n
+* ```DEFINES```       List of predefined macros.<br />
+                      E.g.: ```DEFINES += CONFIG_USE_TEMPERATURE_WATCHER```<br />
                             ```DEFINES += MAX_LM32_INTERRUPTS=2```
-* ```INCLUDE_DIRS```  List of additional directories.
+* ```INCLUDE_DIRS```  List of additional directories.<br />
                       E.g.: ```INCLUDE_DIRS += $(RTOS_SRC_DIR)/include```
 
 ## Building the classical "Hello world" example application for LM32
