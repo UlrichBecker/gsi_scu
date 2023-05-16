@@ -42,7 +42,7 @@ E.g.: ```export SCU_URL=scuxl4711```
 For test and debug purposes the variable ```CALL_ARGS``` can set with commandline parameters.
 * ```make run```       Builds the binary-file and invoke it.
 * ```make dbg```       Builds a debugable binary-file and invokes the KDE-debugger frontend [```kdbg```](https://www.kdbg.org) if the makefile-variable ```DEBUG=1```. **Yes KDE!** That isn't exotic!
-* ```make public       Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
+* ```make public```    Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
 
 ## Some of the most important makefile variables
 * ```REPOSITORY_DIR```    This variable is the most important which shall contain the path who this GIT-repository is installed.<br />
