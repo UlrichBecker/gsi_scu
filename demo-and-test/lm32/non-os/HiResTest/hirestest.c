@@ -187,20 +187,25 @@ void main( void )
 
    printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
 
-   daqChannelEnableTriggerMode( pChannel );
-   daqChannelEnableExternTriggerHighRes( pChannel );
 
-   daqChannelEnableHighResolution( pChannel );
- //  daqChannelEnablePostMortem( pChannel );
-   daqChannelPrintInfo( pChannel );
 
-//daqDeviceDisableScuSlaveInterrupt( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
    printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
 
    irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onScuMSInterrupt );
    mprintf( "IRQ table configured: 0b%04b\n", irqGetMaskRegister() );
    enableMeassageSignaledInterruptsForScuBusSlave( daqChannelGetSlot( pChannel ) - SCUBUS_START_SLOT );
    irqEnable();
+
+   daqChannelEnableTriggerMode( pChannel );
+   daqChannelEnableExternTriggerHighRes( pChannel );
+
+   daqChannelSetTriggerCondition( pChannel, 0x12345678 );
+   mprintf( "Tag: 0x%08X\n", daqChannelGetTriggerCondition( pChannel ) );
+
+
+   daqChannelEnableHighResolution( pChannel );
+   daqChannelPrintInfo( pChannel );
+
 
    while( true )
    {

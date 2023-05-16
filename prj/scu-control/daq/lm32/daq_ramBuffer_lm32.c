@@ -78,13 +78,7 @@ void ramRreadAddacDaqItem( const RAM_RING_INDEX_T index,
                            RAM_DAQ_PAYLOAD_T* pItem )
 {
 #ifdef CONFIG_SCU_USE_DDR3
- #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) || defined( CONFIG_RTOS )
-   criticalSectionEnter();
    ddr3read64( pItem, index );
-   criticalSectionExit();
- #else
-   ddr3read64( pItem, index );
- #endif
 #else
    #error Nothing implemented in function ramRreadItem()!
 #endif
@@ -98,13 +92,7 @@ STATIC inline ALWAYS_INLINE
 void ramWriteAddacDaqItem( const RAM_RING_INDEX_T index,
                            RAM_DAQ_PAYLOAD_T* pItem )
 {
-#if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) || defined( CONFIG_RTOS )
-   criticalSectionEnter();
    ramWriteItem( index, pItem );
-   criticalSectionExit();
-#else
-   ramWriteItem( index, pItem );
-#endif
 }
 
 /*! ---------------------------------------------------------------------------

@@ -628,14 +628,17 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
                break;
             }
             case FB_ON:
-            { /*!
+            {
+               daqChannelSetTriggerCondition( pSetChannel, act.tag );
+               daqChannelSetTriggerCondition( pActChannel, act.tag );
+              /*!
                * @todo Maybe a misunderstanding in the DAQ specification of KHK or
                *       a bug in the VHDL code.\n
                *       The corresponding workaround on Linux is made by the
                *       compiler switch: _CONFIG_PATCH_PHASE.\n
                *       It's a construction site yet!
                */
-               daqChannelSetTriggerDelay( pSetChannel, 10 ); //TODO
+              // daqChannelSetTriggerDelay( pSetChannel, 10 ); //TODO
                // daqChannelEnableTriggerMode( pSetChannel );
                // daqChannelEnableEventTrigger( pSetChannel );
 

@@ -178,19 +178,13 @@ void main( void )
       mprintf( ESC_ERROR "ERROR: Channel " TO_STRING( CHANNEL ) " not present!\n" ESC_NORMAL );
       return;
    }
-   mprintf( "Using channel: " TO_STRING( CHANNEL ) "of ADDAC on slot: %u\n", daqChannelGetSlot( pChannel ) );
+   mprintf( "Using channel: " TO_STRING( CHANNEL ) " of ADDAC on slot: %u\n", daqChannelGetSlot( pChannel ) );
 
 
    printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
 
-   daqChannelEnableTriggerMode( pChannel );
-   daqChannelEnableExternTriggerHighRes( pChannel );
-
-   daqChannelEnableHighResolution( pChannel );
- //  daqChannelEnablePostMortem( pChannel );
    daqChannelPrintInfo( pChannel );
 
-//daqDeviceDisableScuSlaveInterrupt( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
    printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pChannel ) );
 
    irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onScuMSInterrupt );
@@ -198,6 +192,16 @@ void main( void )
    enableMeassageSignaledInterruptsForScuBusSlave( daqChannelGetSlot( pChannel ) - SCUBUS_START_SLOT );
    irqEnable();
 
+   daqChannelSetTriggerCondition( pChannel, 0x12345678 );
+   mprintf( "Tag: 0x%08X\n", daqChannelGetTriggerCondition( pChannel ) );
+
+  //!! daqChannelEnableTriggerMode( pChannel );
+   daqChannelEnableExtrenTrigger( pChannel );
+   //daqChannelEnableEventTrigger( pChannel );
+   daqChannelSample1msOn( pChannel );
+   daqChannelPrintInfo( pChannel );
+
+   unsigned int receiveCount = 0;
    while( true )
    {
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
@@ -218,6 +222,13 @@ void main( void )
          daqChannelPrintInfo( pCurrentCannel );
          readFiFo( pCurrentCannel );
          printIntRegs( DAQ_CHANNEL_GET_PARENT_OF( pCurrentCannel ) );
+         receiveCount++;
+         if( receiveCount == 10 )
+         {
+            receiveCount = 0;
+            daqChannelSample1msOff( pCurrentCannel );
+            mprintf( "\n*** End ***\n" );
+         }
       }
    }
 #endif

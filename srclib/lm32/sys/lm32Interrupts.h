@@ -419,6 +419,12 @@ void criticalSectionExitBase( void );
  *
  * @see criticalSectionExit
  */
+#ifdef __DOXYGEN__
+STATIC inline void criticalSectionEnter( void )
+{
+   criticalSectionEnterBase();
+}
+#else
 #if 1
 #define criticalSectionEnter()                                                \
 {                                                                             \
@@ -430,6 +436,7 @@ void criticalSectionExitBase( void );
 #else
 #define criticalSectionEnter() criticalSectionEnterBase()
 #endif
+#endif /* else of ifdef __DOXYGEN__ */
 
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
@@ -444,7 +451,13 @@ void criticalSectionExitBase( void );
  *
  * @see criticalSectionEnter
  */
-#if 0
+#ifdef __DOXYGEN__
+STATIC inline void criticalSectionExit( void )
+{
+   criticalSectionExitBase();
+}
+#else
+#if 1
 #define criticalSectionExit()                                                 \
 {                                                                             \
    IRQ_ASSERT( irqGetAtomicNestingCount() != 0 );                             \
@@ -455,6 +468,7 @@ void criticalSectionExitBase( void );
 #else
 #define criticalSectionExit() criticalSectionExitBase()
 #endif
+#endif /* else of ifdef __DOXYGEN__ */
 /*! ---------------------------------------------------------------------------
  * @ingroup ATOMIC
  * @def atomic_on

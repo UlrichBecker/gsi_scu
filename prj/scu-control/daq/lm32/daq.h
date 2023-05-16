@@ -1178,6 +1178,33 @@ void daqChannelSetTriggerConditionHW( register DAQ_CANNEL_T* pThis,
    __DAQ_GET_CHANNEL_REG( TRIG_HW ) = value;
 }
 
+/*! --------------------------------------------------------------------------
+ * @ingroup DAQ_CHANNEL
+ * @brief Sets the bus tag event condition for the given DAQ-channel.
+ * @param pThis Pointer to the channel object
+ * @param tag Tag of event condition.
+ */
+STATIC inline void daqChannelSetTriggerCondition( DAQ_CANNEL_T* pThis,
+                                                  const uint32_t tag )
+{
+   STATIC_ASSERT( 2 * sizeof(DAQ_REGISTER_T) == sizeof(uint32_t) );
+
+   daqChannelSetTriggerConditionLW( pThis, GET_LOWER_HALF( tag ) );
+   daqChannelSetTriggerConditionHW( pThis, GET_UPPER_HALF( tag ) );
+}
+
+/*! --------------------------------------------------------------------------
+ * @ingroup DAQ_CHANNEL
+ * @brief Returns the value of the tag of the trigger event.
+ * @param pThis Pointer to the channel object
+ * @return Value of trigger condition tag.
+ */
+STATIC inline uint32_t daqChannelGetTriggerCondition( DAQ_CANNEL_T* pThis )
+{
+   return MERGE_HIGH_LOW( daqChannelGetTriggerConditionHW( pThis ),
+                          daqChannelGetTriggerConditionLW( pThis ) );
+}
+
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL
  * @brief Gets the trigger delay of this channel.

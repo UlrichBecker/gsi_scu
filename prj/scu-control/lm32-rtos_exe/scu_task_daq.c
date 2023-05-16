@@ -67,9 +67,9 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList )
 STATIC void daqSwitchFeedback( const unsigned int slot, const unsigned int fgNum,
                                const DAQ_FEEDBACK_ACTION_T what, const uint32_t tag )
 {
-   criticalSectionEnter();
+  // criticalSectionEnter();
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
-   criticalSectionExit();
+ //  criticalSectionExit();
 
 #ifdef CONFIG_NON_DAQ_FG_SUPPORT
    if( (pDaqDevice == NULL) || (pDaqDevice->type == UNKNOWN))

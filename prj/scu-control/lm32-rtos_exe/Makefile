@@ -66,7 +66,8 @@ LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 
 #NO_LTO := 1
 
-DOX_SKIP_FUNCTION_MACROS = NO
+DOX_SKIP_FUNCTION_MACROS = "NO"
+DOX_MACRO_EXPANSION = "YES"
 
 include ../common_make.mk
 
