@@ -102,7 +102,7 @@ void vPortInterruptHandler( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Macro calculates the absolute stack-pointer offset in bytes.
- * @param i Relative offset in 32-bit values.
+ * @param n Relative offset in 32-bit values.
  */
 #define OS_OFS_R(n)   (sp + (ALIGN * (OS_STACK_DWORD_SIZE - n)))
 
