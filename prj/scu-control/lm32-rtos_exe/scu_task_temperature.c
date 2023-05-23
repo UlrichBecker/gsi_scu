@@ -48,6 +48,12 @@
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
 #endif
 
+/*!
+ * @ingroup TEMPERATURE
+ * @todo From time to time a invalid meaningless temperature is measured.
+ *       Remedy: Watch the temperature gradient.
+ */
+
 /*! --------------------------------------------------------------------------
  * @ingroup TEMPERATURE
  * @brief Calculates the temperature in degree without decimal places.

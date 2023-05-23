@@ -37,8 +37,6 @@ GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/^.* //g' | tr -d . | 
 GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "453" ] && echo "1" )
 
 DEFINES += TARGET_NAME=$(TARGET)
-DEFINES += CONFIG_GSI
-DEFINES += CONFIG_GSI_FE
 
 ifndef NO_COLORED
    ESC_FG_CYAN    := "\\e[36m"

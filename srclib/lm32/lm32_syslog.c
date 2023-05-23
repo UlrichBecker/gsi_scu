@@ -337,7 +337,7 @@ STATIC_ASSERT( sizeof(char*) == sizeof(uint32_t) );
 OPTIMIZE( "-O1"  )
 void vLm32log( const unsigned int filter, const char* format, va_list ap )
 {
-#ifdef CONFIG_DEBUG_LM32LOG
+#if defined( CONFIG_DEBUG_LM32LOG ) && !defined(__DOXYGEN__)
    mprintf( "%s( %u, %s )\n",  __func__, filter, format );
 #endif
 
@@ -419,7 +419,7 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
                      break;
                   }
                }
-              #ifdef CONFIG_DEBUG_LM32LOG
+              #if defined( CONFIG_DEBUG_LM32LOG ) && !defined(__DOXYGEN__)
                mprintf( "Param[%u] = 0x%08X, %d\n", i-1, item.param[i-1], item.param[i-1] );
               #endif
   
@@ -432,7 +432,7 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
 
    syslogPushItem( &item );
 
-#ifdef CONFIG_DEBUG_LM32LOG
+#if defined( CONFIG_DEBUG_LM32LOG ) && !defined(__DOXYGEN__)
    mprintf( "\n" );
 #endif
 }
@@ -442,7 +442,7 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
  */
 void lm32Log( const unsigned int filter, const char* format, ... )
 {
-#ifdef CONFIG_DEBUG_LM32LOG
+#if defined( CONFIG_DEBUG_LM32LOG ) && !defined(__DOXYGEN__)
    mprintf( "%s( %u, %s )\n",  __func__, filter, format );
 #endif
    va_list ap;

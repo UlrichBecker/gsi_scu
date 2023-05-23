@@ -42,7 +42,7 @@ ifdef OECORE_SDK_VERSION
   DEPLOY_APPENDIX = _sdk_$(OECORE_SDK_VERSION)
 endif
 
-include $(MAKEFILE_DIR)/makefile.base
+include $(MAKEFILE_DIR)/makefile.gsi
 
 SDKTARGETSYSROOT ?= /
 

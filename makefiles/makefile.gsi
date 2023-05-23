@@ -1,0 +1,18 @@
+###############################################################################
+##                                                                           ##
+##         General base include makefile for GSI specific projects           ##
+##                                                                           ##
+##---------------------------------------------------------------------------##
+## File:    makefile.gsi                                                     ##
+## (c):     GSI Helmholtz Centre for Heavy Ion Research GmbH                 ##
+## Author:  Ulrich Becker                                                    ##
+## Date:    23.05.2023                                                       ##
+###############################################################################
+
+DEFINES += CONFIG_GSI
+DEFINES += CONFIG_GSI_FE
+
+DOX_INPUT += $(MAKEFILE_DIR)/makefile.gsi
+
+include $(MAKEFILE_DIR)/makefile.base
+#=================================== EOF ======================================

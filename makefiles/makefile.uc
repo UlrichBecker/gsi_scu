@@ -23,7 +23,7 @@ DMP_FILE    = $(WORK_DIR)/$(TARGET).dmp
 
 ADDITIONAL_TO_CLEAN += $(DMP_FILE)
 
-include $(MAKEFILE_DIR)/makefile.base
+include $(MAKEFILE_DIR)/makefile.gsi
 
 $(ELF_FILE): $(OBJ_FILES) $(ADDITIONAL_LD_DEPENDENCES)
 	$(LD_F) -o $@ $(OBJ_FILES) $(_LD_FLAGS)
