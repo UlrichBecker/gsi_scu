@@ -188,6 +188,9 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
    #define FSM_TRANSITION_SELF( attr... ) break
 
    TickType_t xLastWakeTime = xTaskGetTickCount();
+   /*
+    *     *** Task main- loop ***
+    */
    while( true )
    {
       updateTemperature();
@@ -195,11 +198,17 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       #warning Temperature task will compiled in debug mode!
       printTemperatures();
    #endif
+      /*
+       * For each temperature sensor...
+       */
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          const STATE_T lastState = pWatchTemp->state;
+         /*
+          * Executing the FSM-do function
+          */
          switch( lastState )
          {
             case ST_START:
@@ -247,9 +256,19 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
             }
          }
 
+         /*
+          * Has state changed?
+          */
          if( lastState == pWatchTemp->state )
+         { /*
+            * No!
+            */
             continue;
+         }
 
+         /*
+          * State has changed executing the FSM-entry-function.
+          */
          const unsigned int tenthDegree = getTenthDegree( *pWatchTemp->pCurrentTemp );
          switch( pWatchTemp->state )
          {
