@@ -204,19 +204,24 @@ STATIC void taskDaq( void* pTaskData UNUSED )
        */
       ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
    #endif
-   #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
-      /*
-       * Sleep till wake up.
-       */
-      if( xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY ) != pdPASS )
-         continue;
-   #endif
+
       daqScanForCommands();
 
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
+      {
+      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+        /*
+         * Sleep till wake up when queue is empty.
+         */
+         xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY );
+      #endif
          continue;
+      }
 
+      /*
+       * Queue has at least one valid message.
+       */
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
       const unsigned int maxChannels = daqDeviceGetMaxChannels( pDaqDevice );
       for( unsigned int channelNumber = 0; channelNumber < maxChannels; channelNumber++ )
@@ -301,7 +306,10 @@ void taskWakeupDaqFromISR( void )
 void taskWakeupDaq( void )
 {
    if( mg_taskDaqHandle != NULL )
+   {
       xTaskNotify( mg_taskDaqHandle, 0, eNoAction );
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "taskWakeupDaq" ESC_NORMAL );
+   }
 }
 #endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */
 

@@ -104,7 +104,7 @@
 
 #define CONFIG_SLEEP_FG_TASK
 #define CONFIG_SLEEP_MIL_TASK
-//#define CONFIG_SLEEP_DAQ_TASK //TODO Doesn't work yet!
+//#define CONFIG_SLEEP_DAQ_TASK //TODO Doesn't work properly yet!
 
 #define TASK_PRIO_STD         1
 
