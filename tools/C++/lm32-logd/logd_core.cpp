@@ -520,7 +520,7 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
          bool next;
          do
          { /*
-            * Flag becomes "true" within the macro FSM_TRANSITION_NEXT.
+            * Flag "next" becomes "true" within the macro FSM_TRANSITION_NEXT.
             */
             next = false;
             switch( state )
