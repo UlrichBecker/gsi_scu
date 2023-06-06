@@ -192,7 +192,8 @@ Design comments so that they are recognizable as comments and not as possibly co
 Bad:
 ```C
 // This is a bad comment.
-/* This is also a<br />bad comment. */
+/* This is also a
+bad comment. */
 ```
 Good:
 ```c
