@@ -201,6 +201,9 @@ Good:
  * This ist a good comment.
  */
 ```
+Keep the comments [doxygen](https://doxygen.nl)- conform if possible.
+
+Keep the implementation of finite state machines [DOCFSM](https://github.com/UlrichBecker/DocFsm)- conform.
 
 At the head of a source code file belongs at least:
 * The name of this file.
