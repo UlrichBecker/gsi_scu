@@ -153,7 +153,7 @@ of [FreeRTOS](https://www.freertos.org). The source code can be find in the foll
 [```gsi_scu/srclib/lm32/sys/FreeRTOS_LM32_SCU/port```](https://github.com/UlrichBecker/gsi_scu/tree/master/srclib/lm32/sys/FreeRTOS_LM32_SCU/port)
 
 
-## Coding style
+# Coding style
 Keep the code uncluttered and in such a way that it is easy to read and least straining on the eyes.
 
 Avoid squeezing as much as possible into one line of code, because that's not ingenious, it's just cluttered.<br />
@@ -192,7 +192,7 @@ Design comments so that they are recognizable as comments and not as possibly co
 Bad:
 ```C
 // This is a bad comment.
-/* This is also a bad comment. */
+/* This is also a<br />bad comment. */
 ```
 Good:
 ```c
