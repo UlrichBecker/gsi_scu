@@ -207,4 +207,28 @@ At the head of a source code file belongs at least:
 * The name of the author.
 * The date of creation.
 
+Compiler switches for conditional compilation should be written in capital letters, starting with the prefix ```CONFIG_```.
+
+Macros should be written in capital letters if possible.
+
+Self created data types should be in capital letters if possible and should end with the sufix ```_T```. 
+
+C++ class names should start with a capital letter.
+
+C++ member variables should start with the prefix ```m_```.
+
+C++ class variables should start with the prefix ```c_```.
+
+Global variables should start with the prefix ```g_```.
+
+Global variables that are only visible in one compilation unit should start with the prefix ```mg_```.
+
+Local static variables should start with the prefix ```s_```.
+
+Pointers should begin with the lowercase letter ```p```.
+
+C++ references should begin with the lowrecase letter ```r```.
+
+Put a collection of global variables in a structure if possible.
+
 Further explanations will follow as soon as possible.
