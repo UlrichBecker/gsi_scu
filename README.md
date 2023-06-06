@@ -44,7 +44,7 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```make dbg```       Builds a debugable binary-file and invokes the KDE-debugger frontend [```kdbg```](https://www.kdbg.org) if the makefile-variable ```DEBUG=1```. **Yes KDE!** That isn't exotic!
 * ```make public```    Builds the binary-file and copy it in the directory ```/common/usr/cscofe/bin/```
 
-## Some of the most important makefile variables
+## Some of the most important common makefile variables
 * ```REPOSITORY_DIR```    This variable is the most important which shall contain the path who this GIT-repository is installed.<br />
                           The following both codelines shall be include at the bottom of each mekefile:<br />
                           For LM32-applications:<br />
@@ -72,7 +72,26 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
                           ```CODE_OPTIMIZATION = s```
 * ```NO_LTO```            By default the link time optimizer is active. If this is not desired then this variable has to be initialized by one. E.g.:<br />
                           ```NO_LTO = 1```
+* ```SCU_URL```           Name of the developer-SCU. E.g.:<br />
+                          ```SCU_URL = scuxl4711.acc.gsi.de
 
+## Makefile variables which concerns the the building of LM32 applications only
+* ```USRCPUCLK```         CPU-clock in kHz. by default its 125000.
+* ```RAM_SIZE```          Size of LM32-RAM in bytes. By default 147456 bytes.
+* ```USE_RTOS```          The base source files of FreeRTOS will added to the project.
+* ```RTOS_USING_HEAP```   Number of heap-model for FreeRTOS, this can be 1, 2, 3, 4 or 5. By default the heap-model 1 will used.
+
+## Makefile variables which concerns the building of Linux applications only
+* ```LIBS```              List of additional libraries. E.g.:<br />
+                          ```LIBS += stdc++```
+* ```LIB_DIRS```          Path to additional libraries.
+* ```IS_LIBRARY```        Binary will build as library if its value is 1.
+* ```STATIC_LIBRARY```    Binary will build as static-library if its value is 1.
+* ```FOR_SCU```           Binary shall run on SCU only.
+* ```FOR_SCU_AND_ACC```   Binary can run on SCU and ASL-cluster.
+* ```DEBUG```             Binary will build with debug-infos. In this case the code optimization is 0,
+                          doesn't matter how the value of ```CODE_OPTIMIZATION``` is. And the target ```make dbg``` becomes active.
+* ```CALL_ARGS```         List of command line parameters for binary to test. This variable will used by the target ```make run``` and ```make dbg```.
 
 ## Building the classical "Hello world" example application for LM32
 In this example you can see how the makefile has to look for a simple LM32 application.
@@ -132,5 +151,110 @@ Prerequisite is that the LM32-binary file is already built.
 The [FreeRTOS](https://www.freertos.org) port, respectively the hardware depended backend, for the LM32 is not a officially port
 of [FreeRTOS](https://www.freertos.org). The source code can be find in the following directory:
 [```gsi_scu/srclib/lm32/sys/FreeRTOS_LM32_SCU/port```](https://github.com/UlrichBecker/gsi_scu/tree/master/srclib/lm32/sys/FreeRTOS_LM32_SCU/port)
+
+
+### Coding style
+Keep the code uncluttered and in such a way that it is easy to read and least straining on the eyes.
+
+Avoid squeezing as much as possible into one line of code, because that's not ingenious, it's just cluttered.<br />
+This will neither make the binary smaller nor improve performance.
+
+For example: Curly braces open or closed belong in a separate line of code if possible.
+Bad:
+```c
+   if(a==b){
+      b=1;
+      c=2;
+   }else if(x){
+      b=2;
+      c=3;
+   }
+```
+Good:
+```c
+   if( a == b )
+   {
+      b = 1;
+      c = 2;
+   }
+   else if( x != 0 )
+   {
+      b = 2;
+      c = 3;
+   }
+```
+
+Avoid tabulators except in Makefiles
+
+Design comments so that they are recognizable as comments and not as possibly commented out source code.
+Bad:
+```C
+// This is a bad comment.
+/* This is also a bad comment. */
+```
+Good:
+```c
+/*
+ * This ist a good comment.
+ */
+```
+
+At the head of a source code file belongs at least:
+* The name of this file.
+* A short description about the function of this file.
+* The name of the author.
+* The date of creation.
+
+Keep the code uncluttered and in such a way that it is easy to read and least straining on the eyes.
+
+
+Avoid squeezing as much as possible into one line of code, because that's not ingenious, it's just cluttered.<br  This will neither make the binary smaller nor improve performance.
+
+For example: Curly braces open or closed belong in a separate line of code if possible.
+Bad:
+```c
+   if(a==b){
+      b=1;
+      c=2;
+   }else if(x){
+      b=2;
+      c=3;
+   }
+```
+Good:
+```c
+   if( a == b )
+   {
+      b = 1;
+      c = 2;
+   }
+   else if( x != 0 )
+   {
+      b = 2;
+      c = 3;
+   }
+```
+
+Avoid tabulators except in Makefiles
+
+Design comments so that they are recognizable as comments and not as possibly commented out source code.
+Bad:
+```C
+// This is a bad comment.
+/* This is also a bad comment. */
+```
+Good:
+```c
+/*
+ * This ist a good comment.
+ */
+```
+
+At the head of a source code file belongs at least:
+* The name of this file.
+* A short description about the function of this file.
+* The name of the author.
+* The date of creation.
+
 
 Further explanations will follow as soon as possible.
