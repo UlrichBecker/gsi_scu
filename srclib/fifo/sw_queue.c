@@ -78,6 +78,43 @@ bool queuePushSave( SW_QUEUE_T* pThis, const void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
+bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem )
+{
+   const bool isFull = queueIsFull( pThis );
+   if( isFull )
+   { /*
+      * The queue is full, so the oldest item has to be removed by
+      * incrementing the read-index.
+      */
+      ramRingIncReadIndex( &pThis->indexes );
+   }
+
+   memcpy( &pThis->pBuffer[ramRingGetWriteIndex(&pThis->indexes) * pThis->itemSize],
+           pItem, pThis->itemSize );
+   ramRingIncWriteIndex( &pThis->indexes );
+      
+   return !isFull;
+}
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
+bool queueForcePushSave( SW_QUEUE_T* pThis, const void* pItem )
+{
+   bool ret;
+   
+   criticalSectionEnter();
+   ret = queueForcePush( pThis, pItem );
+   criticalSectionExit();
+
+   return ret;
+}
+#endif
+
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
 bool queuePop( SW_QUEUE_T* pThis, void* pItem )
 {
    if( queueIsEmpty( pThis ) )

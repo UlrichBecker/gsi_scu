@@ -308,6 +308,31 @@ bool queuePushSave( SW_QUEUE_T* pThis, const void* pItem );
 #endif
 
 /*! ---------------------------------------------------------------------------
+ * @brief Write an item in the queue in any case, if the queue was already full,
+ *        so the oldest item will be removed.
+ * @see queuePop
+ * @param pThis Pointer to the concerned queue object.
+ * @param pItem Pointer to the item to be written.
+ * @retval true Action was successful, olsest item was not removed.
+ * @retval false Queue already full, the oldest item has been removed.
+ */
+bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem );
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @brief Write an item in the queue within a atomic section in any case,
+ *        if the queue was already full, so the oldest item will be removed.
+ * @see queuePop
+ * @param pThis Pointer to the concerned queue object.
+ * @param pItem Pointer to the item to be written.
+ * @retval true Action was successful, olsest item was not removed.
+ * @retval false Queue already full, the oldest item has been removed.
+ */
+bool queueForcePushSave( SW_QUEUE_T* pThis, const void* pItem );
+#endif
+
+
+/*! ---------------------------------------------------------------------------
  * @brief Copies the oldest item of the queue, and remove it.
  *        counterpart to queuePush().
  * @see queuePush
