@@ -387,7 +387,8 @@ unsigned int queueGetSizeSave( SW_QUEUE_T* pThis );
 ALWAYS_INLINE STATIC inline
 bool queueIsEmpty( SW_QUEUE_T* pThis )
 {
-   return queueGetSize( pThis ) == 0;
+   return ramRingIsEmpty( &pThis->indexes );
+   //return queueGetSize( pThis ) == 0;
 }
 
 #if defined(__lm32__) || defined(__DOXYGEN__)
@@ -397,11 +398,7 @@ bool queueIsEmpty( SW_QUEUE_T* pThis )
  * @retval true Queue is empty.
  * @retval false Queue is not empty. 
  */
-ALWAYS_INLINE STATIC inline
-bool queueIsEmptySave( SW_QUEUE_T* pThis )
-{
-   return queueGetSizeSave( pThis ) == 0;
-}
+bool queueIsEmptySave( SW_QUEUE_T* pThis );
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -445,7 +442,8 @@ unsigned int queueGetMaxCapacity( SW_QUEUE_T* pThis )
 ALWAYS_INLINE STATIC inline
 bool queueIsFull( SW_QUEUE_T* pThis )
 {
-   return queueGetRemainingCapacity( pThis ) == 0;
+   return ramRingIsFull( &pThis->indexes );
+   //return queueGetRemainingCapacity( pThis ) == 0;
 }
 
 #if defined(__lm32__) || defined(__DOXYGEN__)

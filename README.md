@@ -73,7 +73,7 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 * ```NO_LTO```            By default the link time optimizer is active. If this is not desired then this variable has to be initialized by one. E.g.:<br />
                           ```NO_LTO = 1```
 * ```SCU_URL```           Name of the developer-SCU. E.g.:<br />
-                          ```SCU_URL = scuxl4711.acc.gsi.de
+                          ```SCU_URL = scuxl4711.acc.gsi.de```
 
 ## Makefile variables which concerns the the building of LM32 applications only
 * ```USRCPUCLK```         CPU-clock in kHz. by default its 125000.
@@ -227,12 +227,36 @@ Global variables should start with the prefix ```g_```.
 
 Global variables that are only visible in one compilation unit should start with the prefix ```mg_```.
 
-Local static variables should start with the prefix ```s_```.
+Put a collection of global variables in a structure if possible. E.g.:
+```c
+typedef struct
+{
+   int a;
+   int b;
+   int c;
+} MY_GLOBAL_T;
+MY_GLOBAL_T g_myGlobals;
+```
+
+Local static variables should start with the prefix ```s_```. E.g.:
+```c
+void foo( void )
+{
+   static int s_callCount = 0;
+   s_callCount++;
+   printf( "Function %s() has been called for %d times.\n", __func__, s_callCount );
+}
+```
+Non C++ functions without parameters has to be declared and defined by the keyword ```void```. See above.<br />
+Otherwise it would be an open parameter-list in C, which makes code analysis difficult.<br />
+But in C++ it's a good practice to do that as well.
+
+In C++ use the C++ keyword ```nullptr``` instead of ```NULL```.
 
 Pointers should begin with the lowercase letter ```p```.
 
 C++ references should begin with the lowrecase letter ```r```.
 
-Put a collection of global variables in a structure if possible.
+Callback functions, that means functions which are called by pointer, or virtual functions in C++, shall begin with the prefix ```on```if possible.
 
 Further explanations will follow as soon as possible.

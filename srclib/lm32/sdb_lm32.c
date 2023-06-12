@@ -340,13 +340,14 @@ STATIC SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
       {
          case SDB_BRIDGE: case SDB_DEVICE: case SDB_MSI:
          {
+            const uint32_t msiFirst = msiBase + msiAddr;
             if( compareId( pRecord, venId, devId ) )
             {
                DBPRINT2("Target record at 0x%08X\n", base + pRecord->sdbComponent.addrFirst.low);
                pFoundSdb[*pIdx].pSdb     = pRecord;
                pFoundSdb[*pIdx].adr      = base;
-               pFoundSdb[*pIdx].msiFirst = msiBase + msiAddr;
-               pFoundSdb[*pIdx].msiLast  = msiBase + msiAddr + msiLast;
+               pFoundSdb[*pIdx].msiFirst = msiFirst;
+               pFoundSdb[*pIdx].msiLast  = msiFirst + msiLast;
                (*pIdx)++;
             }
 
@@ -358,7 +359,7 @@ STATIC SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
             sdbSerarchRecursive( (SDB_RECORD_T*)(base + pRecord->sdbUnion.bridge.sdbChild.low),
                                  pFoundSdb,
                                  base + pRecord->sdbComponent.addrFirst.low,
-                                 msiBase + msiAddr,
+                                 msiFirst,
                                  msiLast,
                                  pIdx,
                                  qty,

@@ -38,11 +38,27 @@ void ramRingReset( RAM_RING_INDEXES_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @see circular_index.h
  */
+inline bool ramRingIsFull( const RAM_RING_INDEXES_T* pThis )
+{
+   return pThis->end == pThis->capacity;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see circular_index.h
+ */
+inline bool ramRingIsEmpty( const RAM_RING_INDEXES_T* pThis )
+{
+   return pThis->end == pThis->start;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see circular_index.h
+ */
 RAM_RING_INDEX_T ramRingGetSize( const RAM_RING_INDEXES_T* pThis )
 {  /*
     * Is ring-buffer full?
     */
-   if( pThis->end == pThis->capacity )
+   if( ramRingIsFull( pThis ) )
       return pThis->capacity;
 
    /*
@@ -81,7 +97,7 @@ RAM_RING_INDEX_T ramRingGetWriteIndex( const RAM_RING_INDEXES_T* pThis )
 { /*
    * Is the buffer full?
    */
-   if( pThis->end == pThis->capacity )
+   if( ramRingIsFull( pThis ) )
    { /*
       * In the case the buffer was full the write index has been set to a
       * invalid value (maximum capacity) to distinguishing between full
@@ -109,7 +125,7 @@ void ramRingAddToWriteIndex( RAM_RING_INDEXES_T* pThis, const RAM_RING_INDEX_T t
    /*
     * Has the buffer become full?
     */
-   if( pThis->end == pThis->start )
+   if( ramRingIsFull( pThis ) )
    { /*
       * To distinguish between buffer empty and full,
       * in the case of full the write index will set to a value out of
@@ -132,7 +148,7 @@ void ramRingAddToReadIndex( RAM_RING_INDEXES_T* pThis, const RAM_RING_INDEX_T to
    /*
     * Was ring-buffer full?
     */
-   if( pThis->end == pThis->capacity )
+   if( ramRingIsFull( pThis ) )
    { /*
       * In the case the buffer was full the write index has been set to a
       * invalid value (maximum capacity) to distinguishing between full
@@ -160,7 +176,7 @@ RAM_RING_INDEX_T ramRingGetUpperReadSize( const RAM_RING_INDEXES_T* pThis )
 RAM_RING_INDEX_T ramRingGetUpperWriteSize( const RAM_RING_INDEXES_T* pThis )
 {
    RAM_ASSERT( pThis->capacity > 0 );
-   if( pThis->end == pThis->capacity )
+   if( ramRingIsFull( pThis ) )
    { /*
       * In the case the buffer was full the write index has been set to a
       * invalid value (maximum capacity) to distinguishing between full

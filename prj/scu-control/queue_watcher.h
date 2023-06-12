@@ -54,7 +54,7 @@ extern SW_QUEUE_T g_queueAlarm;
 STATIC inline
 void queuePushWatched( SW_QUEUE_T* pThis, const void* pItem )
 {
-   if( queuePush( pThis, pItem ) )
+   if( queueForcePush( pThis, pItem ) )
       return;
    queuePush( &g_queueAlarm, &pThis );
 }

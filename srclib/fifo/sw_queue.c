@@ -44,6 +44,27 @@ void queueCreateOffset( SW_QUEUE_T* pThis,
    queueReset( pThis );
 }
 
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*! ---------------------------------------------------------------------------
+ * @brief Returns true when the queue is empty within a atomic section.
+ * @param pThis Pointer to the concerned queue object.
+ * @retval true Queue is empty.
+ * @retval false Queue is not empty.
+ */
+inline bool queueIsEmptySave( SW_QUEUE_T* pThis )
+{
+   bool ret;
+
+   criticalSectionEnter();
+   ret = queueIsEmpty( pThis );
+   criticalSectionExit();
+
+   return ret;
+   //return queueGetSizeSave( pThis ) == 0;
+}
+#endif
+
+
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
@@ -92,7 +113,7 @@ bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem )
    memcpy( &pThis->pBuffer[ramRingGetWriteIndex(&pThis->indexes) * pThis->itemSize],
            pItem, pThis->itemSize );
    ramRingIncWriteIndex( &pThis->indexes );
-      
+
    return !isFull;
 }
 
@@ -103,7 +124,7 @@ bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem )
 bool queueForcePushSave( SW_QUEUE_T* pThis, const void* pItem )
 {
    bool ret;
-   
+
    criticalSectionEnter();
    ret = queueForcePush( pThis, pItem );
    criticalSectionExit();

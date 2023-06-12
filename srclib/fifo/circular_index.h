@@ -27,6 +27,7 @@
 #define _CIRCULAR_INDEX_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <helper_macros.h>
 
 #ifdef CONFIG_RAM_PEDANTIC_CHECK
@@ -103,6 +104,22 @@ RAM_RING_INDEX_T ramRingGetSize( const RAM_RING_INDEXES_T* pThis );
  * @return Number of free memory items.
  */
 RAM_RING_INDEX_T ramRingGetRemainingCapacity( const RAM_RING_INDEXES_T* pThis );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Returns "true" when the ring-indexes indicates a full buffer.
+ * @param pThis Pointer to the ring index object
+ * @retval true Buffer belonging to this index administration is full.
+ * @retval false Buffer belonging to this index administration is not full.
+ */
+bool ramRingIsFull( const RAM_RING_INDEXES_T* pThis );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Returns "true" when the ring-indexes indicates a empty buffer.
+ * @param pThis Pointer to the ring index object
+ * @retval true Buffer belonging to this index administration is empty.
+ * @retval false Buffer belonging to this index administration is not empty.
+ */
+bool ramRingIsEmpty( const RAM_RING_INDEXES_T* pThis );
 
 /*! ---------------------------------------------------------------------------
  * @brief Adds a value to the write index.

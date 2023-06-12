@@ -92,6 +92,7 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <helper_macros.h>
 #include <access64_type.h>
 #ifdef __lm32__

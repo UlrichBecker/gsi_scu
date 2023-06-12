@@ -112,6 +112,23 @@ uint8_t* find_device( WB_DEVICE_ID_T devid ) GSI_DEPRECATED; /* USE find_device_
  */
 void discoverPeriphery( void ); // GSI_DEPRECATED;
 
+#ifdef __DOXYGEN__
+/*
+ * This is a local function and normally not visible for applications, but
+ * Doxygen need this declaration in the header when the function makes
+ * recursive calls.
+ */
+SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
+                                     SDB_LOCATION_T pFoundSdb[],
+                                     uint32_t  base,
+                                     uint32_t  msiBase,
+                                     uint32_t  msiLast,
+                                     uint32_t* pIdx,
+                                     const uint32_t qty,
+                                     const WB_VENDOR_ID_T venId,
+                                     const WB_DEVICE_ID_T devId );
+#endif /* ifdef __DOXYGEN__ */
+
 #ifdef __cplusplus
 }
 #endif
