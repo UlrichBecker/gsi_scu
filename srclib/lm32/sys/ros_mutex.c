@@ -39,6 +39,14 @@ void osMutexInit( OS_MUTEX_T volatile * pThis )
 /*! ---------------------------------------------------------------------------
  * @see ros_mutex.h
  */
+bool inline osMutexIsLocked( OS_MUTEX_T volatile * pThis )
+{
+   return pThis->lockedTask != NULL;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see ros_mutex.h
+ */
 void osMutexLock( OS_MUTEX_T volatile * pThis )
 {
    const TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
@@ -47,7 +55,7 @@ void osMutexLock( OS_MUTEX_T volatile * pThis )
 
    if( pThis->lockedTask != currentTask )
    {
-      while( pThis->lockedTask != NULL )
+      while( osMutexIsLocked( pThis ) )
       { /*
          * While the mutex is still locked, so the work of other tasks will do.
          * That works, because the critical section is only for this task valid.
@@ -61,14 +69,6 @@ void osMutexLock( OS_MUTEX_T volatile * pThis )
    pThis->nestingCount++;
 
    portEXIT_CRITICAL();
-}
-
-/*! ---------------------------------------------------------------------------
- * @see ros_mutex.h
- */
-bool inline osMutexIsLocked( OS_MUTEX_T volatile * pThis )
-{
-   return pThis->lockedTask != NULL;
 }
 
 /*! ---------------------------------------------------------------------------
