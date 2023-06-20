@@ -1,7 +1,7 @@
 /*!
  *  @file logd_core.cpp
  *  @brief Main functionality of LM32 log daemon.
- *
+ *  >>> PvdS <<<
  *  @date 21.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

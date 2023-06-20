@@ -1,7 +1,7 @@
 /*!
  * @file portasm.S
  * @brief Assembler part of LM32 port for FreeRTOS.
- *
+ * >>> PvdS <<<
  * @date 14.01.2020
  * @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

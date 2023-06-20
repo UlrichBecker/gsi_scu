@@ -1,6 +1,7 @@
 /*!
  * @file ros_mutex.h
  * @brief Very easy resource-saving mutex for FreeRTOS
+ * >>> PvdS <<<
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>
  * @date 10.05.2023
@@ -41,15 +42,14 @@ extern "C" {
  * @brief Motex-object.
  */
 typedef struct
-{
-  /*!
+{ /*!
    * @brief Handle of the task which has the mutex currently locked or NULL.
    */
    TaskHandle_t lockedTask;
 
-   /*!
-    * @brief Mutex nesting counter
-    */
+  /*!
+   * @brief Mutex nesting counter
+   */
    unsigned int nestingCount;
 } OS_MUTEX_T;
 
@@ -73,6 +73,15 @@ void osMutexInit( OS_MUTEX_T volatile * pThis );
  * @param pThis Pointer to the mutex-object.
  */
 void osMutexLock( OS_MUTEX_T volatile * pThis );
+
+/*! ------------------------------------------------------------------------
+ * @ingroup ATOMIC
+ * @brief Tries to lock the mutex. That is a non blocking function.
+ * @param pThis Pointer to the mutex-object.
+ * @retval true Locking was successful.
+ * @retval false Mutex has already been locked by a other task.
+ */
+bool osMutexTryLock( OS_MUTEX_T volatile * pThis );
 
 /*! ------------------------------------------------------------------------
  * @ingroup ATOMIC

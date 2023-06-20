@@ -1,7 +1,7 @@
 /*!
  * @file port.c FreeRTOS backed for Lattice Micro32 (LM32) within the SCU.
  * @brief LM32 port for FreeRtos LM32.
- *
+ * >>> PvdS <<<
  * @date 14.01.2020
  * @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

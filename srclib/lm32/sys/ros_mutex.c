@@ -1,6 +1,7 @@
 /*!
  * @file ros_mutex.c
  * @brief Very easy resource-saving mutex for FreeRTOS
+ * >>> PvdS <<<
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>
  * @date 10.05.2023
@@ -69,6 +70,18 @@ void osMutexLock( OS_MUTEX_T volatile * pThis )
    pThis->nestingCount++;
 
    portEXIT_CRITICAL();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see ros_mutex.h
+ */
+bool osMutexTryLock( OS_MUTEX_T volatile * pThis )
+{
+   if( osMutexIsLocked( pThis ) && (pThis->lockedTask != xTaskGetCurrentTaskHandle()) )
+      return false;
+
+   osMutexLock( pThis );
+   return true;
 }
 
 /*! ---------------------------------------------------------------------------

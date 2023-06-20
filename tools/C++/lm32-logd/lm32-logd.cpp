@@ -1,7 +1,7 @@
 /*!
  *  @file lm32-logd.cpp
  *  @brief Main module for the LM32 log daemon.
- *
+ *  >>> PvdS <<<
  *  @date 21.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

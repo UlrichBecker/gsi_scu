@@ -1,7 +1,7 @@
 /*!
  *  @file logd_core.hpp
  *  @brief Main functionality of LM32 log daemon.
- *
+ *  >>> PvdS <<<
  *  @date 21.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
@@ -36,7 +36,6 @@
 #include <scu_lm32_access.hpp>
 #include <lm32_syslog_common.h>
 #include "logd_cmdline.hpp"
-
 
 namespace Scu
 {

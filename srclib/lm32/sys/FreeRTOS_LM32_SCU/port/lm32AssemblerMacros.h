@@ -1,6 +1,7 @@
 /*!
  * @file lm32AssemblerMacros.h
  * @brief     Some macros for LM32 GNU-Assembler for handling LM32 exceptions.
+ * >>> PvdS <<<
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      27.05.2020

@@ -1,7 +1,7 @@
 /*!
  * @file lm32_syslog.c
  * @brief LM32 version of syslog.
- *
+ * >>> PvdS <<<
  * @see       lm32_syslog.h
  * @see       lm32_syslog_common.h
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH

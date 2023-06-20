@@ -4,7 +4,7 @@
  *        Port specific definitions. \n
  *        The settings in this file configure FreeRTOS correctly \n
  *        for the Gnu-compiler for Lattice Micro32 (LM32)
- *
+ * >>> PvdS <<<
  * @date 14.01.2020
  * @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
