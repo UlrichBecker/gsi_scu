@@ -15,10 +15,14 @@
 #ifndef CONFIG_USE_LINUX_PRINTF
   #include <pp-printf.h>
 #endif
+
 #ifdef CONFIG_RTOS
   #include <lm32Interrupts.h>
   #include <FreeRTOS.h>
   #include <task.h>
+  #ifndef CONFIG_NO_PRINTF_MUTEX
+     #include <ros_mutex.h>
+  #endif
 #endif
 #include <mprintf.h>
 
@@ -41,6 +45,10 @@ volatile struct UART_WB* volatile mg_pUart;
   #define UART_BAUDRATE 115200ULL
 #endif
 
+#if defined( CONFIG_RTOS ) && !defined( CONFIG_NO_PRINTF_MUTEX )
+OS_MUTEX_T mg_printfMutex = { NULL, 0 };
+#endif
+
 /*!----------------------------------------------------------------------------
  * @ingroup PRINTF
  * @brief Helper macro calculates the baud-rate for the printf-UART.
@@ -54,6 +62,9 @@ volatile struct UART_WB* volatile mg_pUart;
  */
 void initMprintf( void )
 {
+#if defined( CONFIG_RTOS ) && !defined( CONFIG_NO_PRINTF_MUTEX )
+   osMutexInit( &mg_printfMutex );
+#endif
    mg_pUart = (struct UART_WB*) find_device_adr( CERN, WR_UART );
    mg_pUart->BCR = CALC_BAUD( UART_BAUDRATE );
 }
@@ -375,7 +386,19 @@ int vprintf( const char* format, va_list ap )
       .limit    = 0,
       .putch    = sendToUart
    };
+#if defined( CONFIG_RTOS ) && !defined( CONFIG_NO_PRINTF_MUTEX )
+   if( !irqIsInContext() && (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) )
+      osMutexLock( &mg_printfMutex );
+
+   const int ret = vprintfBase( &printfObj, format, ap );
+
+   if( !irqIsInContext() && (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) )
+      osMutexUnlock( &mg_printfMutex );
+
+   return ret;
+#else
    return vprintfBase( &printfObj, format, ap );
+#endif
 }
 
 /*! ---------------------------------------------------------------------------

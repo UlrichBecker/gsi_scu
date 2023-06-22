@@ -103,6 +103,8 @@
 
 /* A header file that defines trace macro can be included here. */
 
+#define CONFIG_NO_PRINTF_MUTEX
+
 #define CONFIG_SLEEP_FG_TASK
 #define CONFIG_SLEEP_MIL_TASK
 //#define CONFIG_SLEEP_DAQ_TASK //TODO Doesn't work properly yet!
