@@ -124,8 +124,9 @@ void ramRingAddToWriteIndex( RAM_RING_INDEXES_T* pThis, const RAM_RING_INDEX_T t
 
    /*
     * Has the buffer become full?
+    * This is first incorrectly indicated as buffer-empty.
     */
-   if( ramRingIsFull( pThis ) )
+   if( ramRingIsEmpty( pThis ) )
    { /*
       * To distinguish between buffer empty and full,
       * in the case of full the write index will set to a value out of
