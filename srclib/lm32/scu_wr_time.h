@@ -30,6 +30,8 @@ STATIC inline uint64_t getWrSysTime( void )
 #ifdef CONFIG_WR_TIME_NO_CARRY
    return (((uint64_t)g_pCpuSysTime[0]) << BIT_SIZEOF(uint32_t)) | pCpuSysTime[1];
 #else
+   #pragma GCC diagnostic push
+   #pragma GCC diagnostic ignored "-Wuninitialized"
    uint64_t time;
    do
    {
@@ -37,6 +39,7 @@ STATIC inline uint64_t getWrSysTime( void )
               g_pCpuSysTime[1];
    }
    while( ((volatile uint32_t*)g_pCpuSysTime)[0] != ((uint32_t*)&time)[0] );
+   #pragma GCC diagnostic pop
    return time;
 #endif
 }
