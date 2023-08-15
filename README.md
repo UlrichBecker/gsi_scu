@@ -5,7 +5,7 @@ This repository includes some sub-repositories, therefore don't forget the optio
 
 ```git clone --recursive https://github.com/UlrichBecker/gsi_scu.git```
 
-Add following to the environment variable ```LD_LIBRARY_PATH``` if not already done:
+Add following to the environment variable ```LD_LIBRARY_PATH``` if not already done:<br />
 ```export LD_LIBRARY_PATH=/common/usr/cscofe/lib:/common/usr/fesa/lib:$LD_LIBRARY_PATH```
 
 ## Compiling
