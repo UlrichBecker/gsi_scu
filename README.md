@@ -1,10 +1,12 @@
 # GSI SCU Utilities
+By the way, for people who don't work at GSI, this repository is completely worthless.
 
 This repository includes some sub-repositories, therefore don't forget the option "--recursive" if you'll clone this repository.
 
 ```git clone --recursive https://github.com/UlrichBecker/gsi_scu.git```
 
-By the way, for people who don't work at GSI, this repository is completely worthless.
+Add following to the environment variable ```LD_LIBRARY_PATH``` if not already done:
+```export LD_LIBRARY_PATH=/common/usr/cscofe/lib:/common/usr/fesa/lib:$LD_LIBRARY_PATH```
 
 ## Compiling
 To compiling some of the including projects you need a LM32-cross-compiler.
