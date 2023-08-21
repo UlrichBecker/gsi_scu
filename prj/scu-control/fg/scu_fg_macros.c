@@ -98,13 +98,18 @@ void wdtPoll( void )
       if( currentTime <= timeout )
          continue;
 
-      criticalSectionEnter();
-      g_aFgChannels[i].timeout = 0LL;
-      criticalSectionExit();
+      /*
+       * A timeout happened!
+       */
+      wdtDisable( i );
 
       if( !fgIsStarted( i ) )
          continue;
 
+      /*
+       * The timeout becomes posted only if the
+       * concerned function-generator is active.
+       */
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
                "ERROR: MSI-timeout on fg-%u-%u channel: %u !\n" ESC_NORMAL,
                getSocket(i), getDevice(i), i );

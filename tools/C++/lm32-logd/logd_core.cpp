@@ -306,13 +306,13 @@ void Lm32Logd::setBurstLimit( int burstLimit )
 /*! ---------------------------------------------------------------------------
  */
 void Lm32Logd::read( const uint index,
-                     uint64_t* pData,
+                     void* pData,
                      const uint size )
 {
    assert( m_oMmu.getEb()->isConnected() );
    try
    {
-      m_oMmu.getRamAccess()->read( index, pData, size );
+      m_oMmu.getRamAccess()->read( index, reinterpret_cast<uint64_t*>(pData), size );
    }
    catch( std::exception& e )
    {
@@ -328,13 +328,13 @@ void Lm32Logd::read( const uint index,
 /*! ---------------------------------------------------------------------------
  */
 void Lm32Logd::write( const uint index,
-                      const uint64_t* pData,
+                      const void* pData,
                       const uint size )
 {
    assert( m_oMmu.getEb()->isConnected() );
    try
    {
-      m_oMmu.getRamAccess()->write( index, pData, size );
+      m_oMmu.getRamAccess()->write( index, reinterpret_cast<const uint64_t*>(pData), size );
    }
    catch( std::exception& e )
    {

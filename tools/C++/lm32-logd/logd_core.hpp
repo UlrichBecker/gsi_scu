@@ -182,14 +182,14 @@ private:
     * @brief Reads via the WB/EB-bus fron the SCU-TAM.
     */
    void read( const uint index,
-              uint64_t* pData,
+              void* pData,
               const uint size );
 
    /*!
     * @brief Writes a array of 64-bit values via WB/EB-bus into the SCU-RAM.
     */
    void write( const uint index,
-               const uint64_t* pData,
+               const void* pData,
                const uint size );
 
    /*!

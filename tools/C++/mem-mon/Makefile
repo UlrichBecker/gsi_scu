@@ -37,17 +37,10 @@ else
  DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
 endif
 ifdef USE_STATIC_LIBS
- ifdef USE_NAMED_MUTEX
-  ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
- endif
-  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+ ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
- ifdef USE_NAMED_MUTEX
-  LIBS += boost_system
- endif
  LIBS += etherbone
 endif
-
 
 LIBS += stdc++
 
