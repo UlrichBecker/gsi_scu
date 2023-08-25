@@ -58,7 +58,7 @@ lrun:
 endif # ifndef IS_LIBRARY
 endif # ifdef SCU_URL
 
-ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
+ifeq ($(shell echo $${HOSTNAME:0:4}), asl7)
 PUBLIC_TARGET ?= /common/usr/cscofe/bin/
 PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/
 .PHONY: public
@@ -73,6 +73,8 @@ else
 	cp -u $(BIN_FILE) $(PUBLIC_TARGET)
 endif # ifdef FOR_SCU
 endif # ifdef FOR_SCU_AND_ACC
+else
+   $(error Makefile is not running on ASL!)
 endif # ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
 
 #=================================== EOF ======================================
