@@ -602,7 +602,8 @@ uint DaqAdministration::distributeData( void )
    union PROBE_BUFFER_T
    {
       DAQ_DATA_T        buffer[c_hiresPmDataLen];
-      RAM_DAQ_PAYLOAD_T ramItems[sizeof(PROBE_BUFFER_T::buffer) /
+      RAM_DAQ_PAYLOAD_T ramItems[ //sizeof(PROBE_BUFFER_T::buffer) /
+                                 c_hiresPmDataLen * sizeof( DAQ_DATA_T ) / 
                                  sizeof(RAM_DAQ_PAYLOAD_T)];
       DAQ_DESCRIPTOR_T  descriptor;
    };

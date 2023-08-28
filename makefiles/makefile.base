@@ -197,7 +197,9 @@ AS_ARG ?= $(CC_ARG)
 
 ASM_OPTS = -O$(CODE_OPTIMIZATION) $(OPT_INC_DEFS)
 
-ALL += check_src $(WORK_DIR) $(TARGET_DIR) $(RESULT_FILE)
+ALL += check_src $(WORK_DIR) $(TARGET_DIR)
+ALL += $(RESULT_FILE)
+
 #ifndef IS_LIBRARY
   ALL += size
 #endif
@@ -244,9 +246,9 @@ endif
 # TODO Following rule could be made a bit better...
 #
 $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
-	$(QUIET)(for i in $(_SOURCE); do                                            \
-		case "$${i##*.}" in                                                 \
-		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                                  \
+	$(QUIET)(for i in $(_SOURCE); do                                  \
+		case "$${i##*.}" in                                            \
+		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                             \
 			x=$$($(CXX) -MM $(CC_ARG) "$$i");                           \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -262,8 +264,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CXX_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';  \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                                  \
-		"c"|"C")                                                            \
+		;;                                                             \
+		"c"|"C")                                                       \
 			x=$$($(CC) -MM $(CC_ARG) "$$i");                            \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -279,8 +281,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CC_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';   \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                                  \
-		"s"|"S")                                                            \
+		;;                                                             \
+		"s"|"S")                                                       \
 			x=$$($(AS) -MM $(CC_ARG) "$$i");                            \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -296,8 +298,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CPP_F) -o $$@ $$< $$(ASM_OPTS)\n\n';     \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                                  \
-		esac;                                                               \
+		;;                                                             \
+		esac;                                                          \
 	done) > $(DEPENDFILE);
 
 

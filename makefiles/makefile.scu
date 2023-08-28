@@ -53,14 +53,7 @@ SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/stubs.c
 SOURCE += $(GENERATED_DIR)/$(BUILD_ID_FILE)
 
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sdb_lm32.c
-# SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sdb_add.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/mprintf.c
-
-# WR_SOURCE += $(WR_DIR)/uart.c
-# WR_SOURCE += $(WR_DIR)/devicelist.c
-# WR_SOURCE += $(WR_DIR)/syscon.c
-# WR_SOURCE += $(WR_DIR)/glue.c
-
 SOURCE += $(WR_SOURCE)
 
 DEFINES += CONFIG_WR_NODE
@@ -362,16 +355,23 @@ $(GENERATED_DIR)/$(BUILD_ID_FILE): $(GENERATED_DIR)
 $(WORK_DIR)/$(LINKER_SCRIPT): # $(WORK_DIR)
 	$(QUIET)(printf %b $(LDS)) > $@
 
-$(RESULT_FILE): $(BIN_FILE)
-	$(GENRAMMIF_F) $(BIN_FILE) $(RAM_SIZE) > $(RESULT_FILE)
+#GENERATE_MIF_FILE := 1
 
+$(RESULT_FILE): $(BIN_FILE)
+ifdef GENERATE_MIF_FILE
+	$(GENRAMMIF_F) $(BIN_FILE) $(RAM_SIZE) > $(RESULT_FILE)
+else
+	$(QUIET) echo "Omiting generation of $(RESULT_FILE)"
+endif
 
 # ------------------------ Etherbone- Tools -----------------------------------
+ifdef GENERATE_MIF_FILE
 ifndef GENRAMMIF
    GENRAMMIF := $(shell which genrammif 2>/dev/null)
    ifeq ($(GENRAMMIF),  )
       GENRAMMIF := $(WR_TOOLS)/genrammif
    endif
+endif
 endif
 
 EB_LOAD := $(shell which lm32-fwload 2>/dev/null)
