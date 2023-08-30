@@ -52,7 +52,7 @@ cleanTempFile()
 
 if [ "$1" == "-h" ]
 then
-   echo "Shellscript to uploading LM32-firmware from Linux-homeoffice-PC or directly from ASL-cluster."
+   echo "Shellscript to uploading LM32-firmware from Linux-remote-PC or directly from ASL-cluster."
    echo
    echo "Usage: $0 [-h] <LM32- firmware binary file> <URL of target SCU>"
    echo "Option:"
@@ -67,7 +67,7 @@ fi
 [ "${1:0:1}" != "-" ] || die "Unknown option: \"$1\"!"
 
 
-if [ "${HOSTNAME:0:5}" = "asl74" ]
+if [ "${HOSTNAME:0:4}" = "asl7" ]
 then
    #
    # Script is running on ASL-cluster
@@ -106,7 +106,7 @@ else
    fi
    if [ ! -n "$ASL_NO" ]
    then
-      ASL_NO=744
+      ASL_NO=755
    fi
    ASL_URL=asl${ASL_NO}.acc.gsi.de
    echo "Copy file \"$1\" to asl${ASL_NO}:${ASL_TEMP_DIR}"

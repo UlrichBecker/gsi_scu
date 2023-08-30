@@ -33,14 +33,14 @@ checkTarget()
 
 [ -n "$1" ] || die "Missing argument!"
 
-if [ "${HOSTNAME:0:5}" = "asl74" ]
+if [ "${HOSTNAME:0:4}" = "asl7" ]
 then
    #
    # Script is running on ASL-cluster
    #
    if [ "$1" == "-h" ]
    then
-      echo "Wrapper shell script for using $EB_RESET from Linux-homeoffice-PC or directly from ASL-cluster."
+      echo "Wrapper shell script for using $EB_RESET from Linux-remote-PC or directly from ASL-cluster."
       echo "CAUTION! If the SCU-target name has the prefix \"tcp/\" or is omitted than the port forwarder \"socat\""
       echo "         has to be run on SCU. You can accomplish that by calling start-socat.sh"
       echo
@@ -93,7 +93,7 @@ else
    fi
    if [ ! -n "$ASL_NO" ]
    then
-      ASL_NO=744
+      ASL_NO=755
    fi
    ASL_URL=asl${ASL_NO}.acc.gsi.de
    echo "Recursive call on asl${ASL_NO}."
