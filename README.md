@@ -156,7 +156,7 @@ of [FreeRTOS](https://www.freertos.org). The source code can be find in the foll
 
 
 # Coding style
-The coding style as far as possible to the Eric Allman style.<br />
+The coding style as far as possible to the [Eric Allman style](https://de.wikipedia.org/wiki/Einr%C3%BCckungsstil#Allman_/_BSD).<br />
 Keep the code clearly arranged and in such a way that it is easy to read and least straining on the eyes.
 
 Avoid squeezing as much as possible into one line of code, because that's not ingenious, it's just cluttered.<br />
