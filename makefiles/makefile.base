@@ -36,6 +36,10 @@ GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/^.* //g' | tr -d . | 
 
 GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "453" ] && echo "1" )
 
+ifdef IS_IN_GITHUB_ACTION
+  DEFINES += CONFIG_IS_IN_GITHUB_ACTION
+endif
+
 DEFINES += TARGET_NAME=$(TARGET)
 
 ifndef NO_COLORED

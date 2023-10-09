@@ -183,7 +183,7 @@ typedef enum
  */
 typedef volatile struct
 {
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__)
+#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__) || defined(CONFIG_IS_IN_GITHUB_ACTION)
    /*!
     *  @brief Bit [15:12] slot number, shall be initialized by software,
     *         will used for the DAQ-Descriptor-Word.

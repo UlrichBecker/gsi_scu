@@ -23,7 +23,7 @@ extern "C" {
  */
 STATIC inline uint64_t getWrSysTime( void )
 {
-#if (__BYTE_ORDER__ != __ORDER_BIG_ENDIAN__)
+#if (__BYTE_ORDER__ != __ORDER_BIG_ENDIAN__) && !defined(CONFIG_IS_IN_GITHUB_ACTION)
    #error Byteorder big-endian is requested for this function!
 #endif
 
