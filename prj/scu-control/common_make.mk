@@ -225,8 +225,10 @@ ifdef ADDAC_DAQ
  DOX_DOTFILE_DIRS          += $(DAQ_LM32_DIR)
 endif
 
-ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
+ifndef DOX_OUTPUT_DIRECTORY
+ ifeq ($(shell echo $${HOSTNAME:0:5}), asl75)
    DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/lm32-firmware
+ endif
 endif
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)

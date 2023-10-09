@@ -1,0 +1,26 @@
+name: Creating soucecode documentation by Doxygen
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  doxygen:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Building documentation of LM32 firmware scu_control_os
+        run: |
+          mkdir -p ./.doc
+          mkdir -p ./.doc/lm32fw/
+          mkdir -p ./.doc/lm32fw/scu_control_os
+          mkdir -p ./.doc/lm32fw/scu_control_os/html
+          export DOX_OUTPUT_DIRECTORY=./.doc/lm32fw/scu_control_os/html
+          cd ./prj/scu-control/lm32-rtos_exe
+          make doc
+          cd ../../../..
