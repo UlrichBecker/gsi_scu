@@ -64,8 +64,12 @@ DEFINES += USRCPUCLK=$(USRCPUCLK)
 DOX_GEN_GROUP_NAME ?= GENERATED_SOURCE
 
 CFLAGS += -nostdlib
+ifndef IS_IN_GITHUB_ACTION
 CFLAGS += -mmultiply-enabled
 CFLAGS += -mbarrel-shift-enabled
+else
+DEFINES += __lm32__
+endif
 
 RAM_OFFS      ?= 0x10000000
 BOOTL_SIZE    ?= 0x100
