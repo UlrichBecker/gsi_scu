@@ -206,7 +206,7 @@ STATIC_ASSERT( sizeof(DAQ_CTRL_REG_T) == sizeof(DAQ_REGISTER_T) );
  */
 typedef volatile struct
 {
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__)
+#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__) || defined(CONFIG_IS_IN_GITHUB_ACTION)
    DAQ_REGISTER_T version:     7; //!<@brief Version number of DAQ macro.
    DAQ_REGISTER_T fifoWords:   9; //!<@brief Remaining data words in PmDat Fifo
 #else
@@ -224,7 +224,7 @@ STATIC_ASSERT( sizeof(DAQ_DAQ_FIFO_WORDS_T) == sizeof(DAQ_REGISTER_T) );
  */
 typedef volatile struct
 {
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__)
+#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(__DOCFSM__) || defined(CONFIG_IS_IN_GITHUB_ACTION)
    DAQ_REGISTER_T maxChannels: 6; //!< @brief Maximum number of used channels
    DAQ_REGISTER_T fifoWords:  10; //!< @brief Remaining data words in PmDat Fifo
 #else

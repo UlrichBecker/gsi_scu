@@ -30,7 +30,7 @@ extern "C" {
  */
 typedef struct HW_IMAGE
 {
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__)
+#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || defined(__DOXYGEN__) || defined(CONFIG_IS_IN_GITHUB_ACTION)
    /*!
     * @brief  Add frequency select: (wo) bit [15:13]
     */

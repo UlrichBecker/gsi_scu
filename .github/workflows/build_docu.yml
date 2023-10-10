@@ -20,9 +20,9 @@ jobs:
           mkdir -p ./.doc/lm32fw/
           mkdir -p ./.doc/lm32fw/scu_control_os
           mkdir -p ./.doc/lm32fw/scu_control_os/html
-          export IS_IN_GITHUB_ACTION='y'
-          export CROSS_COMPILE=" "
+          export IS_IN_GITHUB_ACTION=y
+          export CROSS_COMPILE=
           export DOX_OUTPUT_DIRECTORY=./.doc/lm32fw/scu_control_os/html
           cd ./prj/scu-control/lm32-rtos_exe
           make doc
-          cd ../../../..
+          cd ../../..
