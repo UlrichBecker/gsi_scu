@@ -13,8 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Building documentation of LM32 firmware scu_control_os
+        shell: bash
         run: |
           mkdir -p ./.doc
           mkdir -p ./.doc/lm32fw/
@@ -24,5 +25,5 @@ jobs:
           export CROSS_COMPILE=
           export DOX_OUTPUT_DIRECTORY=./.doc/lm32fw/scu_control_os/html
           cd ./prj/scu-control/lm32-rtos_exe
-          make dep
+          make doc
           cd ../../..

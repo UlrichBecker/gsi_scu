@@ -63,6 +63,9 @@ CALL_ARGS = scuxl0035 -Hbakv -I200 -m1000 -M2000
 
 DOX_EXTRACT_PRIVATE = YES
 
+DOX_INPUT += ../../../srclib/lm32/lm32_syslog.c
+DOX_INPUT += ../../../srclib/lm32/lm32_syslog.h
+
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
 include $(REPOSITORY_DIR)/makefiles/makefile.scun
 #=================================== EOF ======================================
