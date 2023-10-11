@@ -1,6 +1,6 @@
 /*!
  * @file scu_etherbone.cpp
- * @brief Base class foe wishbone or etherbone connections
+ * @brief Base class for wishbone or etherbone connections
  * @see scu_etherbone.hpp
  * @see EtherboneConnection.hpp
  * @see EtherboneConnection.cpp

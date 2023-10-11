@@ -74,7 +74,7 @@ else
 endif # ifdef FOR_SCU
 endif # ifdef FOR_SCU_AND_ACC
 else
-   $(error Makefile is not running on ASL!)
+  # $(error Makefile is not running on ASL!)
 endif # ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
 
 #=================================== EOF ======================================
