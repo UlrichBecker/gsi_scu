@@ -107,17 +107,17 @@ In this manner the source files of [FreeRTOS](https://www.freertos.org) will add
 Further the heap-model using by [FreeRTOS](https://www.freertos.org) has to be choose by the makefile variable ```RTOS_USING_HEAP```. E.g.: ```RTOS_USING_HEAP = 4```
 
 
-## Building the LM32-application ```scu_control.bin```
-This binary becomes in the future deprecated use the preemptive multitasking variant ```scu_control_os.bin``` by implementation of [FreeRTOS](https://www.freertos.org) instead.
-1. Change in directory ```gsi_scu/prj/scu-control/lm32-non-os_exe```.
+## Building the LM32-application ```scu3_control.bin```
+This binary becomes in the future deprecated use the preemptive multitasking variant ```scu3_control_os.bin``` by implementation of [FreeRTOS](https://www.freertos.org) instead.
+1. Change in directory ```gsi_scu/prj/scu-control/lm32-non-os_exe/SCU3/```.
 2. Build binary file by typing: ```make```.
-3. If the binary was successful built it will be in this directory: ```gsi_scu/prj/scu-control/lm32-non-os_exe/deploy_lm32/result/scu_control.bin```.
+3. If the binary was successful built it will be in this directory: ```gsi_scu/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin```.
 4. If the variable ```SCU_URL``` specified so you can upload the binary-file by typing ```make load```.
 
-## Building the [FreeRTOS](https://www.freertos.org) LM32-application ```scu_control_os.bin```
-1. Change in directory ```gsi_scu/prj/scu-control/lm32-rtos_exe```.
+## Building the [FreeRTOS](https://www.freertos.org) LM32-application ```scu3_control_os.bin```
+1. Change in directory ```gsi_scu/prj/scu-control/lm32-rtos_exe/SCU3/```.
 2. Build binary file by typing: ```make```.
-3. If the binary was successful built it will be in this directory: ```gsi_scu/prj/scu-control/lm32-rtos_exe/deploy_lm32/result/scu_control.bin```.
+3. If the binary was successful built it will be in this directory: ```gsi_scu/prj/scu-control/lm32-rtos_exe/SCU3/deploy_lm32/result/scu3_control_os.bin```.
 4. If the variable ```SCU_URL``` specified so you can upload the binary-file by typing ```make load```.
 
 ## Building the static library ```libscu_fg_feedback.a```
