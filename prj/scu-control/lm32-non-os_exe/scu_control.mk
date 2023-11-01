@@ -49,8 +49,6 @@ endif
 #DEFINES += CONFIG_IRQ_RESET_IP_AFTER
 
 LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
-include ../common_make.mk
-
 
 # NO_LTO=1
  STACK_SIZE  =  4096
@@ -69,6 +67,13 @@ include ../common_make.mk
 # SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
+
+
+
+
+INCLUDE_DIRS += $(BASE_DIR)/
+
+include $(BASE_DIR)/../common_make.mk
 
 
 TESTFILE       ?= sinus-test.txt
@@ -97,9 +102,5 @@ stop:
 .PHONY: scan
 scan:
 	ssh root@$(SCU_URL) "saft-fg-ctl -si"
-
-INCLUDE_DIRS += $(BASE_DIR)/
-
-include $(BASE_DIR)/../common_make.mk
 #=================================== EOF ======================================
 

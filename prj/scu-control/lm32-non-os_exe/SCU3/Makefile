@@ -10,7 +10,11 @@
 ###############################################################################
 BASE_VERSION = 4
 SUB_VERSION  = 5.4
-TARGET       := scu3_control
+TARGET  := scu3_control
+DEFINES += CONFIG_SCU3
+SCU3    := 1 
+
+MIL_DAQ_USE_RAM := 1
 
 BASE_DIR = $(shell pwd)/..
 

@@ -45,6 +45,10 @@
 #endif
 #include <ros_timeout.h>
 
+#if !(defined( CONFIG_SCU3 ) != defined( CONFIG_SCU4 ))
+  #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
+#endif
+
 extern volatile uint32_t __atomic_section_nesting_count;
 
 #if ( configCHECK_FOR_STACK_OVERFLOW != 0 )

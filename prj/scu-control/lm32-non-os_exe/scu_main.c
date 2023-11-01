@@ -50,6 +50,10 @@
 #endif
 
 
+#if !(defined( CONFIG_SCU3 ) != defined( CONFIG_SCU4 ))
+  #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
+#endif
+
 #ifndef USRCPUCLK
    #define CPU_FREQUENCY 125000000
 #else
