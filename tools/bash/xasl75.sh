@@ -44,7 +44,7 @@ LC_ALL=C
 # 2>&1 doesn't work with ssh. I dont know why yet. :-/
 #
 TMP_FILE=/tmp/${SERVER}.tmp
-ssh $GSI_USERNAME@$SERVER -L $LOCAL_PORT:localhost:3389 -N -f 2>$TMP_FILE
+ssh $GSI_USERNAME@$SERVER -C -L $LOCAL_PORT:localhost:3389 -N -f 2>$TMP_FILE
 ERROR_TEXT=$(cat $TMP_FILE)
 rm $TMP_FILE
 if [ -n "$ERROR_TEXT" ]
@@ -60,6 +60,6 @@ else
    sleep 1
 fi
 
-xfreerdp +clipboard /u:$GSI_USERNAME /f +fonts +glyph-cache /v:localhost:$LOCAL_PORT /relax-order-checks /dynamic-resolution 
+xfreerdp +clipboard /u:$GSI_USERNAME  +fonts +glyph-cache /v:localhost:$LOCAL_PORT /relax-order-checks /dynamic-resolution # /f 
 echo "End..."
 #=================================== EOF ======================================

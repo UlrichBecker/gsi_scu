@@ -25,5 +25,5 @@ jobs:
           export CROSS_COMPILE=
           export DOX_OUTPUT_DIRECTORY=./.doc/lm32fw/scu_control_os/html
           cd ./prj/scu-control/lm32-rtos_exe
-          make doc
+        #  make doc
           cd ../../..
