@@ -68,10 +68,8 @@ LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 
-
-
-
 INCLUDE_DIRS += $(BASE_DIR)/
+GENERATED_DIR = $(shell pwd)/generated
 
 include $(BASE_DIR)/../common_make.mk
 

@@ -52,7 +52,7 @@ DOX_SKIP_FUNCTION_MACROS = "NO"
 DOX_MACRO_EXPANSION = "YES"
 
 INCLUDE_DIRS += $(BASE_DIR)/
-
+GENERATED_DIR = $(shell pwd)/generated
 include $(BASE_DIR)/../common_make.mk
 
 # SCU_URL = scuxl0118

@@ -23,9 +23,9 @@ LM32_APP_DIR=${COMMON_INIT_DIR}lm32-test-apps/
 
 if [ -n "$(echo $0 | grep 96)" ]
 then
-   LM32_APP=scu_control_os.bin
+   LM32_APP=scu3_control_os.bin
 else
-   LM32_APP=scu_control.bin
+   LM32_APP=scu3_control.bin
 fi
 
 EB_FWLOAD=/usr/bin/eb-fwload
