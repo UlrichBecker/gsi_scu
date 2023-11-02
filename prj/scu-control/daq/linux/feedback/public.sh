@@ -14,7 +14,7 @@ VERSION_DIR="_non_DDR34MIL"
 SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
 
 LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64/result/libscu_fg_feedback.a
-LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/deploy_lm32/result/scu_control.bin
+LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
 
