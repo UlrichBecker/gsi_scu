@@ -25,6 +25,9 @@ extern DAQ_ADMIN_T g_scuDaqAdmin;
 
 extern void*  g_pScub_base;
 #ifdef CONFIG_MIL_PIGGY
+  #ifndef CONFIG_SCU3
+     #error MIL-PIGGY is only on SCU 3 present!
+  #endif
 extern void*  g_pScu_mil_base;
 #endif
 
