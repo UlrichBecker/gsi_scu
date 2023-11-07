@@ -122,7 +122,7 @@ This binary becomes in the future deprecated use the preemptive multitasking var
 ## Building the static library ```libscu_fg_feedback.a```
 Prerequisite is that the LM32-binary file is already built.
 1. Change in directory ```gsi_scu/prj/scu-control/daq/linux/feedback/```.
-2. Set some environment variables for building via YOCTO-SDK: ```unset LD_LIBRARY_PATH; source /common/usr/embedded/yocto/fesa/sdk/environment-setup-core2-64-ffos-linux```
+2. Set some environment variables for building via YOCTO-SDK:<br />```unset LD_LIBRARY_PATH; source /common/usr/embedded/yocto/fesa/sdk/environment-setup-core2-64-ffos-linux```
 3. Build binary file by typing: ```make```.
 4. If the binary was successful built it will be in this directory: ```scu-control/daq/linux/feedback/deploy_x86_64/result/libscu_fg_feedback.a```
 
