@@ -11,9 +11,7 @@ Add following to the environment variable ```LD_LIBRARY_PATH``` if not already d
 ## Compiling
 To compiling some of the including projects you need a LM32-cross-compiler.
 On ASL you can find it here: ```/common/usr/cscofe/opt/compiler/lm32/```
-Before you use it, you have to actualize the environment variable ```PATH``` by invoking the script: ```set-gcc-path```
-E.g.: ```. /common/usr/cscofe/opt/compiler/lm32/set-gcc-path```
-Don't forget the dot at the beginning.
+Before you use it, you have to actualize the environment variable ```PATH``` E.g.: ```export PATH=/common/usr/cscofe/opt/compiler/lm32/bin:$PATH```
 If you work on a local machine, so you can [obtain and build the LM32-cross-compiler by this repository](https://github.com/UlrichBecker/gcc-toolchain-builder) as well.
 
 Prerequisite to compile even of some linux-tools, that the LM32-application ```scu_control.bin``` has already be compiled,
