@@ -12,10 +12,10 @@ Add following to the environment variable ```LD_LIBRARY_PATH``` if not already d
 To compiling some of the including projects you need a LM32-cross-compiler.
 On ASL you can find it here: ```/common/usr/cscofe/opt/compiler/lm32/```
 Before you use it, you have to actualize the environment variable ```PATH```.<br />
-E.g.: ```export PATH=/common/usr/cscofe/opt/compiler/lm32/bin:$PATH```
+E.g.: ```export PATH=/common/usr/cscofe/opt/compiler/lm32/bin:$PATH```<br />
 If you work on a local machine, so you can [obtain and build the LM32-cross-compiler by this repository](https://github.com/UlrichBecker/gcc-toolchain-builder) as well.
 
-Prerequisite to compile even of some linux-tools, that the LM32-application ```scu_control.bin``` has already be compiled,
+Prerequisite to compile even of some linux-tools, that the LM32-application ```scu3_control.bin``` has already be compiled,
 because the building of scu_control generates some headder files which will used by some linux-tools and libraries.
 
 ## Some Makefile targets
@@ -78,7 +78,7 @@ For test and debug purposes the variable ```CALL_ARGS``` can set with commandlin
 
 ## Makefile variables which concerns the the building of LM32 applications only
 * ```USRCPUCLK```         CPU-clock in kHz. by default its 125000.
-* ```RAM_SIZE```          Size of LM32-RAM in bytes. By default 147456 bytes.
+* ```RAM_SIZE```          Size of LM32-RAM in bytes. By default on SCU3: 147456 bytes.
 * ```USE_RTOS```          The base source files of FreeRTOS will added to the project.
 * ```RTOS_USING_HEAP```   Number of heap-model for FreeRTOS, this can be 1, 2, 3, 4 or 5. By default the heap-model 1 will used.
 
