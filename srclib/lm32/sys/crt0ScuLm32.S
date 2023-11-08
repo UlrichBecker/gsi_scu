@@ -276,18 +276,25 @@ _crt0:
     mvi     r2, 0
     mvi     r3, 0
     calli   main
-
+    
     /*
      * The C-function __exit() is optional and is implemented in module stubs.c by default.
      * It is called AFTER the main function.
      */
     calli   __exit
 
+#ifdef CONFIG_CPLUSPLUS_OBSOLETE
+    /*
+     * Call exit, which doesn't return, to perform any clean up
+     */
+    calli   exit    
+#else
     /*
      * Endless loop!
      */
 loopf:
     bi loopf
+#endif
 
 /*---------------------------------------------------------------------------*/
 #define ST_OFS 0

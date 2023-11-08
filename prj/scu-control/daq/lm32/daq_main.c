@@ -452,6 +452,14 @@ void addacDaqTask( void )
       {
          s_pDaqDevice  = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
          s_pendingIrqs = queueScuBusIrq.pendingIrqs;
+      #if 0
+        #warning Baustelle!!!
+         static int x = 0;
+         mprintf( "C: %u\n", x++  );
+         uint16_t f =  daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
+         mprintf( "F: %02b\n", f  );
+       //  daqGetAndResetHighresIntPendingBits( s_pDaqDevice );
+      #endif
       }
    }
 

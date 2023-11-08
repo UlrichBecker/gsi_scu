@@ -195,9 +195,7 @@ typedef volatile struct
    #error Big endian is requested for this bit- field structure!
 #endif
 } DAQ_CTRL_REG_T;
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof(DAQ_CTRL_REG_T) == sizeof(DAQ_REGISTER_T) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL DAQ_DEVICE
@@ -213,9 +211,7 @@ typedef volatile struct
    #error Big endian is requested for this bit- field structure!
 #endif
 } DAQ_DAQ_FIFO_WORDS_T;
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof(DAQ_DAQ_FIFO_WORDS_T) == sizeof(DAQ_REGISTER_T) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL DAQ_DEVICE
@@ -231,9 +227,7 @@ typedef volatile struct
    #error Big endian is requested for this bit- field structure!
 #endif
 } DAQ_PM_FIFO_WORDS_T;
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof(DAQ_PM_FIFO_WORDS_T) == sizeof(DAQ_REGISTER_T) );
-#endif
 
 /*!
  * @brief Relative start address of the SCU registers
@@ -248,16 +242,14 @@ STATIC_ASSERT( sizeof(DAQ_PM_FIFO_WORDS_T) == sizeof(DAQ_REGISTER_T) );
  * @ingroup DAQ_CHANNEL DAQ_DEVICE
  * @brief Memory mapped IO-space of a DAQ macro
  */
-typedef volatile union
+typedef struct //union
 {
-   volatile DAQ_REGISTER_T
+   DAQ_REGISTER_T
       i[(SCUBUS_SLAVE_ADDR_SPACE-DAQ_REGISTER_OFFSET)/sizeof(DAQ_REGISTER_T)];
    //volatile struct DAQ_DATA_NAME_T s;
 } DAQ_REGISTER_ACCESS_T;
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( DAQ_REGISTER_ACCESS_T ) ==
                (SCUBUS_SLAVE_ADDR_SPACE-DAQ_REGISTER_OFFSET) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL
@@ -286,9 +278,7 @@ typedef struct PACKED_SIZE
    bool restart:          1;
 
 } DAQ_CHANNEL_BF_PROPERTY_T;
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( DAQ_CHANNEL_BF_PROPERTY_T ) == sizeof( uint8_t ) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL
@@ -473,7 +463,7 @@ typedef struct
    /*!
     * @brief Pointer to DAQ-registers (start of address space)
     */
-   DAQ_REGISTER_ACCESS_T* volatile pReg;
+   DAQ_REGISTER_ACCESS_T*  pReg;
 
 #ifndef CONFIG_DAQ_SINGLE_APP
    /*!
@@ -1667,11 +1657,29 @@ bool daqDeviceIsInterrupt( register DAQ_DEVICE_T* pThis )
  * @return Pointer to the DAQ interrupt pending Register.
  */
 STATIC inline volatile
-uint16_t* daqDeviceGetDaqIntPendingPtr( register DAQ_DEVICE_T* pThis )
+DAQ_REGISTER_T* daqDeviceGetDaqIntPendingPtr( DAQ_DEVICE_T* pThis )
 {
    DAQ_ASSERT( pThis != NULL );
    DAQ_ASSERT( pThis->pReg != NULL );
    return &pThis->pReg->i[DAQ_INTS];
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ_DEVICE DAQ_INTERRUPT
+ * @brief Returns the copy of the flag field of the pending interrupts of the
+ *        continuous mode of all DAQ-channels and resets all flags.
+ * @param pThis Pointer to the DAQ-device object
+ * @return Flag field if pending interrupts before reset.  
+ */
+STATIC inline //volatile
+DAQ_REGISTER_T daqGetAndResetContinuousIntPendingBits( DAQ_DEVICE_T* pThis )
+{
+   volatile DAQ_REGISTER_T* pPendingFlags = daqDeviceGetDaqIntPendingPtr( pThis );
+   const volatile DAQ_REGISTER_T pendingFlags = *pPendingFlags;
+   
+   *pPendingFlags |= pendingFlags;
+
+   return pendingFlags;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -1682,7 +1690,7 @@ uint16_t* daqDeviceGetDaqIntPendingPtr( register DAQ_DEVICE_T* pThis )
 STATIC inline
 void daqDeviceClearDaqChannelInterrupts( register DAQ_DEVICE_T* pThis )
 {
-   *daqDeviceGetDaqIntPendingPtr( pThis ) = (uint16_t)~0;
+   *daqDeviceGetDaqIntPendingPtr( pThis ) = (DAQ_REGISTER_T)~0;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -1697,6 +1705,24 @@ uint16_t* daqDeviceGetHiResIntPendingPtr( register DAQ_DEVICE_T* pThis )
    DAQ_ASSERT( pThis != NULL );
    DAQ_ASSERT( pThis->pReg != NULL );
    return &pThis->pReg->i[HIRES_INTS];
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ_DEVICE DAQ_INTERRUPT
+ * @brief Returns the copy of the flag field of the pending interrupts of the
+ *        high resolution mode of all DAQ-channels and resets all flags.
+ * @param pThis Pointer to the DAQ-device object
+ * @return Flag field if pending interrupts before reset.  
+ */
+STATIC inline volatile
+DAQ_REGISTER_T daqGetAndResetHighresIntPendingBits( DAQ_DEVICE_T* pThis )
+{
+   volatile DAQ_REGISTER_T* pPendingFlags = daqDeviceGetHiResIntPendingPtr( pThis );
+   const volatile DAQ_REGISTER_T pendingFlags = *pPendingFlags;
+   
+   *pPendingFlags |= pendingFlags;
+
+   return pendingFlags;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -1721,16 +1747,7 @@ void daqDeviceClearHiResChannelInterrupts( register DAQ_DEVICE_T* pThis )
 STATIC inline int daqDeviceGetSlot( register DAQ_DEVICE_T* pThis )
 {
    DAQ_ASSERT( pThis != NULL );
-#if 0
-   DAQ_ASSERT( pThis->pReg != NULL );
-   /*
-    * All existing channels of a DAQ have the same slot number
-    * therefore its enough to choose the channel 0.
-    */
-   return daqChannelGetSlot( &pThis->aChannel[0] );
-#else
    return pThis->slot;
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -1760,17 +1777,7 @@ STATIC inline
 unsigned int daqDeviceGetMaxChannels( register DAQ_DEVICE_T* pThis )
 {
    DAQ_ASSERT( pThis != NULL );
-#if 0
-   DAQ_ASSERT( pThis->pReg != NULL );
-   /*
-    * All existing channels of a DAQ have the same information
-    * of the maximum number of used channels,
-    * therefore its enough to choose the channel 0.
-    */
-   return daqChannelGetMaxCannels( &pThis->aChannel[0] );
-#else
    return pThis->maxChannels;
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
