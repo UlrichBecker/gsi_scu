@@ -573,6 +573,7 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
 
  * @dotfile daq.gv
  */
+//#define CONFIG_NO_DAQ_SWITCH_DELAY
 bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 {
    DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
@@ -643,18 +644,31 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
                // daqChannelEnableEventTrigger( pSetChannel );
 
                //daqChannelEnableExtrenTrigger
+               
+             #ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+               ATOMIC_SECTION()
+               {
+                  daqChannelSample1msOn( pSetChannel );
+                  daqChannelSample1msOn( pActChannel );
+               }
+               FSM_TRANSITION( FB_READY );
+             #else
+               #warning "Deprecated: DAQ switch delay"
                daqChannelSample1msOn( pSetChannel );
               // mprintf( "D=%d\n", daqChannelGetTriggerDelay( pSetChannel ) );
 
                FSM_TRANSITION( FB_FIRST_ON, label='Start message received.\n'
                                             'Switch DAQ for set value on.' );
+             #endif
                break;
             }
             default: DAQ_ASSERT( false );
          } /* End switch( act.action ) */
          break;
       } /* End case FB_READY */
-
+#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+   }
+#else
       case FB_FIRST_ON:
       {
          if( getWrSysTimeSafe() < pFeedback->waitingTime )
@@ -704,6 +718,7 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 
       default: break;
    }
+#endif
    return true;
 }
 

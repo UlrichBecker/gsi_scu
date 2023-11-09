@@ -91,6 +91,7 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices
    return DAQ_RET_OK;
 }
 
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
 /*! ---------------------------------------------------------------------------
  */
 ONE_TIME_CALL void handleContinuousMode( DAQ_CANNEL_T* pChannel )
@@ -161,7 +162,7 @@ STATIC inline bool forEachHiresChannel( DAQ_DEVICE_T* pDevice )
    }
    return false;
 }
-
+#endif
 /*! ---------------------------------------------------------------------------
  */
 ONE_TIME_CALL void handlePostMortemMode( DAQ_CANNEL_T* pChannel )
@@ -220,7 +221,6 @@ STATIC inline void irqPrintDebugPending( void )
  */
 #ifdef CONFIG_DAQ_SINGLE_APP
 ONE_TIME_CALL
-#endif
 void forEachScuDaqDevice( void )
 {
    bool isIrq;
@@ -271,7 +271,7 @@ void forEachScuDaqDevice( void )
    executeIfRequested( &g_scuDaqAdmin );
 #endif
 }
-
+#endif
 
 #ifndef CONFIG_DAQ_SINGLE_APP
 
@@ -365,6 +365,7 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 #endif
 }
 
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
 /*! --------------------------------------------------------------------------
  * @retval false Not all channels of this device handled yet.
  * @retval true  All channels of this device has been handled.
@@ -391,6 +392,7 @@ ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice, const uint16_t pend
    s_channelNumber = 0;
    return true;
 }
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
@@ -407,9 +409,10 @@ bool addacDaqQueuePop( SCU_BUS_IRQ_QUEUE_T* pQueueScuBusIrq )
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
  * @ingroup TASK
- * @brief Handles all detected ADDAC-DAQs. One DAQ-channel per function call.
+ * @brief Non - blocking function. Handles all detected ADDAC-DAQs. One DAQ-channel per function call.
  * @see schedule
  */
+//OPTIMIZE( "-O1"  )
 void addacDaqTask( void )
 {
    FG_ASSERT( pThis->pTaskData == NULL );
@@ -440,8 +443,69 @@ void addacDaqTask( void )
 #endif
 
    static DAQ_DEVICE_T* s_pDaqDevice  = NULL;
-   static uint16_t      s_pendingIrqs = 0;
+   
+#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+   static DAQ_REGISTER_T s_continuousPending;
+   static DAQ_REGISTER_T s_highResPending;
+   static unsigned int s_channelNumber;
+   if( s_pDaqDevice == NULL )
+   {
+      SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
+      if( addacDaqQueuePop( &queueScuBusIrq ) )
+      {
+         s_channelNumber = 0;
+         s_continuousPending = 0;
+         s_highResPending = 0;
+         s_pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
 
+         if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+            s_continuousPending = daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
+         
+         if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
+            s_highResPending = daqGetAndResetHighresIntPendingBits( s_pDaqDevice );
+      }
+   }
+   
+   if( s_pDaqDevice != NULL )
+   {
+      DAQ_CANNEL_T* pChannel = daqDeviceGetChannelObject( s_pDaqDevice, s_channelNumber );
+      
+      if( (s_continuousPending & pChannel->intMask) != 0 )
+      {
+      #ifdef CONFIG_DAQ_SW_SEQUENCE
+         pChannel->sequenceContinuous++;
+      #endif
+         if( daqChannelGetDaqFifoWords( pChannel ) == 0 )
+         {
+            DBPRINT1( ESC_BOLD ESC_FG_RED
+                      "DBG: WARNING: Discarding continuous block: "
+                      "Slot: %d, Channel: %d !\n" ESC_NORMAL,
+                      daqChannelGetSlot( pChannel ),
+                      daqChannelGetNumber( pChannel )
+                    );
+         }
+         else
+         {
+            ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, true );
+            daqChannelDecrementBlockCounter( pChannel );
+         }
+      }
+      
+      if( (s_highResPending & pChannel->intMask) != 0 )
+      {
+         daqChannelDisableHighResolution( pChannel );
+      #ifdef CONFIG_DAQ_SW_SEQUENCE
+         pChannel->sequencePmHires++;
+      #endif
+         ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, false );
+      }
+
+      s_channelNumber++;
+      if( s_channelNumber >= daqDeviceGetMaxChannels( s_pDaqDevice ) )
+         s_pDaqDevice = NULL;
+   }
+#else
+   static uint16_t      s_pendingIrqs = 0;
    if( s_pDaqDevice == NULL )
    {
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
@@ -454,10 +518,10 @@ void addacDaqTask( void )
          s_pendingIrqs = queueScuBusIrq.pendingIrqs;
       #if 0
         #warning Baustelle!!!
-         static int x = 0;
-         mprintf( "C: %u\n", x++  );
-         uint16_t f =  daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
-         mprintf( "F: %02b\n", f  );
+        // static int x = 0;
+        // mprintf( "C: %u\n", x++  );
+         DAQ_REGISTER_T f =  daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
+         mprintf( "S: %u, F: %01b\n", queueScuBusIrq.slot, f  );
        //  daqGetAndResetHighresIntPendingBits( s_pDaqDevice );
       #endif
       }
@@ -468,6 +532,7 @@ void addacDaqTask( void )
       if( daqExeNextChannel( s_pDaqDevice, s_pendingIrqs ) )
          s_pDaqDevice = NULL;
    }
+#endif
 }
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */
