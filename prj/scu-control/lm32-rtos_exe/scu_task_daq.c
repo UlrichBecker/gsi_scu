@@ -43,6 +43,9 @@ STATIC TaskHandle_t mg_taskDaqHandle = NULL;
 extern void* g_pScub_base;
 DAQ_ADMIN_T g_scuDaqAdmin;
 
+#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+#warning Offene Baustelle wenn CONFIG_NO_DAQ_SWITCH_DELAY definiert ist!!!!
+#endif
 
 QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 
