@@ -132,13 +132,13 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 # CALL_ARGS = scuxl0035 -vS
 # CALL_ARGS = scuxl0035 -aN
 #CALL_ARGS = scuxl0212 -aqzt1 -I200 -T"X11 size 800,150"
-CALL_ARGS = scuxl0035 -azt1 -I200 -T"X11 size 800,150"  -u0
+CALL_ARGS = scuxl0035.acc.gsi.de -azt1 -I200 -T"X11 size 800,150"  -u0
 #CALL_ARGS = scuxl0162 -azt1 -I200 -T"X11 size 800,150"
 
 # CALL_ARGS = scuxl0035 -vy
 
 # CALL_ARGS = scuxl0035 -b11,12
-# CALL_ARGS = scuxl0035 -azdt1 -I10000 -T"X11 size 800,150"
+# CALL_ARGS = scuxl0035 -azdt1 -I10000 -T"X11 size 800,150
 # CALL_ARGS = "140.181.160.53" -azt1 -T"X11 size 800,150"
 # CALL_ARGS = scuxl0107 -azdt1 -T"X11 size 800,150"i
 

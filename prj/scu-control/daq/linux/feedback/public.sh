@@ -11,9 +11,14 @@
 ###############################################################################
 VERSION_DIR="_non_DDR34MIL"
 
-SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
+if [ ! -n "${OECORE_SDK_VERSION}" ]
+then
+   echo "YOCTO SDK is not active!" 1>&2
+   exit 1
+fi
 
-LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_4.1.1/result/libscu_fg_feedback.a
+SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
+LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_${OECORE_SDK_VERSION}/result/libscu_fg_feedback.a
 LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
@@ -50,7 +55,12 @@ done
 FW_VERSION=$(strings $LM32_FW | grep  "Version     :" | awk '{print $3}')
 echo "LM32-Firmware version is: $FW_VERSION"
 
-DESTINATION_BASE_DIR="/common/usr/cscofe/opt/daq-fg/${FW_VERSION}${VERSION_DIR}/"
+if [ "${HOSTNAME:0:4}" = "asl7" ]
+then
+   DESTINATION_BASE_DIR="/common/usr/cscofe/opt/daq-fg/${FW_VERSION}${VERSION_DIR}/"
+else
+   DESTINATION_BASE_DIR="${HOME}/gsi-export/daq-fg/${FW_VERSION}${VERSION_DIR}/"
+fi
 HEADER_DIR="${DESTINATION_BASE_DIR}include/"
 LIB_DIR="${DESTINATION_BASE_DIR}/lib/"
 LM32_BIN_DIR="${DESTINATION_BASE_DIR}lm32_firmware"

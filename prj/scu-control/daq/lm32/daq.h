@@ -358,6 +358,7 @@ typedef enum
 
 #define FSM_DECLARE_STATE( state, attr... ) state
 
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
 /*!
  * @ingroup DAQ_DEVICE
  * @brief Declaration of the states for the feedback switch FSM.
@@ -368,6 +369,7 @@ typedef enum
    FSM_DECLARE_STATE( FB_FIRST_ON, label='First DAQ channel is on', color='red' ),
    FSM_DECLARE_STATE( FB_BOTH_ON, label='Second DAQ channel is on', color='red' )
 } DAQ_FEEDBACK_STATUS_T;
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
@@ -395,24 +397,27 @@ typedef struct PACKED_SIZE
  * @see daqDeviceDoFeedbackSwitchOnOffFSM
  */
 typedef struct
-{ /*!
+{
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
+  /*!
    * @brief Holds the earliest time point for the next
    *        switch event.
    */
    uint64_t              waitingTime;
-
+#endif
   /*!
    * @brief Number of the concerning function generator
    *        for DAQ feedback.
    */
    unsigned int          fgNumber;
 
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
   /*!
    * @brief Holds the current status of the FSM.
    * @see daqDeviceDoFeedbackSwitchOnOffFSM
    */
    DAQ_FEEDBACK_STATUS_T status;
-
+#endif
   /*!
    * @brief Waiting queue for the next switch actions coming from SAFT-LIB.
    * 

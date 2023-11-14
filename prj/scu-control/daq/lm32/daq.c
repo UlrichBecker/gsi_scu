@@ -463,7 +463,10 @@ uint32_t daqDeviceGetTimeStampTag( register DAQ_DEVICE_T* pThis )
 }
 
 #ifndef CONFIG_DAQ_SINGLE_APP
+
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
 #define FSM_INIT_FSM( s, attr... ) pFeedback->status = s
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
@@ -474,7 +477,9 @@ STATIC inline
 void daqDeviceFeedBackReset( register DAQ_DEVICE_T* pThis )
 {
    DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
+#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
    FSM_INIT_FSM( FB_READY, label='Reset' );
+#endif
    QUEUE_INIT_MEMBER( pFeedback, aktionBuffer, DAQ_ACTION_ITEM_T );
 }
 #endif
@@ -568,12 +573,50 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
 #define DAQ_SWITCH_WAITING_TIME (1000000ULL - 50000)
 
 /*! ---------------------------------------------------------------------------
- * @brief Finite state machine which handles the on/off switching of
- *        feed-back channels for ADDAC- function generators.
-
- * @dotfile daq.gv
+ * @brief Receives a switch-command and turns the concerned of the
+ *        function generator allocated DAQ- channel pair
+ *        for set- and actual value on or off.
  */
-//#define CONFIG_NO_DAQ_SWITCH_DELAY
+#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
+{
+   DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
+   DAQ_ACTION_ITEM_T act;
+
+   if( !daqQueuePop( pFeedback, &act ) )
+      return false;
+
+   pFeedback->fgNumber = act.fgNumber;
+   DAQ_CANNEL_T* pSetChannel = &pThis->aChannel[daqGetSetDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
+   DAQ_CANNEL_T* pActChannel = &pThis->aChannel[daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
+   switch( act.action )
+   {
+      case FB_OFF:
+      {
+         ATOMIC_SECTION()
+         {
+            daqChannelSample1msOff( pSetChannel );
+            daqChannelSample1msOff( pActChannel );
+         }
+         return true;
+      }
+      case FB_ON:
+      {
+         pSetChannel->sequenceContinuous = 0;
+         pActChannel->sequenceContinuous = 0;
+         daqChannelSetTriggerCondition( pSetChannel, act.tag );
+         daqChannelSetTriggerCondition( pActChannel, act.tag );
+         ATOMIC_SECTION()
+         {
+            daqChannelSample1msOn( pSetChannel );
+            daqChannelSample1msOn( pActChannel );
+         }
+         return true;
+      }
+   }
+   return false;
+}
+#else
 bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 {
    DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
@@ -645,30 +688,19 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 
                //daqChannelEnableExtrenTrigger
                
-             #ifdef CONFIG_NO_DAQ_SWITCH_DELAY
-               ATOMIC_SECTION()
-               {
-                  daqChannelSample1msOn( pSetChannel );
-                  daqChannelSample1msOn( pActChannel );
-               }
-               FSM_TRANSITION( FB_READY );
-             #else
                #warning "Deprecated: DAQ switch delay"
                daqChannelSample1msOn( pSetChannel );
               // mprintf( "D=%d\n", daqChannelGetTriggerDelay( pSetChannel ) );
 
                FSM_TRANSITION( FB_FIRST_ON, label='Start message received.\n'
                                             'Switch DAQ for set value on.' );
-             #endif
                break;
             }
             default: DAQ_ASSERT( false );
          } /* End switch( act.action ) */
          break;
       } /* End case FB_READY */
-#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
-   }
-#else
+
       case FB_FIRST_ON:
       {
          if( getWrSysTimeSafe() < pFeedback->waitingTime )
@@ -718,9 +750,9 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 
       default: break;
    }
-#endif
    return true;
 }
+#endif
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
@@ -1213,7 +1245,7 @@ void daqBusReset( register DAQ_BUS_T* pThis )
       daqDeviceReset( daqBusGetDeviceObject( pThis, i ) );
 }
 
-#ifndef CONFIG_DAQ_SINGLE_APP
+#if !defined( CONFIG_DAQ_SINGLE_APP ) && !defined( CONFIG_RTOS )
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */

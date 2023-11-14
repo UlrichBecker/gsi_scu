@@ -31,6 +31,10 @@
 
 using namespace Scu;
 
+#ifndef CONFIG_OECORE_SDK_VERSION
+   #warning "CAUTION: Module becomes not build by YOCTO SDK !"
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  */

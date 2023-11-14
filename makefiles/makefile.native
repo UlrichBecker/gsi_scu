@@ -40,6 +40,7 @@ ifdef OECORE_SDK_VERSION
      $(error Make variable SDKTARGETSYSROOT not defined!)
   endif
   DEPLOY_APPENDIX = _sdk_$(OECORE_SDK_VERSION)
+  DEFINES += CONFIG_OECORE_SDK_VERSION=$(OECORE_SDK_VERSION)
 endif
 
 include $(MAKEFILE_DIR)/makefile.gsi
