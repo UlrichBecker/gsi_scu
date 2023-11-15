@@ -16,6 +16,12 @@ FOR_SCU_AND_ACC := 1
 
 #DEFINES += _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 
+USE_ADDAC_DAQ_BLOCK_STATISTICS := 1
+
+ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
+   DEFINES += CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+endif
+
 MIAN_MODULE := fg-feedback.cpp
 
 SCU_DIR        = $(PRJ_DIR)/scu-control
@@ -26,6 +32,9 @@ SDAQ_LINUX_DIR = $(DAQ_LINUX_DIR)/sdaq
 
 SOURCE += fb_command_line.cpp
 SOURCE += fb_plot.cpp
+ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
+  SOURCE += daq_statistics.cpp
+endif
 
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
 SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp

@@ -598,7 +598,6 @@ uint DaqAdministration::distributeData( void )
 #else // ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 uint DaqAdministration::distributeData( void )
 {
-
    union PROBE_BUFFER_T
    {
       DAQ_DATA_T        buffer[c_hiresPmDataLen];
