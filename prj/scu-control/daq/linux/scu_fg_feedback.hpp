@@ -737,6 +737,9 @@ private:
       void onDataError( void ) override;
 
       void onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+      void onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
+#endif
    }; // class AddacAdministration
    /*!
     * @brief Object for ADDAC DAQ administration.
@@ -1287,6 +1290,18 @@ protected:
     *       becomes triggered if becomes invoked.
     */
    virtual void onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor );
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   /*!
+    * @brief Optional callback function becomes invoked on every incoming
+    *        ADDAC-DAQ block.
+    *
+    * This is for statistical purposes only.
+    *
+    * @param roDescriptor Descriptor of the actual received ADDAC-DAQ- block.
+    */
+   virtual void onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor ) {}
+#endif
 }; // class FgFeedbackAdministration
 
 /*! ---------------------------------------------------------------------------

@@ -16,7 +16,7 @@
 /*!
  * @todo Remove this switch asap!!!
  */
-#define _CONFIG_PATCH_PHASE
+//#define _CONFIG_PATCH_PHASE
 
 /*!
  * @brief If defined then the maximum and minimum of all whishbone accesses

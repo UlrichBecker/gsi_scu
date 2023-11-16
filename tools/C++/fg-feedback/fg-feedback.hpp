@@ -34,6 +34,9 @@
  #include <daq_eb_ram_buffer.hpp>
  #include <daq_calculations.hpp>
  #include <fb_command_line.hpp>
+ #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   #include <daq_statistics.hpp>
+ #endif
 #endif
 
 #ifndef HOT_KEY_RECEIVE
@@ -223,6 +226,10 @@ class AllDaqAdministration: public FgFeedbackAdministration
 
    CommandLine*   m_poCommandLine;
 
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   daq::Statistics m_oStatistics;
+#endif
+
 public:
    AllDaqAdministration( CommandLine* m_poCommandLine, std::string ebAddress );
    virtual ~AllDaqAdministration( void );
@@ -241,6 +248,10 @@ public:
 
 //TODO  void onUnregistered( RingItem* pUnknownItem )  override;
 
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   void onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
+#endif
+
    bool showUngegistered( void );
 
    void setSingleShoot( bool enable );
@@ -258,6 +269,17 @@ public:
    void onDataTimeout( const bool isMil ) override;
 
    void onDataError( const bool isMil ) override;
+
+   void onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   void resetStatistic( void )
+   {
+      m_oStatistics.clear();
+   }
+
+   void printStatistic( void );
+#endif
 };
 
 inline

@@ -818,6 +818,15 @@ void FgFeedbackAdministration::AddacAdministration::onErrorDescriptor( const daq
    m_pParent->onErrorDescriptor( roDescriptor );
 }
 
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+/*! ---------------------------------------------------------------------------
+ */
+void FgFeedbackAdministration::AddacAdministration::onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor )
+{
+   m_pParent->onIncomingDescriptor( roDescriptor );
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef CONFIG_MIL_FG
 /*! ---------------------------------------------------------------------------

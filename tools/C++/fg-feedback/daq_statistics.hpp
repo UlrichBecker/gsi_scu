@@ -70,11 +70,27 @@ class Statistics
     */
    std::vector<BLOCK_T>  m_daqChannelList;
    
+   /*!
+    * @brief Becomes true by every call of function "add())",
+    *        becomes false by every call of function "print()".
+    */
+   bool m_hasUpdated;
+
+   /*!
+    * @brief Minimum time in microseconds for the next print- time.
+    */
+   const uint64_t m_printInterval;
+
+   /*!
+    * @brief Time in the future for the next print.
+    */
+   uint64_t m_nextPrintTime;
+
 public:
    /*!
     * @brief Constructor
     */
-   Statistics( void );
+   Statistics( const uint64_t printInterval = 1000000 );
 
    /*!
     * @brief Destructor

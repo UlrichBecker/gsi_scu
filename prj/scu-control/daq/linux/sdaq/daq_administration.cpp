@@ -590,7 +590,6 @@ uint DaqAdministration::distributeData( void )
       onUnregistered( probe.descriptor );
    }
 
-
    return getCurrentRamSize( false );
 }
 
@@ -659,7 +658,16 @@ uint DaqAdministration::distributeData( void )
    if( !::daqDescriptorVerifyMode( &probe.descriptor ) )
    {
       onErrorDescriptor( probe.descriptor );
+      return getCurrentNumberOfData();
+      //TODO Maybe erase RAM?
    }
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   /*
+    * For statistics only.
+    */
+   onIncomingDescriptor( probe.descriptor );
+#endif
 
    /*!
     * Holds the number of received payload data words without descriptor.

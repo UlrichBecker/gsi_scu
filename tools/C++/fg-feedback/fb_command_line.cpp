@@ -754,6 +754,20 @@ vector<OPTION> CommandLine::c_optList =
                     " block- sequence number of the device descriptor,\n"
                     "by default the pairing will made by WR- timestamp."
    },
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_makeStatistic = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'Q',
+      .m_longOpt  = "statistic",
+      .m_helpText = "Prints a quantitative statistic of all incoming ADDAC-DAQ data-blocks."
+   },
+#endif
    {
       OPT_LAMBDA( poParser,
       {
@@ -863,6 +877,9 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_exitOnError( false )
    ,m_noPlot( false )
    ,m_pairingBySequence( false )
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   ,m_makeStatistic( false )
+#endif
    ,m_xAxisLen( DEFAULT_X_AXIS_LEN )
    ,m_plotInterval( DEFAULT_PLOT_INTERVAL )
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD )

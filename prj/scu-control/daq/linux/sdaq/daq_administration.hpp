@@ -1080,6 +1080,9 @@ public:
    virtual void onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor );
 
 protected:
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   virtual void onIncomingDescriptor( DAQ_DESCRIPTOR_T& roDescriptor ) {}
+#endif
    virtual void onUnregistered( DAQ_DESCRIPTOR_T& roDescriptor ) {}
 
 private:

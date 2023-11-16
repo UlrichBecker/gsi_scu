@@ -87,6 +87,9 @@ class CommandLine: public PARSER
    bool                       m_exitOnError;
    bool                       m_noPlot;
    bool                       m_pairingBySequence;
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   bool                       m_makeStatistic;
+#endif
    float                      m_xAxisLen;
    uint                       m_plotInterval;
    uint                       m_throttleThreshold;
@@ -212,6 +215,13 @@ public:
    {
       return m_pairingBySequence;
    }
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   bool isMakeStatistic( void )
+   {
+      return m_makeStatistic;
+   }
+#endif
 
    uint getPollInterwalTime( void )
    {

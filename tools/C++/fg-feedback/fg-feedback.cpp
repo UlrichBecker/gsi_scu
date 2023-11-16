@@ -242,6 +242,11 @@ void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
 
    if( m_pPlot == nullptr )
    {
+   #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+      if( getCommandLine()->isMakeStatistic() )
+         return;
+   #endif
+
       cout << "fg-" << getSocket() << '-' << getFgNumber() << ":  ";
       if( getCommandLine()->isVerbose() )
          cout     << daq::wrToTimeDateString( wrTimeStamp );
@@ -431,10 +436,26 @@ void AllDaqAdministration::onUnregisteredMilDevice( FG_MACRO_T fg )
 }
 #endif
 
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+/*! ---------------------------------------------------------------------------
+ */
+void AllDaqAdministration::onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor )
+{
+   if( m_poCommandLine->isMakeStatistic() )
+   {
+      m_oStatistics.add( roDescriptor );
+   }
+}
+#endif
+
 /*! ---------------------------------------------------------------------------
  */
 void AllDaqAdministration::onUnregisteredAddacDaq( uint slot, uint daqNumber )
 {
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   if( m_poCommandLine->isMakeStatistic() )
+      return;
+#endif
    WARNING_MESSAGE( "ADDAC DAQ " << daqNumber << " in slot " << slot <<
                     "\tnot registered" ); 
 }
@@ -464,10 +485,29 @@ void AllDaqAdministration::onDataTimeout( const bool isMil )
 
 /*! ---------------------------------------------------------------------------
  */
+void AllDaqAdministration::onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor )
+{
+   if( m_poCommandLine->isExitOnError() )
+      FgFeedbackAdministration::onErrorDescriptor( roDescriptor );
+   ERROR_MESSAGE( "Faulty device descriptor received!" );
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 bool AllDaqAdministration::isRunningOnScu( void ) const
 {
    return m_poCommandLine->isRunningOnScu();
 }
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+/*! ---------------------------------------------------------------------------
+ */
+void AllDaqAdministration::printStatistic( void )
+{
+   if( getCommandLine()->isMakeStatistic() )
+      m_oStatistics.print();
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
@@ -603,7 +643,12 @@ int fbMain( int argc, char** ppArgv )
             if( it >= intervalTime )
                intervalTime = it + cmdLine.getPollInterwalTime() * 1000;
             if( doReceive )
+            {
                remainingData = pDaqAdmin->distributeData();
+            #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+               pDaqAdmin->printStatistic();
+            #endif
+            }
          }
          ::usleep( 100 );
       }
