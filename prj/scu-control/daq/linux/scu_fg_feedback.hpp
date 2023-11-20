@@ -1038,6 +1038,15 @@ public:
       return m_oAddacDaqAdmin.getRamOffset();
    }
 
+   /*!
+    * @brief Returns the number of data-words which are still in the
+    *        ADDAC-DAQ-buffer.
+    */
+   uint getAddacBufferLevel( void )
+   {
+      return m_oAddacDaqAdmin.getCurrentNumberOfData();
+   }
+
 #ifdef CONFIG_MIL_FG
    /*!
     * @brief Returns the maximum capacity of the MIL-DAQ data-buffer
@@ -1055,6 +1064,15 @@ public:
    uint getMilBufferOffset( void )
    {
       return m_oMilDaqAdmin.getRamOffset();
+   }
+
+   /*!
+    * @brief Returns the number of data-words which are still in the
+    *        MIL-DAQ-buffer.
+    */
+   uint getMilBufferLevel( void )
+   {
+      return m_oMilDaqAdmin.getCurrentNumberOfData();
    }
 #endif
 

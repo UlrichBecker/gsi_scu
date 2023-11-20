@@ -26,6 +26,8 @@
 #define _DAQ_STATISTICS_HPP
 
 #include <daq_descriptor.h>
+#include <daq_calculations.hpp>
+#include <scu_fg_feedback.hpp>
 #include <vector>
 #include <iostream>
 
@@ -33,6 +35,7 @@ namespace Scu
 {
 namespace daq
 {
+
 ///////////////////////////////////////////////////////////////////////////////
 /*!----------------------------------------------------------------------------
  * @brief Class makes a statistic of all incoming ADDAC-DAQ data-blocks and
@@ -41,11 +44,12 @@ namespace daq
 class Statistics
 {
    /*!
-    * @brief data type of a item in the DAQ channel list.
+    * @brief Data type of a item in the DAQ channel list.
     */
    struct BLOCK_T
    {  /*!
-       * @brief The serial number helps to sort the channel items in the list.
+       * @brief The serial number helps in finding and
+       *        to sort the channel items in the list.
        */
       uint m_serialNumber;
 
@@ -60,9 +64,14 @@ class Statistics
       uint m_channel;
 
       /*!
-       * @brief Number of received DAQ blocks.
+       * @brief Number of currently received DAQ blocks.
        */
       uint m_counter;
+
+      /*!
+       * @brief Becomes "true" if the counter was updated.
+       */
+      bool m_counterUpdated;
    };
 
    /*!
@@ -79,18 +88,23 @@ class Statistics
    /*!
     * @brief Minimum time in microseconds for the next print- time.
     */
-   const uint64_t m_printInterval;
+   const USEC_T m_printInterval;
 
    /*!
     * @brief Time in the future for the next print.
     */
-   uint64_t m_nextPrintTime;
+   USEC_T m_nextPrintTime;
+
+   /*!
+    * @brief Pointer to parent object this will used at to show the memory level.
+    */
+   FgFeedbackAdministration* m_pParent;
 
 public:
    /*!
     * @brief Constructor
     */
-   Statistics( const uint64_t printInterval = 1000000 );
+   Statistics( FgFeedbackAdministration* pParent, const USEC_T printInterval = 1000000 );
 
    /*!
     * @brief Destructor

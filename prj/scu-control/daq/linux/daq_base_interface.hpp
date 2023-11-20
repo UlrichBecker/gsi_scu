@@ -402,9 +402,6 @@ public:
       return ramRingSharedGetSize( m_poRingAdmin );
    }
 
-protected:
-   void initRingAdmin( RAM_RING_SHARED_INDEXES_T* pAdmin, const std::size_t daqBaseOffset  );
-
    /*!
     * @brief Returns the number of DDR3- memory items which has not been read yet
     *        since the last call of sendWasRead() or program start.
@@ -412,6 +409,9 @@ protected:
     * @return Number of memory items, which are not copied yet.
     */
    uint getNumberOfNewData( void );
+
+protected:
+   void initRingAdmin( RAM_RING_SHARED_INDEXES_T* pAdmin, const std::size_t daqBaseOffset  );
 
    /*!
     * @brief Sends the number DDR3-items back to the LM32.

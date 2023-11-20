@@ -22,14 +22,14 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
- #error Macro USE_ADDAC_DAQ_BLOCK_STATISTICS has to be defined in Makefile!
+#ifndef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+ #error Macro CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS has to be defined in Makefile!
 #endif
 
 #include "daq_statistics.hpp"
 #include <scu_function_generator.h>
 #include <message_macros.hpp>
-#include <daq_calculations.hpp>
+#include <iomanip>
 #include <algorithm>
 
 using namespace Scu::daq;
@@ -37,10 +37,11 @@ using namespace std;
 
 /*!----------------------------------------------------------------------------
  */
-Statistics::Statistics( const uint64_t printInterval )
+Statistics::Statistics( FgFeedbackAdministration* pParent, const USEC_T printInterval )
    :m_hasUpdated( false )
    ,m_printInterval( printInterval )
    ,m_nextPrintTime( 0 )
+   ,m_pParent( pParent )
 {
    DEBUG_MESSAGE_M_FUNCTION();
    clear();
@@ -67,13 +68,14 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
 {
    m_hasUpdated = true;
    const uint serialNumber = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )) * 100 +
-                             static_cast<uint>(daqDescriptorGetChannel(&rDescriptor)) - 1;
+                             static_cast<uint>(daqDescriptorGetChannel(&rDescriptor));
 
    for( auto& i: m_daqChannelList )
    {
       if( i.m_serialNumber == serialNumber )
       {
          i.m_counter++;
+         i.m_counterUpdated = true;
          return;
       }
    }
@@ -84,12 +86,13 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
       return;
    }
 
-   BLOCK_T newBlock =
+   const BLOCK_T newBlock =
    {
-      .m_serialNumber = serialNumber,
-      .m_slot         = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )),
-      .m_channel      = static_cast<uint>(daqDescriptorGetChannel(&rDescriptor)),
-      .m_counter      = 1
+      .m_serialNumber   = serialNumber,
+      .m_slot           = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )),
+      .m_channel        = static_cast<uint>(daqDescriptorGetChannel( &rDescriptor )),
+      .m_counter        = 1,
+      .m_counterUpdated = true
    };
    m_daqChannelList.push_back( newBlock );
    if( m_daqChannelList.size() > 1 )
@@ -109,7 +112,7 @@ void Statistics::print( void )
    if( !m_hasUpdated )
       return;
 
-   const uint64_t time = getSysMicrosecs();
+   const USEC_T time = getSysMicrosecs();
    if( time < m_nextPrintTime )
       return;
    m_nextPrintTime = time + m_printInterval;
@@ -118,14 +121,30 @@ void Statistics::print( void )
 
    cout << ESC_CLR_SCR << flush;
    uint y = 0;
-   for( const auto& i: m_daqChannelList )
+   for( auto& i: m_daqChannelList )
    {
       y++;
+      if( i.m_counterUpdated )
+      {
+         i.m_counterUpdated = false;
+         cout << ESC_BOLD ESC_FG_GREEN;
+      }
+      else
+         cout << ESC_NORMAL ESC_FG_BLUE;
+
       cout << "\e[" << y << ";1H" << y << "\e[" << y << ";4HSlot: " << i.m_slot <<
               ",\e[" << y << ";14HChannel: " << i.m_channel <<
               ", received: " << i.m_counter;
    }
-   cout << endl;
+   cout << ESC_NORMAL << endl;
+
+   float level = static_cast<float>(m_pParent->getAddacBufferLevel()) * 100.0 /
+                 static_cast<float>(m_pParent->getAddacBufferCapacity());
+
+   if( level > 90.0 )
+      cout << ESC_WARNING;
+   cout << "FiFo- level: " << fixed << setprecision(2) << setw( 6 ) << level << '%'
+        << ESC_NORMAL << endl;
 }
 
 //================================== EOF=======================================
