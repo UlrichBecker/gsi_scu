@@ -95,6 +95,7 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
       .m_counterUpdated = true
    };
    m_daqChannelList.push_back( newBlock );
+
    if( m_daqChannelList.size() > 1 )
    {
       sort( m_daqChannelList.begin(), m_daqChannelList.end(),
