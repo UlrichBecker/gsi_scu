@@ -138,8 +138,10 @@ void Statistics::print( void )
    }
    cout << ESC_NORMAL << endl;
 
-   float level = static_cast<float>(m_pParent->getAddacBufferLevel()) * 100.0 /
-                 static_cast<float>(m_pParent->getAddacBufferCapacity());
+   assert( m_pParent->getAddacBufferCapacity() != 0 );
+
+   const float level = static_cast<float>(m_pParent->getAddacBufferLevel()) * 100.0 /
+                       static_cast<float>(m_pParent->getAddacBufferCapacity());
 
    if( level > 90.0 )
       cout << ESC_WARNING;
