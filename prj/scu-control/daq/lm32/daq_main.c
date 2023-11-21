@@ -275,9 +275,9 @@ void forEachScuDaqDevice( void )
 
 #ifndef CONFIG_DAQ_SINGLE_APP
 
-//#define _CONFIG_NO_DAQ_FSM
+#define _CONFIG_NO_DAQ_FSM
 
-#define CONFIG_DEBUG_FEEDBACK_ON_OFF
+//#define CONFIG_DEBUG_FEEDBACK_ON_OFF
 
 #ifdef CONFIG_DEBUG_FEEDBACK_ON_OFF
  #define DEBUG_FEEDBACK_ON_OFF()  \
@@ -295,9 +295,7 @@ void daqEnableFgFeedback( const unsigned int slot,
                         )
 {
   // DEBUG_FEEDBACK_ON_OFF();
-#ifdef CONFIG_USE_LM32LOG
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
-#endif
    criticalSectionEnter();
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
    criticalSectionExit();
@@ -309,21 +307,25 @@ void daqEnableFgFeedback( const unsigned int slot,
    DAQ_ASSERT( pDaqDevice != NULL );
 #endif
 #ifdef _CONFIG_NO_DAQ_FSM
-   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[daqGetSetDaqNumberOfFg(fgNum)];
-   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[daqGetActualDaqNumberOfFg(fgNum)];
+   const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
+   const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg( fgNum, pDaqDevice->type );
+   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[setChannelNumber];
+   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[actChannelNumber];
 
-    //TODO Start both channels time synchronized.
-   daqChannelSetTriggerDelay( pSetChannel, 10000 );
-   daqChannelSetTriggerDelay( pActChannel, 10000 );
-   daqChannelSample1msOn( pSetChannel );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Enable DAQ-channels set %u and act %u\n" ESC_NORMAL,
+            setChannelNumber, actChannelNumber );
 
- //  daqChannelSample1msOn( &daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, 8 )->aChannel[daqGetSetDaqNumberOfFg(fgNum)] );
-#if 1
-   for( unsigned int i = 0; i < 200000; i++ ) NOP();
-   daqChannelSample1msOn( pActChannel );
-
-  // daqChannelSample1msOn( &daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, 8 )->aChannel[daqGetActualDaqNumberOfFg(fgNum)] );
-#endif
+   ATOMIC_SECTION()
+   {
+      pSetChannel->sequenceContinuous = 0;
+      pActChannel->sequenceContinuous = 0;
+      daqChannelSetTriggerCondition( pSetChannel, tag );
+      daqChannelSetTriggerCondition( pActChannel, tag );
+      daqChannelSetTriggerDelay( pSetChannel, 10000 );
+      daqChannelSetTriggerDelay( pActChannel, 10000 );
+      daqChannelSample1msOn( pSetChannel );
+      daqChannelSample1msOn( pActChannel );
+   }
 #else
    daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_ON, fgNum, tag );
 #endif
@@ -334,10 +336,8 @@ void daqEnableFgFeedback( const unsigned int slot,
  */
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 {
-   //DEBUG_FEEDBACK_ON_OFF();
-#ifdef CONFIG_USE_LM32LOG
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
-#endif
+
    criticalSectionEnter();
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
    criticalSectionExit();
@@ -350,15 +350,20 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 #endif
 
 #ifdef _CONFIG_NO_DAQ_FSM
-   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[daqGetSetDaqNumberOfFg(fgNum)];
-   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[daqGetActualDaqNumberOfFg(fgNum)];
+   const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
+   const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg( fgNum, pDaqDevice->type );
+   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[setChannelNumber];
+   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[actChannelNumber];
+
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Disable DAQ-channels set %u and act %u\n" ESC_NORMAL,
+            setChannelNumber, actChannelNumber );
 
    ATOMIC_SECTION()
    {
       daqChannelSample1msOff( pSetChannel );
-      daqChannelTestAndClearDaqIntPending( pSetChannel );
+    //  daqChannelTestAndClearDaqIntPending( pSetChannel );
       daqChannelSample1msOff( pActChannel );
-      daqChannelTestAndClearDaqIntPending( pActChannel );
+    //  daqChannelTestAndClearDaqIntPending( pActChannel );
    }
 #else
    daqDevicePutFeedbackSwitchCommand( pDaqDevice, FB_OFF, fgNum, 0 );

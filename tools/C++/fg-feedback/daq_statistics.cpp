@@ -43,7 +43,7 @@ Statistics::Statistics( FgFeedbackAdministration* pParent, const USEC_T printInt
    ,m_nextPrintTime( 0 )
    ,m_pParent( pParent )
 {
-   DEBUG_MESSAGE_M_FUNCTION();
+   DEBUG_MESSAGE_M_FUNCTION( "" );
    clear();
 }
 
@@ -51,7 +51,7 @@ Statistics::Statistics( FgFeedbackAdministration* pParent, const USEC_T printInt
  */
 Statistics::~Statistics( void )
 {
-   DEBUG_MESSAGE_M_FUNCTION();
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*!----------------------------------------------------------------------------

@@ -548,13 +548,8 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
 
    if( !daqQueuePush( pThis, &act ) )
    {
-   #ifdef CONFIG_USE_LM32LOG
       lm32Log( LM32_LOG_ERROR, ESC_ERROR "ERROR: DAQ command buffer of slot %u full!\n" ESC_NORMAL,
                daqDeviceGetSlot( pThis ) );
-   #else
-      mprintf( ESC_ERROR "Error: DAQ command buffer of slot %u full!\n" ESC_NORMAL,
-               daqDeviceGetSlot( pThis ) );
-   #endif
    }
 #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
    else
@@ -578,6 +573,7 @@ void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
  *        for set- and actual value on or off.
  */
 #ifdef CONFIG_NO_DAQ_SWITCH_DELAY
+//OPTIMIZE( "-O0" )
 bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
 {
    DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
@@ -587,34 +583,40 @@ bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
       return false;
 
    pFeedback->fgNumber = act.fgNumber;
-   DAQ_CANNEL_T* pSetChannel = &pThis->aChannel[daqGetSetDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
-   DAQ_CANNEL_T* pActChannel = &pThis->aChannel[daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
-   switch( act.action )
+   const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg(pFeedback->fgNumber, pThis->type);
+   const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type);
+   DAQ_CANNEL_T* pSetChannel = &pThis->aChannel[setChannelNumber];
+   DAQ_CANNEL_T* pActChannel = &pThis->aChannel[actChannelNumber];
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
+            "Switch DAQ channels set %u and act %u of slot %u: %s"
+            ESC_NORMAL,
+            setChannelNumber, actChannelNumber,
+            daqDeviceGetSlot(pThis),
+            (act.action == FB_ON)? "ON":"OFF"
+          );
+
+   if( act.action == FB_ON )
    {
-      case FB_OFF:
+      pSetChannel->sequenceContinuous = 0;
+      pActChannel->sequenceContinuous = 0;
+      daqChannelSetTriggerCondition( pSetChannel, act.tag );
+      daqChannelSetTriggerCondition( pActChannel, act.tag );
+      ATOMIC_SECTION()
       {
-         ATOMIC_SECTION()
-         {
-            daqChannelSample1msOff( pSetChannel );
-            daqChannelSample1msOff( pActChannel );
-         }
-         return true;
-      }
-      case FB_ON:
-      {
-         pSetChannel->sequenceContinuous = 0;
-         pActChannel->sequenceContinuous = 0;
-         daqChannelSetTriggerCondition( pSetChannel, act.tag );
-         daqChannelSetTriggerCondition( pActChannel, act.tag );
-         ATOMIC_SECTION()
-         {
-            daqChannelSample1msOn( pSetChannel );
-            daqChannelSample1msOn( pActChannel );
-         }
-         return true;
+         daqChannelSample1msOn( pSetChannel );
+         daqChannelSample1msOn( pActChannel );
       }
    }
-   return false;
+   else
+   {
+      ATOMIC_SECTION()
+      {
+         daqChannelSample1msOff( pSetChannel );
+         daqChannelSample1msOff( pActChannel );
+      }
+   }
+
+   return true;
 }
 #else
 bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
