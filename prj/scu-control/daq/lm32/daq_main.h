@@ -119,34 +119,7 @@ inline void scuDaqInitialize( DAQ_ADMIN_T* pDaqAdmin )
  */
 void daqExeNextDevice( void );
 
-/*! ---------------------------------------------------------------------------
- * @brief Enables the feedback-channel for the given function generator number
- *        in the given slot.
- *
- * Counterpart to daqDisableFgFeedBack
- * @see daqDisableFgFeedBack
- * @param slot SCU-bus slot number
- * @param fgNum Function generator number 0 or 1
- */
-void daqEnableFgFeedback( const unsigned int slot,
-                          const unsigned int fgNum,
-                          const uint32_t tag
-                        );
-
-/*! ---------------------------------------------------------------------------
- * @brief Disables the feedback-channel for the given function generator number
- *        in the given slot.
- *
- * Counterpart to daqEnableFgFeedback
- * @see daqEnableFgFeedback
- * @param slot SCU-bus slot number
- * @param fgNum Function generator number 0 or 1
- */
-void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
-
-//extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
-
 #ifdef __cplusplus
 }
 #endif

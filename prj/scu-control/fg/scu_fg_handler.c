@@ -13,9 +13,9 @@
 #include <scu_fg_handler.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
  #ifdef CONFIG_RTOS
-  #include <scu_task_daq.h>
+  #include <scu_task_daq.h> //!!
  #else
-  #include <daq_main.h>
+  #include <daq_fg_switch.h>
  #endif
 #endif
 

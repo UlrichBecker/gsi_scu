@@ -5,6 +5,7 @@
  *            Helpful for outputs via eb-console
  *
  * @file      eb_console_helper.h
+ * @note      Header only!
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      12.11.2018
