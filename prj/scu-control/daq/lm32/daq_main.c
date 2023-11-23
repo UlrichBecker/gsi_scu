@@ -215,8 +215,6 @@ STATIC inline void irqPrintDebugPending( void )
 #define irqPrintDebugPending()
 #endif
 
-
-
 /*! ---------------------------------------------------------------------------
  */
 #ifdef CONFIG_DAQ_SINGLE_APP
@@ -274,40 +272,6 @@ void forEachScuDaqDevice( void )
 #endif
 
 #ifndef CONFIG_DAQ_SINGLE_APP
-
-#define _CONFIG_NO_DAQ_FSM
-
-//#define CONFIG_DEBUG_FEEDBACK_ON_OFF
-
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-/*! --------------------------------------------------------------------------
- * @retval false Not all channels of this device handled yet.
- * @retval true  All channels of this device has been handled.
- */
-ONE_TIME_CALL bool daqExeNextChannel( DAQ_DEVICE_T* pDevice, const uint16_t pendingIrqs )
-{
-   static unsigned int s_channelNumber = 0;
-   DAQ_CANNEL_T* pChannel = daqDeviceGetChannelObject( pDevice, s_channelNumber );
-
-   if( (pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
-   {
-      handleContinuousMode( pChannel );
-   }
-
-   if( (pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
-   {
-      handleHiresMode( pChannel );
-   }
-
-   s_channelNumber++;
-   if( s_channelNumber < daqDeviceGetMaxChannels( pDevice ) )
-       return false;
-
-   s_channelNumber = 0;
-   return true;
-}
-#endif
-
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
  * @ingroup TASK
@@ -326,7 +290,6 @@ bool addacDaqQueuePop( SCU_BUS_IRQ_QUEUE_T* pQueueScuBusIrq )
  * @brief Non - blocking function. Handles all detected ADDAC-DAQs. One DAQ-channel per function call.
  * @see schedule
  */
-//OPTIMIZE( "-O1"  )
 void addacDaqTask( void )
 {
    FG_ASSERT( pThis->pTaskData == NULL );
@@ -337,10 +300,6 @@ void addacDaqTask( void )
       return;
    }
 
-#ifndef _CONFIG_NO_DAQ_FSM
-   daqBusDoFeedbackTask( &g_scuDaqAdmin.oDaqDevs );
-#endif
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    /*
     * Removing old data which has been possibly read and evaluated by the
     * Linux client
@@ -354,11 +313,8 @@ void addacDaqTask( void )
     * See daq_administration.cpp  function: DaqAdministration::distributeData
     */
    ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
-#endif
 
    static DAQ_DEVICE_T* s_pDaqDevice  = NULL;
-   
-#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
    static DAQ_REGISTER_T s_continuousPending;
    static DAQ_REGISTER_T s_highResPending;
    static unsigned int s_channelNumber;
@@ -418,35 +374,6 @@ void addacDaqTask( void )
       if( s_channelNumber >= daqDeviceGetMaxChannels( s_pDaqDevice ) )
          s_pDaqDevice = NULL;
    }
-#else
-   static uint16_t      s_pendingIrqs = 0;
-   if( s_pDaqDevice == NULL )
-   {
-      SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
-      /*
-       * Did the interrupt put a message in the pipe?
-       */
-      if( addacDaqQueuePop( &queueScuBusIrq ) )
-      {
-         s_pDaqDevice  = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
-         s_pendingIrqs = queueScuBusIrq.pendingIrqs;
-      #if 0
-        #warning Baustelle!!!
-        // static int x = 0;
-        // mprintf( "C: %u\n", x++  );
-         DAQ_REGISTER_T f =  daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
-         mprintf( "S: %u, F: %01b\n", queueScuBusIrq.slot, f  );
-       //  daqGetAndResetHighresIntPendingBits( s_pDaqDevice );
-      #endif
-      }
-   }
-
-   if( s_pDaqDevice != NULL )
-   {
-      if( daqExeNextChannel( s_pDaqDevice, s_pendingIrqs ) )
-         s_pDaqDevice = NULL;
-   }
-#endif
 }
 
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */

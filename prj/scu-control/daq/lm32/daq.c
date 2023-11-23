@@ -375,13 +375,6 @@ void daqDevicePresetTimeStampCounter( register DAQ_DEVICE_T* pThis,
     #else
       pThis->pReg->i[TS_COUNTER_WD1+i] = ((uint16_t*)&futureTime)[i];
     #endif
-    #if 0
-      mprintf( "pTS[%d]: %p, %04X, %04X, %04x\n", i,
-               &pThis->pReg->i[TS_COUNTER_WD1+i], pThis->pReg->i[TS_COUNTER_WD1+i],
-               ((uint16_t*)&futureTime)[((sizeof(uint64_t)/sizeof(uint16_t))-1) - i],
-               ((uint16_t*)&futureTime)[i]
-      );
-    #endif
    }
 }
 
@@ -410,8 +403,6 @@ uint64_t daqDeviceGetTimeStampCounter( register DAQ_DEVICE_T* pThis )
     #else
       ((uint16_t*)&ts)[i] = pThis->pReg->i[TS_COUNTER_WD1+i];
     #endif
-     // mprintf( "pTS: %p\n", &pThis->pReg->i[TS_COUNTER_WD1+i] );
-     // mprintf( "pTS: %p, %04X\n", &pThis->pReg->i[TS_COUNTER_WD1+i], pThis->pReg->i[TS_COUNTER_WD1+i]);
    }
    return ts;
 }
@@ -424,9 +415,6 @@ void daqDeviceSetTimeStampCounterEcaTag( register DAQ_DEVICE_T* pThis, const uin
    DAQ_ASSERT( pThis != NULL );
    DAQ_ASSERT( pThis->pReg != NULL );
    STATIC_ASSERT( TS_CNTR_TAG_LW+1 == TS_CNTR_TAG_HW );
-#if 0
-   mprintf( "ECA-Tag: 0x%08X\n", tsTag );
-#endif
 
    for( unsigned int i = 0; i < (sizeof(uint32_t)/sizeof(uint16_t)); i++ )
    {
@@ -434,9 +422,6 @@ void daqDeviceSetTimeStampCounterEcaTag( register DAQ_DEVICE_T* pThis, const uin
       pThis->pReg->i[TS_CNTR_TAG_LW+i] = ((uint16_t*)&tsTag)[((sizeof(uint32_t)/sizeof(uint16_t))-1) - i];
     #else
       pThis->pReg->i[TS_CNTR_TAG_LW+i] = ((uint16_t*)&tsTag)[i];
-    #endif
-    #if 0
-      mprintf( "ECA-Tag[%u]: %04X\n", i, pThis->pReg->i[TS_CNTR_TAG_LW+i] );
     #endif
    }
 }
@@ -462,28 +447,6 @@ uint32_t daqDeviceGetTimeStampTag( register DAQ_DEVICE_T* pThis )
    return tsTag;
 }
 
-#ifndef CONFIG_DAQ_SINGLE_APP
-
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-#define FSM_INIT_FSM( s, attr... ) pFeedback->status = s
-#endif
-
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Resetting of feedback command buffer.
- * @param pThis Pointer to the DAQ-device object
- */
-STATIC inline
-void daqDeviceFeedBackReset( register DAQ_DEVICE_T* pThis )
-{
-   DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-   FSM_INIT_FSM( FB_READY, label='Reset' );
-#endif
-   QUEUE_INIT_MEMBER( pFeedback, aktionBuffer, DAQ_ACTION_ITEM_T );
-}
-#endif
-
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */
@@ -494,269 +457,7 @@ void daqDeviceReset( register DAQ_DEVICE_T* pThis )
 
    for( int i = daqDeviceGetMaxChannels( pThis )-1; i >= 0; i-- )
       daqChannelReset( daqDeviceGetChannelObject( pThis, i ) );
-
-   //!!daqDeviceSetTimeStampCounter( pThis, 0L );
-   //daqDeviceSetTimeStampTag( pThis, 0 );
-
-#ifndef CONFIG_DAQ_SINGLE_APP
-   daqDeviceFeedBackReset( pThis );
-#endif
 }
-
-#ifndef CONFIG_DAQ_SINGLE_APP
-
-#define CONFIG_DAQ_CMD_SINGLE_THREAD
-
-/*! ---------------------------------------------------------------------------
- * @see queuePush
- * @see queuePushSave
- */
-STATIC inline ALWAYS_INLINE
-bool daqQueuePush( DAQ_DEVICE_T* pThis, const DAQ_ACTION_ITEM_T* pAct )
-{
-#if defined( CONFIG_RTOS ) && !defined( CONFIG_DAQ_CMD_SINGLE_THREAD )
-   return queuePushSave( &pThis->feedback.aktionBuffer, pAct ); 
-#else
-   return queuePush( &pThis->feedback.aktionBuffer, pAct ); 
-#endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @see queuePop
- * @see queuePopSave
- */
-STATIC inline ALWAYS_INLINE
-bool daqQueuePop( DAQ_FEEDBACK_T* pFeedback, DAQ_ACTION_ITEM_T* pAct )
-{
-#if defined( CONFIG_RTOS ) && !defined( CONFIG_DAQ_CMD_SINGLE_THREAD )
-   return queuePopSave( &pFeedback->aktionBuffer, pAct );
-#else
-   return queuePop( &pFeedback->aktionBuffer, pAct );
-#endif
-}
-
-/*! ---------------------------------------------------------------------------
- * @see daq.h
- */
-void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
-                                        const DAQ_FEEDBACK_ACTION_T what,
-                                        const unsigned int fgNumber,
-                                        const uint32_t tag
-                                      )
-{
-   const DAQ_ACTION_ITEM_T act = { .action = what, .fgNumber = fgNumber, .tag = tag };
-
-   if( !daqQueuePush( pThis, &act ) )
-   {
-      lm32Log( LM32_LOG_ERROR, ESC_ERROR "ERROR: DAQ command buffer of slot %u full!\n" ESC_NORMAL,
-               daqDeviceGetSlot( pThis ) );
-   }
-#if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
-   else
-   {
-      taskWakeupDaq();
-   }
-#endif
-}
-
-#define FSM_TRANSITION( s, attr... ) pFeedback->status = s
-#define FSM_TRANSITION_SELF( attr... )
-/*!
- * @brief Time distance between two switch-on events of DAQ channels
- */
-//#define DAQ_SWITCH_WAITING_TIME 1000000ULL
-#define DAQ_SWITCH_WAITING_TIME (1000000ULL - 50000)
-
-/*! ---------------------------------------------------------------------------
- * @brief Receives a switch-command and turns the concerned of the
- *        function generator allocated DAQ- channel pair
- *        for set- and actual value on or off.
- */
-#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
-//OPTIMIZE( "-O0" )
-bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
-{
-   DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
-   DAQ_ACTION_ITEM_T act;
-
-   if( !daqQueuePop( pFeedback, &act ) )
-      return false;
-
-   pFeedback->fgNumber = act.fgNumber;
-   const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg(pFeedback->fgNumber, pThis->type);
-   const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type);
-   DAQ_CANNEL_T* pSetChannel = &pThis->aChannel[setChannelNumber];
-   DAQ_CANNEL_T* pActChannel = &pThis->aChannel[actChannelNumber];
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
-            "Switch DAQ channels set %u and act %u of slot %u: %s"
-            ESC_NORMAL,
-            setChannelNumber, actChannelNumber,
-            daqDeviceGetSlot(pThis),
-            (act.action == FB_ON)? "ON":"OFF"
-          );
-
-   if( act.action == FB_ON )
-   {
-      pSetChannel->sequenceContinuous = 0;
-      pActChannel->sequenceContinuous = 0;
-      daqChannelSetTriggerCondition( pSetChannel, act.tag );
-      daqChannelSetTriggerCondition( pActChannel, act.tag );
-      ATOMIC_SECTION()
-      {
-         daqChannelSample1msOn( pSetChannel );
-         daqChannelSample1msOn( pActChannel );
-      }
-   }
-   else
-   {
-      ATOMIC_SECTION()
-      {
-         daqChannelSample1msOff( pSetChannel );
-         daqChannelSample1msOff( pActChannel );
-      }
-   }
-
-   return true;
-}
-#else
-bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis )
-{
-   DAQ_FEEDBACK_T* pFeedback = &pThis->feedback;
-
-   const DAQ_FEEDBACK_STATUS_T oldStatus = pFeedback->status;
-
-   /*
-    * FSM-do activities:
-    */
-   switch( oldStatus )
-   {
-      case FB_READY:
-      {
-         DAQ_ACTION_ITEM_T act;
-         /*
-          * Command from FG-layer received?
-          */
-         if( !daqQueuePop( pFeedback, &act ) )
-         { /*
-            * No!
-            */
-            FSM_TRANSITION_SELF( label='No message.' );
-            break;
-         }
-
-         pFeedback->fgNumber = act.fgNumber;
-         DAQ_CANNEL_T* pSetChannel = &pThis->aChannel[daqGetSetDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
-         DAQ_CANNEL_T* pActChannel = &pThis->aChannel[daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
-         pSetChannel->sequenceContinuous = 0;
-         pActChannel->sequenceContinuous = 0;
-#if 0
-         lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "fg-%u-%u: setDAQ: %u actDAQ: %u\n" ESC_NORMAL,
-                  daqDeviceGetSlot( pThis ), pFeedback->fgNumber,
-                  daqChannelGetNumber( pSetChannel ), daqChannelGetNumber( pActChannel ) );
-#endif
-         /*
-          * Evaluating of DAQ command coming from function generator.
-          */
-         switch( act.action )
-         {
-            case FB_OFF:
-            { /*
-               * Switching both DAQ channels for set and actual value off.
-               */
-               ATOMIC_SECTION()
-               {
-                  daqChannelSample1msOff( pSetChannel );
-                  daqChannelTestAndClearDaqIntPending( pSetChannel );
-                  daqChannelSample1msOff( pActChannel );
-                  daqChannelTestAndClearDaqIntPending( pActChannel );
-               }
-               FSM_TRANSITION_SELF( label='Switch both channels off\nif stop-message received.' );
-               break;
-            }
-            case FB_ON:
-            {
-               daqChannelSetTriggerCondition( pSetChannel, act.tag );
-               daqChannelSetTriggerCondition( pActChannel, act.tag );
-              /*!
-               * @todo Maybe a misunderstanding in the DAQ specification of KHK or
-               *       a bug in the VHDL code.\n
-               *       The corresponding workaround on Linux is made by the
-               *       compiler switch: _CONFIG_PATCH_PHASE.\n
-               *       It's a construction site yet!
-               */
-              // daqChannelSetTriggerDelay( pSetChannel, 10 ); //TODO
-               // daqChannelEnableTriggerMode( pSetChannel );
-               // daqChannelEnableEventTrigger( pSetChannel );
-
-               //daqChannelEnableExtrenTrigger
-               
-               #warning "Deprecated: DAQ switch delay"
-               daqChannelSample1msOn( pSetChannel );
-              // mprintf( "D=%d\n", daqChannelGetTriggerDelay( pSetChannel ) );
-
-               FSM_TRANSITION( FB_FIRST_ON, label='Start message received.\n'
-                                            'Switch DAQ for set value on.' );
-               break;
-            }
-            default: DAQ_ASSERT( false );
-         } /* End switch( act.action ) */
-         break;
-      } /* End case FB_READY */
-
-      case FB_FIRST_ON:
-      {
-         if( getWrSysTimeSafe() < pFeedback->waitingTime )
-         {
-            FSM_TRANSITION_SELF();
-            break;
-         }
-         DAQ_CANNEL_T* pActChannel = &pThis->aChannel[daqGetActualDaqNumberOfFg(pFeedback->fgNumber, pThis->type)];
-         daqChannelSample1msOn( pActChannel );
-
-         FSM_TRANSITION( FB_BOTH_ON, label='Waiting time expired.\n'
-                                           'Switch DAQ for actual value on.' );
-         break;
-      } /* End case FB_FIRST_ON */
-
-      case FB_BOTH_ON:
-      {
-         if( getWrSysTimeSafe() < pFeedback->waitingTime )
-         {
-            FSM_TRANSITION_SELF();
-            break;
-         }
-         FSM_TRANSITION( FB_READY, label='Waiting time expired.');
-         break;
-      } /* End case FB_BOTH_ON */
-
-      default: DAQ_ASSERT( false );
-   } /* End switch( oldStatus ) */
-
-   /*
-    * Has the FSM- state not changed?
-    */
-   if( oldStatus == pFeedback->status )
-      return true;
-
-   /*
-    * FSM- entry activities:
-    */
-   switch( pFeedback->status )
-   {
-      case FB_FIRST_ON: /* Immediately to the next case, no break here. */
-      case FB_BOTH_ON:
-      {
-         pFeedback->waitingTime = getWrSysTimeSafe() + DAQ_SWITCH_WAITING_TIME;
-         break;
-      }
-
-      default: break;
-   }
-   return true;
-}
-#endif
-
-#endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
 #if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
@@ -1248,6 +949,7 @@ void daqBusReset( register DAQ_BUS_T* pThis )
 }
 
 #if !defined( CONFIG_DAQ_SINGLE_APP ) && !defined( CONFIG_RTOS )
+#if 0
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */
@@ -1261,7 +963,7 @@ void daqBusDoFeedbackTask( register DAQ_BUS_T* pThis )
       currentDevNum %= daqBusGetFoundDevices( pThis );
    }
 }
-
+#endif
 #endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
 #if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)

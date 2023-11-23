@@ -492,7 +492,11 @@ void AllDaqAdministration::onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDes
 {
    if( m_poCommandLine->isExitOnError() )
       FgFeedbackAdministration::onErrorDescriptor( roDescriptor );
+
    ERROR_MESSAGE( "Faulty device descriptor received!" );
+   assert( getAddacBufferCapacity() != 0 );
+   if( (getAddacBufferLevel() * 100) / getAddacBufferCapacity() > 95 )
+      clearBuffer();
 }
 
 /*! ---------------------------------------------------------------------------

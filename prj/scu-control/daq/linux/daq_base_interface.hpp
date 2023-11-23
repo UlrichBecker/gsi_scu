@@ -299,22 +299,6 @@ public:
       return m_poRingAdmin->indexes.offset;
    }
 
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   /*!
-    * @brief Returns the number of items which are currently in the
-    *        data buffer.
-    * @param update If true the indexes in the LM32 shared memory
-    *               will read before.
-    */
-   virtual RAM_RING_INDEX_T getCurrentRamSize( bool update = true ) = 0;
-
-   /*!
-    * @brief Makes the data buffer empty.
-    * @param update If true the indexes in the LM32 shared memory
-    *               becomes updated.
-    */
-   virtual void clearBuffer( bool update = true ) = 0;
-#endif
    /*!
     * @brief Callback function shall be invoked within a polling-loop and looks
     *        whether enough data are present for forwarding to the higher
@@ -348,7 +332,6 @@ public:
     */
    virtual void onDataReadingPause( void );
 
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    /*!
     * @brief Gives the LM32 the order to clear the data-buffer once he has enter
     *        the handling routine of this buffer.
@@ -364,7 +347,6 @@ public:
       updateMemAdmin();
       sendWasRead( ramRingSharedGetSize( m_poRingAdmin ) );
    }
-#endif
 
 private:
    void checkIntegrity( void );

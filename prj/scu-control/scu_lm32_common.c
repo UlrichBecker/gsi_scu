@@ -177,7 +177,6 @@ void mmuAllocateDaqBuffer( void )
    MMU_STATUS_T status;
 
  #ifdef CONFIG_SCU_DAQ_INTEGRATION
-  #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ringAdmin.indexes.offset) );
    STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ringAdmin.indexes.capacity) );
    #pragma GCC diagnostic push
@@ -187,18 +186,7 @@ void mmuAllocateDaqBuffer( void )
                      (size_t*)&g_shared.sDaq.ringAdmin.indexes.capacity,
                      true );
    #pragma GCC diagnostic pop
-  #else
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ramIndexes.ringIndexes.offset) );
-   STATIC_ASSERT( sizeof(size_t) == sizeof(g_shared.sDaq.ramIndexes.ringIndexes.capacity) );
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-   status = mmuAlloc( TAG_ADDAC_DAQ,
-                      (size_t*)&g_shared.sDaq.ramIndexes.ringIndexes.offset,
-                      (size_t*)&g_shared.sDaq.ramIndexes.ringIndexes.capacity,
-                      true );
-   #pragma GCC diagnostic pop
-  #endif
- #endif
+ #endif /* ifdef CONFIG_SCU_DAQ_INTEGRATION */
    scuLog( LM32_LOG_INFO, "MMU-Tag 0x%04X for ADDAC-DAQ-buffer: %s\n",
            TAG_ADDAC_DAQ, mmuStatus2String( status ) );
  #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM )
@@ -213,29 +201,22 @@ void mmuAllocateDaqBuffer( void )
    #pragma GCC diagnostic pop
    scuLog( LM32_LOG_INFO, "MMU-Tag 0x%04X for MIL-DAQ-buffer:   %s\n",
            TAG_MIL_DAQ, mmuStatus2String( status ) );
- #endif
+ #endif /* defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM ) */
 #endif /* CONFIG_USE_MMU */
 
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
- #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer offset:   %5u item\n",
            g_shared.sDaq.ringAdmin.indexes.offset );
    scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer capacity: %5u item\n",
            g_shared.sDaq.ringAdmin.indexes.capacity );
- #else
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer offset:   %5u item\n",
-           g_shared.sDaq.ramIndexes.ringIndexes.offset );
-   scuLog( LM32_LOG_INFO, "ADDAC-DAQ buffer capacity: %5u item\n",
-           g_shared.sDaq.ramIndexes.ringIndexes.capacity );
- #endif
-#endif
+#endif /* ifdef CONFIG_SCU_DAQ_INTEGRATION */
 
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM )
    scuLog( LM32_LOG_INFO, "MIL-DAQ buffer offset:     %5u item\n",
            g_shared.mDaq.memAdmin.indexes.offset );
    scuLog( LM32_LOG_INFO, "MIL-DAQ buffer capacity:   %5u item\n",
            g_shared.mDaq.memAdmin.indexes.capacity );
-#endif
+#endif /* if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_DAQ_USE_RAM ) */
 }
 
 /*================================== EOF ====================================*/

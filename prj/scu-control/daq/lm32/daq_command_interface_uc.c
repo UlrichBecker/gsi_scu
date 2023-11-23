@@ -69,11 +69,7 @@ STATIC void printFunctionName( const char* str )
  */
 int initBuffer( RAM_SCU_T* poRam )
 {
-#ifdef  _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    return ramInit( poRam, &GET_SHARED().ringAdmin );
-#else
-   return ramInit( poRam, (RAM_RING_SHARED_OBJECT_T*)&GET_SHARED().ramIndexes );
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -131,24 +127,6 @@ verifyChannelAccess( DAQ_BUS_T* pDaqBus,
    return DAQ_RET_OK;
 }
 
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- * @brief Locks the access of the DAQ ring buffer access.
- * @note After the this command the command function table is not any more
- *       a reachable from the Linux host! \n
- *       Therefore the opposite action (unlock) will made from the
- *       Linux host directly in the shared memory.
- * @see executeIfRequested
- */
-STATIC
-DAQ_RETURN_CODE_T opLock( DAQ_ADMIN_T* pDaqAdmin,
-                                           volatile DAQ_OPERATION_IO_T* pData )
-{
-   DBG_FUNCTION_INFO();
-   GET_SHARED().ramIndexes.ramAccessLock = true;
-   return DAQ_RET_OK;
-}
-#endif
 /*! ---------------------------------------------------------------------------
  */
 STATIC
@@ -173,12 +151,8 @@ DAQ_RETURN_CODE_T opReset( DAQ_ADMIN_T* pDaqAdmin,
 {
    DBG_FUNCTION_INFO();
    daqBusReset( &pDaqAdmin->oDaqDevs );
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    ramRingSharedReset( pDaqAdmin->oRam.pSharedObj );
-#else
-   ramRingReset( &pDaqAdmin->oRam.pSharedObj->ringIndexes );
-   GET_SHARED().ramIndexes.ramAccessLock = false;
-#endif
+
    return DAQ_RET_OK;
 }
 
@@ -755,9 +729,6 @@ typedef struct
  */
 STATIC const DAQ_OPERATION_TAB_ITEM_T g_operationTab[] =
 {
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   OPERATION_ITEM( DAQ_OP_LOCK,                   opLock                ),
-#endif
    OPERATION_ITEM( DAQ_OP_GET_ERROR_STATUS,       opReadErrorStatus     ),
    OPERATION_ITEM( DAQ_OP_RESET,                  opReset               ),
    OPERATION_ITEM( DAQ_OP_GET_MACRO_VERSION,      opGetMacroVersion     ),

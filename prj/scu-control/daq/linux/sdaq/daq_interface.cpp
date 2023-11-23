@@ -54,9 +54,6 @@ const std::string command2String( DAQ_OPERATION_CODE_T op )
    switch( op )
    {
       __OP_CODE_CASE_ITEM( DAQ_OP_IDLE );
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-      __OP_CODE_CASE_ITEM( DAQ_OP_LOCK );
-#endif
       __OP_CODE_CASE_ITEM( DAQ_OP_GET_ERROR_STATUS );
       __OP_CODE_CASE_ITEM( DAQ_OP_RESET );
       __OP_CODE_CASE_ITEM( DAQ_OP_GET_MACRO_VERSION );
@@ -155,9 +152,6 @@ void DaqInterface::init( void )
       return;
 
    readSharedTotal();
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   sendUnlockRamAccess();
-#endif
    sendReset();
    readSlotStatus();
 }
@@ -204,8 +198,6 @@ bool DaqInterface::isFgIntegrated( void ) const
  */
 void DaqInterface::readSharedTotal( void )
 {
-
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    initRingAdmin( &m_oSharedData.ringAdmin,
                   getEbAccess()->getAddacDaqOffset() + offsetof( DAQ_SHARED_IO_T, ringAdmin ));
    DAQ_SHARED_IO_T temp;
@@ -213,17 +205,7 @@ void DaqInterface::readSharedTotal( void )
    CONV_ENDIAN( m_oSharedData, temp, magicNumber );
    CONV_ENDIAN( m_oSharedData, temp, operation.code );
    CONV_ENDIAN( m_oSharedData, temp, operation.retCode );
-#else
-   DAQ_SHARED_IO_T temp;
-   readLM32( &temp, sizeof(DAQ_SHARED_IO_T) );
-   CONV_ENDIAN( m_oSharedData, temp, magicNumber );
-   CONV_ENDIAN( m_oSharedData, temp, ramIndexes.ringIndexes.offset );
-   CONV_ENDIAN( m_oSharedData, temp, ramIndexes.ringIndexes.capacity );
-   CONV_ENDIAN( m_oSharedData, temp, ramIndexes.ringIndexes.start );
-   CONV_ENDIAN( m_oSharedData, temp, ramIndexes.ringIndexes.end );
-   CONV_ENDIAN( m_oSharedData, temp, operation.code );
-   CONV_ENDIAN( m_oSharedData, temp, operation.retCode );
-#endif
+
    if( m_oSharedData.magicNumber != DAQ_MAGIC_NUMBER )
       throw DaqException( "Wrong DAQ magic number respectively not found" );
 }
@@ -423,33 +405,7 @@ DaqInterface::RETURN_CODE_T DaqInterface::readParam1234( void )
 
    return static_cast<RETURN_CODE_T>( m_oSharedData.operation.retCode );
 }
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- */
-DaqInterface::RETURN_CODE_T DaqInterface::readRamIndexes( void )
-{
-   checkAddacSupport();
-   RAM_RING_INDEXES_T temp;
-   readLM32( &temp, sizeof( RAM_RING_INDEXES_T ),
-                        offsetof( DAQ_SHARED_IO_T, ramIndexes.ringIndexes ));
-   CONV_ENDIAN( m_oSharedData.ramIndexes.ringIndexes, temp, start );
-   CONV_ENDIAN( m_oSharedData.ramIndexes.ringIndexes, temp, end );
 
-   return static_cast<RETURN_CODE_T>( m_oSharedData.operation.retCode );
-}
-#endif
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- */
-void DaqInterface::sendUnlockRamAccess( void )
-{
-   checkAddacSupport();
-   m_oSharedData.ramIndexes.ramAccessLock = false;
-   uint32_t temp = 0;
-   writeLM32( &temp, sizeof( temp ),
-                          offsetof(DAQ_SHARED_IO_T, ramIndexes.ramAccessLock ));
-}
-#endif
 /*! ---------------------------------------------------------------------------
  */
 void DaqInterface::writeParam1( void )
@@ -510,35 +466,6 @@ void DaqInterface::writeParam1234( void )
    writeLM32( &temp, GET_OFFSET_AFTER( DAQ_OPERATION_IO_T, param4 ),
                      offsetof( DAQ_SHARED_IO_T, operation.ioData ));
 }
-
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- */
-void DaqInterface::writeRamIndexesAndUnlock( void )
-{
-   checkAddacSupport();
-   m_oSharedData.ramIndexes.ramAccessLock = false;
-
-   RAM_RING_SHARED_OBJECT_T temp;
-   CONV_ENDIAN( temp, m_oSharedData.ramIndexes, ramAccessLock );
-   CONV_ENDIAN( temp.ringIndexes, m_oSharedData.ramIndexes.ringIndexes, offset );
-   CONV_ENDIAN( temp.ringIndexes, m_oSharedData.ramIndexes.ringIndexes, capacity );
-   CONV_ENDIAN( temp.ringIndexes, m_oSharedData.ramIndexes.ringIndexes, start );
-   //!! CONV_ENDIAN( temp.ringIndexes, m_oSharedData.ramIndexes.ringIndexes, end );
-   writeLM32( &temp, GET_OFFSET_AFTER( RAM_RING_SHARED_OBJECT_T,
-                     ringIndexes.start ),
-                     offsetof( DAQ_SHARED_IO_T, ramIndexes ));
-}
-
-/*! ---------------------------------------------------------------------------
- */
-RAM_RING_INDEX_T DaqInterface::getCurrentRamSize( bool update )
-{
-   if( update )
-      readRamIndexes();
-   return ::ramRingGetSize( &m_oSharedData.ramIndexes.ringIndexes );
-}
-#endif
 
 /*! ---------------------------------------------------------------------------
  */
@@ -914,17 +841,4 @@ bool DaqInterface::receiveTriggerSourceHiRes( const uint deviceNumber,
    return (m_oSharedData.operation.ioData.param1 != 0);
 }
 
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-/*! ---------------------------------------------------------------------------
- */
-void DaqInterface::clearBuffer( bool update )
-{
-   if( !isAddacDaqSupport() )
-      return;
-
-   ramRingReset( &m_oScuRam.pSharedObj->ringIndexes );
-   if( update )
-      writeRamIndexesAndUnlock();
-}
-#endif
 //================================== EOF ======================================

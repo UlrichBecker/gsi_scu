@@ -80,13 +80,8 @@ typedef struct
    *       memory. \n
    *       Therefore its a pointer in this object.
    */
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    RAM_RING_SHARED_INDEXES_T* volatile pSharedObj;
-#else
-   RAM_RING_SHARED_OBJECT_T* volatile pSharedObj;
-#endif
 } RAM_SCU_T;
-
 
 /*! ---------------------------------------------------------------------------
  * @brief Initializing SCU RAM buffer ready to use.
@@ -95,11 +90,7 @@ typedef struct
  * @retval 0 Initializing was successful
  * @retval <0 Error
  */
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj );
-#else
-int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj );
-#endif
 
 /*! ----------------------------------------------------------------------------
  * @brief Exchanges the order of devicedeskriptor and payload so that the

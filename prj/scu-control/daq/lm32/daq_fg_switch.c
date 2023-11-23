@@ -36,7 +36,7 @@ extern DAQ_ADMIN_T g_scuDaqAdmin;
 /*! ---------------------------------------------------------------------------
  * @see daq_main.h
  */
-void daqEnableFgFeedback( const unsigned int slot,  const unsigned int fgNum,
+void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
                           const uint32_t tag )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );

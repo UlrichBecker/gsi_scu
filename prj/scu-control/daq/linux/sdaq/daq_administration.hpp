@@ -1092,12 +1092,6 @@ private:
                                      daqDescriptorGetChannel( &roDescriptor )
                                      + 1 );
    }
-
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   bool dataBlocksPresent( void );
-
-   int readDaqDataBlock( RAM_DAQ_PAYLOAD_T* pData, std::size_t len );
-#endif
 }; // class DaqAdministration
 
 ///////////////////////////////////////////////////////////////////////////////

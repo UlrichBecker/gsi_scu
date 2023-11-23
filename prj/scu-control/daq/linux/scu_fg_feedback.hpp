@@ -762,12 +762,7 @@ private:
       virtual ~MilDaqAdministration( void ) {}
 
       void onUnregistered( const FG_MACRO_T fg )  override;
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-      RAM_RING_INDEX_T getCurrentRamSize( bool update = true ) override
-      {
-         return 0; //TODO
-      }
-#endif
+
       void onDataReadingPause( void ) override;
 
       void onDataTimeout( void ) override;

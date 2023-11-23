@@ -12,11 +12,7 @@
 #include <scu_fg_macros.h>
 #include <scu_fg_handler.h>
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
- #ifdef CONFIG_RTOS
-  #include <scu_task_daq.h> //!!
- #else
-  #include <daq_fg_switch.h>
- #endif
+ #include <daq_fg_switch.h>
 #endif
 
 /*!

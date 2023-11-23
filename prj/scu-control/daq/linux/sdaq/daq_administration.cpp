@@ -245,9 +245,13 @@ bool DaqAdministration::registerDevice( DaqDevice* pDevice )
          return true;
    }
 
-   // Is device number forced?
+   /*
+    * Is device number forced?
+    */
    if( pDevice->m_deviceNumber == 0 )
-   { // No, allocation automatically.
+   { /*
+      * No, allocation automatically.
+      */
       if( pDevice->m_slot == 0  || !isLM32CommandEnabled() )
          pDevice->m_deviceNumber = m_devicePtrList.size() + 1;
       else
@@ -412,189 +416,8 @@ void DaqAdministration::onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor 
 }
 
 
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 /*! ---------------------------------------------------------------------------
  */
-inline bool DaqAdministration::dataBlocksPresent( void )
-{
-   std::size_t size = getCurrentRamSize( true );
-   return ((size != 0) && ((size % c_ramBlockShortLen) == 0));
-}
-
-/*! ---------------------------------------------------------------------------
- * @brief Function performs a block reading divided in smaller sub-blocks to
- *        reduce the maximum EB-cycle open time.
- *
- * That makes time gaps for making occasions for other EB-access devices
- * e.g.: SAFTLIB
- */
-int DaqAdministration::readDaqDataBlock( RAM_DAQ_PAYLOAD_T* pData,
-                                         std::size_t len )
-{
-   const std::size_t maxLen = ( m_maxEbCycleDataLen == 0 )? len : m_maxEbCycleDataLen;
-   while( true )
-   {
-      const std::size_t partLen = std::min( len, maxLen );
-      readRam( pData, partLen );
-      len -= partLen;
-      if( len == 0 )
-         break;
-      pData += partLen;
-      onDataReadingPause();
-   }
-
-   return EB_OK;
-}
-
-
-/*! ---------------------------------------------------------------------------
- */
-uint DaqAdministration::distributeData( void )
-{
-   union PROBE_BUFFER_T
-   {
-      DAQ_DATA_T        buffer[c_hiresPmDataLen];
-      RAM_DAQ_PAYLOAD_T ramItems[sizeof(PROBE_BUFFER_T::buffer) /
-                                 sizeof(RAM_DAQ_PAYLOAD_T)];
-      DAQ_DESCRIPTOR_T  descriptor;
-   };
-
-   static_assert( sizeof(PROBE_BUFFER_T)
-                   == c_hiresPmDataLen * sizeof(DAQ_DATA_T),
-                  "sizeof(PROBE_BUFFER_T) has to be equal"
-                  "c_hiresPmDataLen * sizeof(DAQ_DATA_T) !" );
-   static_assert( sizeof(PROBE_BUFFER_T) % sizeof(RAM_DAQ_PAYLOAD_T) == 0,
-                  "sizeof(PROBE_BUFFER_T) has to be dividable by "
-                  "sizeof(RAM_DAQ_PAYLOAD_T) !" );
-   /*
-    * For performance reasons the RAM-Size will at first read in the
-    * unlocked state.
-    * At least one block in RAM?
-    */
-   if( !dataBlocksPresent() )
-   { /*
-      * No, nothing to do.
-      */
-      return getCurrentRamSize( false );
-   }
-
-   m_receiveCount++;
-
-   /*
-    * At least one date block in RAM. For further actions
-    * the LM32 has to be locked, otherwise it could crash in the
-    * wishbone-bus. >:-O
-    */
-  //!! sendLockRamAccess();
-
-   /*
-    * After the access locking for the LM32 the RAM size has to be read again.
-    * Because it could be that in the meanwhile the LM32 has been received
-    * further data- blocks.
-    */
-   std::size_t size = getCurrentRamSize( true );
-   if( (size == 0) || (size % c_ramBlockShortLen != 0) )
-   { /*
-      * Nothing to do?
-      * Or does the LM32 has made bullshit?!?
-      * Very unlikely but not excluded.
-      * Data in RAM could be corrupt,
-      * therefore the entire RAM becomes cleared.
-      */
-      clearBuffer();
-      sendUnlockRamAccess();
-      return size;
-   }
-
-   PROBE_BUFFER_T probe;
-#ifdef CONFIG_DAQ_DEBUG
-   ::memset( &probe, 0x7f, sizeof( probe ) );
-#endif
-
-#ifdef CONFIG_DAQ_TIME_MEASUREMENT
-   USEC_T startTime = getSysMicrosecs();
-#endif
-
-   /*
-    * At first a short block is supposed. It's necessary to read this data
-    * obtaining the device-descriptor.
-    */
-   if( readDaqDataBlock( &probe.ramItems[0], c_ramBlockShortLen ) != EB_OK )
-   {
-      sendUnlockRamAccess();
-      throw EbException( "Unable to read SCU-Ram buffer first part" );
-   }
-#ifdef CONFIG_DAQ_TIME_MEASUREMENT
-   m_elapsedTime = std::max( getSysMicrosecs() - startTime, m_elapsedTime );
-#endif
-   /*
-    * Rough check of the device descriptors integrity.
-    */
-   if( !::daqDescriptorVerifyMode( &probe.descriptor ) )
-   {
-      //TODO Maybe clearing the entire buffer?
-      clearBuffer();
-      sendUnlockRamAccess();
-      onErrorDescriptor( probe.descriptor );
-   }
-
-   std::size_t wordLen;
-
-   if( ::daqDescriptorIsLongBlock( &probe.descriptor ) )
-   { /*
-      * Long block has been detected, in this case the rest of the data
-      * has still to be read from the DAQ-Ram-buffer.
-      */
-   #ifdef CONFIG_DAQ_TIME_MEASUREMENT
-      startTime = getSysMicrosecs();
-   #endif
-      if( readDaqDataBlock( &probe.ramItems[c_ramBlockShortLen],
-                            c_ramBlockLongLen - c_ramBlockShortLen
-                          ) != EB_OK )
-      {
-         sendUnlockRamAccess();
-         throw EbException( "Unable to read SCU-Ram buffer second part" );
-      }
-   #ifdef CONFIG_DAQ_TIME_MEASUREMENT
-       m_elapsedTime = std::max( getSysMicrosecs() - startTime, m_elapsedTime );
-   #endif
-       wordLen = c_hiresPmDataLen - c_discriptorWordSize;
-   }
-   else
-   { /*
-      * Short block has been detected.
-      */
-      wordLen = c_contineousDataLen - c_discriptorWordSize;
-   }
-
-   /*
-    * Unlock the LM32!
-    */
-   writeRamIndexesAndUnlock();
-
-   //TODO Make CRC check here!
-
-   DaqChannel* pChannel = getChannelByDescriptor( probe.descriptor );
-
-   if( pChannel != nullptr )
-   {
-      m_poCurrentDescriptor = &probe.descriptor;
-      pChannel->verifySequence();
-      pChannel->onDataBlock( &probe.buffer[c_discriptorWordSize], wordLen );
-      m_poCurrentDescriptor = nullptr;
-   }
-   else
-   {
-      readLastStatus();
-      //onBlockReceiveError();
-      onUnregistered( probe.descriptor );
-   }
-
-   return getCurrentRamSize( false );
-}
-
-
-#else // ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 uint DaqAdministration::distributeData( void )
 {
    union PROBE_BUFFER_T
@@ -655,11 +478,16 @@ uint DaqAdministration::distributeData( void )
    /*
     * Rough check of the device descriptors integrity.
     */
-   if( !::daqDescriptorVerifyMode( &probe.descriptor ) )
+   if( !::daqDescriptorVerifyMode( &probe.descriptor ) ||
+       !gsi::isInRange(::daqDescriptorGetSlot( &probe.descriptor ),
+                       static_cast<int>(Bus::SCUBUS_START_SLOT),
+                       static_cast<int>(Bus::MAX_SCU_SLAVES) ) ||
+       !isDevicePresent(::daqDescriptorGetSlot( &probe.descriptor )) ||
+       (static_cast<uint>(::daqDescriptorGetChannel( &probe.descriptor )) >= 4)
+     )
    {
       onErrorDescriptor( probe.descriptor );
       return getCurrentNumberOfData();
-      //TODO Maybe erase RAM?
    }
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
@@ -718,7 +546,6 @@ uint DaqAdministration::distributeData( void )
 
    return getCurrentNumberOfData();
 }
-#endif // ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 
 /*! ---------------------------------------------------------------------------
  */

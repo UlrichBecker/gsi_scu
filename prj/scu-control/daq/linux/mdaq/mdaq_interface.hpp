@@ -243,12 +243,7 @@ public:
 #endif
    uint getBufferSize( void );
 
-
-   void clearBuffer( bool update = true )
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   override
-#endif
-   ;
+   void clearBuffer( bool update = true );
 
 protected:
 #ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE

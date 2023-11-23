@@ -45,7 +45,6 @@
 /*! ---------------------------------------------------------------------------
  * @see scu_ramBuffer.h
  */
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj )
 {
    pThis->pSharedObj = pSharedObj;
@@ -55,17 +54,6 @@ int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_INDEXES_T* pSharedObj )
    return ddr3init();
  #endif
 }
-#else
-int ramInit( RAM_SCU_T* pThis, RAM_RING_SHARED_OBJECT_T* pSharedObj )
-{
-   pThis->pSharedObj = pSharedObj;
-   ramRingReset( &pSharedObj->ringIndexes );   
-
- #ifdef CONFIG_SCU_USE_DDR3
-   return ddr3init();
- #endif
-}
-#endif // else ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
 
 //#define CONFIG_MIL_IN_TIMER_INTERRUPT
 
@@ -132,11 +120,8 @@ typedef enum
 STATIC inline
 RAM_DAQ_BLOCK_T ramRingGetTypeOfOldestBlock( register RAM_SCU_T* pThis )
 {
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    unsigned int size = ramRingSharedGetSize( pThis->pSharedObj );
-#else
-   unsigned int size = ramRingGetSize( &pThis->pSharedObj->ringIndexes );
-#endif
+
    if( size == 0 )
       return RAM_DAQ_EMPTY;
 
@@ -149,11 +134,8 @@ RAM_DAQ_BLOCK_T ramRingGetTypeOfOldestBlock( register RAM_SCU_T* pThis )
    }
 
    RAM_DAQ_PAYLOAD_T  item;
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    RAM_RING_INDEXES_T indexes = pThis->pSharedObj->indexes;
-#else   
-   RAM_RING_INDEXES_T indexes = pThis->pSharedObj->ringIndexes;
-#endif
+
    ramRingAddToReadIndex( &indexes, RAM_DAQ_INDEX_OFFSET_OF_CHANNEL_CONTROL );
    ramRreadAddacDaqItem( ramRingGetReadIndex( &indexes ), &item );
 
@@ -195,33 +177,19 @@ void ramRemoveOldestBlock( register RAM_SCU_T* pThis )
    {
       case RAM_DAQ_UNDEFINED:
       {
-       #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
          ramRingSharedReset( pThis->pSharedObj );
-       #else
-         ramRingReset( &pThis->pSharedObj->ringIndexes );
-       #endif
          break;
       }
       case RAM_DAQ_SHORT:
       {
-      #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
          ramRingSharedAddToReadIndex( pThis->pSharedObj,
                                       RAM_DAQ_SHORT_BLOCK_LEN );
-      #else
-         ramRingAddToReadIndex( &pThis->pSharedObj->ringIndexes,
-                                RAM_DAQ_SHORT_BLOCK_LEN );
-      #endif
          break;
       }
       case RAM_DAQ_LONG:
       {
-      #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
          ramRingSharedAddToReadIndex( pThis->pSharedObj,
                                       RAM_DAQ_LONG_BLOCK_LEN );
-      #else
-         ramRingAddToReadIndex( &pThis->pSharedObj->ringIndexes,
-                                RAM_DAQ_LONG_BLOCK_LEN );
-      #endif
          break;
       }
       default: break;
@@ -234,14 +202,8 @@ void ramRemoveOldestBlock( register RAM_SCU_T* pThis )
 STATIC inline
 bool ramDoesBlockFit( register RAM_SCU_T* pThis, const bool isShort )
 {
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    return (ramRingSharedGetRemainingCapacity( pThis->pSharedObj ) >=
            (isShort? RAM_DAQ_SHORT_BLOCK_LEN : RAM_DAQ_LONG_BLOCK_LEN));
-
-#else
-   return (ramRingGetRemainingCapacity( &pThis->pSharedObj->ringIndexes ) >=
-           (isShort? RAM_DAQ_SHORT_BLOCK_LEN : RAM_DAQ_LONG_BLOCK_LEN));
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -284,17 +246,10 @@ STATIC inline
 void publishWrittenData( register RAM_SCU_T* pThis,
                          RAM_RING_INDEXES_T* poIndexes )
 {
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
    pThis->pSharedObj->indexes.end = poIndexes->end;
    //pThis->pSharedObj->serverHasWritten = 1;
    DBG_RAM_INFO( "DBG: RAM-items: %d\n",
                  ramRingSharedGetSize( &pThis->pSharedObj->ringAdmin ) );
-#else
-   pThis->pSharedObj->ringIndexes.end = poIndexes->end;
-   pThis->pSharedObj->serverHasWritten = 1;
-   DBG_RAM_INFO( "DBG: RAM-items: %d\n",
-                 ramRingGetSize( &pThis->pSharedObj->ringIndexes ) );
-#endif
 }
 
 //#define CONFIG_DAQ_DECREMENT
@@ -344,11 +299,8 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
 
    RAM_DAQ_PAYLOAD_T ramItem;
    DAQ_DATA_T        firstData[RAM_DAQ_DESCRIPTOR_COMPLETION];
-#ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
+
    oDescriptorIndexes = pThis->pSharedObj->indexes;
-#else
-   oDescriptorIndexes = pThis->pSharedObj->ringIndexes;
-#endif
    oDataIndexes       = oDescriptorIndexes;
    poIndexes          = &oDataIndexes;
 
@@ -643,9 +595,7 @@ int ramPushDaqDataBlock( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
       daqDescriptorSetDaq( &pDaqChannel->simulatedDescriptor, true );
    #endif
    }
-#ifndef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-   ramPollAccessLock( pThis );
-#endif
+
    ramMakeSpaceIfNecessary( pThis, isShort );
    ramWriteDaqData( pThis, pDaqChannel, isShort );
    return 0;

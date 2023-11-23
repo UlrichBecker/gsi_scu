@@ -311,15 +311,6 @@ typedef struct PACKED_SIZE
     */
    uint16_t blockDownCounter;
 
-#ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
-   /*!
-    * @brief White rabbit time-stamp of the corresponding interrupt of this channel.
-    * @note This is a patch! Because of a perhaps erroneous DAQ-VHDL-macro.
-    *       This shall be removed ASAP.
-    */
-    uint64_t timestamp;
-#endif
-
 #ifdef CONFIG_DAQ_SW_SEQUENCE
    /*!
     * @brief Sequence number respectively modulo 256 block counter for
@@ -343,97 +334,6 @@ typedef struct PACKED_SIZE
    DAQ_DESCRIPTOR_T  simulatedDescriptor; //!<@brief For simulation purposes only!
 #endif
 } DAQ_CANNEL_T;
-
-#ifndef CONFIG_DAQ_SINGLE_APP
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Task type for the DAQ channels for the ADDAC function generator
- *        feedback of set- and actual values.
- */
-typedef enum
-{
-   FB_OFF = 0, /*!<@brief Switch DAQ channels for FG-feedback on */
-   FB_ON  = 1  /*!<@brief Switch DAQ channels for FG-feedback off */
-} DAQ_FEEDBACK_ACTION_T;
-
-#define FSM_DECLARE_STATE( state, attr... ) state
-
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-/*!
- * @ingroup DAQ_DEVICE
- * @brief Declaration of the states for the feedback switch FSM.
- */
-typedef enum
-{
-   FSM_DECLARE_STATE( FB_READY, label='Wait for message.', color='green' ),
-   FSM_DECLARE_STATE( FB_FIRST_ON, label='First DAQ channel is on', color='red' ),
-   FSM_DECLARE_STATE( FB_BOTH_ON, label='Second DAQ channel is on', color='red' )
-} DAQ_FEEDBACK_STATUS_T;
-#endif
-
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Item type for action buffer.
- */
-typedef struct PACKED_SIZE
-{
-  /*!
-   * @brief Operation code.
-   * @see DAQ_FEEDBACK_ACTION_T
-   */
-   DAQ_FEEDBACK_ACTION_T action;
-
-  /*!
-   * @brief Number of function generator.
-   */
-   unsigned int fgNumber;
-
-   uint32_t     tag;
-} DAQ_ACTION_ITEM_T;
-
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Main data type for feedback on/off-switch FSM.
- * @see daqDeviceDoFeedbackSwitchOnOffFSM
- */
-typedef struct
-{
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-  /*!
-   * @brief Holds the earliest time point for the next
-   *        switch event.
-   */
-   uint64_t              waitingTime;
-#endif
-  /*!
-   * @brief Number of the concerning function generator
-   *        for DAQ feedback.
-   */
-   unsigned int          fgNumber;
-
-#ifndef CONFIG_NO_DAQ_SWITCH_DELAY
-  /*!
-   * @brief Holds the current status of the FSM.
-   * @see daqDeviceDoFeedbackSwitchOnOffFSM
-   */
-   DAQ_FEEDBACK_STATUS_T status;
-#endif
-  /*!
-   * @brief Waiting queue for the next switch actions coming from SAFT-LIB.
-   * 
-   * It is supposed the SAFT-LIB doesn't send more than MAX_FG_PER_SLAVE
-   * commands to the same slave in a short time, therefore the queue has a
-   * maximum capacity of MAX_FG_PER_SLAVE.
-   * @var SW_QUEUE_T aktionBuffer
-   * @see MAX_FG_PER_SLAVE
-   * @see daqDeviceFeedBackReset
-   * @see daqDevicePutFeedbackSwitchCommand
-   * @see daqDeviceDoFeedbackSwitchOnOffFSM
-   */
-   QUEUE_IMPLEMENT( aktionBuffer, 2 * MAX_FG_PER_SLAVE, DAQ_ACTION_ITEM_T );
-} DAQ_FEEDBACK_T;
-
-#endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
@@ -470,13 +370,6 @@ typedef struct
     */
    DAQ_REGISTER_ACCESS_T*  pReg;
 
-#ifndef CONFIG_DAQ_SINGLE_APP
-   /*!
-    * @brief Administration of feedback channels for
-    * ADDAC- function generators
-    */
-   DAQ_FEEDBACK_T feedback;
-#endif
 } DAQ_DEVICE_T;
 
 /*! ---------------------------------------------------------------------------
@@ -484,14 +377,25 @@ typedef struct
  * @brief Object represents all on the SCU-bus connected DAQs.
  */
 typedef struct
-{
-   //! @brief Mirror-flags of the used slots by DAQ-slaves
+{  /*!
+    * @brief Mirror-flags of the used slots by DAQ-slaves
+    */
    SCUBUS_SLAVE_FLAGS_T  slotDaqUsedFlags;
-   //! @brief Number of found DAQs
+
+   /*!
+    * @brief Number of found DAQs
+    */
    unsigned int          foundDevices;
-   //! @brief Holding of the last error for the Linux host.
+
+   /*!
+    * @brief Holds of the last error for the Linux host.
+    */
    DAQ_LAST_STATUS_T     lastErrorState;
-   //! @brief Array of all possible existing DAQs
+
+
+   /*!
+    * @brief Array of all possible existing DAQs
+    */
    DAQ_DEVICE_T          aDaq[DAQ_MAX];
 } DAQ_BUS_T;
 
@@ -1869,33 +1773,6 @@ uint32_t daqDeviceGetTimeStampTag( register DAQ_DEVICE_T* pThis );
  * @param pThis Pointer to the DAQ-device object
  */
 void daqDeviceReset( register DAQ_DEVICE_T* pThis );
-
-#ifndef CONFIG_DAQ_SINGLE_APP
-
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Finite state machine which handles the on/off switching of
- *        feed-back channels for ADDAC- function generators.
-
- * @dotfile daq.gv
- */
-bool daqDeviceDoFeedbackSwitchOnOffFSM( DAQ_DEVICE_T* pThis );
-
-/*! ---------------------------------------------------------------------------
- * @ingroup DAQ_DEVICE
- * @brief Puts a command for the feedback switch FSM in the waiting queue
- *        this command will executed ASAP.
- * @param pThis Pointer to the DAQ-device object
- * @param what Command: FB_ON or FB_OFF.
- * @param fgNumber Number of the function generator: 0 or 1.
- */
-void daqDevicePutFeedbackSwitchCommand( register DAQ_DEVICE_T* pThis,
-                                        const DAQ_FEEDBACK_ACTION_T what,
-                                        const unsigned int fgNumber,
-                                        const uint32_t tag
-                                      );
-
-#endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
