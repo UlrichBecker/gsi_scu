@@ -9,7 +9,7 @@
 ## Date:     09.10.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-DEFINES += VERSION=4.1
+DEFINES += VERSION=4.2
 FOR_SCU_AND_ACC := 1
 
 #USE_NAMED_MUTEX := 1
@@ -150,7 +150,7 @@ CALL_ARGS = scuxl0035.acc.gsi.de -I200 -rQ
 # CALL_ARGS = scuxl0035 -b11,12
 # CALL_ARGS = scuxl0035 -azdt1 -I10000 -T"X11 size 800,150
 # CALL_ARGS = "140.181.160.53" -azt1 -T"X11 size 800,150"
-# CALL_ARGS = scuxl0107 -azdt1 -T"X11 size 800,150"i
+# CALL_ARGS = scuxl0107 -azdt1 -T"X11 size 800,150"
 
 
 DOX_OPTIMIZE_OUTPUT_FOR_C = "NO"

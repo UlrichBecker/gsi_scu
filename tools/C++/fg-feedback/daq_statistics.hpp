@@ -82,6 +82,16 @@ class Statistics
        * @brief Keeps the actual block sequence number.
        */
       DAQ_SEQUENCE_T m_actualSequence;
+
+      /*!
+       * @brief Becomes true if a sequense error had detected.
+       */
+      bool m_sequenceError;
+
+      /*!
+       * @brief Counter for sequence error respectively block lost.
+       */
+      uint m_sequenceErrorCount;
    };
 
    /*!

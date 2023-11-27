@@ -475,6 +475,10 @@ void AllDaqAdministration::onDataError( const bool isMil )
  */
 void AllDaqAdministration::onAddacBlockError( uint slot, uint daqNumber )
 {
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   if( m_poCommandLine->isMakeStatistic() )
+      return;
+#endif
    WARNING_MESSAGE( "Possible loss of data blocks of ADDAC DAQ "
                      << daqNumber << " in slot " << slot );
 }
