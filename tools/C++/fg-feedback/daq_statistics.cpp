@@ -76,6 +76,8 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
       {
          i.m_counter++;
          i.m_counterUpdated = true;
+         i.m_lastSequence = i.m_actualSequence;
+         i.m_actualSequence = daqDescriptorGetSequence( &rDescriptor );
          return;
       }
    }
@@ -88,11 +90,13 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
 
    const BLOCK_T newBlock =
    {
-      .m_serialNumber   = serialNumber,
-      .m_slot           = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )),
-      .m_channel        = static_cast<uint>(daqDescriptorGetChannel( &rDescriptor )),
-      .m_counter        = 1,
-      .m_counterUpdated = true
+      .m_serialNumber     = serialNumber,
+      .m_slot             = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )),
+      .m_channel          = static_cast<uint>(daqDescriptorGetChannel( &rDescriptor )),
+      .m_counter          = 1,
+      .m_counterUpdated   = true,
+      .m_lastSequence     = static_cast<DAQ_SEQUENCE_T>(daqDescriptorGetSequence( &rDescriptor ) - 1),
+      .m_actualSequence   = daqDescriptorGetSequence( &rDescriptor )
    };
    m_daqChannelList.push_back( newBlock );
 
@@ -128,7 +132,10 @@ void Statistics::print( void )
       if( i.m_counterUpdated )
       {
          i.m_counterUpdated = false;
-         cout << ESC_BOLD ESC_FG_GREEN;
+         if( static_cast<DAQ_SEQUENCE_T>(i.m_lastSequence + 1) == i.m_actualSequence )
+            cout << ESC_BOLD ESC_FG_GREEN;
+         else
+            cout << ESC_BOLD ESC_FG_YELLOW;
       }
       else
          cout << ESC_NORMAL ESC_FG_BLUE;

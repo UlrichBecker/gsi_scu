@@ -72,6 +72,16 @@ class Statistics
        * @brief Becomes "true" if the counter was updated.
        */
       bool m_counterUpdated;
+
+      /*!
+       * @brief Keeps the last received block sequence number.
+       */
+      DAQ_SEQUENCE_T m_lastSequence;
+
+      /*!
+       * @brief Keeps the actual block sequence number.
+       */
+      DAQ_SEQUENCE_T m_actualSequence;
    };
 
    /*!
