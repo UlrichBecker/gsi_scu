@@ -329,10 +329,10 @@ void addacDaqTask( void )
          s_pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
 
          if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
-            s_continuousPending = daqGetAndResetContinuousIntPendingBits( s_pDaqDevice );
+            s_continuousPending = daqDeviceGetAndResetContinuousIntPendingBits( s_pDaqDevice );
          
          if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
-            s_highResPending = daqGetAndResetHighresIntPendingBits( s_pDaqDevice );
+            s_highResPending = daqDeviceGetAndResetHighresIntPendingBits( s_pDaqDevice );
       }
    }
    

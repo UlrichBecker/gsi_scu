@@ -115,6 +115,7 @@ endif
 LIBS += pthread
 LIBS += stdc++
 
+NO_LTO := 1
 
 DOX_INPUT += $(DAQ_LINUX_DIR)/daq_calculations.hpp
 

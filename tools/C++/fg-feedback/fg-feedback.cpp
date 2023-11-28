@@ -64,6 +64,7 @@ using namespace Scu;
 
 #define FSM_TRANSITION_SELF( attr... ) break
 
+#ifndef CONFIG_OECORE_SDK_VERSION
 /*! ---------------------------------------------------------------------------
  */
 void onUexpectedException( void )
@@ -71,6 +72,7 @@ void onUexpectedException( void )
   ERROR_MESSAGE( "Unexpected exception occurred!" );
   throw 0;     // throws int (in exception-specification)
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
@@ -673,7 +675,10 @@ int fbMain( int argc, char** ppArgv )
  */
 int main( int argc, char** ppArgv )
 {
+#ifndef CONFIG_OECORE_SDK_VERSION
    set_unexpected( onUexpectedException );
+#endif
+
    try
    {
       return fbMain( argc, ppArgv );

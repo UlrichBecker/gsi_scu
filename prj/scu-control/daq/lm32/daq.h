@@ -1136,6 +1136,7 @@ void daqChannelSetTriggerDelay( register DAQ_CANNEL_T* pThis,
    __DAQ_GET_CHANNEL_REG( TRIG_DLY ) = value;
 }
 
+#if 0
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL DAQ_INTERRUPT
  * @brief Returns the pointer to the 16 bit DAQ interrupt pending register
@@ -1203,7 +1204,7 @@ bool daqChannelTestAndClearHiResIntPending( register DAQ_CANNEL_T* pThis )
    }
    return false;
 }
-
+#endif
 /*! --------------------------------------------------------------------------
  * @ingroup DAQ_CHANNEL
  * @brief Get the pointer to the data of the post mortem respectively to
@@ -1581,7 +1582,7 @@ DAQ_REGISTER_T* daqDeviceGetDaqIntPendingPtr( DAQ_DEVICE_T* pThis )
  * @return Flag field if pending interrupts before reset.  
  */
 STATIC inline //volatile
-DAQ_REGISTER_T daqGetAndResetContinuousIntPendingBits( DAQ_DEVICE_T* pThis )
+DAQ_REGISTER_T daqDeviceGetAndResetContinuousIntPendingBits( DAQ_DEVICE_T* pThis )
 {
    volatile DAQ_REGISTER_T* pPendingFlags = daqDeviceGetDaqIntPendingPtr( pThis );
    const volatile DAQ_REGISTER_T pendingFlags = *pPendingFlags;
@@ -1624,7 +1625,7 @@ uint16_t* daqDeviceGetHiResIntPendingPtr( register DAQ_DEVICE_T* pThis )
  * @return Flag field if pending interrupts before reset.  
  */
 STATIC inline volatile
-DAQ_REGISTER_T daqGetAndResetHighresIntPendingBits( DAQ_DEVICE_T* pThis )
+DAQ_REGISTER_T daqDeviceGetAndResetHighresIntPendingBits( DAQ_DEVICE_T* pThis )
 {
    volatile DAQ_REGISTER_T* pPendingFlags = daqDeviceGetHiResIntPendingPtr( pThis );
    const volatile DAQ_REGISTER_T pendingFlags = *pPendingFlags;

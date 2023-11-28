@@ -149,8 +149,8 @@ void daqChannelReset( register DAQ_CANNEL_T* pThis )
    for( i = 0; i < DAQ_FIFO_DAQ_WORD_SIZE; i++ )
       dummy = daqChannelPopDaqFifo( pThis );
 
-   daqChannelTestAndClearDaqIntPending( pThis );
-   daqChannelTestAndClearHiResIntPending( pThis );
+ //  daqChannelTestAndClearDaqIntPending( pThis );
+ //  daqChannelTestAndClearHiResIntPending( pThis );
 }
 #else /* ifndef CONFIG_DAQ_SIMULATE_CHANNEL */
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -560,7 +560,6 @@ int daqDeviceFindChannels( DAQ_DEVICE_T* pThis, const unsigned int slot )
 
       DAQ_ASSERT( channel < BIT_SIZEOF( pCurrentChannel->intMask ));
       pCurrentChannel->intMask = 1 << channel;
-
       DBPRINT2( "DBG: Slot of channel %d: %d\n", channel,
                 daqChannelGetSlot( pCurrentChannel ) );
 
@@ -579,6 +578,8 @@ int daqDeviceFindChannels( DAQ_DEVICE_T* pThis, const unsigned int slot )
              );
     #endif
    }
+   daqDeviceGetAndResetContinuousIntPendingBits( pThis );
+   daqDeviceGetAndResetHighresIntPendingBits( pThis );
    return pThis->maxChannels;
 }
 

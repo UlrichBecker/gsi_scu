@@ -34,6 +34,7 @@ using namespace std;
 using namespace Scu;
 using namespace fgw;
 
+#ifndef CONFIG_OECORE_SDK_VERSION
 /*! ---------------------------------------------------------------------------
  */
 void onUexpectedException( void )
@@ -41,6 +42,7 @@ void onUexpectedException( void )
   ERROR_MESSAGE( "Unexpected exception occurred!" );
   throw 0;     // throws int (in exception-specification)
 }
+#endif
 
 /*! ---------------------------------------------------------------------------
  */
@@ -144,7 +146,9 @@ int static printInfo( const POLYMOM_VECT_T& rVect, const bool beVerbose )
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** ppArgv )
 {
+#ifndef CONFIG_OECORE_SDK_VERSION
    set_unexpected( onUexpectedException );
+#endif
    try
    {
       CommandLine oCmdLine( argc, ppArgv );

@@ -227,7 +227,7 @@ uint64_t EtherboneConnection::findDeviceBaseAddress( VendorId vendorId,
    }
 
    std::vector<sdb_device> deviceVector;
-   sdb_device device;
+   sdb_device device = {0};
    deviceVector.push_back(device);
 
    {

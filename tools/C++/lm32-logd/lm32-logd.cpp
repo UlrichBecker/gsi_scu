@@ -43,6 +43,7 @@ namespace EB = FeSupport::Scu::Etherbone;
 
 STATIC bool g_exit = false;
 
+#ifndef CONFIG_OECORE_SDK_VERSION
 /*! ---------------------------------------------------------------------------
  */
 void onUnexpectedException( void )
@@ -50,6 +51,7 @@ void onUnexpectedException( void )
    ERROR_MESSAGE( "Unexpected exception occurred!" );
    throw 0;     // throws int (in exception-specification)
 }
+#endif
 
 /*! ---------------------------------------------------------------------------
  */
@@ -201,8 +203,9 @@ STATIC void daemonize( void )
 int main( int argc, char** ppArgv )
 {
    DEBUG_MESSAGE_FUNCTION("");
+#ifndef CONFIG_OECORE_SDK_VERSION
    set_unexpected( onUnexpectedException );
-
+#endif
    try
    {
       CommandLine oCmdLine( argc, ppArgv );
