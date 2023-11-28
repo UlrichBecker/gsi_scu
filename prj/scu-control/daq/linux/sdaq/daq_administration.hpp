@@ -1080,6 +1080,13 @@ public:
    virtual void onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor );
 
 protected:
+
+   /*!
+    * @ingroup onDataBlock
+    * @brief Optionel callback function becones invoked if a crc error had detected.
+    */
+   virtual void onErrorCrc( void );
+
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    virtual void onIncomingDescriptor( DAQ_DESCRIPTOR_T& roDescriptor ) {}
 #endif
@@ -1092,6 +1099,11 @@ private:
                                      daqDescriptorGetChannel( &roDescriptor )
                                      + 1 );
    }
+
+   /*!
+    * @brief Calculates the 8-bit value of the CRC polynom: y = 1 + x^2 + x^5
+    */
+   uint8_t crcPolynom( uint8_t x );
 }; // class DaqAdministration
 
 ///////////////////////////////////////////////////////////////////////////////

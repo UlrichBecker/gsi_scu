@@ -182,6 +182,14 @@ uint DaqBaseInterface::getNumberOfNewData( void )
 
 /*! --------------------------------------------------------------------------
  */
+uint DaqBaseInterface::getFiFoLevelPerTenThousand( void )
+{
+   assert( getRamCapacity() > 0 );
+   return (getCurrentNumberOfData() * 10000) / getRamCapacity();
+}
+
+/*! --------------------------------------------------------------------------
+ */
 void DaqBaseInterface::sendWasRead( const uint wasRead )
 {
    assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );

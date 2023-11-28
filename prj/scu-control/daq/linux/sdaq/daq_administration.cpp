@@ -415,6 +415,19 @@ void DaqAdministration::onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor 
    throw( DaqException( "Erroneous descriptor" ) );
 }
 
+/*! ---------------------------------------------------------------------------
+ */
+uint8_t DaqAdministration::crcPolynom( uint8_t x )
+{
+   return static_cast<uint8_t>(1 + x * x + x * x * x * x * x);
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void DaqAdministration::onErrorCrc( void )
+{
+
+}
 
 /*! ---------------------------------------------------------------------------
  */
@@ -437,7 +450,6 @@ uint DaqAdministration::distributeData( void )
                   "sizeof(PROBE_BUFFER_T) has to be dividable by "
                   "sizeof(RAM_DAQ_PAYLOAD_T) !" );
 
-   //TODO: Timeout detection!
    /*
     * Getting the number of DDR3 memory items which has to be copied
     * in the probe buffer.
@@ -490,13 +502,6 @@ uint DaqAdministration::distributeData( void )
       return getCurrentNumberOfData();
    }
 
-#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
-   /*
-    * For statistics only.
-    */
-   onIncomingDescriptor( probe.descriptor );
-#endif
-
    /*!
     * Holds the number of received payload data words without descriptor.
     */
@@ -528,6 +533,29 @@ uint DaqAdministration::distributeData( void )
       wordLen = c_contineousDataLen - c_discriptorWordSize;
    }
 
+   // TODO !!!!!!!!!
+   const uint crcLen = wordLen * sizeof(DAQ_DATA_T);
+   assert( crcLen < sizeof(probe) );
+   uint8_t crc = 0;
+   for( uint i = c_discriptorWordSize * sizeof(DAQ_DATA_T); i < crcLen; i++ )
+   {
+      crc = crcPolynom( crc ) ^ reinterpret_cast<uint8_t*>(&probe)[i];
+   }
+   for( uint i = 0; i < (c_discriptorWordSize-1) * sizeof(DAQ_DATA_T); i++ )
+   {
+      crc = crcPolynom( crc ) ^ reinterpret_cast<uint8_t*>(&probe)[i];
+   }
+   if( daqDescriptorGetCRC( &probe.descriptor ) != crc )
+   {
+      onErrorCrc();
+   }
+
+#ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+   /*
+    * For statistics only.
+    */
+   onIncomingDescriptor( probe.descriptor );
+#endif
 
    DaqChannel* pChannel = getChannelByDescriptor( probe.descriptor );
 

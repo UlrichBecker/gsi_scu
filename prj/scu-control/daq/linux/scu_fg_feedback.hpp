@@ -1042,6 +1042,23 @@ public:
       return m_oAddacDaqAdmin.getCurrentNumberOfData();
    }
 
+   /*!
+    * @brief Returns the relative FoFo-level of DDR3 or SRAM of ADDAC-DAQs
+    *        in ten thousand parts.
+    *
+    * This makes it possible to calculate the FIFO level in percent with a
+    * precision of two decimal places after the decimal point.
+    *
+    * On this software layer shall floating point calculations be avoided.
+    *
+    * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
+    *                to be called before!
+    */
+   uint getAddacFiFoLevelPerTenThousand( void )
+   {
+      return m_oAddacDaqAdmin.getFiFoLevelPerTenThousand();
+   }
+
 #ifdef CONFIG_MIL_FG
    /*!
     * @brief Returns the maximum capacity of the MIL-DAQ data-buffer
@@ -1069,6 +1086,24 @@ public:
    {
       return m_oMilDaqAdmin.getCurrentNumberOfData();
    }
+
+   /*!
+    * @brief Returns the relative FoFo-level of DDR3 or SRAM of MIL-DAQs
+    *        in ten thousand parts.
+    *
+    * This makes it possible to calculate the FIFO level in percent with a
+    * precision of two decimal places after the decimal point.
+    *
+    * On this software layer shall floating point calculations be avoided.
+    *
+    * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
+    *                to be called before!
+    */
+    uint getMilFiFoLevelPerTenThousand( void )
+    {
+       return m_oMilDaqAdmin.getFiFoLevelPerTenThousand();
+    }
+
 #endif
 
    /*!

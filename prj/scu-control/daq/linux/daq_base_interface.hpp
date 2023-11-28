@@ -375,7 +375,7 @@ public:
 
    /*!
     * @brief Returns the currently number of data items which are not read yet
-    *         in the DDR3-RAM
+    *         in the DDR3-RAM of SCU3 respectively SRAM of SCU4
     * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
     *                to be called before!
     */
@@ -383,6 +383,19 @@ public:
    {
       return ramRingSharedGetSize( m_poRingAdmin );
    }
+
+   /*!
+    * @brief Returns the relative FoFo-level of DDR3 or SRAM in ten thousand parts.
+    *
+    * This makes it possible to calculate the FIFO level in percent with an
+    * precision of two decimal places.
+    *
+    * On this software layer shall floating point calculations be avoided.
+    *
+    * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
+    *                to be called before!
+    */
+   uint getFiFoLevelPerTenThousand( void );
 
    /*!
     * @brief Returns the number of DDR3- memory items which has not been read yet

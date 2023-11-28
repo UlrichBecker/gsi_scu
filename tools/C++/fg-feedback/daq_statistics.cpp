@@ -158,12 +158,10 @@ void Statistics::print( void )
    }
    cout << ESC_NORMAL << endl;
 
-   assert( m_pParent->getAddacBufferCapacity() != 0 );
-
-   const float level = static_cast<float>(m_pParent->getAddacBufferLevel()) * 100.0 /
-                       static_cast<float>(m_pParent->getAddacBufferCapacity());
-
-   if( level > 90.0 )
+   const float level = static_cast<float>(m_pParent->getAddacFiFoLevelPerTenThousand()) / 100.0;
+   if( level > 98.0 )
+      cout << ESC_ERROR;
+   else if( level > 90.0 )
       cout << ESC_WARNING;
    cout << "FiFo- level: " << fixed << setprecision(2) << setw( 6 ) << level << '%'
         << ESC_NORMAL << endl;
