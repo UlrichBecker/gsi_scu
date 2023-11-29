@@ -43,10 +43,6 @@ STATIC TaskHandle_t mg_taskDaqHandle = NULL;
 extern void* g_pScub_base;
 DAQ_ADMIN_T g_scuDaqAdmin;
 
-#ifdef CONFIG_NO_DAQ_SWITCH_DELAY
-#warning Offene Baustelle wenn CONFIG_NO_DAQ_SWITCH_DELAY definiert ist!!!!
-#endif
-
 QUEUE_CREATE_STATIC( g_queueAddacDaq, 2 * MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 
 /*! ---------------------------------------------------------------------------
@@ -63,51 +59,7 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList )
    return DAQ_RET_OK;
 }
 
-/*! ---------------------------------------------------------------------------
- * @brief Switceing the DAQ-channels for set- and actual- values on or off
- *        if DAQ present.
- */
-STATIC void daqSwitchFeedback( const unsigned int slot, const unsigned int fgNum,
-                               const DAQ_FEEDBACK_ACTION_T what, const uint32_t tag )
-{
-  // criticalSectionEnter();
-   DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
- //  criticalSectionExit();
-
-#ifdef CONFIG_NON_DAQ_FG_SUPPORT
-   if( (pDaqDevice == NULL) || (pDaqDevice->type == UNKNOWN))
-   {
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "No DAQ devices on slave %u\n" ESC_NORMAL, slot ); 
-      return;
-   }
-#else
-   DAQ_ASSERT( pDaqDevice != NULL );
-#endif
-   daqDevicePutFeedbackSwitchCommand( pDaqDevice, what, fgNum, tag );
-}
-
-/*! ---------------------------------------------------------------------------
- * @see scu_task_daq.h
- */
-void daqEnableFgFeedback( const unsigned int slot,
-                          const unsigned int fgNum,
-                          const uint32_t tag
-                        )
-{
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
-
-   daqSwitchFeedback( slot, fgNum, FB_ON, tag );
-}
-
-/*! ---------------------------------------------------------------------------
- * @see scu_task_daq.h
- */
-void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
-{
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
-   daqSwitchFeedback( slot, fgNum, FB_OFF, 0 );
-}
-
+#if 0
 /*! ---------------------------------------------------------------------------
  */
 STATIC inline void handleContinuousMode( DAQ_CANNEL_T* pChannel )
@@ -139,7 +91,7 @@ STATIC inline void handleHiresMode( DAQ_CANNEL_T* pChannel )
 #endif
    ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, false );
 }
-
+#endif
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -166,14 +118,13 @@ STATIC inline void daqDeviceScanPostMortem( DAQ_DEVICE_T* pDaqDevice )
 
 /*! ---------------------------------------------------------------------------
  */
-STATIC inline void daqScanForCommands( void )
+STATIC inline void daqHandlePostMortem( void )
 {
    const unsigned int maxDevices = daqBusGetFoundDevices( &g_scuDaqAdmin.oDaqDevs );
    for( unsigned int devNr = 0; devNr < maxDevices; devNr++ )
    {
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceObject( &g_scuDaqAdmin.oDaqDevs, devNr );
       daqDeviceScanPostMortem( pDaqDevice );
-      daqDeviceDoFeedbackSwitchOnOffFSM( pDaqDevice );
    }
 }
 
@@ -181,7 +132,7 @@ STATIC inline void daqScanForCommands( void )
  * @ingroup RTOS_TASK
  * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
  */
-OPTIMIZE( "-O1"  ) //!@todo Necessary if LTO activated I don't know why yet!
+//OPTIMIZE( "-O1"  ) //!@todo Necessary if LTO activated I don't know why yet!
 STATIC void taskDaq( void* pTaskData UNUSED )
 {
    taskInfoLog();
@@ -192,7 +143,6 @@ STATIC void taskDaq( void* pTaskData UNUSED )
     */
    while( true )
    {
-   #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
       /*
        * Removing old data which has been possibly read and evaluated by the
        * Linux client
@@ -206,9 +156,8 @@ STATIC void taskDaq( void* pTaskData UNUSED )
        * See daq_administration.cpp  function: DaqAdministration::distributeData
        */
       ramRingSharedSynchonizeReadIndex( &GET_SHARED().ringAdmin );
-   #endif
 
-      daqScanForCommands();
+      daqHandlePostMortem();
 
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
@@ -226,19 +175,45 @@ STATIC void taskDaq( void* pTaskData UNUSED )
        * Queue has at least one valid message.
        */
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
+      
+      DAQ_REGISTER_T continousIntPending = 0;
+      if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+         continousIntPending = daqDeviceGetAndResetContinuousIntPendingBits( pDaqDevice );
+      
+      DAQ_REGISTER_T hiResPending = 0; 
+      if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
+         hiResPending = daqDeviceGetAndResetHighresIntPendingBits( pDaqDevice );
+      
       const unsigned int maxChannels = daqDeviceGetMaxChannels( pDaqDevice );
       for( unsigned int channelNumber = 0; channelNumber < maxChannels; channelNumber++ )
       {
          DAQ_CANNEL_T* pChannel = daqDeviceGetChannelObject( pDaqDevice, channelNumber );
 
-         if(( queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
+         /*
+          * Handling of DAQ continous interrupt
+          */
+         if( (continousIntPending & pChannel->intMask) != 0 )
          {
-            handleContinuousMode( pChannel );
+         #ifdef CONFIG_DAQ_SW_SEQUENCE
+            pChannel->sequenceContinuous++;
+         #endif
+            if( daqChannelGetDaqFifoWords( pChannel ) > 0 )
+            {
+               ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, true );
+               daqChannelDecrementBlockCounter( pChannel );
+            }
          }
-
-         if(( queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_HIRES_FINISHED)) != 0 )
+         
+         /*
+          * Handling of DAQ high-resolution interrupt
+          */
+         if( (hiResPending & pChannel->intMask) != 0 )
          {
-            handleHiresMode( pChannel );
+            daqChannelDisableHighResolution( pChannel );
+         #ifdef CONFIG_DAQ_SW_SEQUENCE
+            pChannel->sequencePmHires++;
+         #endif
+            ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, false );
          }
       }
       //TASK_YIELD();

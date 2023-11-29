@@ -45,37 +45,14 @@ extern "C" {
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief Enables the feedback-channel for the given function generator number
- *        in the given slot.
- *
- * Counterpart to daqDisableFgFeedBack
- * @see daqDisableFgFeedBack
- * @param slot SCU-bus slot number
- * @param fgNum Function generator number 0 or 1
- */
-void daqEnableFgFeedback( const unsigned int slot,
-                          const unsigned int fgNum,
-                          const uint32_t tag
-                        );
-
-/*! ---------------------------------------------------------------------------
- * @brief Disables the feedback-channel for the given function generator number
- *        in the given slot.
- *
- * Counterpart to daqEnableFgFeedback
- * @see daqEnableFgFeedback
- * @param slot SCU-bus slot number
- * @param fgNum Function generator number 0 or 1
- */
-void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum );
-
-/*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Stops the DAQ-task if running.
  * @see daqTaskResume
  */
 void daqTaskSuspend( void );
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Resumes the stopped DAQ-task.
  * @see daqTaskSuspend
  */
