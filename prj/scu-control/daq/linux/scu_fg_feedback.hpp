@@ -736,6 +736,8 @@ private:
 
       void onDataError( void ) override;
 
+      void onFifoAlarm( void ) override;
+
       void onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
       void onIncomingDescriptor( daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
@@ -761,13 +763,15 @@ private:
       }
       virtual ~MilDaqAdministration( void ) {}
 
-      void onUnregistered( const FG_MACRO_T fg )  override;
+      void onUnregistered( const FG_MACRO_T fg ) override;
 
       void onDataReadingPause( void ) override;
 
       void onDataTimeout( void ) override;
 
       void onDataError( void ) override;
+
+      void onFifoAlarm( void ) override;
    }; // class MilDaqAdministration
 
    /*!
@@ -1104,7 +1108,29 @@ public:
        return m_oMilDaqAdmin.getFiFoLevelPerTenThousand();
     }
 
-#endif
+   /*!
+    * @brief Activates the FIFO alarm for MIL-DAQ and sets the alarm threshold,
+    *        which is triggered permanently when the FIFO threatens
+    *        to overflow.
+    * @note The value of zero disabled the alarm.
+    * @param threshold Alarm trigger threshold in parts per ten thousand of
+    *                  the fifo-level.
+    */
+   void setMilFifoAlarmThreshold( uint threshold = 9900 )
+   {
+      m_oMilDaqAdmin.setFifoAlarmThreshold( threshold );
+   }
+
+   /*!
+    * @brief Returns the fifo alarm trigger threshold in
+    *        parts per ten thousand of the MIL- fifo-level
+    */
+   uint getMilFifoAlarmThreshold( void )
+   {
+      return m_oMilDaqAdmin.getFifoAlarmThreshold();
+   }
+
+#endif /* ifdef CONFIG_MIL_FG */
 
    /*!
     * @brief Triggering a software interrupt in LM32 firmware
@@ -1279,6 +1305,44 @@ public:
 
    void reset( void );
 
+   /*!
+    * @brief Activates the FIFO alarm for ADDAC DAQ and sets the alarm threshold,
+    *        which is triggered permanently when the FIFO threatens
+    *        to overflow.
+    * @note The value of zero disabled the alarm.
+    * @param threshold Alarm trigger threshold in parts per ten thousand of
+    *                  the fifo-level.
+    */
+   void setAddacFifoAlarmThreshold( uint threshold = 9900 )
+   {
+      m_oAddacDaqAdmin.setFifoAlarmThreshold( threshold );
+   }
+
+   /*!
+    * @brief Returns the fifo alarm trigger threshold in
+    *        parts per ten thousand of the ADDAC- fifo-level
+    */
+   uint getAddacFifoAlarmThreshold( void )
+   {
+      return m_oAddacDaqAdmin.getFifoAlarmThreshold();
+   }
+
+   /*!
+    * @brief Activates the FIFO alarm and sets the alarm threshold,
+    *        which is triggered permanently when the MIL and/or ADDAC FIFO
+    *        threatens to overflow.
+    * @note The value of zero disabled the alarm.
+    * @param threshold Alarm trigger threshold in parts per ten thousand of
+    *                  the fifo-level.
+    */
+   void setFifoAlarmThreshold( uint threshold = 9900 )
+   {
+      setAddacFifoAlarmThreshold( threshold );
+    #ifdef CONFIG_MIL_FG
+      setMilFifoAlarmThreshold( threshold );
+    #endif
+   }
+
 protected:
    /*!
     * @brief The function is called between divided data blocks for
@@ -1291,6 +1355,17 @@ protected:
     *              MIL data-transfer.
     */
    virtual void onDataReadingPause( const bool isMil );
+
+   /*!
+    * @brief The optional callback function is called when an overflow
+    *        in the FIFO is imminent.
+    * @see setMilFifoAlarmThreshold
+    * @see setAddacFifoAlarmThreshold
+    * @see setFifoAlarmThreshold
+    * @param isMil Is true if the alarm happens by the MIL-fifo else
+    *              it comes from the ADDAC fifo.
+    */
+   virtual void onFifoAlarm( bool isMil ) {}
 
 #ifdef CONFIG_MIL_FG
    /*!

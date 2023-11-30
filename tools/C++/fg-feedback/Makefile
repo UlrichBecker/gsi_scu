@@ -9,7 +9,7 @@
 ## Date:     09.10.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-DEFINES += VERSION=4.2
+DEFINES += VERSION=4.3
 FOR_SCU_AND_ACC := 1
 
 #USE_NAMED_MUTEX := 1

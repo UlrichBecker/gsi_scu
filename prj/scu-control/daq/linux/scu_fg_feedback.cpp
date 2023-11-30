@@ -813,6 +813,13 @@ void FgFeedbackAdministration::AddacAdministration::onDataError( void )
 
 /*! ---------------------------------------------------------------------------
  */
+void FgFeedbackAdministration::AddacAdministration::onFifoAlarm( void )
+{
+   m_pParent->onFifoAlarm( false );
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 void FgFeedbackAdministration::AddacAdministration::onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor )
 {
    m_pParent->onErrorDescriptor( roDescriptor );
@@ -849,7 +856,15 @@ void FgFeedbackAdministration::MilDaqAdministration::onDataError( void )
 {
    m_pParent->onDataError( true );
 }
-#endif // ifdef CONFIG_MIL_FG
+
+/*! ---------------------------------------------------------------------------
+ */
+void FgFeedbackAdministration::MilDaqAdministration::onFifoAlarm( void )
+{
+   m_pParent->onFifoAlarm( true );
+}
+
+#endif /* ifdef CONFIG_MIL_FG */
 
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------

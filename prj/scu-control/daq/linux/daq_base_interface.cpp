@@ -39,6 +39,8 @@ DaqBaseInterface::DaqBaseInterface( DaqEb::EtherboneConnection* poEtherbone,
    ,m_lastReadIndex( 0 )
    ,m_daqBaseOffset( 0 )
    ,m_oWatchdog( dataTimeout )
+   ,m_fifoAlarmThreshold( 0 )
+   ,m_fifoAlarmTriggered( false )
    ,m_maxEbCycleDataLen( c_defaultMaxEbCycleDataLen )
    ,m_blockReadEbCycleGapTimeUs( c_defaultBlockReadEbCycleGapTimeUs )
 {
@@ -55,6 +57,8 @@ DaqBaseInterface::DaqBaseInterface( DaqAccess* poEbAccess,
    ,m_lastReadIndex( 0 )
    ,m_daqBaseOffset( 0 )
    ,m_oWatchdog( dataTimeout )
+   ,m_fifoAlarmThreshold( 0 )
+   ,m_fifoAlarmTriggered( false )
    ,m_maxEbCycleDataLen( c_defaultMaxEbCycleDataLen )
    ,m_blockReadEbCycleGapTimeUs( c_defaultBlockReadEbCycleGapTimeUs )
 {
@@ -156,6 +160,22 @@ uint DaqBaseInterface::getNumberOfNewData( void )
     */
    updateMemAdmin();
 
+   const uint currentNumberOfData = getCurrentNumberOfData();
+   if( m_fifoAlarmThreshold > 0 )
+   {
+      assert( getRamCapacity() > 0 );
+      if( (currentNumberOfData * 10000 / getRamCapacity()) >= m_fifoAlarmThreshold )
+      {
+         if( !m_fifoAlarmTriggered )
+         {
+            m_fifoAlarmTriggered = true;
+            onFifoAlarm();
+         }
+      }
+      else
+         m_fifoAlarmTriggered = false;
+   }
+
    if( getWasRead() != 0 )
    { /*
       * Server respectively the LM32 has not synchronized the read index yet.
@@ -172,12 +192,12 @@ uint DaqBaseInterface::getNumberOfNewData( void )
    }
    m_lastReadIndex = getReadIndex();
 
-   const uint ret = getCurrentNumberOfData();
+  // const uint currentNumberOfData = getCurrentNumberOfData();
 
-   if( ret != 0 )
+   if( currentNumberOfData != 0 )
       m_oWatchdog.start();
 
-   return ret;
+   return currentNumberOfData;
 }
 
 /*! --------------------------------------------------------------------------

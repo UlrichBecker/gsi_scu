@@ -391,6 +391,7 @@ AllDaqAdministration::AllDaqAdministration( CommandLine* m_poCommandLine,
    ,m_oStatistics( this )
 #endif
 {
+   setFifoAlarmThreshold();
 }
 
 /*! ---------------------------------------------------------------------------
@@ -490,6 +491,13 @@ void AllDaqAdministration::onAddacBlockError( uint slot, uint daqNumber )
 void AllDaqAdministration::onDataTimeout( const bool isMil )
 {
    WARNING_MESSAGE( "Timeout of " << (isMil? "MIL":"ADDAC") << " data stream detected!" );
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+void AllDaqAdministration::onFifoAlarm( bool isMil )
+{
+   WARNING_MESSAGE( "Fifo of " << (isMil? "MIL":"ADDAC") << "- DAQ is almost full!" );
 }
 
 /*! ---------------------------------------------------------------------------

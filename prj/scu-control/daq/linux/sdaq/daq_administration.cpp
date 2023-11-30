@@ -416,6 +416,7 @@ void DaqAdministration::onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor 
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/DataAquisitionMacrof%C3%BCrSCUSlaveBaugruppen#Die_CRC_Pr_252fsumme
  */
 uint8_t DaqAdministration::crcPolynom( uint8_t x )
 {
@@ -533,17 +534,20 @@ uint DaqAdministration::distributeData( void )
       wordLen = c_contineousDataLen - c_discriptorWordSize;
    }
 
-   // TODO !!!!!!!!!
+   /*
+    *  See: https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/DataAquisitionMacrof%C3%BCrSCUSlaveBaugruppen#Die_CRC_Pr_252fsumme
+    * TODO It doesn't work yet! :-(
+    */
    const uint crcLen = wordLen * sizeof(DAQ_DATA_T);
    assert( crcLen < sizeof(probe) );
-   uint8_t crc = 0;
+   uint8_t crc = 0x1F;
    for( uint i = c_discriptorWordSize * sizeof(DAQ_DATA_T); i < crcLen; i++ )
    {
-      crc = crcPolynom( crc ) ^ reinterpret_cast<uint8_t*>(&probe)[i];
+      crc = crcPolynom( crc ^ reinterpret_cast<uint8_t*>(&probe)[i] );
    }
    for( uint i = 0; i < (c_discriptorWordSize-1) * sizeof(DAQ_DATA_T); i++ )
    {
-      crc = crcPolynom( crc ) ^ reinterpret_cast<uint8_t*>(&probe)[i];
+      crc = crcPolynom( crc ^ reinterpret_cast<uint8_t*>(&probe)[i] );
    }
    if( daqDescriptorGetCRC( &probe.descriptor ) != crc )
    {

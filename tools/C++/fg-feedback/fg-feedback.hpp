@@ -270,6 +270,8 @@ public:
 
    void onDataError( const bool isMil ) override;
 
+   void onFifoAlarm( bool isMil ) override;
+
    void onErrorDescriptor( const daq::DAQ_DESCRIPTOR_T& roDescriptor ) override;
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS

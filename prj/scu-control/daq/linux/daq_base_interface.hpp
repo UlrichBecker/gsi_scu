@@ -178,6 +178,8 @@ private:
    uint                         m_lastReadIndex;
    std::size_t                  m_daqBaseOffset;
    Watchdog                     m_oWatchdog;
+   uint                         m_fifoAlarmThreshold;
+   bool                         m_fifoAlarmTriggered;
 
 protected:
    static constexpr std::size_t c_defaultMaxEbCycleDataLen = 10;
@@ -405,6 +407,30 @@ public:
     */
    uint getNumberOfNewData( void );
 
+   /*!
+    * @brief Activates the FIFO alarm and sets the alarm threshold,
+    *        which is triggered permanently when the FIFO threatens
+    *        to overflow.
+    * @note The value of zero disabled the alarm.
+    * @param threshold Alarm trigger threshold in parts per ten thousand of
+    *                  the fifo-level.
+    */
+   void setFifoAlarmThreshold( uint threshold = 9900 )
+   {
+      assert( threshold <= 10000 );
+      m_fifoAlarmThreshold = threshold;
+      m_fifoAlarmTriggered = false;
+   }
+
+   /*!
+    * @brief Returns the fifo alarm trigger threshold in
+    *        parts per ten thousand of the fifo-level
+    */
+   uint getFifoAlarmThreshold( void )
+   {
+      return m_fifoAlarmThreshold;
+   }
+
 protected:
    void initRingAdmin( RAM_RING_SHARED_INDEXES_T* pAdmin, const std::size_t daqBaseOffset  );
 
@@ -473,6 +499,13 @@ protected:
     *        has been detected.
     */
    virtual void onDataTimeout( void ) {}
+
+   /*!
+    * @brief The optional callback function is called when an overflow
+    *        in the FIFO is imminent.
+    * @see setFifoAlarmThreshold
+    */
+   virtual void onFifoAlarm( void ) {}
 
 public:
    /*!
