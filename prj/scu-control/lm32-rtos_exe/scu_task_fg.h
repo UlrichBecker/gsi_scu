@@ -26,6 +26,10 @@
 #ifndef _SCU_TASK_FG_H
 #define _SCU_TASK_FG_H
 
+#ifndef CONFIG_USE_ADDAC_FG_TASK
+  #error CONFIG_USE_ADDAC_FG_TASK respectively USE_ADDAC_FG_TASK has to be defined in makefile!
+#endif
+
 #include <scu_fg_handler.h>
 #include <sw_queue.h>
 

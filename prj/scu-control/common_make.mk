@@ -95,10 +95,6 @@ ifdef SCU_MIL
   VERSION_STR += "+GAP"
  endif
 endif
-ifdef USE_HISTORY
-  DEFINES += CONFIG_USE_HISTORY
-  VERSION_STR += "+HST"
-endif
 ifdef USE_LM32LOG
   DEFINES += CONFIG_USE_LM32LOG
   VERSION_STR += "+LOG"
@@ -112,6 +108,11 @@ ifdef ADDAC_DAQ
      DEFINES += CONFIG_DIOB_WITH_DAQ
      VERSION_STR += "+DIOB-DAQ"
   endif
+endif
+ifdef USE_ADDAC_FG_TASK
+  VERSION_STR += "+AFGT"
+else
+  VERSION_STR += "+AFGI"
 endif
 VERSION = $(VERSION_STR)
 
@@ -152,9 +153,6 @@ ifdef ADDAC_DAQ
   SOURCE += $(DAQ_LM32_DIR)/daq_command_interface_uc.c
   SOURCE += $(DAQ_LM32_DIR)/daq_ramBuffer_lm32.c
   USE_SCU_EXTERN_RAM := 1
-endif
-ifdef USE_HISTORY
-  SOURCE += $(SCU_DIR)/history.c
 endif
 ifdef USE_LM32LOG
   SOURCE += $(SCU_LIB_SRC_LM32_DIR)/lm32_syslog.c
@@ -198,10 +196,6 @@ ifdef ADDAC_DAQ
     else
       SHARED_SIZE = 65780
     endif
-   endif
-   ifdef USE_HISTORY
-      STACK_SIZE  =  4096
-      # STACK_SIZE = 5104
    endif
 else
    SHARED_SIZE = 81920

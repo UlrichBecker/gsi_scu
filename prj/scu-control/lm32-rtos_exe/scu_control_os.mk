@@ -10,14 +10,21 @@
 ###############################################################################
 MIAN_MODULE = $(BASE_DIR)/scu_control_os.c
 
+USE_ADDAC_FG_TASK := 1
+
 ifdef ADDAC_DAQ
   SOURCE += $(BASE_DIR)/scu_task_daq.c
 endif
 ifdef SCU_MIL
   SOURCE += $(BASE_DIR)/scu_task_mil.c
 endif
-SOURCE   += $(BASE_DIR)/scu_task_fg.c
+ifdef USE_ADDAC_FG_TASK
+  SOURCE   += $(BASE_DIR)/scu_task_fg.c
+  DEFINES  += CONFIG_USE_ADDAC_FG_TASK
+endif
 SOURCE   += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
+
+
 ifdef USE_TEMPERATURE_WATCHER
   SOURCE    += $(BASE_DIR)/scu_task_temperature.c
   DEFINES   += CONFIG_USE_TEMPERATURE_WATCHER

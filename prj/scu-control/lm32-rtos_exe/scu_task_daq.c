@@ -59,39 +59,6 @@ int daqScanScuBus( DAQ_BUS_T* pDaqDevices, FG_MACRO_T* pFgList )
    return DAQ_RET_OK;
 }
 
-#if 0
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void handleContinuousMode( DAQ_CANNEL_T* pChannel )
-{
-   if( !daqChannelTestAndClearDaqIntPending( pChannel ) )
-      return;
-   if( daqChannelGetDaqFifoWords( pChannel ) == 0 )
-   {
-      return;
-   }
-
-#ifdef CONFIG_DAQ_SW_SEQUENCE
-   pChannel->sequenceContinuous++;
-#endif
-   ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, true );
-   daqChannelDecrementBlockCounter( pChannel );
-}
-
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void handleHiresMode( DAQ_CANNEL_T* pChannel )
-{
-   if( !daqChannelTestAndClearHiResIntPending( pChannel ) )
-      return;
-
-   daqChannelDisableHighResolution( pChannel );
-#ifdef CONFIG_DAQ_SW_SEQUENCE
-   pChannel->sequencePmHires++;
-#endif
-   ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, false );
-}
-#endif
 #endif
 
 /*! ---------------------------------------------------------------------------

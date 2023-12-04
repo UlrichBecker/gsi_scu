@@ -27,7 +27,7 @@ NEW_ADDAC_HANDSHAKE := 1
 
 TARGET  := scu3_control_os
 DEFINES += CONFIG_SCU3
-SCU3    := 1 
+SCU3    := 1
 
 BASE_DIR = $(shell pwd)/..
 # DEFINES += DEBUGLEVEL

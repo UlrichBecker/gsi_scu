@@ -40,7 +40,7 @@
   #include <scu_task_mil.h>
  #endif
 #endif
-#ifdef CONFIG_RTOS
+#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
  #include <scu_task_fg.h>
 #endif
 #include "queue_watcher.h"
@@ -71,7 +71,7 @@ void queuePollAlarm( void )
 #ifdef CONFIG_MIL_FG
    QEUE2STRING( g_queueMilFg );
 #endif
-#ifdef CONFIG_RTOS
+#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
    QEUE2STRING( g_queueFg );
 #endif
    #undef QEUE2STRING

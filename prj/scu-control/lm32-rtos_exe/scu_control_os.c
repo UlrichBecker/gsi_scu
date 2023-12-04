@@ -35,7 +35,11 @@
 #ifdef CONFIG_USE_TEMPERATURE_WATCHER
  #include <scu_task_temperature.h>
 #endif
-#include <scu_task_fg.h>
+#ifdef CONFIG_USE_ADDAC_FG_TASK
+ #include <scu_task_fg.h>
+#else
+ #include <scu_fg_handler.h>
+#endif
 #ifdef CONFIG_MIL_FG
  #include <scu_eca_handler.h>
  #include <scu_task_mil.h>
@@ -114,7 +118,9 @@ void taskDeleteIfRunning( void* pTaskHandle )
  */
 void taskDeleteAllRunningFgAndDaq( void )
 {
+#ifdef CONFIG_USE_ADDAC_FG_TASK
    taskStopFgIfRunning();
+#endif
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
    taskStopDaqIfRunning();
 #endif
@@ -128,7 +134,9 @@ void taskDeleteAllRunningFgAndDaq( void )
  */
 void taskStartAllIfHwPresent( void )
 {
+#ifdef CONFIG_USE_ADDAC_FG_TASK
    taskStartFgIfAnyPresent();
+#endif
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
    taskStartDaqIfAnyPresent();
 #endif
@@ -151,6 +159,10 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 
    while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
    {
+   #ifdef CONFIG_USE_ADDAC_FG_TASK
+      /*
+       * ADDAC function generators running in a separate RTOS-task.
+       */
       if( (queueScuBusIrq.pendingIrqs & (FG1_IRQ | FG2_IRQ)) != 0 )
       {
          queuePushWatched( &g_queueFg, &queueScuBusIrq );
@@ -158,6 +170,20 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          taskWakeupFgFromISR();
       #endif
       }
+   #else
+      /*
+       * ADDAC function generators running in this interrupt context.
+       */
+      if( (queueScuBusIrq.pendingIrqs & FG1_IRQ) != 0 )
+      {
+         handleAdacFg( slot, FG1_BASE );
+      }
+
+      if( (queueScuBusIrq.pendingIrqs & FG2_IRQ) != 0 )
+      {
+         handleAdacFg( slot, FG2_BASE );
+      }
+   #endif
 
    #ifdef CONFIG_MIL_FG
       if( (queueScuBusIrq.pendingIrqs & DREQ ) != 0 )

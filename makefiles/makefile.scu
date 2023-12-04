@@ -243,8 +243,15 @@ CBR_GCC  = $$($(CC) --version | grep gcc)
 CBR_FLGS = $(CFLAGS)
 CBR_KRNL := $$(uname -mrs)
 CBR_OS   := $$(lsb_release -d -s | tr -d '"')
-CBR_PF   := SCU 3
-
+ifdef SCU3
+  CBR_PF   := SCU 3
+else
+ifdef SCU4
+  CBR_PF   := SCU 4
+else
+  CBR_PF   := SCU ?
+endif
+endif
 CBR  = "/*!\n"
 CBR += " * @defgroup $(DOX_GEN_GROUP_NAME)\n"
 CBR += " * @{\n"
