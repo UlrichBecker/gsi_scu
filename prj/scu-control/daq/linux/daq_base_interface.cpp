@@ -164,7 +164,7 @@ uint DaqBaseInterface::getNumberOfNewData( void )
    if( m_fifoAlarmThreshold > 0 )
    {
       assert( getRamCapacity() > 0 );
-      if( (currentNumberOfData * 10000 / getRamCapacity()) >= m_fifoAlarmThreshold )
+      if( ((currentNumberOfData * 10000) / getRamCapacity()) >= m_fifoAlarmThreshold )
       {
          if( !m_fifoAlarmTriggered )
          {

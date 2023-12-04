@@ -793,6 +793,19 @@ vector<OPTION> CommandLine::c_optList =
                     "Burst mode is never used by default.\n"
                     "If the DDR3-RAM is not involved in the data transfer,"
                     " then this option has no effect."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_clearFifoOnAlarm = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'O',
+      .m_longOpt  = "clear-fifo-on-overflow",
+      .m_helpText = "Deletes the FIFO in the DDR3-RAM or SRAM if it"
+                    " threatens to overflow."
    }
 };
 
@@ -877,6 +890,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_exitOnError( false )
    ,m_noPlot( false )
    ,m_pairingBySequence( false )
+   ,m_clearFifoOnAlarm( false )
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    ,m_makeStatistic( false )
 #endif

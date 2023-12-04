@@ -498,6 +498,8 @@ void AllDaqAdministration::onDataTimeout( const bool isMil )
 void AllDaqAdministration::onFifoAlarm( bool isMil )
 {
    WARNING_MESSAGE( "Fifo of " << (isMil? "MIL":"ADDAC") << "- DAQ is almost full!" );
+   if( m_poCommandLine->isClearFifoOnAlarm() )
+      clearBuffer();
 }
 
 /*! ---------------------------------------------------------------------------

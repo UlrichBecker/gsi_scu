@@ -87,6 +87,7 @@ class CommandLine: public PARSER
    bool                       m_exitOnError;
    bool                       m_noPlot;
    bool                       m_pairingBySequence;
+   bool                       m_clearFifoOnAlarm;
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    bool                       m_makeStatistic;
 #endif
@@ -214,6 +215,11 @@ public:
    bool isPairingBySequence( void )
    {
       return m_pairingBySequence;
+   }
+
+   bool isClearFifoOnAlarm( void )
+   {
+      return m_clearFifoOnAlarm;
    }
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
