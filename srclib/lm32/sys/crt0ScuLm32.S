@@ -12,15 +12,18 @@
  */
 #include <lm32signal.h>
 
-#ifndef MICO32_FULL_CONTEXT_SAVE_RESTORE
- #define MICO32_FULL_CONTEXT_SAVE_RESTORE
-#endif
-
 #ifdef CONFIG_RTOS
+   /*
+    * If FreeRTOS is used, then the main interrupt function is assembler function
+    * vPortInterruptHandler which is implemented in module portasm.S which will
+    * invoke the C-function _irq_entry implemented in module lm32Interrupts.c
+    */
    .extern vPortInterruptHandler
 #else
    /*
-    * This function is implemented in module lm32Interrupts.c 
+    * For applications without FreeRTOS the interrupt main function is
+    * directly the C-function _irq_entry which is implemented in module
+    * lm32Interrupts.c.
     */
    .extern _irq_entry
 #endif
@@ -303,17 +306,10 @@ loopf:
 #define SAVE_R( n )    sw (sp + OFS_R(n)), r##n
 #define RESTORE_R( n ) lw r##n, (sp + OFS_R(n))
 
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
-   #define OFS_RA    OFS_R( 28 )
-   #define OFS_EA    OFS_R( 29 )
-   #define OFS_BA    OFS_R( 30 )
-   #define STACK_TOP OFS_R( 32 )
-#else
-   #define OFS_RA    OFS_R( 11 )
-   #define OFS_EA    OFS_R( 12 )
-   #define OFS_BA    OFS_R( 13 )
-   #define STACK_TOP OFS_R( 15 )
-#endif
+#define OFS_RA    OFS_R( 28 )
+#define OFS_EA    OFS_R( 29 )
+#define OFS_BA    OFS_R( 30 )
+#define STACK_TOP OFS_R( 32 )
 
 /* ----------------------------------------------------------------------------
  * Function _save_all
@@ -335,7 +331,6 @@ _save_all:
     SAVE_R(8)
     SAVE_R(9)
     SAVE_R(10)
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
     SAVE_R(11)
     SAVE_R(12)
     SAVE_R(13)
@@ -353,7 +348,6 @@ _save_all:
     SAVE_R(25)
     SAVE_R(26)
     SAVE_R(27)
-#endif
     /* ra and sp need special handling, as they have been modified */
     lw  r1, (sp + STACK_TOP)
     sw  (sp + OFS_RA), r1
@@ -379,7 +373,6 @@ _save_all:
     RESTORE_R(8)
     RESTORE_R(9)
     RESTORE_R(10)
-#ifdef MICO32_FULL_CONTEXT_SAVE_RESTORE
     RESTORE_R(11)
     RESTORE_R(12)
     RESTORE_R(13)
@@ -397,7 +390,6 @@ _save_all:
     RESTORE_R(25)
     RESTORE_R(26)
     RESTORE_R(27)
-#endif
     lw   ra, (sp + OFS_RA)
     lw   ea, (sp + OFS_EA)
     lw   ba, (sp + OFS_BA)

@@ -12,7 +12,6 @@ BASE_VERSION = 4
 SUB_VERSION  = 6.3
 
 #------------------------------------------------------------------------------
-DEFINES += CONFIG_NO_DAQ_SWITCH_DELAY
  SCU_MIL := 1
 # MIL_GAP := 1
 

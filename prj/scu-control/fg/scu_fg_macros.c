@@ -66,10 +66,8 @@ STATIC_ASSERT( ARRAY_SIZE(g_aFgChannels) == MAX_FG_CHANNELS );
 void wdtReset( const unsigned int channel )
 {
    FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
-   criticalSectionEnter();
    if( fgIsStarted( channel ) )
-      g_aFgChannels[channel].timeout = getWrSysTime() + MSI_TIMEOUT_OFFSET;
-   criticalSectionExit();
+      ATOMIC_SECTION() g_aFgChannels[channel].timeout = getWrSysTime() + MSI_TIMEOUT_OFFSET;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -77,9 +75,8 @@ void wdtReset( const unsigned int channel )
 void wdtDisable( const unsigned int channel )
 {
    FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
-   criticalSectionEnter();
-   g_aFgChannels[channel].timeout = 0LL;
-   criticalSectionExit();
+
+   ATOMIC_SECTION() g_aFgChannels[channel].timeout = 0LL;
 }
 
 /*! ---------------------------------------------------------------------------
@@ -87,24 +84,43 @@ void wdtDisable( const unsigned int channel )
 void wdtPoll( void )
 {
    const uint64_t currentTime = getWrSysTimeSafe();
-   for( unsigned int i = 0; i < ARRAY_SIZE( g_aFgChannels ); i++ )
+
+   for( unsigned int channel = 0; channel < ARRAY_SIZE( g_aFgChannels ); channel++ )
    {
       criticalSectionEnter();
-      volatile const uint64_t timeout = g_aFgChannels[i].timeout;
+      volatile const uint64_t timeout = g_aFgChannels[channel].timeout;
       criticalSectionExit();
 
       if( timeout == 0LL )
+      { /*
+         * Watchdog for this FG- channel is not active.
+         * Go to the next channel.
+         */
          continue;
+      }
+
       if( currentTime <= timeout )
+      { /*
+         * Watchdog is active, but there is no timeout yet.
+         * Go to the next channel.
+         */
          continue;
+      }
 
       /*
        * A timeout happened!
+       * The watchdog of this channel becomes disabled to prevent
+       * multiple timeout messages.
        */
-      wdtDisable( i );
+      wdtDisable( channel );
 
-      if( !fgIsStarted( i ) )
+      if( !fgIsStarted( channel ) )
+      { /*
+         * FG- channel is not enabled, so the timeout will ignored.
+         * Go to the next channel.
+         */
          continue;
+      }
 
       /*
        * The timeout becomes posted only if the
@@ -112,7 +128,15 @@ void wdtPoll( void )
        */
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
                "ERROR: MSI-timeout on fg-%u-%u channel: %u !\n" ESC_NORMAL,
-               getSocket(i), getDevice(i), i );
+               getSocket(channel), getDevice(channel), channel );
+
+      /*!
+       * @todo Is the channel disabling by MSI- timeout really meaningful?
+       *       Because in this case the concerned DAQ- channels becomes
+       *       disabled as well.
+       */
+      makeStop( channel );
+      fgDisableChannel( channel );
    }
 }
 #endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */

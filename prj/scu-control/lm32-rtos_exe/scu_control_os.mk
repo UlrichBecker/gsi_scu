@@ -10,7 +10,7 @@
 ###############################################################################
 MIAN_MODULE = $(BASE_DIR)/scu_control_os.c
 
-USE_ADDAC_FG_TASK := 1
+ USE_ADDAC_FG_TASK := 1
 
 ifdef ADDAC_DAQ
   SOURCE += $(BASE_DIR)/scu_task_daq.c

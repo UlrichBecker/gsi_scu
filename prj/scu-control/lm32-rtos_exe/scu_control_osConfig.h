@@ -117,7 +117,7 @@
 
 #ifdef CONFIG_USE_ADDAC_FG_TASK
  #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
-  #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 1
+  #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 2 //1
  #else
   #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
  #endif

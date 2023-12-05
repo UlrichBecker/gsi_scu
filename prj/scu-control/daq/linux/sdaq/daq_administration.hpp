@@ -1103,7 +1103,8 @@ private:
    /*!
     * @brief Calculates the 8-bit value of the CRC polynom: y = 1 + x^2 + x^5
     */
-   uint8_t crcPolynom( uint8_t x );
+   //uint8_t crcPolynom( uint8_t x );
+   uint16_t crcPolynom( uint16_t x );
 }; // class DaqAdministration
 
 ///////////////////////////////////////////////////////////////////////////////
