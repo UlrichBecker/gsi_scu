@@ -792,9 +792,7 @@ void FgFeedbackAdministration::AddacAdministration::onUnregistered( daq::DAQ_DES
  */
 void FgFeedbackAdministration::AddacAdministration::onBlockReceiveError( void )
 {
-   SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-   m_pParent->onAddacBlockError( daq::daqDescriptorGetSlot( m_poCurrentDescriptor ),
-                                 daq::daqDescriptorGetChannel( m_poCurrentDescriptor ));
+   m_pParent->onAddacBlockError( descriptorGetSlot(), descriptorGetChannel() );
 }
 
 /*! ---------------------------------------------------------------------------

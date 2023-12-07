@@ -196,14 +196,16 @@ DaqAdministration::DaqAdministration( DaqEb::EtherboneConnection* poEtherbone,
                                       const bool doSendCommand
                                     )
    :DaqInterface( poEtherbone, doReset, doSendCommand )
+   ,m_poBlockBuffer( nullptr )
    ,m_maxChannels( 0 )
    ,m_receiveCount( 0 )
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    ,m_elapsedTime( 0 )
 #endif
-   ,m_poCurrentDescriptor( nullptr )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+   m_poBlockBuffer = new BLOCK_BUFFER_T;
+   ::memset( m_poBlockBuffer, 0, sizeof( BLOCK_BUFFER_T ) );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -213,14 +215,16 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess,
                                       const bool doSendCommand
                                     )
    :DaqInterface( poEbAccess, doReset, doSendCommand )
+   ,m_poBlockBuffer( nullptr )
    ,m_maxChannels( 0 )
    ,m_receiveCount( 0 )
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    ,m_elapsedTime( 0 )
 #endif
-   ,m_poCurrentDescriptor( nullptr )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+   m_poBlockBuffer = new BLOCK_BUFFER_T;
+   ::memset( m_poBlockBuffer, 0, sizeof( BLOCK_BUFFER_T ) );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -228,8 +232,11 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess,
 DaqAdministration::~DaqAdministration( void )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
-   //for( const auto& def: *this )
-   //   unregisterDevice( def );
+   if( m_poBlockBuffer != nullptr )
+      delete m_poBlockBuffer;
+
+   //for( const auto& dev: *this )
+   //   unregisterDevice( dev );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -418,17 +425,11 @@ void DaqAdministration::onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor 
 /*! ---------------------------------------------------------------------------
  * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/DataAquisitionMacrof%C3%BCrSCUSlaveBaugruppen#Die_CRC_Pr_252fsumme
  */
-#if 0
-uint8_t DaqAdministration::crcPolynom( uint8_t x )
-{
-   return static_cast<uint8_t>(1 + x * x + x * x * x * x * x);
-}
-#else
 uint16_t DaqAdministration::crcPolynom( uint16_t x )
 {
    return static_cast<uint16_t>(1 + x * x + x * x * x * x * x);
 }
-#endif
+
 /*! ---------------------------------------------------------------------------
  */
 void DaqAdministration::onErrorCrc( void )
@@ -440,29 +441,13 @@ void DaqAdministration::onErrorCrc( void )
  */
 uint DaqAdministration::distributeData( void )
 {
-   union PROBE_BUFFER_T
-   {
-      DAQ_DATA_T        buffer[c_hiresPmDataLen];
-      RAM_DAQ_PAYLOAD_T ramItems[ //sizeof(PROBE_BUFFER_T::buffer) /
-                                 c_hiresPmDataLen * sizeof( DAQ_DATA_T ) / 
-                                 sizeof(RAM_DAQ_PAYLOAD_T)];
-      DAQ_DESCRIPTOR_T  descriptor;
-   };
-
-   static_assert( sizeof(PROBE_BUFFER_T)
-                   == c_hiresPmDataLen * sizeof(DAQ_DATA_T),
-                  "sizeof(PROBE_BUFFER_T) has to be equal"
-                  "c_hiresPmDataLen * sizeof(DAQ_DATA_T) !" );
-   static_assert( sizeof(PROBE_BUFFER_T) % sizeof(RAM_DAQ_PAYLOAD_T) == 0,
-                  "sizeof(PROBE_BUFFER_T) has to be dividable by "
-                  "sizeof(RAM_DAQ_PAYLOAD_T) !" );
-
+   assert( m_poBlockBuffer != nullptr );
    /*
     * Getting the number of DDR3 memory items which has to be copied
-    * in the probe buffer.
+    * in the m_poBlockBuffer buffer.
     */
    const uint toRead = std::min( getNumberOfNewData(),
-                                 static_cast<uint>(sizeof( PROBE_BUFFER_T ) / sizeof(RAM_DAQ_PAYLOAD_T)) );
+                                 static_cast<uint>(sizeof( BLOCK_BUFFER_T ) / sizeof(RAM_DAQ_PAYLOAD_T)) );
 
    if( toRead == 0 )
       return toRead;
@@ -476,9 +461,8 @@ uint DaqAdministration::distributeData( void )
       return toRead;
    }
 
-   PROBE_BUFFER_T probe; //!@TODO Move this from stack to the heap!
 #ifdef CONFIG_DAQ_DEBUG
-   ::memset( &probe, 0x7f, sizeof( probe ) );
+   ::memset( &m_poBlockBuffer, 0x7f, sizeof( BLOCK_BUFFER_T ) );
 #endif
 
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
@@ -489,7 +473,7 @@ uint DaqAdministration::distributeData( void )
     * Copying via wishbone/etherbone the DDR3-RAM data in the middle buffer.
     * This occupies the wishbone/etherbone bus!
     */
-   readDaqData( &probe.ramItems[0], c_ramBlockShortLen );
+   readDaqData( &m_poBlockBuffer->ramItems[0], c_ramBlockShortLen );
 
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    m_elapsedTime = std::max( getSysMicrosecs() - startTime, m_elapsedTime );
@@ -497,15 +481,15 @@ uint DaqAdministration::distributeData( void )
    /*
     * Rough check of the device descriptors integrity.
     */
-   if( !::daqDescriptorVerifyMode( &probe.descriptor ) ||
-       !gsi::isInRange(::daqDescriptorGetSlot( &probe.descriptor ),
-                       static_cast<int>(Bus::SCUBUS_START_SLOT),
-                       static_cast<int>(Bus::MAX_SCU_SLAVES) ) ||
-       !isDevicePresent(::daqDescriptorGetSlot( &probe.descriptor )) ||
-       (static_cast<uint>(::daqDescriptorGetChannel( &probe.descriptor )) >= 4)
+   if( !::daqDescriptorVerifyMode( &m_poBlockBuffer->descriptor ) ||
+       !gsi::isInRange( descriptorGetSlot(),
+                        static_cast<uint>(Bus::SCUBUS_START_SLOT),
+                        static_cast<uint>(Bus::MAX_SCU_SLAVES) ) ||
+       !isDevicePresent( descriptorGetSlot() ) ||
+       ( descriptorGetChannel() >= 4 )
      )
    {
-      onErrorDescriptor( probe.descriptor );
+      onErrorDescriptor( m_poBlockBuffer->descriptor );
       return getCurrentNumberOfData();
    }
 
@@ -514,7 +498,7 @@ uint DaqAdministration::distributeData( void )
     */
    std::size_t wordLen;
 
-   if( ::daqDescriptorIsLongBlock( &probe.descriptor ) )
+   if( ::daqDescriptorIsLongBlock( &m_poBlockBuffer->descriptor ) )
    { /*
       * Long block has been detected, (high resolution or post mortem)
       * in this case the rest of the data has still to be read
@@ -523,7 +507,7 @@ uint DaqAdministration::distributeData( void )
    #ifdef CONFIG_DAQ_TIME_MEASUREMENT
       startTime = getSysMicrosecs();
    #endif
-      readDaqData( &probe.ramItems[c_ramBlockShortLen],
+      readDaqData( &m_poBlockBuffer->ramItems[c_ramBlockShortLen],
                    c_ramBlockLongLen - c_ramBlockShortLen );
    #ifdef CONFIG_DAQ_TIME_MEASUREMENT
       m_elapsedTime = std::max( getSysMicrosecs() - startTime, m_elapsedTime );
@@ -544,58 +528,40 @@ uint DaqAdministration::distributeData( void )
     *  See: https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/DataAquisitionMacrof%C3%BCrSCUSlaveBaugruppen#Die_CRC_Pr_252fsumme
     * TODO It doesn't work yet! :-(
     */
-#if 0
-   const uint crcLen = wordLen * sizeof(DAQ_DATA_T);
-   assert( crcLen < sizeof(probe) );
-   uint8_t crc = 0x1F;
-   for( uint i = c_discriptorWordSize * sizeof(DAQ_DATA_T); i < crcLen; i++ )
-   {
-      crc = crcPolynom( crc ^ reinterpret_cast<uint8_t*>(&probe)[i] );
-   }
-   for( uint i = 0; i < (c_discriptorWordSize-1) * sizeof(DAQ_DATA_T); i++ )
-   {
-      crc = crcPolynom( crc ^ reinterpret_cast<uint8_t*>(&probe)[i] );
-   }
-   if( daqDescriptorGetCRC( &probe.descriptor ) != crc )
-   {
-      onErrorCrc();
-   }
-#else
    uint16_t crc = 0x001F;
    for( uint i = c_discriptorWordSize; i < wordLen; i++ )
    {
-      crc ^= crcPolynom( probe.buffer[i] );
+      crc += crcPolynom( m_poBlockBuffer->buffer[i] );
    }
    for( uint i = 0; i < (c_discriptorWordSize-1); i++ )
    {
-      crc ^= crcPolynom( probe.buffer[i] );
+      crc += crcPolynom( m_poBlockBuffer->buffer[i] );
    }
-   if( daqDescriptorGetCRC( &probe.descriptor ) != static_cast<uint8_t>(crc & 0x00FF) )
+   if( daqDescriptorGetCRC( &m_poBlockBuffer->descriptor ) != static_cast<uint8_t>(crc & 0x00FF) )
    {
       onErrorCrc();
    }
-#endif
+
+   m_receiveCount++;
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    /*
     * For statistics only.
     */
-   onIncomingDescriptor( probe.descriptor );
+   onIncomingDescriptor( m_poBlockBuffer->descriptor );
 #endif
 
-   DaqChannel* pChannel = getChannelByDescriptor( probe.descriptor );
+   DaqChannel* pChannel = getChannelByDescriptor();
 
    if( pChannel != nullptr )
    {
-      m_poCurrentDescriptor = &probe.descriptor;
       pChannel->verifySequence();
-      pChannel->onDataBlock( &probe.buffer[c_discriptorWordSize], wordLen );
-      m_poCurrentDescriptor = nullptr;
+      pChannel->onDataBlock( &m_poBlockBuffer->buffer[c_discriptorWordSize], wordLen );
    }
    else
    {
       readLastStatus();
-      onUnregistered( probe.descriptor );
+      onUnregistered( m_poBlockBuffer->descriptor );
    }
 
    return getCurrentNumberOfData();

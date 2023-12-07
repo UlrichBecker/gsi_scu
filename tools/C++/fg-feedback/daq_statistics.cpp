@@ -158,6 +158,7 @@ void Statistics::print( void )
    }
    cout << ESC_NORMAL << endl;
 
+   cout << "Received data blocks: " << m_pParent->getAddacDaqBlockReceiveCount() << endl;
    const float level = static_cast<float>(m_pParent->getAddacFiFoLevelPerTenThousand()) / 100.0;
    if( level > 98.0 )
       cout << ESC_ERROR;

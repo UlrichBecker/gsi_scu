@@ -1063,6 +1063,15 @@ public:
       return m_oAddacDaqAdmin.getFiFoLevelPerTenThousand();
    }
 
+   /*!
+    * @brief Returns the number of received ADDAC-DAQ- data-blocks after the last reset,
+    *        doesn't matter whether the received blocks was valid or corrupt.
+    */
+   uint getAddacDaqBlockReceiveCount( void )
+   {
+      return m_oAddacDaqAdmin.getReceiveCount();
+   }
+
 #ifdef CONFIG_MIL_FG
    /*!
     * @brief Returns the maximum capacity of the MIL-DAQ data-buffer

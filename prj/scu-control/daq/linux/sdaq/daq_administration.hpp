@@ -764,6 +764,25 @@ class DaqAdministration: public DaqInterface
 {
    friend class DaqChannel;
 
+   /*!
+    * @brief Data type of a complete DAQ- block with the maximum possible length.
+    */
+   union BLOCK_BUFFER_T
+   {
+      DAQ_DATA_T        buffer[c_hiresPmDataLen];
+      RAM_DAQ_PAYLOAD_T ramItems[ c_hiresPmDataLen * sizeof( DAQ_DATA_T ) /
+                                  sizeof(RAM_DAQ_PAYLOAD_T)];
+      DAQ_DESCRIPTOR_T  descriptor;
+   };
+
+   static_assert( sizeof(BLOCK_BUFFER_T) == c_hiresPmDataLen * sizeof(DAQ_DATA_T),
+                  "sizeof(BLOCK_BUFFER_T) has to be equal "
+                  "c_hiresPmDataLen * sizeof(DAQ_DATA_T) !" );
+   static_assert( sizeof(BLOCK_BUFFER_T) % sizeof(RAM_DAQ_PAYLOAD_T) == 0,
+                  "sizeof(BLOCK_BUFFER_T) has to be dividable by "
+                  "sizeof(RAM_DAQ_PAYLOAD_T) !" );
+
+   BLOCK_BUFFER_T*   m_poBlockBuffer;
    uint              m_maxChannels;
    uint              m_receiveCount;
 
@@ -771,7 +790,6 @@ protected:
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    USEC_T            m_elapsedTime;
 #endif
-   DAQ_DESCRIPTOR_T* m_poCurrentDescriptor;
 
    #define DEVICE_LIST_BASE std::list
    using DEVICE_LIST_T = DEVICE_LIST_BASE<DaqDevice*>;
@@ -968,8 +986,7 @@ public:
     */
    uint32_t descriptorGetTriggerCondition( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetTriggerCondition( m_poCurrentDescriptor );
+      return daqDescriptorGetTriggerCondition( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -981,8 +998,7 @@ public:
     */
    DAQ_REGISTER_T descriptorGetTriggerDelay( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetTriggerDelay( m_poCurrentDescriptor );
+      return daqDescriptorGetTriggerDelay( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -993,8 +1009,7 @@ public:
     */
    uint8_t descriptorGetSequence( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetSequence( m_poCurrentDescriptor );
+      return daqDescriptorGetSequence( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1005,8 +1020,7 @@ public:
     */
    uint8_t descriptorGetCrc( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetCRC( m_poCurrentDescriptor );
+      return daqDescriptorGetCRC( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1017,8 +1031,7 @@ public:
     */
    bool descriptorWasPostMortem( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorWasPM( m_poCurrentDescriptor );
+      return daqDescriptorWasPM( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1029,8 +1042,7 @@ public:
     */
    bool descriptorWasHighResolution( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorWasHiRes( m_poCurrentDescriptor );
+      return daqDescriptorWasHiRes( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1041,8 +1053,7 @@ public:
     */
    bool descriptorWasContinuous( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorWasDaq( m_poCurrentDescriptor );
+      return daqDescriptorWasDaq( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1054,8 +1065,7 @@ public:
     */
    uint64_t descriptorGetTimeStamp( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetTimeStamp( m_poCurrentDescriptor );
+      return daqDescriptorGetTimeStamp( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1066,8 +1076,7 @@ public:
     */
    uint descriptorGetTimeBase( void )
    {
-      SCU_ASSERT( m_poCurrentDescriptor != nullptr );
-      return daqDescriptorGetTimeBase( m_poCurrentDescriptor );
+      return daqDescriptorGetTimeBase( &m_poBlockBuffer->descriptor );
    }
 
    /*!
@@ -1078,6 +1087,24 @@ public:
     *       becomes triggered if becomes invoked.
     */
    virtual void onErrorDescriptor( const DAQ_DESCRIPTOR_T& roDescriptor );
+
+   /*!
+    * @ingroup onDataBlock
+    * @brief Returns the slot number of the last received DAQ block.
+    */
+   uint descriptorGetSlot( void )
+   {
+      return daqDescriptorGetSlot( &m_poBlockBuffer->descriptor );
+   }
+
+   /*!
+    * @ingroup onDataBlock
+    * @brief Returns the channel number of the last received DAQ block.
+    */
+   uint descriptorGetChannel( void )
+   {
+      return daqDescriptorGetChannel( &m_poBlockBuffer->descriptor );
+   }
 
 protected:
 
@@ -1093,17 +1120,15 @@ protected:
    virtual void onUnregistered( DAQ_DESCRIPTOR_T& roDescriptor ) {}
 
 private:
-   DaqChannel* getChannelByDescriptor( DAQ_DESCRIPTOR_T& roDescriptor )
+   DaqChannel* getChannelByDescriptor( void )
    {
-      return getChannelBySlotNumber( daqDescriptorGetSlot( &roDescriptor ),
-                                     daqDescriptorGetChannel( &roDescriptor )
-                                     + 1 );
+      return getChannelBySlotNumber( descriptorGetSlot(),
+                                     descriptorGetChannel() + 1 );
    }
 
    /*!
-    * @brief Calculates the 8-bit value of the CRC polynom: y = 1 + x^2 + x^5
+    * @brief Calculates the 16-bit value of the CRC polynom: y = 1 + x^2 + x^5
     */
-   //uint8_t crcPolynom( uint8_t x );
    uint16_t crcPolynom( uint16_t x );
 }; // class DaqAdministration
 

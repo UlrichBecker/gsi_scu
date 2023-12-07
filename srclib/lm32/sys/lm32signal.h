@@ -3,7 +3,7 @@
  * @brief  Very small variant of signal.h for LM32.
  *
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
- * @author    Ulrich Becker <u.becker@gsi.de>m
+ * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      19.05.2020
  * @see       crt0ScuLm32.S
  */
