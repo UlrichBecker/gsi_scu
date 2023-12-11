@@ -227,8 +227,8 @@ uint64_t EtherboneConnection::findDeviceBaseAddress( VendorId vendorId,
    }
 
    std::vector<sdb_device> deviceVector;
-   sdb_device device = {0};
-   deviceVector.push_back(device);
+//   sdb_device device = {0};        // Dummy object isn't necessary because vector::resize(32)
+//   deviceVector.push_back(device); // will called in function sdb_find_by_identity(). UB
 
    {
       SCOPED_MUTEX_T lock(_sysMu);

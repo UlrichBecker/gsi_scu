@@ -1,5 +1,5 @@
 /*!
- *  @file mdaqt.hpp
+ *  @file fg-feedback.hpp
  *  @brief Main module of MIL-Data Acquisition Tool
  *
  *  @date 14.08.2019

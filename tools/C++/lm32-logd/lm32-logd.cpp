@@ -37,6 +37,10 @@
 #include "logd_cmdline.hpp"
 #include "logd_core.hpp"
 
+#ifndef CONFIG_OECORE_SDK_VERSION
+   #warning "CAUTION: Module becomes not build by YOCTO SDK !"
+#endif
+
 using namespace std;
 using namespace Scu;
 namespace EB = FeSupport::Scu::Etherbone;
@@ -156,7 +160,7 @@ STATIC void daemonize( void )
 {
    DEBUG_MESSAGE_FUNCTION("");
 
-   pid_t pid = ::fork();
+   const pid_t pid = ::fork();
    if( pid < 0 )
    {
       throwSysError( "Unable to fork!" );

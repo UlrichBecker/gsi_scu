@@ -32,6 +32,10 @@
 #include "mem_cmdline.hpp"
 #include "mem_browser.hpp"
 
+#ifndef CONFIG_OECORE_SDK_VERSION
+   #warning "CAUTION: Module becomes not build by YOCTO SDK !"
+#endif
+
 using namespace std;
 using namespace Scu::mmu;
 namespace EB = FeSupport::Scu::Etherbone;
