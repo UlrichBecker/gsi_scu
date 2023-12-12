@@ -29,7 +29,7 @@
  */
 #ifndef _SCU_DDR3_LM32_H
 #define _SCU_DDR3_LM32_H
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error Module is for target Lattice Micro 32 (LM32) only!
 #endif
 

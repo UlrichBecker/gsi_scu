@@ -11,7 +11,7 @@
  */
 #ifndef _SCU_FG_LIST_H
 #define _SCU_FG_LIST_H
-#if !defined(__lm32__) && !defined(__DOXYGEN__)
+#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__CPPCHECK__)
    #error This module is for the target LM32 only!
 #endif
 

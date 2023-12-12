@@ -6,7 +6,7 @@
  * @date 30.01.2020
  * @see https://www-acc.gsi.de/wiki/Timing/TimingSystemHowSoftCPUHandleECAMSIs
  */
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This module is for LM32 only!
 #endif
 

@@ -185,10 +185,9 @@ public:
       if( m_pParent == nullptr )
          throw( DaqException( "Object of DaqChannel is not"
                                                " registered in DaqDevice!" ) );
-      SCU_ASSERT( m_pParent != nullptr );
+      assert( m_pParent != nullptr );
       return m_pParent;
    }
-
 
    const std::string& getWbDevice( void );
    const std::string getScuDomainName( void );
@@ -414,7 +413,7 @@ public:
     */
    SequenceNumber* getSequencePtr( void ) const
    {
-      SCU_ASSERT( m_poSequence != nullptr );
+      assert( m_poSequence != nullptr );
       return m_poSequence;
    }
 
@@ -585,7 +584,7 @@ public:
       if( m_pParent == nullptr )
          throw( DaqException( "Object of DaqDevice is not"
                               " registered in DaqAdministration!" ) );
-      SCU_ASSERT( m_pParent != nullptr );
+      assert( m_pParent != nullptr );
       return m_pParent;
    }
 

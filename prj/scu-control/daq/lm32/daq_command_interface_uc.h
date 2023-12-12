@@ -25,7 +25,7 @@
  */
 #ifndef _DAQ_COMMAND_INTERFACE_UC_H
 #define _DAQ_COMMAND_INTERFACE_UC_H
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This module is compilable for LM32 only!
 #endif
 #if defined( CONFIG_SCU_DAQ_INTEGRATION ) && defined( CONFIG_DAQ_SINGLE_APP )

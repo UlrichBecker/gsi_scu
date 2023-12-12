@@ -9,7 +9,7 @@
  *
  */
 
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This assembler module is for the target Latice Micro32 (LM32) only!
 #endif
 #ifndef CONFIG_RTOS
@@ -19,6 +19,8 @@
 #include <lm32signal.h>
 #include <lm32AssemblerMacros.h>
 #include <lm32_port_common.h>
+
+#ifndef __CPPCHECK__
 
 /*!
  * @brief Pointer to current Task Control Block.
@@ -429,4 +431,5 @@ vPortInterruptHandler:
 .size vPortInterruptHandler, .-vPortInterruptHandler
 #endif
 
+#endif /* ifndef __CPPCHECK__ */
 /*================================== EOF ====================================*/

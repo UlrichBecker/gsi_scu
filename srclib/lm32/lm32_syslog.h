@@ -25,7 +25,7 @@
 #ifndef _LM32_SYSLOG_H
 #define _LM32_SYSLOG_H
 
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
  #error This module is for LM32 only!
 #endif
 

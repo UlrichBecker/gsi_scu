@@ -27,7 +27,7 @@
 #ifndef _SCU_LM32_COMMON_H
 #define _SCU_LM32_COMMON_H
 
-#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__DOCFSM__)
+#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__DOCFSM__) && !defined(__CPPCHECK__)
   #error This module is for the target LM32 only!
 #endif
 

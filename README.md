@@ -25,11 +25,15 @@ Prerequisite is that you has changed in a directory which includes a "Makefile".
 * ```make clean```     Deletes the binary file and all build artifacts.
 * ```make rebuild```   Compiles the entire project new doesn't matter a source-file has changed or not.
 * ```make ldep```      Prints the dependencies, that means all source and headder files which are involved at the corresponding project.
+* ```make lsrc```      Prints all source code files belonging to the current project.
+* ```make incdirs```   Prints all include directories belonging to the current project.
+* ```make devargs```   Prints all definitions of the preprocessor which had been made in the makefile.
 * ```make doc```       Generates a [doxygen](https://doxygen.nl) documentation in HTML of the corresponding project.
 * ```make showdoc```   Generates a [doxygen](https://doxygen.nl) documentation in HTML of the corresponding project and invokes the firefox-browser.
 * ```make deldoc```    Cleans the complete documentation.
 * ```make asm```       Translates all source code modules in assembler.
 * ```make objdump```   Builds the corresponding ```.elf``` - file and disassemble it.
+* ```make check```     Makes C/C++ code analysis of the current project by the tool [cppcheck](https://cppcheck.sourceforge.io) which is more accuracy as the compilers code analysis.
 * ```make V=1```       Builds the project in the verbosity mode.
 
 ### Makefile targets especially for LM32 projects

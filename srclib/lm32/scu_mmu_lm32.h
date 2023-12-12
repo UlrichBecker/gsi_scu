@@ -29,7 +29,7 @@
  */
 #ifndef _SCU_MMU_LM32_H
 #define _SCU_MMU_LM32_H
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This module is for LM32 only! 
 #endif
 

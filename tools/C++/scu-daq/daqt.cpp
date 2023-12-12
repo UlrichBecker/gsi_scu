@@ -224,7 +224,7 @@ void Channel::start( void )
       m_oPlot << endl;
       m_oOutputFileName = poCommandLine->getOutputName();
       string inserter = "_";
-      for( auto& it: getScuDomainName() )
+      for( const auto& it: getScuDomainName() )
       {
          if( it == '.' )
             inserter += '_';

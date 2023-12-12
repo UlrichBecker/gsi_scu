@@ -725,7 +725,7 @@ DaqInterface::receiveTriggerCondition( const uint deviceNumber,
    sendCommand( DAQ_OP_GET_TRIGGER_CONDITION );
    readParam12();
 
-   uint32_t condition;
+   uint32_t condition = 0;
 #if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
    reinterpret_cast<uint16_t*>(&condition)[1] =
       m_oSharedData.operation.ioData.param1;

@@ -21,7 +21,7 @@
  */
 #ifndef _SDB_LM32_H
 #define _SDB_LM32_H
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
  #error This module os for Lettice Micro 32 (LM32) only!
 #endif
 

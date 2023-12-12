@@ -19,7 +19,7 @@
  *  License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This module is for the target Latice micro32 (LM32) only!
 #endif
 #include <stdint.h>

@@ -45,7 +45,7 @@ typedef enum
 {
    ERROR_NOT_FOUND     = 0xFFFFFFFE,
    NO_MSI              = 0xDEADBEE3,
-   OWN_MSI             = (1<<31)
+   OWN_MSI             = (((unsigned int)1) << 31)
 } WB_STATUS_T;
 
 /*!

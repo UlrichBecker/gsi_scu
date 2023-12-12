@@ -250,9 +250,9 @@ endif
 # TODO Following rule could be made a bit better...
 #
 $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
-	$(QUIET)(for i in $(_SOURCE); do                                  \
-		case "$${i##*.}" in                                            \
-		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                             \
+	$(QUIET)(for i in $(_SOURCE); do                                            \
+		case "$${i##*.}" in                                                 \
+		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                                  \
 			x=$$($(CXX) -MM $(CC_ARG) "$$i");                           \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -268,8 +268,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CXX_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';  \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                             \
-		"c"|"C")                                                       \
+		;;                                                                  \
+		"c"|"C")                                                            \
 			x=$$($(CC) -MM $(CC_ARG) "$$i");                            \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -285,8 +285,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CC_F) -S -o $$@ $$< $$(ASM_OPTS)\n\n';   \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                             \
-		"s"|"S")                                                       \
+		;;                                                                  \
+		"s"|"S")                                                            \
 			x=$$($(AS) -MM $(CC_ARG) "$$i");                            \
 			if [ "$$?" != "0" ];                                        \
 			then                                                        \
@@ -302,8 +302,8 @@ $(DEPENDFILE): $(_SOURCE) $(ADDITIONAL_DEPENDENCES) $(WORK_DIR)
 			      printf '\t$$(CPP_F) -o $$@ $$< $$(ASM_OPTS)\n\n';     \
 			   fi                                                       \
 			fi;                                                         \
-		;;                                                             \
-		esac;                                                          \
+		;;                                                                  \
+		esac;                                                               \
 	done) > $(DEPENDFILE);
 
 
@@ -335,6 +335,26 @@ incargs:
 .PHONY: devargs
 devargs:
 	$(QUIET)echo -e $(OPT_DEFINES)
+
+OPT_CPPCHECK          ?= -q
+CPPCHECK              ?= cppcheck
+CPPCHECK_WITH_OPTIONS = $(CPPCHECK) $(OPT_CPPCHECK) $(OPT_INCLUDE) $(OPT_DEFINES) -D__CPPCHECK__
+.PHONY: check
+check:
+	$(QUIET)(for i in $(_SOURCE); do                                    \
+		echo "checking: " $$(basename $$i);                         \
+		case "$${i##*.}" in                                         \
+		"cpp"|"CPP"|"cc"|"CC"|"cxx"|"CXX")                          \
+			$(CPPCHECK_WITH_OPTIONS) $(OPT_CPPCHECK_CXX) $$i;   \
+		;;                                                          \
+		"c"|"C")                                                    \
+			$(CPPCHECK_WITH_OPTIONS) $(OPT_CPPCHECK_C)   $$i;   \
+		;;                                                          \
+		"s"|"S")                                                    \
+			$(CPPCHECK_WITH_OPTIONS) $(OPT_CPPCHECK_ASM) $$i;   \
+		;;                                                          \
+		esac;                                                       \
+	done)
 
 .PHONY: asm
 asm:   $(ASM_DIR) $(ASM_FILES)

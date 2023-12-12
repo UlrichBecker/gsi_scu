@@ -641,7 +641,7 @@ void daqDescriptorSetTriggerConditionHW( register DAQ_DESCRIPTOR_T* pThis,
 STATIC inline
 uint32_t daqDescriptorGetTriggerCondition( register DAQ_DESCRIPTOR_T* pThis )
 {
-   uint32_t condition;
+   uint32_t condition = 0;
 #if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
    ((DAQ_DATA_T*)&condition)[0] = pThis->name.trigger.high;
    ((DAQ_DATA_T*)&condition)[1] = pThis->name.trigger.low;

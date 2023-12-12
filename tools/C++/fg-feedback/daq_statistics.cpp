@@ -112,7 +112,7 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
    if( m_daqChannelList.size() > 1 )
    {
       sort( m_daqChannelList.begin(), m_daqChannelList.end(),
-            []( BLOCK_T& a, BLOCK_T& b ) -> bool
+            []( const BLOCK_T& a, const BLOCK_T& b ) -> bool
             {
                return a.m_serialNumber < b.m_serialNumber;
             });

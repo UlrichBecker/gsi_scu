@@ -36,14 +36,14 @@
  * http://aws.amazon.com/freertos
  */
 #ifndef __DOXYGEN__
- #ifndef __GNUC__
+ #if !defined(__GNUC__) && !defined(__CPPCHECK__)
    #error This module is for GNU compiler only!
  #endif
- #ifndef __lm32__
+ #if !defined(__lm32__) && !defined(__CPPCHECK__)
    #error This module is for the target Latice micro32 (LM32) only!
  #endif
  #ifndef CONFIG_RTOS
-   #error Compiler switch CONFIG_RTOS has to be define in Makefile!
+   #error Compiler switch CONFIG_RTOS has to be defined in Makefile!
  #endif
 #endif
 #include <FreeRTOS.h>

@@ -53,6 +53,9 @@ uint64_t timeMeasureGetLast( const TIME_MEASUREMENT_T* pMeasureTime )
 uint64_t timeMeasureGetLastSafe( const TIME_MEASUREMENT_T* pMeasureTime )
 {
    uint64_t ret;
+#ifdef __CPPCHECK__
+   ret = 0;
+#endif
    ATOMIC_SECTION() ret = timeMeasureGetLast( pMeasureTime );
    return ret;
 }
@@ -87,6 +90,9 @@ bool timeMeasureIsValid( const TIME_MEASUREMENT_T* pMeasureTime )
 bool timeMeasureIsValidSafe( const TIME_MEASUREMENT_T* pMeasureTime )
 {
    bool ret;
+#ifdef __CPPCHECK__
+   ret = 0;
+#endif
    ATOMIC_SECTION() ret = timeMeasureIsValid( pMeasureTime );
    return ret;
 }

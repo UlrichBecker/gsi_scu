@@ -494,6 +494,15 @@
 #define __FUNCTION_HEAD_CONVERT_BYTE_ENDIAN( TYP )      \
    TYP convertByteEndian_##TYP( const TYP value )
 
+#ifdef __CPPCHECK__
+   /*
+    * Makes cppcheck happy.
+    */
+   #define __ENDIAN_INIT( x ) x = (TYP)0;
+#else
+   #define __ENDIAN_INIT( x )
+#endif
+
 /*!
  * @brief Will used from macro IMPLEMENT_CONVERT_BYTE_ENDIAN
  *        and C++ template "convertByteEndian" in the
@@ -502,6 +511,7 @@
 #define __FUNCTION_BODY_CONVERT_BYTE_ENDIAN( TYP )      \
    {                                                    \
       TYP result;                                       \
+      __ENDIAN_INIT( result )                           \
       int i;                                            \
       for( i = sizeof(TYP)-1; i >= 0; i-- )             \
         ((unsigned char*)&result)[i] =                  \

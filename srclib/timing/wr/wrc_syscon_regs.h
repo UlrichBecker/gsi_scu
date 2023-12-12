@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #endif
 
-#if defined( __GNUC__)
+#if defined( __GNUC__) || defined(__DOXYGEN__) || defined(__CPPCHECK__)
 #define PACKED __attribute__ ((packed))
 #else
 #error "Unsupported compiler?"
@@ -28,7 +28,7 @@
 
 #ifndef __WBGEN2_MACROS_DEFINED__
 #define __WBGEN2_MACROS_DEFINED__
-#define WBGEN2_GEN_MASK(offset, size) (((1<<(size))-1) << (offset))
+#define WBGEN2_GEN_MASK(offset, size) (((unsigned int)((1<<(size))-1)) << (offset))
 #define WBGEN2_GEN_WRITE(value, offset, size) (((value) & ((1<<(size))-1)) << (offset))
 #define WBGEN2_GEN_READ(reg, offset, size) (((reg) >> (offset)) & ((1<<(size))-1))
 #define WBGEN2_SIGN_EXTEND(value, bits) (((value) & (1<<bits) ? ~((1<<(bits))-1): 0 ) | (value))

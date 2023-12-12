@@ -283,7 +283,7 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
 #endif
    DAQ_REGISTER_T remainingDataWords;
    unsigned int dataWordCounter;
-   unsigned int payloadIndex;
+   unsigned int payloadIndex = 0;
    DAQ_REGISTER_T expectedWords;
 
    /*

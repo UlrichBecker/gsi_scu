@@ -11,6 +11,7 @@
  *       is specialized for FreeRTOS.
  */
 #include <lm32signal.h>
+#ifndef __CPPCHECK__
 
 #ifdef CONFIG_RTOS
    /*
@@ -32,6 +33,8 @@
 .extern __init
 .extern main
 .extern __exit
+
+
 #ifndef CONFIG_NO_INTERRUPTS
    /*
     * Nesting counter for atomic sections.
@@ -56,6 +59,7 @@ __atomic_section_nesting_count:
 __reset_count:
    .long -1    /* Pre-initializing __reset_count with -1 by assembler */
 #endif
+
 
 /* ----------------------------------------------------------------------------
  * Exception handlers - Must be 32 bytes long respectively 8 instructions.
@@ -426,5 +430,5 @@ _restore_all_and_bret:
     RESTORE_ALL
     bret
 .size   _restore_all_and_bret, .-_restore_all_and_bret
-
+#endif /* ifndef __CPPCHECK__ */
 /*================================== EOF ====================================*/

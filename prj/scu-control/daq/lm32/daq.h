@@ -34,7 +34,7 @@
 #ifndef _DAQ_H
 #define _DAQ_H
 
-#if !defined(__lm32__) && !defined(__DOCFSM__)
+#if !defined(__lm32__) && !defined(__DOCFSM__) && !defined(__CPPCHECK__)
   #error This module is for the target LM32 only!
 #endif
 

@@ -34,6 +34,8 @@ ADDITIONAL_TO_CLEAN += $(ELF_FILE)
 
 DEFINES += CONFIG_PATCH_LM32_BUG
 
+OPT_CPPCHECK ?= -q --platform=unix32 -D__BYTE_ORDER__=__ORDER_BIG_ENDIAN__
+
 # For doxygen if used only.
 DOX_INPUT       += $(MAKEFILE_DIR)/makefile.lm32
 DOX_PREDEFINED  += __lm32__

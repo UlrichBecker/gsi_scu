@@ -9,13 +9,14 @@
 #ifndef _LM32ASSEMBLERMACROS_H
 #define _LM32ASSEMBLERMACROS_H
 
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
   #error This headder file is for the target Latice Micro32 (LM32) only!
 #endif
-#ifndef __ASSEMBLER__
+#if !defined(__ASSEMBLER__) && !defined(__CPPCHECK__)
   #error This headder file is for GNU-Assembler only!
 #endif
 
+#ifndef __CPPCHECK__
 
 /*! --------------------------------------------------------------------------
  * @brief Loads the pointer of a global 32-bit C/C++ variable in a register.
@@ -45,5 +46,6 @@
 .endm
 #endif
 
+#endif /* ifndef __CPPCHECK__ */
 #endif /* ifndef _LM32ASSEMBLERMACROS_H */
 /*================================== EOF ====================================*/

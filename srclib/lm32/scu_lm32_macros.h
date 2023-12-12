@@ -27,7 +27,7 @@
  */
 #ifndef _SCU_LM32_MACROS_H
 #define _SCU_LM32_MACROS_H
-#ifndef __lm32__
+#if !defined(__lm32__) && !defined(__CPPCHECK__)
    #error This header file is specific for LM32 targets in GSI-SCU only!
 #endif
 

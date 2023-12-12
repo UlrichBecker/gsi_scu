@@ -68,8 +68,6 @@ void initEcaQueue( void )
             ESC_NORMAL, g_eca.pQueue, g_eca.tag );
 }
 
-//#define OFFS(SLOT) ((SLOT) * (1 << 16))
-
 #ifdef _CONFIG_ECA_BY_MSI
   #define ECA_ATOMIC_SECTION() 
 #else

@@ -9,7 +9,7 @@
  * @date 21.10.2019
  * Renamed from scu_function_generator.c 21.10.2019
  */
-#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__DOCFSM__)
+#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__DOCFSM__) && !defined(__CPPCHECK__)
   #error This module is for the target LM32 only!
 #endif
 

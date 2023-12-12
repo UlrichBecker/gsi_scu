@@ -26,7 +26,7 @@
 #ifndef _LM32INTERRUPTS_H
 #define _LM32INTERRUPTS_H
 
-#if !defined(__lm32__) && !defined(__DOXYGEN__)
+#if !defined(__lm32__) && !defined(__DOXYGEN__) && !defined(__CPPCHECK__)
   #error This module is for the target LM32 only!
 #endif
 

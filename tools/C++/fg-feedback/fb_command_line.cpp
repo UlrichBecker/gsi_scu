@@ -110,6 +110,14 @@ STATIC int listOrScanFGs( CommandLine* pCmdLine, bool doScan )
 /*! ---------------------------------------------------------------------------
  * @brief Initializing the command line options.
  */
+#ifdef CONFIG_EB_TIME_MEASSUREMENT
+  #define PRINT_HOT_KEY_SHOW_TIMING  \
+           << HOT_KEY_SHOW_TIMING << \
+           ": Shows the maximum and minimum access time in microseconds" \
+                                        " of wishbone cycles.\n"
+#else
+  #define PRINT_HOT_KEY_SHOW_TIMING
+#endif
 vector<OPTION> CommandLine::c_optList =
 {
    {
@@ -132,10 +140,7 @@ vector<OPTION> CommandLine::c_optList =
               << HOT_KEY_TOGGLE_SINGLE_SHOOT << ": Toggling single shoot mode on / off\n"
               << HOT_KEY_PRINT_HISTORY << ": Prints the current LM32 history in a eb-console. (See option -H)\n"
               << HOT_KEY_BUILD_NEW << ": Rebuilds the objects respectively restart.\n"
-         #ifdef CONFIG_EB_TIME_MEASSUREMENT
-              << HOT_KEY_SHOW_TIMING << ": Shows the maximum and minimum access time in microseconds"
-                                        " of wishbone cycles.\n"
-         #endif
+              PRINT_HOT_KEY_SHOW_TIMING
                  "Esc: Program termination\n"
                  "\nCommandline options:\n";
          poParser->list( cout );
@@ -228,20 +233,13 @@ vector<OPTION> CommandLine::c_optList =
          if( static_cast<CommandLine*>(poParser)->m_verbose )
          {
             cout << "Version: "
-         #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-                 "* "
-         #endif
                  TO_STRING( VERSION )
                     ", Git revision: "
                  TO_STRING( GIT_REVISION ) << endl;
          }
          else
          {
-            cout <<
-         #ifdef _CONFIG_WAS_READ_FOR_ADDAC_DAQ
-            "* "
-         #endif
-            TO_STRING( VERSION ) << endl;
+            cout << TO_STRING( VERSION ) << endl;
          }
          ::exit( EXIT_SUCCESS );
          return 0;
