@@ -21,6 +21,7 @@ because the building of scu_control generates some headder files which will used
 ## Using the tool [cppcheck](https://cppcheck.sourceforge.io) as option
 If you work on a local linux machine so it's meaningful to verify the C/C++ code by the additional tool<br />
 [cppcheck](https://cppcheck.sourceforge.io) to make the sourcecode as clean as possible.<br />
+The [cppcheck](https://cppcheck.sourceforge.io) code analysis can still find errors and warnings that the compiler misses.<br />
 Unfortunately this tool isn't installed on the ASL- clusters at the moment.
 
 ## Some Makefile targets
