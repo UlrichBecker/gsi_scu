@@ -43,6 +43,8 @@ ifdef OECORE_SDK_VERSION
   DEFINES += CONFIG_OECORE_SDK_VERSION=$(OECORE_SDK_VERSION)
 endif
 
+OPT_CPPCHECK ?= -q --enable=performance,portability
+
 include $(MAKEFILE_DIR)/makefile.gsi
 
 SDKTARGETSYSROOT ?= /

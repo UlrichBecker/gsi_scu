@@ -34,7 +34,7 @@ namespace FeSupport {
             va_end(vl);
     }
 
-    BusException::BusException(const std::string errorMessage) :
+    BusException::BusException(const std::string& errorMessage) :
                     message_(errorMessage)
     {
     }

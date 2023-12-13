@@ -83,7 +83,7 @@ int ddr3init( void )
    osMutexInit( &mg_oDdr3.oMutex );
 #endif
 
-   mg_oDdr3.pTrModeBase = find_device_adr( GSI, WB_DDR3_if1 );
+   mg_oDdr3.pTrModeBase = (DDR3_ADDR_T)find_device_adr( GSI, WB_DDR3_if1 );
    if( mg_oDdr3.pTrModeBase == (uint32_t*)ERROR_NOT_FOUND )
    {
       mg_oDdr3.pTrModeBase = DDR3_INVALID;
@@ -91,7 +91,7 @@ int ddr3init( void )
       return -1;
    }
 #ifndef CONFIG_DDR3_NO_BURST_FUNCTIONS
-   mg_oDdr3.pBurstModeBase = find_device_adr( GSI, WB_DDR3_if2 );
+   mg_oDdr3.pBurstModeBase = (DDR3_ADDR_T)find_device_adr( GSI, WB_DDR3_if2 );
    if( mg_oDdr3.pBurstModeBase == (uint32_t*)ERROR_NOT_FOUND )
    {
       mg_oDdr3.pBurstModeBase = DDR3_INVALID;

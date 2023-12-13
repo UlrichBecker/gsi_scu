@@ -47,7 +47,7 @@ class Ddr3Access: public RamAccess
    class Ddr3Mutex: public Mutex
    {
    public:
-      Ddr3Mutex( std::string name );
+      Ddr3Mutex( const std::string& name );
       ~Ddr3Mutex( void );
    };
 

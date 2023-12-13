@@ -500,7 +500,7 @@ void* daqChannelGetScuBusSlaveBaseAddress( register DAQ_CANNEL_T* pThis )
    * to the registers of the SCU slave, therefore the base address of the
    * DAQ registers are noted rather than the SCU bus slave address.
    */
-   return ((void*)daqChannelGetRegPtr( pThis )) - DAQ_REGISTER_OFFSET;
+   return ((uint8_t*)daqChannelGetRegPtr( pThis )) - DAQ_REGISTER_OFFSET;
 }
 
 /*! --------------------------------------------------------------------------
@@ -1413,7 +1413,7 @@ void* daqDeviceGetScuBusSlaveBaseAddress( register DAQ_DEVICE_T* pThis )
    * to the registers of the SCU slave, therefore the base address of the
    * DAQ register is noted rather than the SCU bus slave address.
    */
-   return ((void*)pThis->pReg) - DAQ_REGISTER_OFFSET;
+   return ((uint8_t*)pThis->pReg) - DAQ_REGISTER_OFFSET;
 }
 
 /*! ---------------------------------------------------------------------------

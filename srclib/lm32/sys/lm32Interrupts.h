@@ -163,6 +163,12 @@ bool irqIsInContext( void );
  */
 unsigned int irqGetAtomicNestingCount( void );
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Returns the pointer of the atomic section nesting counter.
+ */
+uint32_t* irqGetNestingCountPointer( void );
+
 void irqPresetAtomicNestingCount( void );
 
 

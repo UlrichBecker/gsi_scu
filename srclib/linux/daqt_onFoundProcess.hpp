@@ -53,7 +53,7 @@ int __onFoundProcess( ::OFP_ARG_T* pArg );
  * @retval false No concurrent process accessing to the same etherbone
  *               address is running.
  */
-inline bool isConcurrentProcessRunning( std::string myProcess,
+inline bool isConcurrentProcessRunning( const std::string& myProcess,
                                         std::string& ebAddress )
 {
    return (::findProcesses( myProcess.c_str(), __onFoundProcess, &ebAddress,

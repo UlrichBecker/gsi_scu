@@ -384,7 +384,7 @@ Device::~Device( void )
 /*! ---------------------------------------------------------------------------
  */
 AllDaqAdministration::AllDaqAdministration( CommandLine* m_poCommandLine,
-                                            std::string ebAddress )
+                                            const std::string& ebAddress )
    :FgFeedbackAdministration( new DaqEb::EtherboneConnection( ebAddress ) )
    ,m_poCommandLine( m_poCommandLine )
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS

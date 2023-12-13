@@ -732,7 +732,7 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
       * DAQ registers are noted rather than the SCU bus slave address.
       */
       pCurrentDaqDevice->pReg =
-          scuBusGetAbsSlaveAddr( pScuBusBase, slot ) + DAQ_REGISTER_OFFSET;
+          (DAQ_REGISTER_ACCESS_T*)(((uint8_t*)scuBusGetAbsSlaveAddr( pScuBusBase, slot )) + DAQ_REGISTER_OFFSET);
 
       DBPRINT2( "DBG: DAQ found in slot: %2d, address: 0x%08X\n", slot,
                 pCurrentDaqDevice->pReg );

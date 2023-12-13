@@ -29,7 +29,7 @@ namespace FeSupport {
         /*!
          * \brief Constructor with an error message as parameter
         */
-        BusException(const std::string errorMessage);
+        BusException(const std::string& errorMessage);
         /*!
          * @return Containing error message
          */

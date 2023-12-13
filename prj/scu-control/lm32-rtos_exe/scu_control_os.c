@@ -53,8 +53,6 @@
   #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
 #endif
 
-extern volatile uint32_t __atomic_section_nesting_count;
-
 #if ( configCHECK_FOR_STACK_OVERFLOW != 0 )
 /*! ---------------------------------------------------------------------------
  * @ingroup OVERWRITABLE
@@ -441,7 +439,7 @@ void main( void )
           );
 
    scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Addr nesting count: 0x%p\n" ESC_NORMAL,
-           &__atomic_section_nesting_count );
+           irqGetNestingCountPointer() );
 
    initializeGlobalPointers();
 

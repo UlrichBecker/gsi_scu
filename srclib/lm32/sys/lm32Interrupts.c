@@ -51,6 +51,11 @@ extern volatile uint32_t __atomic_section_nesting_count;
 volatile uint64_t mg_interruptTimestamp = 0LL;
 #endif
 
+/*!
+ * @ingroup INTERRUPT
+ * @brief This flag becomes "true" f the program flow is in the
+ *        interrupt routine, else it is "false".
+ */
 volatile bool mg_isInContext = false;
 
 /*! ---------------------------------------------------------------------------
@@ -97,6 +102,14 @@ inline bool irqIsInContext( void )
 inline unsigned int irqGetAtomicNestingCount( void )
 {
    return __atomic_section_nesting_count;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
+inline uint32_t* irqGetNestingCountPointer( void )
+{
+   return (uint32_t*) &__atomic_section_nesting_count;
 }
 
 inline void irqPresetAtomicNestingCount( void )
@@ -167,7 +180,7 @@ void irqPrintInfo( uint32_t ie,  uint32_t nc )
             "Interrupt-enable:     0b%02b\n"
             "Interrupt-pending:    0b%02b\n",
             nc, ie,
-            irqGetPendingRegister() );
+            irqGetPendingRegister() );--std
 }
 
 void irqPrintNestingCounter( void )
@@ -254,8 +267,15 @@ void _irq_entry( void )
          IRQ_ASSERT( intNum < ARRAY_SIZE( ISREntryTable ) );
          const uint32_t mask = _irqGetPendingMask( intNum );
 
-         if( (mask & ip) == 0 ) /* Is this interrupt pending? */
-            continue; /* No, go to next possible interrupt. */
+          /*
+           * Is this interrupt pending?
+           */
+         if( (mask & ip) == 0 )
+         { /*
+            * No, go to next possible interrupt.
+            */
+            continue;
+         }
 
          /*
           * Handling of detected pending interrupt.

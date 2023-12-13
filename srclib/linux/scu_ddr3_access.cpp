@@ -34,7 +34,7 @@ using namespace Scu;
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Mutex::Ddr3Mutex( std::string name )
+Ddr3Access::Ddr3Mutex::Ddr3Mutex( const std::string& name )
    :Mutex( name + "_DDR3" )
 {
    DEBUG_MESSAGE_M_FUNCTION("");

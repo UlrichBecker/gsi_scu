@@ -231,7 +231,7 @@ class AllDaqAdministration: public FgFeedbackAdministration
 #endif
 
 public:
-   AllDaqAdministration( CommandLine* m_poCommandLine, std::string ebAddress );
+   AllDaqAdministration( CommandLine* m_poCommandLine, const std::string& ebAddress );
    virtual ~AllDaqAdministration( void );
 
    CommandLine* getCommandLine( void )
