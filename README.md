@@ -24,6 +24,8 @@ If you work on a local linux machine so it's meaningful to verify the C/C++ code
 The [cppcheck](https://cppcheck.sourceforge.io) code analysis can still find errors and warnings that the compiler misses.<br />
 Unfortunately this tool isn't installed on the ASL- clusters at the moment.
 
+**Note: For a release variant, only one number of warnings are permitted: zero!**
+
 ## Some Makefile targets
 ### Common targets
 Prerequisite is that you has changed in a directory which includes a "Makefile".
