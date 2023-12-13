@@ -18,6 +18,11 @@ If you work on a local machine, so you can [obtain and build the LM32-cross-comp
 Prerequisite to compile even of some linux-tools, that the LM32-application ```scu3_control.bin``` has already be compiled,
 because the building of scu_control generates some headder files which will used by some linux-tools and libraries.
 
+## Using the tool [cppcheck](https://cppcheck.sourceforge.io) as option
+If you work on a local linux machine so it's meaningful to verify the C/C++ code by the additional tool<br />
+[cppcheck](https://cppcheck.sourceforge.io) to make the sourcecode as clean as possible.<br />
+Unfortunately this tool isn't installed on the ASL- clusters at the moment.
+
 ## Some Makefile targets
 ### Common targets
 Prerequisite is that you has changed in a directory which includes a "Makefile".
