@@ -23,6 +23,10 @@
 extern DAQ_ADMIN_T g_scuDaqAdmin;
 #endif
 
+#if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && defined( CONFIG_RTOS )
+ #error This module shall not run in timerinterrupt context when FreeRTOS is used!
+#endif
+
 extern void*  g_pScub_base;
 #ifdef CONFIG_MIL_PIGGY
   #ifndef CONFIG_SCU3
