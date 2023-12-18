@@ -64,6 +64,19 @@
    #define STACK_MAGIC 0xAAAAAAAA
 #endif
 
+/*!
+ * @brief Restarts the LM32- application.
+ */
+#define LM32_RESTART_APP()  \
+   asm volatile             \
+   (                        \
+      "bi   _crt0 \n\t"     \
+      :                     \
+      :                     \
+      : "memory"            \
+   )
+
+
 #ifndef __ASSEMBLER__
    #include <stdint.h>
 

@@ -31,7 +31,7 @@
 #include <lm32Interrupts.h>
 #include "sys_exception.h"
 
-#define CONFIG_STOP_ON_LM32_EXCEPTION
+//#define CONFIG_STOP_ON_LM32_EXCEPTION
 
 /*! ---------------------------------------------------------------------------
  * @brief Callback function becomes invoked by LM32 when an exception has
@@ -52,11 +52,15 @@ void _onException( const uint32_t sig )
    scuLog( LM32_LOG_ERROR, ESC_ERROR "Exception occurred: %d -> %s\n"
                                   #ifdef CONFIG_STOP_ON_LM32_EXCEPTION
                                      "System stopped!\n"
+                                  #else
+                                     "Restarting application!"
                                   #endif
                            ESC_NORMAL, sig, str );
 #ifdef CONFIG_STOP_ON_LM32_EXCEPTION
    irqDisable();
    while( true );
+#else
+   LM32_RESTART_APP();
 #endif
 }
 

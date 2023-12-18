@@ -32,6 +32,6 @@ BASE_DIR = $(shell pwd)/..
 # DEFINES += DEBUGLEVEL
 
 STACK_SIZE  =  512
-
+#NO_LTO := 1
 include $(BASE_DIR)/scu_control_os.mk
 #=================================== EOF ======================================

@@ -66,11 +66,20 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask UNUSED, char* pcTaskName 
    criticalSectionEnterBase();
    scuLog( LM32_LOG_ERROR,
            ESC_ERROR "Panic: Stack overflow at task \"%s\"!\n"
-                     "+++ LM32 stopped! +++" ESC_NORMAL, pcTaskName );
+                 #ifdef CONFIG_STOP_ON_LM32_EXCEPTION
+                     "+++ LM32 stopped! +++"
+                 #else
+                     "Restarting application!"
+                 #endif
+                     ESC_NORMAL, pcTaskName );
+#ifdef CONFIG_STOP_ON_LM32_EXCEPTION
    /*
     * Remaining in the atomic section until reset. :-(
     */
    while( true );
+#else
+   LM32_RESTART_APP();
+#endif
 }
 #endif /* #if ( configCHECK_FOR_STACK_OVERFLOW != 0 ) */
 #if ( configUSE_MALLOC_FAILED_HOOK != 0 )
@@ -192,7 +201,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          const MIL_QEUE_T milMsg =
          { /*
             * The slot number is in any cases not zero.
-            * In this way the MIL handler function knows it comes
+            * In this way the MIL handler function knows the message comes
             * from a SCU-bus SIO slave.
             */
             .slot = slot,
@@ -223,7 +232,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
- * @brief Interrupt callback function for each Message Signaled Interrupt
+ * @brief Interrupt callback function for each Message Signaled Interrupt (MSI)
  * @param intNum Interrupt number.
  * @param pContext Value of second parameter from irqRegisterISR not used
  *                 in this case.
@@ -267,7 +276,6 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
          { /*
             * Command message from SAFT-lib
             */
-
             STATIC_ASSERT( sizeof( m.msg ) == sizeof( SAFT_CMD_T ) );
             queuePushWatched( &g_queueSaftCmd, &m.msg );
             break;

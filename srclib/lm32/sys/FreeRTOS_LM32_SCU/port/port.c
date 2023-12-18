@@ -265,6 +265,12 @@ ONE_TIME_CALL void prvSetupTimer( void )
     */
    STATIC_ASSERT( (configCPU_CLOCK_HZ % configTICK_RATE_HZ) == 0 );
 
+   /*
+    * If the timer still running e.g. because of a exception with restert
+    * then it is a good idea to stop him here.
+    */
+   lm32TimerDisable( pTimer );
+
    lm32TimerSetPeriod( pTimer, configCPU_CLOCK_HZ / configTICK_RATE_HZ );
    lm32TimerEnable( pTimer );
    /*
