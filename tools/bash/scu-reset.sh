@@ -33,10 +33,10 @@ checkTarget()
 
 [ -n "$1" ] || die "Missing argument!"
 
-if [ "${HOSTNAME:0:4}" = "asl7" ]
+if [ "${HOSTNAME:0:4}" = "asl7" ] || $IN_GSI_NET
 then
    #
-   # Script is running on ASL-cluster
+   # Script is running on ASL-cluster or om PC in GSI- net.
    #
    if [ "$1" == "-h" ]
    then
@@ -47,8 +47,15 @@ then
       echo "Help of $EB_RESET:"
    fi
 
-   [ -n "$(which $EB_RESET 2>/dev/null)" ] || die "$EB_RESET not found on ASL! Check your environment variable PATH on ASL."
-
+   if [ ! -n "$(which $EB_RESET 2>/dev/null)" ]
+   then
+      if $IN_GSI_NET
+      then
+         die "$EB_RESET not found on your computer! Check your environment variable PATH."
+      else
+         die "$EB_RESET not found on ASL! Check your environment variable PATH on ASL."
+      fi
+   fi
    if [ "${1:0:1}" = "-" ]
    then
       OPTION=$1

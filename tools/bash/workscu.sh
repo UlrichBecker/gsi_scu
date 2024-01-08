@@ -18,6 +18,7 @@ LOG_SCRIPT=__LM32Log.sh
 CON_SCRIPT=__scuCon.sh
 
 SCU_TOOL_DIR="/opt/nfsinit/global/tools/"
+GSI_POSTFIX=".acc.gsi.de"
 
 if [ "${HOSTNAME:0:4}" = "asl7" ]
 then
@@ -37,7 +38,7 @@ die()
 checkTarget()
 {
    [ ! -n "$1" ] && die "Missing target URL!"
-   if $IS_ON_ASL
+   if $IS_ON_ASL || $IN_GSI_NET
    then
       ping -c1 $1 2>/dev/null 1>/dev/null
    else
@@ -101,7 +102,7 @@ __EOH__
 generateScript()
 {
    echo '#!/bin/sh' > $1
-   if $IS_ON_ASL
+   if $IS_ON_ASL || $IN_GSI_NET
    then
       echo -e $2 >> $1
    else
@@ -158,7 +159,7 @@ else
 fi
 
 
-if ! $IS_ON_ASL
+if ! $IS_ON_ASL && ! $IN_GSI_NET
 then
    if [ ! -n "$GSI_USERNAME" ]
    then
@@ -172,7 +173,12 @@ then
 fi
 
 SCU_URL=$1
-ASL_URL=asl${ASL_NO}.acc.gsi.de
+if [ ! -n "$(echo $SCU_URL | grep $GSI_POSTFIX )" ]
+then
+   SCU_URL=${SCU_URL}${GSI_POSTFIX}
+fi
+
+ASL_URL=asl${ASL_NO}${GSI_POSTFIX}
 checkTarget $SCU_URL
 
 TOOL_CMD="ssh -t root@${SCU_URL} \"export ENV=${SCU_TOOL_DIR}fe_scripts/fe_environment.sh; cd ${SCU_TOOL_DIR}; sh -i\""

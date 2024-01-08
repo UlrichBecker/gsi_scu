@@ -13,6 +13,7 @@ ESC_ERROR="\e[1m\e[31m"
 ESC_NORMAL="\e[0m"
 
 DEV=dev/wbm0
+GSI_POSTFIX=".acc.gsi.de"
 
 die()
 {
@@ -35,15 +36,26 @@ then
    exit 0
 fi
 
-if [ "${HOSTNAME:0:4}" = "asl7" ]
+SCU_NAME=$1
+if [ ! -n "$(echo $SCU_NAME | grep $GSI_POSTFIX )" ]
+then
+   SCU_NAME=${SCU_NAME}${GSI_POSTFIX}
+fi
+
+if [ "${HOSTNAME:0:4}" = "asl7" ] || $IN_GSI_NET
 then
    #
    # Script is running on ASL-cluster
    #
-   checkTarget $1
-   echo "Calling eb-info on $1:"
-   echo "------------------------"
-   ssh root@${1} "eb-info -w $DEV"
+   checkTarget $SCU_NAME
+   if [ -n "$(which lm32-logd 2>/dev/null)" ]
+   then
+      lm32-logd -B $SCU_NAME
+   else
+      echo "Calling eb-info on $SCU_NAME:"
+      echo "------------------------"
+      ssh root@${SCU_NAME} "eb-info -w $DEV"
+   fi
    exit $?
 else
    #
@@ -58,9 +70,9 @@ else
    then
       ASL_NO=755
    fi
-   ASL_URL=asl${ASL_NO}.acc.gsi.de
+   ASL_URL=asl${ASL_NO}${GSI_POSTFIX}
    echo "Recursive call on asl${ASL_NO}:"
-   ssh -t ${GSI_USERNAME}@${ASL_URL} $(basename $0) $1
+   ssh -t ${GSI_USERNAME}@${ASL_URL} $(basename $0) $SCU_NAME
 fi
 
 #=================================== EOF ======================================
