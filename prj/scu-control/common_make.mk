@@ -222,7 +222,7 @@ endif
 
 ifndef DOX_OUTPUT_DIRECTORY
  ifeq ($(shell echo $${HOSTNAME:0:5}), asl75)
-   DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/lm32-firmware
+   DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/lm32-firmware/$(TARGET)
  endif
 endif
 
