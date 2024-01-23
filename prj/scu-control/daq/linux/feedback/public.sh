@@ -9,11 +9,10 @@
 ## (c)     GSI Helmholtz Centre for Heavy Ion Research GmbH                  ##
 ## Date:   14.10.2020                                                        ##
 ###############################################################################
-VERSION_DIR="_non_DDR34MIL"
 
 if [ ! -n "${OECORE_SDK_VERSION}" ]
 then
-   echo "YOCTO SDK is not active!" 1>&2
+   echo "ERROR: YOCTO SDK is not active!" 1>&2
    exit 1
 fi
 
@@ -54,6 +53,14 @@ done
 
 FW_VERSION=$(strings $LM32_FW | grep  "Version     :" | awk '{print $3}')
 echo "LM32-Firmware version is: $FW_VERSION"
+if [ -n "$(strings $LM32_FW | grep "+MIL-DDR3")" ]
+then
+   VERSION_DIR="_non_DDR34MIL"
+   echo "Version will use the LM32 working memory for MIL-DAQ!"
+else
+   VERSION_DIR=""
+   echo "Version will use the DDR3-RAM for MIL-DAQ."
+fi
 
 if [ "${HOSTNAME:0:4}" = "asl7" ]
 then
@@ -81,6 +88,6 @@ do
    [ "$?" == "0" ] && ((n++))
 done
 
-echo "$n header files copied."
+echo "$n header files copied to $HEADER_DIR"
 
 #=================================== EOF ======================================
