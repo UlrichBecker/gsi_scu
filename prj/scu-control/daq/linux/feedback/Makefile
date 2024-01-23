@@ -53,7 +53,7 @@ SOURCE += $(DAQ_DIR)/daq_fg_allocator.c
 # NO_LTO = 1
 
 ifeq ($(shell echo $${HOSTNAME:0:4}), asl7)
-   DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/daq
+   DOX_OUTPUT_DIRECTORY = /common/usr/cscofe/doc/scu/daq/$(TARGET)
 endif
 
 DOX_EXPAND_AS_DEFINED      = ADD_NAMESPACE
