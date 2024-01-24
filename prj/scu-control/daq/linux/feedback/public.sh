@@ -22,7 +22,7 @@ LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/resu
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
 
-COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v etherbone\.h  | grep -v Constants\.hpp )
+COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v "/etherbone\.h"  | grep -v Constants\.hpp )
 
 if [ ! -f "$LIB_FILE" ]
 then
@@ -55,11 +55,11 @@ FW_VERSION=$(strings $LM32_FW | grep  "Version     :" | awk '{print $3}')
 echo "LM32-Firmware version is: $FW_VERSION"
 if [ -n "$(strings $LM32_FW | grep "+MIL-DDR3")" ]
 then
-   VERSION_DIR="_non_DDR34MIL"
-   echo "Version will use the LM32 working memory for MIL-DAQ!"
-else
    VERSION_DIR=""
    echo "Version will use the DDR3-RAM for MIL-DAQ."
+else
+   VERSION_DIR="_non_DDR34MIL"
+   echo "Version will use the LM32 working memory for MIL-DAQ!"
 fi
 
 if [ "${HOSTNAME:0:4}" = "asl7" ]
