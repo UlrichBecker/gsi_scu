@@ -16,9 +16,24 @@ then
    exit 1
 fi
 
+if [ "$1" = "os" ]
+then
+   EXPORT_FREE_RTOS_VERSION=true
+else
+   EXPORT_FREE_RTOS_VERSION=false
+fi
+
 SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
 LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_${OECORE_SDK_VERSION}/result/libscu_fg_feedback.a
-LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
+
+if $EXPORT_FREE_RTOS_VERSION
+then
+   LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-rtos_exe/SCU3/deploy_lm32/result/scu3_control_os.bin
+else
+   LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
+fi
+
+
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
 
