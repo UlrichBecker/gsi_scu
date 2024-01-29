@@ -14,6 +14,8 @@ ESC_ERROR="\e[1m\e[31m"
 ESC_SUCCESS="\e[1m\e[32m"
 ESC_NORMAL="\e[0m"
 
+USE_RDESKTOP=true
+
 die()
 {
    echo -e $ESC_ERROR"ERROR: $@"$ESC_NORMAL 1>&2
@@ -60,6 +62,13 @@ else
    sleep 1
 fi
 
-xfreerdp +clipboard /u:$GSI_USERNAME  +fonts +glyph-cache /v:localhost:$LOCAL_PORT /relax-order-checks /dynamic-resolution # /f 
+if $USE_RDESKTOP
+then
+   echo "INFO Starting \"rdesktop\"."
+   rdesktop  -E -u $GSI_USERNAME -g 2600x1380 localhost:$LOCAL_PORT
+else
+   echo "INFO Starting \"xfreerdp\"."
+   xfreerdp +clipboard /u:$GSI_USERNAME  +fonts +glyph-cache /v:localhost:$LOCAL_PORT /relax-order-checks /dynamic-resolution
+fi
 echo "End..."
 #=================================== EOF ======================================
