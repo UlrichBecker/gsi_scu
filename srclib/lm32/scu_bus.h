@@ -7,6 +7,9 @@
  * @see
  * <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/StdRegScuBusSlave">
  *    Registersatz SCU-Bus-Slaves</a>
+ * @see
+ * <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/ScuBusBp12s3">
+ *    SCU-Bus-Backplane</a>
  *
  ******************************************************************************
  * This library is free software; you can redistribute it and/or

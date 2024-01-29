@@ -8,6 +8,9 @@
  *
  *  @see scu_bus.h
  *  @see scu_bus.c
+ *  @see
+ *  <a href="https://www-acc.gsi.de/wiki/Hardware/Intern/ScuBusBp12s3">
+ *    SCU-Bus-Backplane</a>
  *  @date 04.03.2019
  *  @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
