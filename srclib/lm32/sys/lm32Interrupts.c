@@ -248,6 +248,7 @@ void _irq_entry( void )
     * As long as there is an interrupt pending...
     */
 #ifdef CONFIG_IRQ_RESET_IP_AFTER
+   #warning CONFIG_IRQ_RESET_IP_AFTER active!
    while( (ip = irqGetPendingRegister()) != 0 )
 #else
    while( (ip = irqGetAndResetPendingRegister()) != 0 )

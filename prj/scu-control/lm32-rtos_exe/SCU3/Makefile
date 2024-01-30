@@ -15,6 +15,8 @@ SUB_VERSION  = 6.3
  SCU_MIL := 1
 # MIL_GAP := 1
 
+USE_ADDAC_FG_TASK := 1
+
  USE_TEMPERATURE_WATCHER :=1
 
  MIL_DAQ_USE_RAM := 1
@@ -30,8 +32,25 @@ SCU3    := 1
 
 BASE_DIR = $(shell pwd)/..
 # DEFINES += DEBUGLEVEL
-
+DEFINES +=  CONFIG_IRQ_RESET_IP_AFTER
 STACK_SIZE  =  512
 #NO_LTO := 1
+
+
+# SCU_URL = scuxl0118
+### SCU_URL = scuxl0107
+# SCU_URL = scuxl0035
+# SCU_URL = scuxl0192
+# SCU_URL = scuxl0212
+# SCU_URL = scuxl0331
+# SCU_URL = scuxl0025
+# SCU_URL = scuxl0328
+# SCU_URL = scuxl0202
+# SCU_URL = scuxl0305
+# SCU_URL = scuxl0331
+# SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0336  # DIOB-test
+ # ACU-test
+
 include $(BASE_DIR)/scu_control_os.mk
 #=================================== EOF ======================================

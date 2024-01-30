@@ -10,8 +10,6 @@
 ###############################################################################
 MIAN_MODULE = $(BASE_DIR)/scu_control_os.c
 
- USE_ADDAC_FG_TASK := 1
-
 ifdef ADDAC_DAQ
   SOURCE += $(BASE_DIR)/scu_task_daq.c
 endif
@@ -62,20 +60,7 @@ INCLUDE_DIRS += $(BASE_DIR)/
 GENERATED_DIR = $(shell pwd)/generated
 include $(BASE_DIR)/../common_make.mk
 
-# SCU_URL = scuxl0118
-### SCU_URL = scuxl0107
-# SCU_URL = scuxl0035
-# SCU_URL = scuxl0192
-# SCU_URL = scuxl0212
-# SCU_URL = scuxl0331
-# SCU_URL = scuxl0025
-# SCU_URL = scuxl0328
-# SCU_URL = scuxl0202
-# SCU_URL = scuxl0305
-# SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
-# SCU_URL = scuxl0336  # DIOB-test
- # ACU-test
+
 
 TESTFILE       ?= sinus-test.txt
 TARGETTEST_DIR ?= /
