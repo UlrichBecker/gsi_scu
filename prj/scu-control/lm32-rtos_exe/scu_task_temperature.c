@@ -21,9 +21,12 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
+#define _CONFIG_TEMPERATURE_WATCH_GRADIEND
+
 #ifndef __DOCFSM__
  #include <FreeRTOS.h>
  #include <task.h>
+ #include <stdlib.h>
  #include <lm32_syslog.h>
  #include <scu_lm32_common.h>
  #include <scu_temperature.h>
@@ -50,8 +53,7 @@
 
 /*!
  * @ingroup TEMPERATURE
- * @todo From time to time a invalid meaningless temperature is measured.
- *       Remedy: Watch the temperature gradient.
+ * @todo Introducing a additional warning for low temperature.
  */
 
 /*! --------------------------------------------------------------------------
@@ -99,6 +101,19 @@ typedef struct
     * @brief Points to the received value of the concerning temperature sensor.
     */
    uint32_t* pCurrentTemp;
+
+#ifdef _CONFIG_TEMPERATURE_WATCH_GRADIEND
+   /*!
+    * @brief Value of the last measured temperature for watching of the
+    *        temperature gradient.
+    */
+   int       lastTemperature;
+
+   /*!
+    * @brief Flag prevents an multiple warning log message.
+    */
+   bool      wasGradientError;
+#endif
 
    /*!
     * @brief Name of the temperature sensor.
@@ -206,6 +221,27 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          const STATE_T lastState = pWatchTemp->state;
+
+      #ifdef _CONFIG_TEMPERATURE_WATCH_GRADIEND
+         const int lastTemperature = pWatchTemp->lastTemperature;
+         pWatchTemp->lastTemperature = currentTemperature;
+         if( lastState != ST_START )
+         {
+            if( abs( (currentTemperature + 273) - (lastTemperature + 273) ) > 10 )
+            { /*
+               * Impossible temperature gradient, perhaps a measurement error.
+               * Jump to the next temperature sensor.
+               */
+               if( !pWatchTemp->wasGradientError )
+               {
+                  pWatchTemp->wasGradientError = true;
+                  lm32Log( LM32_LOG_WARNING, "Impossible temperature gradient of sensor: \"%s\"!", pWatchTemp->name );
+               }
+               continue;
+            }
+         }
+         pWatchTemp->wasGradientError = false;
+      #endif
          /*
           * Executing the FSM-do function
           */

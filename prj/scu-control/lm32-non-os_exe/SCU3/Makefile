@@ -19,6 +19,21 @@ SCU3    := 1
 BASE_DIR = $(shell pwd)/..
 
 
+# SCU_URL = scuxl0118
+### SCU_URL = scuxl0107
+# SCU_URL = scuxl0035
+# SCU_URL = scuxl0192
+# SCU_URL = scuxl0212
+# SCU_URL = scuxl0331
+# SCU_URL = scuxl0025
+# SCU_URL = scuxl0328
+# SCU_URL = scuxl0202
+# SCU_URL = scuxl0305
+# SCU_URL = scuxl0331
+ SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0336  # DIOB-test
+ # ACU-test
+
 include $(BASE_DIR)/scu_control.mk
 
 #=================================== EOF ======================================

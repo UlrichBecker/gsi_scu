@@ -9,7 +9,7 @@
 ## Date:    12.10.2023                                                       ##
 ###############################################################################
 BASE_VERSION = 4
-SUB_VERSION  = 6.3
+SUB_VERSION  = 6.4
 
 #------------------------------------------------------------------------------
  SCU_MIL := 1
@@ -48,7 +48,7 @@ STACK_SIZE  =  512
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+ SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
  # ACU-test
 

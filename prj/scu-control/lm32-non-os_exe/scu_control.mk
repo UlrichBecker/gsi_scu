@@ -53,20 +53,7 @@ LD_FLAGS += --specs=nosys.specs -ffreestanding -nostdlib
 # NO_LTO=1
  STACK_SIZE  =  4096
 
-# SCU_URL = scuxl0118
-### SCU_URL = scuxl0107
-# SCU_URL = scuxl0035
-# SCU_URL = scuxl0192
-# SCU_URL = scuxl0212
-# SCU_URL = scuxl0331
-# SCU_URL = scuxl0025
-# SCU_URL = scuxl0328
-# SCU_URL = scuxl0202
-# SCU_URL = scuxl0305
-# SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
-# SCU_URL = scuxl0336  # DIOB-test
- # ACU-test
+
 
 INCLUDE_DIRS += $(BASE_DIR)/
 GENERATED_DIR = $(shell pwd)/generated
