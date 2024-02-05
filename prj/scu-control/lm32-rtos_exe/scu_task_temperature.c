@@ -21,7 +21,7 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#define _CONFIG_TEMPERATURE_WATCH_GRADIEND
+#define _CONFIG_TEMPERATURE_WATCH_GRADIENT
 
 #ifndef __DOCFSM__
  #include <FreeRTOS.h>
@@ -46,7 +46,7 @@
 #endif
 
 #define HYSTERESIS     2
-
+#define MAX_TEMP_GRADIENT 10
 #if ( TEMP_HIGH >= TEMP_CRITICAL )
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
 #endif
@@ -102,7 +102,7 @@ typedef struct
     */
    uint32_t* pCurrentTemp;
 
-#ifdef _CONFIG_TEMPERATURE_WATCH_GRADIEND
+#ifdef _CONFIG_TEMPERATURE_WATCH_GRADIENT
    /*!
     * @brief Value of the last measured temperature for watching of the
     *        temperature gradient.
@@ -222,12 +222,16 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          const STATE_T lastState = pWatchTemp->state;
 
-      #ifdef _CONFIG_TEMPERATURE_WATCH_GRADIEND
-         const int lastTemperature = pWatchTemp->lastTemperature;
+      #ifdef _CONFIG_TEMPERATURE_WATCH_GRADIENT
+         /*
+          * Every now and then a invalid value will read from the temperature sensor.
+          * Therefore a check of the temperature gradient will made here.
+          */
+         const int gradient = currentTemperature - pWatchTemp->lastTemperature;
          pWatchTemp->lastTemperature = currentTemperature;
          if( lastState != ST_START )
          {
-            if( abs( (currentTemperature + 273) - (lastTemperature + 273) ) > 10 )
+            if( abs( gradient ) >= MAX_TEMP_GRADIENT )
             { /*
                * Impossible temperature gradient, perhaps a measurement error.
                * Jump to the next temperature sensor.
@@ -235,7 +239,10 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
                if( !pWatchTemp->wasGradientError )
                {
                   pWatchTemp->wasGradientError = true;
-                  lm32Log( LM32_LOG_WARNING, "Impossible temperature gradient of sensor: \"%s\"!", pWatchTemp->name );
+                  lm32Log( LM32_LOG_WARNING, ESC_WARNING
+                           "WARNING: Impossible temperature gradient (%d°C/"
+                           TO_STRING(TEMPERATURE_UPDATE_PERIOD) "sec) from sensor: \"%s\"!"
+                           ESC_NORMAL, gradient, pWatchTemp->name );
                }
                continue;
             }
