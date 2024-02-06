@@ -48,8 +48,9 @@ STACK_SIZE  =  512
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
- SCU_URL = scuxl0162   # with MIL and ADDAC
+# SCU_URL = scuxl0162   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
+SCU_URL = scuxl0692
  # ACU-test
 
 include $(BASE_DIR)/scu_control_os.mk

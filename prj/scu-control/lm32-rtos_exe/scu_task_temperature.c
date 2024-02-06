@@ -47,6 +47,8 @@
 
 #define HYSTERESIS     2
 #define MAX_TEMP_GRADIENT 10
+#define MAX_TEMPERATURE 1000
+
 #if ( TEMP_HIGH >= TEMP_CRITICAL )
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
 #endif
@@ -114,6 +116,11 @@ typedef struct
     */
    bool      wasGradientError;
 #endif
+   /*!
+    * @brief Sensor error detected.
+    *        Prevents multiple error log messages.
+    */
+   bool      wasError;
 
    /*!
     * @brief Name of the temperature sensor.
@@ -173,16 +180,19 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       {
          .pCurrentTemp = &BOARD_TEMP,
          .name = "board",
+         .wasError = false,
          FSM_INIT_FSM( ST_START, color = blue )
       },
       {
          .pCurrentTemp = &BACKPLANE_TEMP,
          .name = "backplane",
+         .wasError = false,
          .state = ST_START
       },
       {
          .pCurrentTemp = &EXTERN_TEMP,
          .name = "extern",
+         .wasError = false,
          .state = ST_START
       }
    };
@@ -249,6 +259,23 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          }
          pWatchTemp->wasGradientError = false;
       #endif
+
+         if( currentTemperature > MAX_TEMPERATURE )
+         { /*
+            * Impossible temperature received, perhaps the sensor is demaged or not present.
+            * Jump to the next temperature sensor.
+            */
+            if( !pWatchTemp->wasError )
+            {
+               pWatchTemp->wasError = true;
+               lm32Log( LM32_LOG_ERROR, ESC_ERROR
+                        "ERROR: Temperature sensor \"%s\" failed!"
+                        ESC_NORMAL, pWatchTemp->name  );
+            }
+            continue;
+         }
+         pWatchTemp->wasError = false;
+
          /*
           * Executing the FSM-do function
           */
