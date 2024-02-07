@@ -23,6 +23,12 @@ extern "C" {
  * @defgroup TEMPERATURE Functions and macros for handling the temperature sensors.
  */
 
+/*!
+ * @ingroup TEMPERATURE
+ * @brief Pre-initializing value for recognizing a faulty temperature sensor.
+ */
+#define INVALID_TEMPERATURE ((uint32_t)~0)
+
 /*! ---------------------------------------------------------------------------
  * @ingroup W1
  * @brief Pointers for one wire connections.

@@ -45,9 +45,8 @@
  #define TEMP_CRITICAL 75
 #endif
 
-#define HYSTERESIS     2
-#define MAX_TEMP_GRADIENT 10
-#define MAX_TEMPERATURE 1000
+#define HYSTERESIS             2
+#define MAX_TEMP_GRADIENT     10
 
 #if ( TEMP_HIGH >= TEMP_CRITICAL )
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
@@ -120,7 +119,7 @@ typedef struct
     * @brief Sensor error detected.
     *        Prevents multiple error log messages.
     */
-   bool      wasError;
+   unsigned int errorMsgPeriod;
 
    /*!
     * @brief Name of the temperature sensor.
@@ -152,9 +151,14 @@ void printTemperatures( void )
    volatile const uint32_t externTemp    = EXTERN_TEMP;
    criticalSectionExit();
 
-   lm32Log( LM32_LOG_INFO, "Board temperature:     %d.%u °C", TEMP_FORMAT( boardTemp ) );
-   lm32Log( LM32_LOG_INFO, "Backplane temperature: %d.%u °C", TEMP_FORMAT( backplaneTemp ) );
-   lm32Log( LM32_LOG_INFO, "Extern temperature:    %d.%u °C", TEMP_FORMAT( externTemp ) );
+   if( boardTemp != INVALID_TEMPERATURE )
+      lm32Log( LM32_LOG_INFO, "Board temperature:     %d.%u °C", TEMP_FORMAT( boardTemp ) );
+   
+   if( backplaneTemp != INVALID_TEMPERATURE )
+      lm32Log( LM32_LOG_INFO, "Backplane temperature: %d.%u °C", TEMP_FORMAT( backplaneTemp ) );
+
+   if( externTemp != INVALID_TEMPERATURE )
+      lm32Log( LM32_LOG_INFO, "Extern temperature:    %d.%u °C", TEMP_FORMAT( externTemp ) );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -180,19 +184,19 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       {
          .pCurrentTemp = &BOARD_TEMP,
          .name = "board",
-         .wasError = false,
+         .errorMsgPeriod = 0,
          FSM_INIT_FSM( ST_START, color = blue )
       },
       {
          .pCurrentTemp = &BACKPLANE_TEMP,
          .name = "backplane",
-         .wasError = false,
+         .errorMsgPeriod = 0,
          .state = ST_START
       },
       {
          .pCurrentTemp = &EXTERN_TEMP,
          .name = "extern",
-         .wasError = false,
+         .errorMsgPeriod = 0,
          .state = ST_START
       }
    };
@@ -229,6 +233,27 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
+
+         if( pWatchTemp->errorMsgPeriod > 0 )
+             pWatchTemp->errorMsgPeriod--;
+
+         if( *pWatchTemp->pCurrentTemp == INVALID_TEMPERATURE )
+         { /*
+            * Impossible temperature received, perhaps the sensor is demaged or not present.
+            * Jump to the next temperature sensor.
+            */
+            if( pWatchTemp->errorMsgPeriod == 0 )
+            { /*
+               * To post this message every hour is enough.
+               */
+               pWatchTemp->errorMsgPeriod = 3600 / TEMPERATURE_UPDATE_PERIOD;
+               lm32Log( LM32_LOG_ERROR, ESC_ERROR
+                        "ERROR: Temperature sensor \"%s\" failed!"
+                        ESC_NORMAL, pWatchTemp->name  );
+            }
+            continue;
+         }
+
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          const STATE_T lastState = pWatchTemp->state;
 
@@ -259,22 +284,6 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          }
          pWatchTemp->wasGradientError = false;
       #endif
-
-         if( currentTemperature > MAX_TEMPERATURE )
-         { /*
-            * Impossible temperature received, perhaps the sensor is demaged or not present.
-            * Jump to the next temperature sensor.
-            */
-            if( !pWatchTemp->wasError )
-            {
-               pWatchTemp->wasError = true;
-               lm32Log( LM32_LOG_ERROR, ESC_ERROR
-                        "ERROR: Temperature sensor \"%s\" failed!"
-                        ESC_NORMAL, pWatchTemp->name  );
-            }
-            continue;
-         }
-         pWatchTemp->wasError = false;
 
          /*
           * Executing the FSM-do function

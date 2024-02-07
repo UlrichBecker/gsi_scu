@@ -39,12 +39,16 @@ bool initOneWire( void )
  */
 void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemperature )
 {
-   wrpc_w1_bus.detail = bus; // set the portnumber of the onewire controller
+   *pTemperature = INVALID_TEMPERATURE;
+   /*
+    * Set the portnumber of the onewire controller.
+    */
+   wrpc_w1_bus.detail = bus;
    if( w1_scan_bus( &wrpc_w1_bus ) <= 0 )
    {
-    #ifdef DEBUG
-      scuLog( LM32_LOG_WARNING, "No devices found on bus %d\n", wrpc_w1_bus.detail );
-    #endif
+      lm32Log( LM32_LOG_WARNING, 
+               ESC_WARNING "WARNING: No devices found on w1-bus: %d" ESC_NORMAL,
+               wrpc_w1_bus.detail );
       return;
    }
 
