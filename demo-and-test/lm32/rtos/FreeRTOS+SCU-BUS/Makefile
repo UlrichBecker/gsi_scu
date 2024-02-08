@@ -11,8 +11,9 @@
 REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 
 MIAN_MODULE := rtosScuBusTest.c
-# SOURCE      += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
-SOURCE      += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_bus.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
 
 # The following flag is essential so that the build system adds the
 # FreeRTOS sources to this project.

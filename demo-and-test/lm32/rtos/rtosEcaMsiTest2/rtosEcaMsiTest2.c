@@ -136,10 +136,10 @@ STATIC inline void clearActions( void )
 STATIC inline void configureEcaMsiForLM32( void )
 {
    clearActions();   // clean ECA queue and channel from pending actions
-   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)pMyMsi, true );
+   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)g_pMyMsi, true );
    scuLog( LM32_LOG_INFO, "MSI path (ECA -> LM32)           : enabled\n"
            "\tECA channel = %d\n\tdestination = 0x%08X\n",
-            ECA_SELECT_LM32_CHANNEL, (uint32_t)pMyMsi);
+            ECA_SELECT_LM32_CHANNEL, (uint32_t)g_pMyMsi);
 }
 
 /*! ---------------------------------------------------------------------------

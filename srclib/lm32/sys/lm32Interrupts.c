@@ -180,7 +180,7 @@ void irqPrintInfo( uint32_t ie,  uint32_t nc )
             "Interrupt-enable:     0b%02b\n"
             "Interrupt-pending:    0b%02b\n",
             nc, ie,
-            irqGetPendingRegister() );--std
+            irqGetPendingRegister() );
 }
 
 void irqPrintNestingCounter( void )

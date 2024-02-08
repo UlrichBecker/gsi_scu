@@ -21,7 +21,7 @@
  ******************************************************************************
  */
 #include "eb_console_helper.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
@@ -30,14 +30,6 @@
    #error "This project provides FreeRTOS"
 #endif
 
-/*! --------------------------------------------------------------------------
- * @brief This function has to be invoked at first.
- */
-static inline void init( void )
-{
-   discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
-   uart_init_hw();      // init UART, required for printf...
-}
 
 #define TEST_TASK_PRIORITY    ( tskIDLE_PRIORITY + 1 )
 
@@ -106,7 +98,6 @@ TASK_DATA_T taskData2 =
  */
 void main( void )
 {
-   init();
    mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR
             "FreeRTOS-test mprintf + MUTEX\n"
             "Compiler: " COMPILER_VERSION_STRING "\n"

@@ -25,7 +25,7 @@
  ******************************************************************************
  */
 #include "eb_console_helper.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "generated/shared_mmap.h"
 #include "scu_lm32_macros.h"
 #include "shared_memory_helper.h"
@@ -36,14 +36,6 @@
    #error "This project provides FreeRTOS"
 #endif
 
-
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void init( void )
-{
-   discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
-   uart_init_hw();      // init UART, required for printf...
-}
 
 #define TEST_TASK_PRIORITY    ( tskIDLE_PRIORITY + 1 )
 
@@ -293,7 +285,6 @@ STATIC inline BaseType_t initAndStartRTOS( void )
  */
 void main( void )
 {
-   init();
 #if 0
    uint32_t* pCpuRamExternal = shmGetRelatedEtherBoneAddress(SHARED_OFFS);
    if( pCpuRamExternal == NULL )

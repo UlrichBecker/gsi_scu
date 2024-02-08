@@ -203,7 +203,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
    #pragma GCC diagnostic pop
 
    /*!
-    * https://github.com/UlrichBecker/DocFsm
+    * @see https://github.com/UlrichBecker/DocFsm
     */
    #define FSM_TRANSITION( newState, attr... ) \
    {                                           \
@@ -212,7 +212,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
    }
 
    /*!
-    * https://github.com/UlrichBecker/DocFsm
+    * @see https://github.com/UlrichBecker/DocFsm
     */
    #define FSM_TRANSITION_SELF( attr... ) break
 
@@ -340,7 +340,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
           */
          if( lastState == pWatchTemp->state )
          { /*
-            * No!
+            * No, jump to the next temperature sensor.
             */
             continue;
          }

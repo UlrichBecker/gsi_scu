@@ -2,6 +2,10 @@
  *  @file scu_control_os.c
  *  @brief Main module of SCU control including the main-thread FreeRTOS.
  *
+ *  @bug The timer-interrupt doesn't work, when the application starts at first,
+ *       but it works when the classical non-OS version "scu_control.bin"
+ *       was loaded before.
+ *
  *  @date 18.08.2022
  *
  *  @see https://www-acc.gsi.de/wiki/Hardware/Intern/ScuFgDoc
@@ -342,6 +346,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
 
    tellMailboxSlot();
 
+   /*!
+    * @todo Check whether this delay is really necessary.
+    */
    vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
    printCpuId();

@@ -27,7 +27,7 @@ ifdef USE_LM32LOG
   SOURCE += $(SCU_LIB_SRC_LM32_DIR)/lm32_syslog.c
   SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_mmu_lm32.c
   SOURCE += $(SCU_LIB_SRC_DIR)/scu_mmu.c
-  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
+  SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3_lm32.c
   DEFINES += CONFIG_SCU_USE_DDR3
   DEFINES += CONFIG_USE_LM32LOG
 endif

@@ -22,7 +22,7 @@
  */
 #ifndef _SHARED_MEMORY_HELPER_H
 #define _SHARED_MEMORY_HELPER_H
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 //#include "aux.h"
 
 #ifdef __cplusplus

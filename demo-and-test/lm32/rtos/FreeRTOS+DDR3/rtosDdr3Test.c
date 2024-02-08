@@ -12,7 +12,7 @@
 //#define CONFIG_MUTEX
 
 #include "eb_console_helper.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "generated/shared_mmap.h"
 #include "scu_lm32_macros.h"
 #include "scu_ddr3.h"
@@ -55,13 +55,6 @@ inline void ddr3Unlock( void )
 #endif
 }
 
-/*! ---------------------------------------------------------------------------
- */
-STATIC inline void init( void )
-{
-   discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
-   uart_init_hw();      // init UART, required for printf...
-}
 
 #ifndef CONFIG_YIELD
 /*! ---------------------------------------------------------------------------
@@ -253,7 +246,6 @@ STATIC inline BaseType_t initAndStartRTOS( void )
 
 void main( void )
 {
-   init();
    mprintf( ESC_XY( "1", "1" ) ESC_CLR_SCR "FreeRTOS DDR3 test\n"
             "Compiler: " COMPILER_VERSION_STRING "\n"
          #if (configUSE_PREEMPTION == 1)
