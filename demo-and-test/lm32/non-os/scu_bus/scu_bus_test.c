@@ -25,7 +25,7 @@
  */
 
 #include "mprintf.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "scu_bus.h"
 #include "eb_console_helper.h"
 
@@ -40,8 +40,6 @@ void main( void )
 {
    SCUBUS_SLAVE_FLAGS_T slavePersentFlags, oldSlavePresentFlags;
 
-   discoverPeriphery();
-   uart_init_hw();
    clrscr();
    mprintf("\nTest...\n");
 

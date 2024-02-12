@@ -179,6 +179,7 @@ volatile uint32_t* g_pCpuIrqSlave;
 volatile uint32_t* g_pCpuSysTime;
 volatile uint32_t* g_pCpuMsiBox;
 volatile uint32_t* g_pMyMsi;
+volatile uint32_t* g_pCpuId;
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
@@ -527,6 +528,7 @@ void discoverPeriphery( void )
 
    g_pCpuSysTime     = find_device_adr( GSI, CPU_SYSTEM_TIME );
    g_pCpuIrqSlave    = find_device_adr( GSI, CPU_MSI_CTRL_IF );
+   g_pCpuId          = find_device_adr( GSI, CPU_INFO_ROM );
 
    g_pCpuMsiBox      = NULL;
    g_pMyMsi          = NULL;

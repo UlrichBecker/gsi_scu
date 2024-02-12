@@ -41,6 +41,7 @@ extern volatile uint32_t* g_pCpuIrqSlave;
 extern volatile uint32_t* g_pCpuSysTime;
 extern volatile uint32_t* g_pCpuMsiBox;
 extern volatile uint32_t* g_pMyMsi;
+extern volatile uint32_t* g_pCpuId;
 
 STATIC_ASSERT( sizeof(WB_VENDOR_ID_T) == sizeof(uint32_t) );
 STATIC_ASSERT( sizeof(WB_DEVICE_ID_T) == sizeof(uint32_t) );

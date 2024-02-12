@@ -29,7 +29,7 @@
 
 #define configCPU_CLOCK_HZ   (USRCPUCLK * 10)
 
-#define FREQU 1000
+#define FREQU 10
 
 TIME_MEASUREMENT_T g_evTime = TIME_MEASUREMENT_INITIALIZER;
 
@@ -70,6 +70,7 @@ void main( void )
 
    unsigned int i = 0;
    static const char fan[] = { '|', '/', '-', '\\' };
+   mprintf( "Entering polling loop...\n" );
    while( true )
    {
       volatile unsigned int currentCount;

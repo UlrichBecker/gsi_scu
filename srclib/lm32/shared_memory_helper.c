@@ -30,8 +30,8 @@
 uint32_t* shmGetRelatedEtherBoneAddress( const uint32_t sharedOffset )
 {
    uint32_t idx;
-   sdb_location aFoundSdb[10]; //! @todo Check array size!
-   sdb_location foundClu;
+   SDB_LOCATION_T aFoundSdb[10]; //! @todo Check array size!
+   SDB_LOCATION_T foundClu;
    const unsigned int cpuId = getCpuIdx();
    mprintf( "%d\n", cpuId );
 

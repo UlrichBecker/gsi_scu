@@ -36,7 +36,7 @@
 //#define configTOTAL_HEAP_SIZE                   10240
 #define configTOTAL_HEAP_SIZE                   (4 * 1024)
 #define configAPPLICATION_ALLOCATED_HEAP        1
-
+#define configMINIMAL_STACK_SIZE                64
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     1
 #define configUSE_TICK_HOOK                     1

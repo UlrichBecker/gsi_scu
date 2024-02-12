@@ -21,8 +21,6 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************
  */
-#define _CONFIG_TEMPERATURE_WATCH_GRADIENT
-
 #ifndef __DOCFSM__
  #include <FreeRTOS.h>
  #include <task.h>
@@ -103,7 +101,6 @@ typedef struct
     */
    uint32_t* pCurrentTemp;
 
-#ifdef _CONFIG_TEMPERATURE_WATCH_GRADIENT
    /*!
     * @brief Value of the last measured temperature for watching of the
     *        temperature gradient.
@@ -114,7 +111,7 @@ typedef struct
     * @brief Flag prevents an multiple warning log message.
     */
    bool      wasGradientError;
-#endif
+
    /*!
     * @brief Sensor error detected.
     *        Prevents multiple error log messages.
@@ -257,7 +254,6 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          const int currentTemperature = getDegree( *pWatchTemp->pCurrentTemp );
          const STATE_T lastState = pWatchTemp->state;
 
-      #ifdef _CONFIG_TEMPERATURE_WATCH_GRADIENT
          /*
           * Every now and then a invalid value will read from the temperature sensor.
           * Therefore a check of the temperature gradient will made here.
@@ -283,7 +279,6 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
             }
          }
          pWatchTemp->wasGradientError = false;
-      #endif
 
          /*
           * Executing the FSM-do function

@@ -126,10 +126,10 @@ STATIC inline void clearActions( void )
 STATIC inline void configureEcaMsiForLM32( void )
 {
    clearActions();   // clean ECA queue and channel from pending actions
-   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)pMyMsi, true );
+   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)g_pMyMsi, true );
    mprintf( "MSI path (ECA -> LM32)           : enabled\n"
            "\tECA channel = %d\n\tdestination = 0x%08X\n",
-            ECA_SELECT_LM32_CHANNEL, (uint32_t)pMyMsi);
+            ECA_SELECT_LM32_CHANNEL, (uint32_t)g_pMyMsi);
 }
 
 /*! ---------------------------------------------------------------------------
@@ -181,13 +181,7 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
    *g_pScuBusBase = 0;
 #endif
 
-   if( pEca == NULL )
-   {
-      mprintf( ESC_ERROR "Could not find the ECA event input. Exit!\n" ESC_NORMAL);
-      vTaskEndScheduler();
-   }
-   mprintf("ECA event input                  @ 0x%p\n", pEca );
-   mprintf("MSI destination addr for LM32    : 0x%p\n", pMyMsi );
+   mprintf("MSI destination addr for LM32    : 0x%p\n", g_pMyMsi );
 
    g_pEcaCtl = ecaControlGetRegisters();
    if( g_pEcaCtl == NULL )

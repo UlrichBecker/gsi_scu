@@ -2,7 +2,7 @@
 
 REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 
-MIAN_MODULE := timerTest.c
+MIAN_MODULE := irqTimerTest.c
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 

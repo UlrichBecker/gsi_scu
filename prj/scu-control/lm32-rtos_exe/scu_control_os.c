@@ -411,12 +411,36 @@ STATIC void taskMain( void* pTaskData UNUSED )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @brief Function seems to be necessary, otherwise the timerinterrupt doesn't
+ *        work if this application started at first, immediately after power-on.
+ * @todo Why? Power-on interrupt?
+ */
+OPTIMIZE( "-O1"  )
+void cleanEcaQueue( void )
+{
+   ECA_CONTROL_T* pEcaCtl = ecaControlGetRegisters();
+
+   uint32_t valCnt = ecaControlGetAndResetLM32ValidCount( pEcaCtl );
+   scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Pending actions: %d\n" ESC_NORMAL, valCnt );
+   if( valCnt != 0 )
+   {
+      ECA_QUEUE_ITEM_T* pEcaQueue = ecaGetLM32Queue();
+      valCnt = ecaClearQueue( pEcaQueue, valCnt );
+      scuLog( LM32_LOG_DEBUG, ESC_DEBUG "cleared actions: %d\n" ESC_NORMAL, valCnt );
+   }
+   MSI_ITEM_T m;
+   while( irqMsiCopyObjectAndRemoveIfActive( &m, ECA_INTERRUPT_NUMBER ) )
+   {}
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Main-function: establishing the memory management unit (MMU) and
  *        LM32-logging system;
  *        creates the main task and start it.
  */
 void main( void )
 {
+   irqClearEntryTab();
    const char* text;
    text = ESC_BOLD "\nStart of \"" TO_STRING(TARGET_NAME) "\"" ESC_NORMAL
            ", Version: " TO_STRING(SW_VERSION) "\n"
@@ -457,7 +481,7 @@ void main( void )
            irqGetNestingCountPointer() );
 
    initializeGlobalPointers();
-
+   cleanEcaQueue();
    /*
     * Creating the main task.
     */

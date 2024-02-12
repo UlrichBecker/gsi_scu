@@ -91,6 +91,20 @@ STATIC ISR_ENTRY_T ISREntryTable[MAX_LM32_INTERRUPTS] = {{NULL, NULL}};
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
  */
+void irqClearEntryTab( void )
+{
+   criticalSectionEnter();
+   for( unsigned int i = 0; i < ARRAY_SIZE( ISREntryTable ); i++ )
+   {
+      ISREntryTable[i].pfCallback = NULL;
+      ISREntryTable[i].pContext   = NULL;
+   }
+   criticalSectionExit();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
 inline bool irqIsInContext( void )
 {
    return mg_isInContext;

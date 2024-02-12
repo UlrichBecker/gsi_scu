@@ -90,10 +90,10 @@ void clearActions( void )
 void configureEcaMsiForLM32( void )
 {
    clearActions();   // clean ECA queue and channel from pending actions
-   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)pMyMsi, true );
+   ecaControlSetMsiLM32TargetAddress( g_pEcaCtl, (void*)g_pMyMsi, true );
    mprintf( "MSI path (ECA -> LM32)           : enabled\n"
            "\tECA channel = %d\n\tdestination = 0x%08x\n",
-            ECA_SELECT_LM32_CHANNEL, (uint32_t)pMyMsi);
+            ECA_SELECT_LM32_CHANNEL, (uint32_t)g_pMyMsi);
 }
 
 /*! ---------------------------------------------------------------------------
@@ -201,6 +201,7 @@ STATIC void initIrqTable( void )
  */
 STATIC void init( void )
 {
+   uint32_t* pEca = find_device_adr( GSI, ECA_EVENT );
    if( pEca != NULL )
       mprintf("ECA event input                  @ 0x%p\n", pEca );
    else
@@ -209,7 +210,7 @@ STATIC void init( void )
       return;
    }
 
-   mprintf("MSI destination addr for LM32    : 0x%p\n", pMyMsi );
+   mprintf("MSI destination addr for LM32    : 0x%p\n", g_pMyMsi );
 
    g_pEcaCtl = ecaControlGetRegisters();
    if( g_pEcaCtl != NULL )

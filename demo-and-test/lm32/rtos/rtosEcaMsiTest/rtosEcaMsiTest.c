@@ -64,7 +64,7 @@ ECA_CONTROL_T* g_pEcaCtl;
  */
 ECA_QUEUE_ITEM_T* g_pEcaQueue;
 
-#if 0
+#if 1
 /*! ---------------------------------------------------------------------------
  * @brief Reorders the interrupt priority.
  *
@@ -79,7 +79,7 @@ ECA_QUEUE_ITEM_T* g_pEcaQueue;
 unsigned int _irqReorderPriority( const unsigned int prio )
 {
    /*
-    * Here the the interrupt priorities of the timer interrupt and the
+    * Here the interrupt priorities of the timer interrupt and the
     * ECA-Interrupt becomes exchanged.
     */
    switch( prio )
@@ -213,12 +213,6 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
             ESC_NORMAL,
             __func__, pcTaskGetName( NULL ) );
 
-   if( pEca == NULL )
-   {
-      mprintf( ESC_ERROR "Could not find the ECA event input. Exit!\n" ESC_NORMAL);
-      vTaskEndScheduler();
-   }
-   mprintf("ECA event input                  @ 0x%p\n", pEca );
    mprintf("MSI destination addr for LM32    : 0x%p\n", g_pMyMsi );
 
    g_pEcaCtl = ecaControlGetRegisters();

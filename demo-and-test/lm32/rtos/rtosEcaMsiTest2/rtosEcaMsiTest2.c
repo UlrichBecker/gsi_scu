@@ -236,15 +236,7 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
                           ESC_NORMAL,
             __func__, pcTaskGetName( NULL ) );
 
-   if( pEca == NULL )
-   {
-      scuLog( LM32_LOG_ERROR, ESC_ERROR
-                              "Could not find the ECA event input. Exit!\n"
-                              ESC_NORMAL);
-      vTaskEndScheduler();
-   }
-   scuLog( LM32_LOG_INFO, "ECA event input                  @ 0x%p\n", pEca );
-   scuLog( LM32_LOG_INFO, "MSI destination addr for LM32    : 0x%p\n", pMyMsi );
+   scuLog( LM32_LOG_INFO, "MSI destination addr for LM32    : 0x%p\n", g_pMyMsi );
 
    g_pEcaCtl = ecaControlGetRegisters();
    if( g_pEcaCtl == NULL )

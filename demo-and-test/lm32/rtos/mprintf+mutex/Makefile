@@ -30,8 +30,8 @@ CODE_OPTIMIZATION = s
 # When the following compiler switch is defined, then the assert-macros
 # within the FreeRTOS kernel will activated.
 # Meaningful in debug mode.
- DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
- DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
+# DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
+# DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
 
 DEFINES += MAX_LM32_INTERRUPTS=2
 

@@ -20,8 +20,10 @@ RTOS_USING_HEAP = 1
 
 # TOOLCHAIN_DIR = $(INCLUDED_TOOLCHAIN_DIR)
 
-CODE_OPTIMIZATION = s
+CODE_OPTIMIZATION = 1
 
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
 
 # When the following compiler switch is defined, then the assert-macros
 # within the FreeRTOS kernel will activated.
@@ -36,5 +38,6 @@ DEFINES += MAX_LM32_INTERRUPTS=2
 # into a smaller size.
 STACK_SIZE := 256
 DOX_REFERENCES_RELATION = YES
+SCU_URL = scuxl0692
 include $(REPOSITORY_DIR)/makefiles/makefile.scu
 #=================================== EOF ======================================

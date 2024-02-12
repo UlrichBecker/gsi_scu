@@ -18,6 +18,8 @@ USE_LM32LOG = 1
 
 # Additional module(s)
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
+
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/eca_queue_type.c
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/sw_queue.c
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c

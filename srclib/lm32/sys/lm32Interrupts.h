@@ -123,6 +123,12 @@ uint64_t irqGetTimeSinceLastInterrupt( void );
 #endif /* ifdef CONFIG_USE_INTERRUPT_TIMESTAMP */
 
 /*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Clears the whole interrupt entry table.
+ */
+void irqClearEntryTab( void );
+
+/*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT OVERWRITABLE
  * @brief Reordering the interrupt priority.
  *

@@ -37,7 +37,7 @@
 #endif
 
 
-#define TEST_TASK_PRIORITY    ( tskIDLE_PRIORITY + 1 )
+#define TEST_TASK_PRIORITY    ( tskIDLE_PRIORITY + 0 )
 
 typedef struct PACKED_SIZE
 {
@@ -285,7 +285,7 @@ STATIC inline BaseType_t initAndStartRTOS( void )
  */
 void main( void )
 {
-#if 0
+#if 1
    uint32_t* pCpuRamExternal = shmGetRelatedEtherBoneAddress(SHARED_OFFS);
    if( pCpuRamExternal == NULL )
    {
