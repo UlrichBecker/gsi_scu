@@ -349,7 +349,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    /*!
     * @todo Check whether this delay is really necessary.
     */
-   vTaskDelay( pdMS_TO_TICKS( 1500 ) );
+ //  vTaskDelay( pdMS_TO_TICKS( 1500 ) );
 
    printCpuId();
 
@@ -358,12 +358,8 @@ STATIC void taskMain( void* pTaskData UNUSED )
    scuLog( LM32_LOG_INFO, "g_oneWireBase.pWr is:   0x%p\n", g_oneWireBase.pWr );
    scuLog( LM32_LOG_INFO, "g_oneWireBase.pUser is: 0x%p\n", g_oneWireBase.pUser );
    scuLog( LM32_LOG_INFO, "g_pScub_irq_base is:    0x%p\n", g_pScub_irq_base );
-
-#ifdef CONFIG_MIL_FG
- #ifdef CONFIG_MIL_PIGGY
+#if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
    scuLog( LM32_LOG_INFO, "g_pMil_irq_base is:     0x%p\n", g_pMil_irq_base );
- #endif
-   initEcaQueue();
 #endif
 
    initAndScan();
@@ -415,22 +411,21 @@ STATIC void taskMain( void* pTaskData UNUSED )
  *        work if this application started at first, immediately after power-on.
  * @todo Why? Power-on interrupt?
  */
-OPTIMIZE( "-O1"  )
 void cleanEcaQueue( void )
 {
-   ECA_CONTROL_T* pEcaCtl = ecaControlGetRegisters();
-
-   uint32_t valCnt = ecaControlGetAndResetLM32ValidCount( pEcaCtl );
-   scuLog( LM32_LOG_DEBUG, ESC_DEBUG "Pending actions: %d\n" ESC_NORMAL, valCnt );
-   if( valCnt != 0 )
+   const uint64_t future = getWrSysTime() + 1500000000L;
+   while( getWrSysTime() < future )
    {
-      ECA_QUEUE_ITEM_T* pEcaQueue = ecaGetLM32Queue();
-      valCnt = ecaClearQueue( pEcaQueue, valCnt );
-      scuLog( LM32_LOG_DEBUG, ESC_DEBUG "cleared actions: %d\n" ESC_NORMAL, valCnt );
+      NOP();
    }
+
+   unsigned int i = 0;
    MSI_ITEM_T m;
    while( irqMsiCopyObjectAndRemoveIfActive( &m, ECA_INTERRUPT_NUMBER ) )
-   {}
+   {
+      i++;
+   }
+   scuLog( LM32_LOG_DEBUG, ESC_DEBUG "%u MSIs removed.\n" ESC_NORMAL, i );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -481,6 +476,9 @@ void main( void )
            irqGetNestingCountPointer() );
 
    initializeGlobalPointers();
+#ifdef CONFIG_MIL_FG
+   initEcaQueue();
+#endif
    cleanEcaQueue();
    /*
     * Creating the main task.

@@ -35,6 +35,7 @@ ECA_OBJ_T g_eca =
 /*! ---------------------------------------------------------------------------
  * @brief Find the ECA queue of LM32
  */
+//OPTIMIZE( "-O0"  )
 void initEcaQueue( void )
 {
    g_eca.pQueue = ecaGetLM32Queue();
