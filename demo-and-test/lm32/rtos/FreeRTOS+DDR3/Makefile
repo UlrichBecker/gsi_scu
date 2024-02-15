@@ -11,7 +11,7 @@
 REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 
 MIAN_MODULE := rtosDdr3Test.c
-SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3.c
+SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_ddr3_lm32.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/scu_std_init.c
 SOURCE += $(SCU_LIB_SRC_LM32_DIR)/sys/ros_mutex.c
 
@@ -32,7 +32,7 @@ CODE_OPTIMIZATION = s
  DEFINES += CONFIG_RTOS_PEDANTIC_CHECK
  DEFINES += CONFIG_INTERRUPT_PEDANTIC_CHECK
  DEFINES += CONFIG_DDR_PEDANTIC_CHECK
-
+DEFINES += CONFIG_SCU_USE_DDR3
 DEFINES += MAX_LM32_INTERRUPTS=2
 
 # FreeRTOS will handle the stack defined in FreeRTOSConfig.h.
