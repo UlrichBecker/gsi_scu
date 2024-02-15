@@ -729,7 +729,7 @@ void FgFeedbackDevice::registerChannel( FgFeedbackChannel* pFeedbackChannel )
    else
 #endif // ifdef CONFIG_MIL_FG
    /*
-    * Is this object a non-MIL device?
+    * Is this object a ADDAC- device?
     */
    if( dynamic_cast<daq::DaqDevice*>(m_poDevice) != nullptr )
    {
@@ -742,8 +742,10 @@ void FgFeedbackDevice::registerChannel( FgFeedbackChannel* pFeedbackChannel )
       }
    }
    else
-   {
-      assert( false );
+   { /*
+      * Nither ADDAC- nor MIL- dvice.
+      */
+      throw daq::Exception( "Unknown function generator can't be registered!" );
    }
 
    if( m_pParent != nullptr )
