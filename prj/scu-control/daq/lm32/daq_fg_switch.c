@@ -51,8 +51,8 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
 
    const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
    const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg( fgNum, pDaqDevice->type );
-   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[setChannelNumber];
-   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[actChannelNumber];
+   DAQ_CANNEL_T* pSetChannel = daqDeviceGetChannelObject( pDaqDevice, setChannelNumber );
+   DAQ_CANNEL_T* pActChannel = daqDeviceGetChannelObject( pDaqDevice, actChannelNumber );
 
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Enable DAQ-channels of FG %u: set %u and act %u\n" ESC_NORMAL,
             fgNum, setChannelNumber, actChannelNumber );
@@ -89,8 +89,8 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 
    const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
    const unsigned int actChannelNumber = daqGetActualDaqNumberOfFg( fgNum, pDaqDevice->type );
-   DAQ_CANNEL_T* pSetChannel = &pDaqDevice->aChannel[setChannelNumber];
-   DAQ_CANNEL_T* pActChannel = &pDaqDevice->aChannel[actChannelNumber];
+   DAQ_CANNEL_T* pSetChannel = daqDeviceGetChannelObject( pDaqDevice, setChannelNumber );
+   DAQ_CANNEL_T* pActChannel = daqDeviceGetChannelObject( pDaqDevice, actChannelNumber );
 
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Disable DAQ-channels of FG %u: set %u and act %u\n" ESC_NORMAL,
             fgNum, setChannelNumber, actChannelNumber );

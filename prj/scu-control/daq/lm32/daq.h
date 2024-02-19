@@ -1703,7 +1703,6 @@ unsigned int daqDeviceGetMaxChannels( register DAQ_DEVICE_T* pThis )
  */
 unsigned int daqDeviceGetUsedChannels( register DAQ_DEVICE_T* pThis );
 
-
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
  * @brief Gets the pointer to the device object remaining to the given number.

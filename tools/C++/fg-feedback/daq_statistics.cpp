@@ -67,7 +67,7 @@ void Statistics::clear( void )
 void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
 {
    m_hasUpdated = true;
-   const uint serialNumber = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )) * 100 +
+   const auto serialNumber = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )) * 100 +
                              static_cast<uint>(daqDescriptorGetChannel(&rDescriptor));
 
    for( auto& i: m_daqChannelList )
@@ -126,7 +126,7 @@ void Statistics::print( void )
    if( !m_hasUpdated )
       return;
 
-   const USEC_T time = getSysMicrosecs();
+   const auto time = getSysMicrosecs();
    if( time < m_nextPrintTime )
       return;
    m_nextPrintTime = time + m_printInterval;
@@ -159,7 +159,7 @@ void Statistics::print( void )
    cout << ESC_NORMAL << endl;
 
    cout << "Received data blocks: " << m_pParent->getAddacDaqBlockReceiveCount() << endl;
-   const float level = static_cast<float>(m_pParent->getAddacFiFoLevelPerTenThousand()) / 100.0;
+   const auto level = static_cast<float>(m_pParent->getAddacFiFoLevelPerTenThousand()) / 100.0;
    if( level > 98.0 )
       cout << ESC_ERROR;
    else if( level > 90.0 )

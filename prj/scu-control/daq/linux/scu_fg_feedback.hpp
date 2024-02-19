@@ -188,10 +188,6 @@ private:
        */
       Receive m_oReceiveActValue;
 
-   #ifdef _CONFIG_PATCH_PHASE
-      uint64_t m_expectedTimestamp;
-      DAQ_T    m_lastValue;
-   #endif
    public:
       AddacFb( FgFeedbackChannel* pParent, const daq::DAQ_DEVICE_TYP_T type );
       virtual ~AddacFb( void );

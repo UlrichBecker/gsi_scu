@@ -83,7 +83,7 @@ STATIC unsigned int getTenthDegree( const uint32_t v )
  * @ingroup TEMPERATURE
  * @brief Definition of the states of the finite state machine (FSM)
  */
-typedef enum
+typedef enum: uint32_t
 {
    FSM_DECLARE_STATE( ST_START, color = blue, label = 'Start of temperature\nwatching.' ),
    FSM_DECLARE_STATE( ST_NORMAL, color = green, label = 'Tamperature is whithin\nnormal range.'),
@@ -260,23 +260,20 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
           */
          const int gradient = currentTemperature - pWatchTemp->lastTemperature;
          pWatchTemp->lastTemperature = currentTemperature;
-         if( lastState != ST_START )
-         {
-            if( abs( gradient ) >= MAX_TEMP_GRADIENT )
-            { /*
-               * Impossible temperature gradient, perhaps a measurement error.
-               * Jump to the next temperature sensor.
-               */
-               if( !pWatchTemp->wasGradientError )
-               {
-                  pWatchTemp->wasGradientError = true;
-                  lm32Log( LM32_LOG_WARNING, ESC_WARNING
-                           "WARNING: Impossible temperature gradient (%d°C/"
-                           TO_STRING(TEMPERATURE_UPDATE_PERIOD) "sec) from sensor: \"%s\"!"
-                           ESC_NORMAL, gradient, pWatchTemp->name );
-               }
-               continue;
+         if( (lastState != ST_START) && (abs( gradient ) >= MAX_TEMP_GRADIENT) )
+         { /*
+            * Impossible temperature gradient, perhaps a measurement error.
+            * Jump to the next temperature sensor.
+            */
+            if( !pWatchTemp->wasGradientError )
+            {
+               pWatchTemp->wasGradientError = true;
+               lm32Log( LM32_LOG_WARNING, ESC_WARNING
+                        "WARNING: Impossible temperature gradient (%d°C/"
+                        TO_STRING(TEMPERATURE_UPDATE_PERIOD) "sec) from sensor: \"%s\"!"
+                        ESC_NORMAL, gradient, pWatchTemp->name );
             }
+            continue;
          }
          pWatchTemp->wasGradientError = false;
 

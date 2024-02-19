@@ -364,7 +364,7 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
       bool next;
       do
       {  /*
-          * Becones 'true' within macro FSM_TRANSITION_NEXT.
+          * Becomes 'true' within macro FSM_TRANSITION_NEXT.
           */
          next = false;
          switch( state )

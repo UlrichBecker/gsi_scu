@@ -242,9 +242,6 @@ FgFeedbackChannel::AddacFb::AddacFb( FgFeedbackChannel* pParent,
    :Common( pParent )
    ,m_oReceiveSetValue( this, 1 + daq::daqGetSetDaqNumberOfFg( pParent->getFgNumber(), type ) )
    ,m_oReceiveActValue( this, 1 + daq::daqGetActualDaqNumberOfFg( pParent->getFgNumber(), type ) )
-#ifdef _CONFIG_PATCH_PHASE
-   ,m_expectedTimestamp( 0 )
-#endif
 {
    DEBUG_MESSAGE_M_FUNCTION("");
 }
@@ -348,11 +345,8 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
          */
          return;
       }
-    #ifdef _CONFIG_PATCH_PHASE
-      if( diff > m_oReceiveSetValue.getSampleTime() )
-    #else
+
       if( diff > 0 )
-    #endif
       {
          m_pParent->onActSetTimestampDeviation( timeStampSetVal, timeStampActVal );
       }
@@ -361,24 +355,11 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
    /*
     * Forwarding of set- and actual- values to the higher software layer.
     */
-#ifdef _CONFIG_PATCH_PHASE
-   #warning Compiler switch _CONFIG_PATCH_PHASE is active!
-   for( std::size_t i = 0; i < m_oReceiveSetValue.getBlockLen(); i++ )
-   {
-      if( m_expectedTimestamp == timeStampSetVal )
-         evaluate( timeStampSetVal, m_lastValue, m_oReceiveSetValue[i] );
-
-      m_lastValue = m_oReceiveActValue[i];
-      timeStampSetVal += m_oReceiveSetValue.getSampleTime();
-      m_expectedTimestamp = timeStampSetVal;
-   }
-#else
    for( std::size_t i = 0; i < m_oReceiveSetValue.getBlockLen();
         i++, timeStampSetVal += m_oReceiveSetValue.getSampleTime() )
    {
       evaluate( timeStampSetVal, m_oReceiveActValue[i], m_oReceiveSetValue[i] );
    }
-#endif
 }
 
 #ifdef CONFIG_MIL_FG

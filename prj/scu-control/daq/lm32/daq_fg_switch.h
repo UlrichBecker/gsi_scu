@@ -36,6 +36,8 @@ extern "C" {
  *
  * Counterpart to daqDisableFgFeedBack
  * @see daqDisableFgFeedBack
+ * @see daqGetSetDaqNumberOfFg
+ * @see daqGetActualDaqNumberOfFg
  * @param slot SCU-bus slot number
  * @param fgNum Function generator number 0 or 1
  * @param tag ECA-tag for trigger condition
@@ -49,6 +51,8 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
  *
  * Counterpart to daqEnableFgFeedback
  * @see daqEnableFgFeedback
+ * @see daqGetSetDaqNumberOfFg
+ * @see daqGetActualDaqNumberOfFg
  * @param slot SCU-bus slot number
  * @param fgNum Function generator number 0 or 1
  */
