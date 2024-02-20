@@ -933,21 +933,7 @@ CommandLine::~CommandLine( void )
 inline
 void CommandLine::autoBuild( void )
 {
-   for( const auto& fg: m_poAllDaq->getFgList() )
-   {
-      Device* pDev = m_poAllDaq->getDevice( fg.getSocket() );
-      if( pDev == nullptr )
-      {
-         pDev = new Device( fg.getSocket() );
-         m_poAllDaq->registerDevice( pDev );
-      }
-      FbChannel* pChannel = static_cast<FbChannel*>(pDev->getChannel( fg.getDevice() ));
-      if( pChannel == nullptr )
-      {
-         pChannel = new FbChannel( fg.getDevice() );
-         pDev->registerChannel( pChannel );
-      }
-   }
+   m_poAllDaq->autoBuildAllDevicesAndChannels<FbChannel, Device>();
 }
 
 /*-----------------------------------------------------------------------------

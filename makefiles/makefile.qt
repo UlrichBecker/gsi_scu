@@ -1,0 +1,60 @@
+###############################################################################
+##                                                                           ##
+##                   General Makefile for QT- applications                   ##
+##                                                                           ##
+##---------------------------------------------------------------------------##
+## File:   makefile.qt                                                       ##
+## Author: Ulrich Becker                                                     ##
+## (C)     2024 GSI Helmholtz Centre for Heavy Ion Research GmbH             ##
+## Date:   20.02.2024                                                        ##
+###############################################################################
+UI_PREFIX  = $(GENERATED_DIR)/ui_
+MOC_PREFIX = $(GENERATED_DIR)/moc_
+
+FORMS_HEADER += $(addsuffix ".hpp", $(addprefix $(UI_PREFIX), $(basename $(FORMS))))
+MOC_SOURCE   += $(addsuffix ".cpp", $(addprefix $(MOC_PREFIX), $(basename $(FORMS))))
+
+#GEN_SOURCE += $(MOC_SOURCE)
+GEN_SOURCE += $(MOC_PREFIX)simpleFrom.cpp
+
+QT_VERSION ?= 5
+
+QT_INCLUDE_DIRS += QtCore
+QT_INCLUDE_DIRS += QtWidgets
+
+QT_LIBS += Gui
+QT_LIBS += Core
+QT_LIBS += Widgets
+
+LIBS += $(addprefix Qt$(QT_VERSION), $(QT_LIBS))
+LIBS += stdc++
+
+QT_INCLUDE ?= /usr/include/qt$(QT_VERSION)
+INCLUDE_DIRS += $(QT_INCLUDE)
+INCLUDE_DIRS += $(addprefix $(QT_INCLUDE)/, $(QT_INCLUDE_DIRS))
+
+ADDITIONAL_TO_CLEAN += $(GENERATED_DIR)/*.*
+
+UIC ?= uic
+MOC ?= moc
+RCC ?= rcc
+
+MOC_MSG := "MOC"
+UIC_MSG := "UIC"
+RCC_MSG := "RCC"
+
+ifeq ($(V), 1)
+   UIC_F = $(UIC)
+   MOC_F = $(MOC)
+   RCC_F = $(RCC)
+else
+   UIC_F = $(FORMAT) "gen" $(UIC_MSG) $(@); $(UIC)
+   MOC_F = $(FORMAT) "gen" $(MOC_MSG) $(@); $(MOC)
+   RCC_F = $(FORMAT) "gen" $(RCC_MSG) $(@); $(RCC)
+endif
+
+CHECK_SOURCE += $(FORMS)
+
+include $(REPOSITORY_DIR)/makefiles/makefile.scun
+#TODO
+#=================================== EOF ======================================

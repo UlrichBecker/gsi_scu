@@ -1278,6 +1278,43 @@ public:
    }
 
    /*!
+    * @ingroup REGISTRATION
+    * @brief Cerates feedback devices and feedback channen devices of all
+    *        found function generators.
+    * @param CT Inherit class of FgFeedbackChannel
+    * @param DT Inherit class of FgFeedbackDevice or class FgFeedbackDevice
+    */
+   template< typename CT, typename DT = FgFeedbackDevice >
+   void autoBuildAllDevicesAndChannels( void )
+   {
+      static_assert( std::is_class<CT>::value,
+                     "CT is not a class!" );
+      static_assert( std::is_class<DT>::value,
+                     "DT is nor a class!" );
+      static_assert( std::is_base_of<FgFeedbackDevice, DT>::value,
+                     "DT has not the base class FgFeedbackDevice!" );
+      static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
+                     "CT has not the base class FgFeedbackChannel!" );
+
+      for( const auto& fg: getFgList() )
+      {
+         auto pDev = static_cast<DT*>(getDevice( fg.getSocket() ));
+         if( pDev == nullptr )
+         {
+            pDev = new DT( fg.getSocket() );
+            registerDevice( pDev );
+         }
+
+         auto pChannel = static_cast<CT*>(pDev->getChannel( fg.getDevice() ));
+         if( pChannel == nullptr )
+         {
+            pChannel = new CT( fg.getDevice() );
+            pDev->registerChannel( pChannel );
+         }
+      }
+   }
+
+   /*!
     * @brief Prepares all found DAQ-devices on SCU-bus to synchronizing its
     *        timestamp- counter.
     * @note Dummy-function in the case of MIL-DAQs!

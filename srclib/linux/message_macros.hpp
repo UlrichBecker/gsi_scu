@@ -46,7 +46,7 @@
 
    #define DEBUG_MESSAGE_FUNCTION( args... )                                  \
    {                                                                          \
-      std::string __f = __FILE__;                                             \
+      const std::string __f = __FILE__;                                       \
       DEBUG_MESSAGE( __FUNCTION__ <<  "(" << args << ")"                      \
                      << "\tline: " << __LINE__                                \
                      << " file: " << __f.substr(__f.find_last_of('/')+1));    \
@@ -54,7 +54,7 @@
 
    #define DEBUG_MESSAGE_M_FUNCTION( args... )                                \
    {                                                                          \
-      std::string __f = __FILE__;                                             \
+      const std::string __f = __FILE__;                                       \
       int __s;                                                                \
       std::string __c = abi::__cxa_demangle( typeid(this).name(),             \
                                              nullptr, nullptr, &__s );        \

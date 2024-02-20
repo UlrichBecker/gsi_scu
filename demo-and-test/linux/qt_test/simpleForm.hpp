@@ -30,7 +30,7 @@
  * moc simpleForm.hpp -o ./generated/moc_simpleFrom.cpp
  */
 #include <QObject>
-#include "generated/ui_simpleForm.hpp"
+#include <generated/ui_simpleForm.hpp>
 
 class SimpleForm: public QDialog
 {

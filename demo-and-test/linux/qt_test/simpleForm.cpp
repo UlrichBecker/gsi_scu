@@ -49,7 +49,7 @@ void SimpleForm::onButtonActionClicked( void )
 {
    m_counter++;
    m_oUi.labelCounter->setText(QString::number(m_counter));
-   DEBUG_MESSAGE_M_FUNCTION( m_counter );
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /* ----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ void SimpleForm::onButtonResetClicked( void )
 {
    m_counter = 0;
    m_oUi.labelCounter->setText(QString::number(m_counter));
-   DEBUG_MESSAGE_M_FUNCTION( m_counter );
+   DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 //================================== EOF ======================================

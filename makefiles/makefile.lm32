@@ -35,7 +35,7 @@ ADDITIONAL_TO_CLEAN += $(ELF_FILE)
 DEFINES += CONFIG_PATCH_LM32_BUG
 
 OPT_CPPCHECK     ?= -q --platform=unix32 -D__BYTE_ORDER__=__ORDER_BIG_ENDIAN__ \
-                    --enable=performance,portability -D__lm32__ -D__GNUC__
+                    --enable=performance,portability -D__lm32__
 OPT_CPPCHECK_C   = --std=c17
 OPT_CPPCHECK_CXX = --std=c++17
 

@@ -43,7 +43,10 @@ ifdef OECORE_SDK_VERSION
   DEFINES += CONFIG_OECORE_SDK_VERSION=$(OECORE_SDK_VERSION)
 endif
 
-OPT_CPPCHECK ?= -q --enable=performance,portability
+OPT_CPPCHECK += -q --enable=performance,portability -D__linux__
+OPT_CPPCHECK_C   = --std=c17
+OPT_CPPCHECK_CXX = --std=c++11
+
 
 include $(MAKEFILE_DIR)/makefile.gsi
 

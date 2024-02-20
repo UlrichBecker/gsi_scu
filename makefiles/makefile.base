@@ -125,6 +125,7 @@ SOURCE       += $(MIAN_MODULE)
 INCLUDE_DIRS += $(dir $(MIAN_MODULE))
 
 _SOURCE       = $(strip $(SOURCE))
+_SOURCE      += $(strip $(GEN_SOURCE))
 
 ifeq (.cpp, $(findstring .cpp,$(_SOURCE) ))
    CPLUSPLUS_MODULE_PRESENT := 1
@@ -336,7 +337,9 @@ incargs:
 devargs:
 	$(QUIET)echo -e $(OPT_DEFINES)
 
-OPT_CPPCHECK          ?= -q
+OPT_CPPCHECK ?= -q
+OPT_CPPCHECK += -D__GNUC__
+
 CPPCHECK              ?= cppcheck
 CPPCHECK_WITH_OPTIONS = $(CPPCHECK) $(OPT_CPPCHECK) $(OPT_INCLUDE) $(OPT_DEFINES) -D__CPPCHECK__
 .PHONY: check
