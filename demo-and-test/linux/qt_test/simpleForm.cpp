@@ -61,4 +61,12 @@ void SimpleForm::onButtonResetClicked( void )
    DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
+/* ----------------------------------------------------------------------------
+ */
+void SimpleForm::onButtonDialogClicked( void )
+{
+   DEBUG_MESSAGE_M_FUNCTION( "" );
+}
+
+
 //================================== EOF ======================================

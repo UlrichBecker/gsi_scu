@@ -13,6 +13,7 @@ REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 MIAN_MODULE := qttest.cpp
 SOURCE += simpleForm.cpp
 FORMS += simpleForm.ui
+FORMS += nochEinDialog.ui
 DEFINES += CONFIG_DEBUG_MESSAGES
 
 #GEN_SOURCE += $(MOC_PREFIX)simpleFrom.cpp

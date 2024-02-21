@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
+    <width>397</width>
     <height>235</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="pushButtonExit">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>290</x>
      <y>190</y>
      <width>87</width>
      <height>34</height>
@@ -44,14 +44,13 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>221</width>
+     <width>371</width>
      <height>161</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <pointsize>93</pointsize>
-     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -81,6 +80,19 @@
     <string>Reset</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButtonDialog">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>190</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Dialog</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -91,7 +103,7 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>180</x>
+     <x>300</x>
      <y>196</y>
     </hint>
     <hint type="destinationlabel">
@@ -132,9 +144,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButtonDialog</sender>
+   <signal>clicked()</signal>
+   <receiver>simpleDialog</receiver>
+   <slot>onButtonDialogClocked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>209</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>151</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onButtonActionClicked()</slot>
   <slot>onButtonResetClicked()</slot>
+  <slot>onButtonDialogClocked()</slot>
  </slots>
 </ui>

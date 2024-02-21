@@ -45,6 +45,7 @@ public:
 public slots:
    void onButtonActionClicked( void );
    void onButtonResetClicked( void );
+   void onButtonDialogClicked( void );
 };
 
 #endif // _SIMPLEFORM_HPP
