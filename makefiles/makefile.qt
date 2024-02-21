@@ -8,6 +8,13 @@
 ## (C)     2024 GSI Helmholtz Centre for Heavy Ion Research GmbH             ##
 ## Date:   20.02.2024                                                        ##
 ###############################################################################
+ifndef QT_LIBRARY_PATH
+   $(error QT_LIBRARY_PATH is not defined! )
+endif
+ifndef QT_INCLUDE_PATH
+   $(error QT_INCLUDE_PATH is not defined! )
+endif
+
 UI_PREFIX  = $(GENERATED_DIR)/ui_
 MOC_PREFIX = $(GENERATED_DIR)/moc_
 
@@ -29,7 +36,7 @@ QT_LIBS += Widgets
 LIBS += $(addprefix Qt$(QT_VERSION), $(QT_LIBS))
 LIBS += stdc++
 
-QT_INCLUDE ?= /usr/include/qt$(QT_VERSION)
+QT_INCLUDE ?= $(QT_INCLUDE_PATH)/../qt$(QT_VERSION)
 INCLUDE_DIRS += $(QT_INCLUDE)
 INCLUDE_DIRS += $(addprefix $(QT_INCLUDE)/, $(QT_INCLUDE_DIRS))
 

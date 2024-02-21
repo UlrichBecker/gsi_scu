@@ -1240,6 +1240,29 @@ public:
 
    /*!
     * @ingroup REGISTRATION
+    * @brief Template returns a pointer to a registered channel object.
+    * @param CT Inherit class of FgFeedbackChannel or class FgFeedbackChannel.
+    * @param socket Device number.
+    * @param channelNumber Channel number
+    * @retval !=nullptr Pointer to the channel object.
+    * @retval ==nullptr Channel not present respectively not registered.
+    */
+   template< typename CT = FgFeedbackChannel >
+   CT* getChannel( const uint socket, const uint channelNumber )
+   {
+      static_assert( std::is_class<CT>::value,
+                     "CT is not a class!" );
+      static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
+                     "CT has not the base class FgFeedbackChannel!" );
+
+      FgFeedbackDevice* pDev = getDevice( socket );
+      if( pDev == nullptr )
+         return nullptr;
+      return static_cast<CT*>(pDev->getChannel( channelNumber ));
+   }
+   
+   /*!
+    * @ingroup REGISTRATION
     * @brief Registering of a device containing function generators.
     * @note If the given device or one of its containing function generators
     *       are not present on the SCU, than an exception will throw.
@@ -1279,39 +1302,73 @@ public:
 
    /*!
     * @ingroup REGISTRATION
-    * @brief Cerates feedback devices and feedback channen devices of all
-    *        found function generators.
+    * @brief Template builds and registers a feedback channel if not already present.<\br>
+    *        When the belonging device is yet not created and registered then
+    *        this will made too.
     * @param CT Inherit class of FgFeedbackChannel
     * @param DT Inherit class of FgFeedbackDevice or class FgFeedbackDevice
+    * @param socket Device-number.
+    * @param channelNumber Channel-number.
+    * @retval true  Channel object has been new created. 
+    * @retval false Channel object is already present.
     */
    template< typename CT, typename DT = FgFeedbackDevice >
-   void autoBuildAllDevicesAndChannels( void )
+   bool buildAndRegisterChannel( const uint socket, const uint channelNumber )
    {
       static_assert( std::is_class<CT>::value,
                      "CT is not a class!" );
       static_assert( std::is_class<DT>::value,
-                     "DT is nor a class!" );
+                     "DT is not a class!" );
       static_assert( std::is_base_of<FgFeedbackDevice, DT>::value,
                      "DT has not the base class FgFeedbackDevice!" );
       static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
                      "CT has not the base class FgFeedbackChannel!" );
 
+      auto pDev = static_cast<DT*>(getDevice( socket ));
+      if( pDev == nullptr )
+      {
+         pDev = new DT( socket );
+         registerDevice( pDev );
+      }
+
+      auto pChannel = static_cast<CT*>(pDev->getChannel( channelNumber ));
+      if( pChannel == nullptr )
+      {
+         pChannel = new CT( channelNumber );
+         pDev->registerChannel( pChannel );
+         return true;
+      }
+
+      return false;
+   }
+   
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Template creates feedback- devices and feedback channel- devices of all
+    *        found function generators.
+    * @param CT Inherit class of FgFeedbackChannel
+    * @param DT Inherit class of FgFeedbackDevice or class FgFeedbackDevice
+    * @return Number of new created channels.
+    */
+   template< typename CT, typename DT = FgFeedbackDevice >
+   uint autoBuildAllDevicesAndChannels( void )
+   {
+      static_assert( std::is_class<CT>::value,
+                     "CT is not a class!" );
+      static_assert( std::is_class<DT>::value,
+                     "DT is not a class!" );
+      static_assert( std::is_base_of<FgFeedbackDevice, DT>::value,
+                     "DT has not the base class FgFeedbackDevice!" );
+      static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
+                     "CT has not the base class FgFeedbackChannel!" );
+
+      uint ret = 0;
       for( const auto& fg: getFgList() )
       {
-         auto pDev = static_cast<DT*>(getDevice( fg.getSocket() ));
-         if( pDev == nullptr )
-         {
-            pDev = new DT( fg.getSocket() );
-            registerDevice( pDev );
-         }
-
-         auto pChannel = static_cast<CT*>(pDev->getChannel( fg.getDevice() ));
-         if( pChannel == nullptr )
-         {
-            pChannel = new CT( fg.getDevice() );
-            pDev->registerChannel( pChannel );
-         }
+         if( buildAndRegisterChannel<CT, DT>( fg.getSocket(), fg.getDevice() ) )
+            ret++;
       }
+      return ret;
    }
 
    /*!
