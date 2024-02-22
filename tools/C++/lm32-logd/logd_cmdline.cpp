@@ -460,6 +460,18 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     "CAUTION: Possible stored log-data will be lost!\n"
                     "NOTE: When the memory already has been allocated by"
                     " the application \"mem-mon\" so this option becomes mandatory."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         static_cast<CommandLine*>(poParser)->m_timeInUtc = true;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'U',
+      .m_longOpt  = "utc",
+      .m_helpText = "Converts the white rabbit timestamp in to universal time (UTC)."
    }
 
 }; // CommandLine::c_optList
@@ -502,6 +514,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_addBuildId( false )
    ,m_readBuildId( false )
    ,m_doReset( false )
+   ,m_timeInUtc( false )
    ,m_interval( DEFAULT_INTERVAL )
    ,m_maxItemsPerInterval( DEFAULT_MAX_ITEMS )
    ,m_burstLimit( Ddr3Access::NEVER_BURST )

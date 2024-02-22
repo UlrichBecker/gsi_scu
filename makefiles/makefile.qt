@@ -23,6 +23,7 @@ MOC_SOURCE   += $(addsuffix ".cpp", $(addprefix $(MOC_PREFIX), $(basename $(FORM
 
 #GEN_SOURCE += $(MOC_SOURCE)
 GEN_SOURCE += $(MOC_PREFIX)simpleFrom.cpp
+GEN_SOURCE += $(MOC_PREFIX)nochEinDialog.cpp
 
 QT_VERSION ?= 5
 

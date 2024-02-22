@@ -12,6 +12,7 @@ REPOSITORY_DIR = $(shell git rev-parse --show-toplevel)
 
 MIAN_MODULE := qttest.cpp
 SOURCE += simpleForm.cpp
+SOURCE += nochEinDialog.cpp
 FORMS += simpleForm.ui
 FORMS += nochEinDialog.ui
 DEFINES += CONFIG_DEBUG_MESSAGES
@@ -28,6 +29,12 @@ $(UI_PREFIX)simpleForm.hpp: simpleForm.ui $(GENERATED_DIR)
 	$(UIC_F) $< -o $@
 
 $(MOC_PREFIX)simpleFrom.cpp: ./simpleForm.hpp $(UI_PREFIX)simpleForm.hpp
+	$(MOC_F) $< -o $@
+
+$(UI_PREFIX)nochEinDialog.hpp: nochEinDialog.ui $(GENERATED_DIR)
+	$(UIC_F) $< -o $@
+
+$(MOC_PREFIX)nochEinDialog.cpp: ./nochEinDialog.hpp $(UI_PREFIX)nochEinDialog.hpp
 	$(MOC_F) $< -o $@
 
 p:

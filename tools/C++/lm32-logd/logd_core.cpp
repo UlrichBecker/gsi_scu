@@ -692,22 +692,24 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
          return;
    }
 
-   if( m_lastTimestamp >= item.timestamp )
+   const uint64_t timestamp = m_rCmdLine.isUtc()? daq::wrtToUtc(item.timestamp) : item.timestamp;
+
+   if( m_lastTimestamp >= timestamp )
    { /*
       * A non-causal deviation of lower or equal of one second will tolerated
       * because by using FreeRTOS its possible that the order of log-messages
       * becomes exchanged.
       */
-      if( (m_lastTimestamp - item.timestamp) > daq::NANOSECS_PER_SEC )
+      if( (m_lastTimestamp - timestamp) > daq::NANOSECS_PER_SEC )
       {
          m_isError = true;
          *this << "Invalid timestamp: last: " << m_lastTimestamp
-               << ", actual: " << item.timestamp << std::endl;
+               << ", actual: " << timestamp << std::endl;
          m_lastTimestamp = 0;
          return;
       }
    }
-   m_lastTimestamp = item.timestamp;
+   m_lastTimestamp = timestamp;
 
    if( m_rCmdLine.isPrintFilter() )
    {
@@ -721,15 +723,15 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    {
       if( m_rCmdLine.isHumanReadableTimestamp() )
       {
-         rOutput += daq::wrToTimeDateString( item.timestamp );
+         rOutput += daq::wrToTimeDateString( timestamp );
          std::stringstream stream;
          stream << " + " << std::setw( 9 ) << std::setfill( '0' )
-                << (item.timestamp % daq::NANOSECS_PER_SEC) << " ns";
+                << (timestamp % daq::NANOSECS_PER_SEC) << " ns";
          rOutput += stream.str();
       }
       else
       {
-         rOutput += std::to_string(item.timestamp);
+         rOutput += std::to_string(timestamp);
       }
       rOutput += ": ";
    }
@@ -908,7 +910,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
                bool     isNegative = false;
                uint32_t value = item.param[ai++];
                STATIC_ASSERT( sizeof(value) == sizeof(item.param[0]) );
-               if( signum && ((value & (1 << (BIT_SIZEOF(value)-1))) != 0) )
+               if( signum && ((value & (static_cast<uint32_t>(1) << (BIT_SIZEOF(value)-1))) != 0) )
                {
                   value = -value;
                   if( paddingChar == '0' )

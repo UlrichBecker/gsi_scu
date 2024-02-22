@@ -122,6 +122,20 @@ inline TIME_DATE_T& wrToTimeDate( TIME_DATE_T& rTm, uint64_t wrt )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
+ * @brief Concerts the white rabbit time to the universal time.
+ * @todo At the moment the difference between white rabbit time ant the
+ *       universal time is 37 seconds, but in the future this can changes!
+ *       Remove this hard coded offset by a dynamic offset.
+ * @param wrt White rabbit time.
+ * @return Universal time UTC
+ */
+inline uint64_t wrtToUtc( uint64_t wrt )
+{
+   return wrt - 37 * NANOSECS_PER_SEC;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ
  * @brief Converts the POSIX time object in a human readable string.
  * @param rTm Reverence to the POSIX time object.
  * @return Human readable string without linefeed.

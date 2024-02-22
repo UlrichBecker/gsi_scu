@@ -55,6 +55,7 @@ private:
    bool          m_addBuildId;
    bool          m_readBuildId;
    bool          m_doReset;
+   bool          m_timeInUtc;
    uint          m_interval;
    uint          m_maxItemsPerInterval;
    int           m_burstLimit;
@@ -139,6 +140,11 @@ public:
    bool isReset( void )
    {
       return m_doReset;
+   }
+
+   bool isUtc( void )
+   {
+      return m_timeInUtc;
    }
 
    uint getPollInterwalTime( void )

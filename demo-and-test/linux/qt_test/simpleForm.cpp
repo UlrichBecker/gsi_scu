@@ -23,7 +23,9 @@
  ******************************************************************************
  */
 #include "simpleForm.hpp"
+#include "nochEinDialog.hpp"
 #include <message_macros.hpp>
+#include <unistd.h>
 
 /* ----------------------------------------------------------------------------
  */
@@ -63,9 +65,12 @@ void SimpleForm::onButtonResetClicked( void )
 
 /* ----------------------------------------------------------------------------
  */
-void SimpleForm::onButtonDialogClicked( void )
+void SimpleForm::onButtonDialogClocked( void )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+   NochEinDialogForm dialog( this );
+   dialog.show();
+   //sleep( 3 );
 }
 
 
