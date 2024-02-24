@@ -1246,6 +1246,13 @@ public:
     * @param channelNumber Channel number
     * @retval !=nullptr Pointer to the channel object.
     * @retval ==nullptr Channel not present respectively not registered.
+    * Example:
+    * @code
+    * fg-4-1
+    *    | |
+    *    | +- channelNumber
+    *    +--- socket
+    * @endcode
     */
    template< typename CT = FgFeedbackChannel >
    CT* getChannel( const uint socket, const uint channelNumber )
@@ -1311,6 +1318,13 @@ public:
     * @param channelNumber Channel-number.
     * @retval true  Channel object has been new created. 
     * @retval false Channel object is already present.
+    * Example:
+    * @code
+    * fg-4-1
+    *    | |
+    *    | +- channelNumber
+    *    +--- socket
+    * @endcode
     */
    template< typename CT, typename DT = FgFeedbackDevice >
    bool buildAndRegisterChannel( const uint socket, const uint channelNumber )
