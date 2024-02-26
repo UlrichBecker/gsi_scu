@@ -276,8 +276,44 @@ public:
     * @brief Returns the object of type FgFeedbackDevice
     *        in which this object has been registered, if
     *        not registered then a exception will thrown.
+    *
+    * @note If this function becomes invoked within the function onData()
+    *       or onInit() so this object is always registered and you don't
+    *       care about this mentioned exception.
     */
    FgFeedbackDevice* getParent( void );
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns the pointer of the FgFeedbackAdministration - object
+    *        if this object is registered via object FgFeedbackDevice,
+    *        otherwise an exception will thrown.
+    *
+    * This is meaningful if all existing feedback channel objects will access
+    * to common shared data objects, e.g. to objects of a inherited class
+    * from FgFeedbackAdministration.
+    *
+    * @note If this function becomes invoked within the function onData()
+    *       or onInit() so this object is always registered and you don't
+    *       care about this mentioned exception.
+    */
+   FgFeedbackAdministration* getAdministration( void );
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns "true" if this object has been registered.
+    */
+   bool isRegistered( void )
+   {
+      return m_pParent != nullptr;
+   }
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns "true" if this object has been registered in FgFeedbackDevice
+    *        and FgFeedbackDevice has been registered in FgFeedbackAdministration.
+    */
+   bool isCompleateRegistered( void );
 
    /*!
     * @brief Returns the function generator number.
@@ -299,6 +335,12 @@ public:
     * @brief Returns the function generator name.
     *
     * E.g.: "fg-4-0"
+    *
+    * If this object not registered then the socked is unknown the output
+    * will be:
+    *
+    * e.g.: "fg-unknown-0"
+    *
     * @return Name of function generator.
     */
    std::string getFgName( void );
@@ -352,7 +394,7 @@ protected:
     * That means once the connection-path of this object to
     * the LM32-application has been established.
     */
-   virtual void onInit( void ) {}
+   virtual void onInit( void ) { assert( isCompleateRegistered() ); }
 
    /*!
     * @brief Optional callback function becomes invoked by a reset event.
@@ -418,6 +460,78 @@ protected:
 }; // class FgFeedbackChannel
 
 ///////////////////////////////////////////////////////////////////////////////
+/*!
+ * @brief Specializing of the class FgFeedbackChannel in which the callback
+ *        function onData becomes redefined for tuples instead of three
+ *        single parameters.
+ * @note This class is completely implemented in this header.
+ */
+class FgFeedbackTuple: public FgFeedbackChannel
+{
+public:
+   /*!
+    * @brief Tuple type for white rabbit: timestamp, actual value and set value.
+    */
+   struct TUPLE_T
+   { /*!
+      * @brief White rabbit timestamp.
+      */
+      uint64_t m_timestamp;
+
+      /*!
+       * @brief Actual raw value.
+       */
+      DAQ_T    m_actValue;
+
+      /*!
+       * @brief Set raw value.
+       */
+      DAQ_T    m_setValue;
+   };
+
+   /*!
+    * @brief Constructor of a single function generator feedback channel
+    *        specialized for tuples.
+    * @code
+    * fg-10-3 In this example is the function generator number 3.
+    * @endcode
+    * @param fgNumber Number of function generator.
+    */
+   FgFeedbackTuple( const uint fgNumber ): FgFeedbackChannel( fgNumber ) {}
+
+   /*!
+    * @brief Destructor, if a instance of this type has been registered
+    *        then it will deregistered by its self.
+    */
+   virtual ~FgFeedbackTuple( void ) {}
+
+protected:
+
+   /*!
+    * @brief Callback function becomes invoked for each incoming data item which
+    *        belongs to this object.
+    * @param oTuple Tuple object which includes the white rabbit timestamp,
+    *               the actual- raw value and the set- raw value.
+    */
+   virtual void onData( TUPLE_T oTuple ) = 0;
+
+private:
+
+   void onData( uint64_t wrTimeStampTAI,
+                DAQ_T actlValue,
+                DAQ_T setValue ) override
+   {
+      FgFeedbackTuple::onData( { .m_timestamp = wrTimeStampTAI,
+                                 .m_actValue  = actlValue,
+                                 .m_setValue  = setValue } );
+   }
+};
+
+static_assert( sizeof(FgFeedbackChannel) == sizeof(FgFeedbackTuple),
+               "Class FgFeedbackTuple shall be a adapter class for function"
+               " onData() with no additional member variables!");
+
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /*!
  * @brief Object type for MIL-or ADDAC/ACU devices.
@@ -480,10 +594,20 @@ public:
    void registerChannel( FgFeedbackChannel* pFeedbackChannel );
 
    /*!
+    * @ingroup REGISTRATION
     * @brief Counterpart to registerChannel.
     * @see registerChannel
     */
    void unregisterChannel( FgFeedbackChannel* pFeedbackChannel );
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns "true" if this object has been registered.
+    */
+   bool isRegistered( void )
+   {
+      return m_pParent != nullptr;
+   }
 
    /*!
     * @brief Returns the socket number.
@@ -613,6 +737,13 @@ inline   bool FgFeedbackChannel::isMil( void )
   return getParent()->isMil();
 }
 #endif
+
+inline bool FgFeedbackChannel::isCompleateRegistered( void )
+{
+   if( isRegistered() )
+      return getParent()->isRegistered();
+   return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1566,7 +1697,12 @@ inline uint FgFeedbackChannel::getSocket( void )
    return getParent()->getSocket();
 }
 
-
+/*! ---------------------------------------------------------------------------
+ */
+inline FgFeedbackAdministration* FgFeedbackChannel::getAdministration( void )
+{
+   return getParent()->getParent();
+}
 
 } // End namespace Scu
 

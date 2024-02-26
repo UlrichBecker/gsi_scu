@@ -479,7 +479,10 @@ FgFeedbackDevice* FgFeedbackChannel::getParent( void )
 std::string FgFeedbackChannel::getFgName( void )
 {
    std::string str = "fg-";
-   str += std::to_string( getSocket() );
+   if( m_pParent == nullptr )
+      str += "unknown";
+   else
+      str += std::to_string( getSocket() );
    str += '-';
    str += std::to_string( getFgNumber() );
    return str;

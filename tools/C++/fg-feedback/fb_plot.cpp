@@ -53,7 +53,7 @@ void Plot::init( void )
    *this << "set terminal "
          << m_pParent->getCommandLine()->getTerminal()
          << " title \"SCU: "
-         << m_pParent->getParent()->getParent()->getScuDomainName()
+         << m_pParent->getAdministration()->getScuDomainName()
          << ", DAQ-Type: " << daq::deviceType2String( m_pParent->getParent()->getTyp() )
          << "\"" << endl;
    *this << "set grid" << endl;
@@ -70,8 +70,9 @@ void Plot::init( void )
 void Plot::plot( void )
 {
    constexpr float MILISECS_PER_NANOSEC = 1000000.0;
+   assert( m_pParent->isCompleateRegistered() );
 
-   FgFeedbackAdministration* pAdmin = m_pParent->getParent()->getParent();
+   FgFeedbackAdministration* pAdmin = m_pParent->getAdministration();
 
    *this << "set title \"" << m_pParent->getFgName()
          << "  Date: "

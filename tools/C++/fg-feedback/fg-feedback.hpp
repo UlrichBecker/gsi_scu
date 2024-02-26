@@ -112,8 +112,8 @@ class FbChannel: public FgFeedbackChannel
    using PLOT_LIST_T = std::vector<PLOT_T>;
 
    Plot*                 m_pPlot;
-   MiLdaq::MIL_DAQ_T     m_lastSetRawValue;
-   MiLdaq::MIL_DAQ_T     m_lastActRawValue;
+   DAQ_T                 m_lastSetRawValue;
+   DAQ_T                 m_lastActRawValue;
    uint64_t              m_startTime;
    uint64_t              m_lastTime;
    uint64_t              m_currentTime;
@@ -155,6 +155,8 @@ public:
       return GNUPLOT_DEFAULT_TERMINAL;
    }
 
+   AllDaqAdministration* getAdministration( void );
+
    CommandLine* getCommandLine( void );
 
    bool plotDuringCollecting( void );
@@ -195,7 +197,7 @@ private:
                    DAQ_T actlValue,
                    DAQ_T setValue ) override;
 
-   void onTimestampError( const uint64_t tinestamp,
+   void onTimestampError( const uint64_t timestamp,
                           DAQ_T actlValue,
                           DAQ_T setValue ) override;
 };
@@ -284,10 +286,15 @@ public:
 #endif
 };
 
+inline AllDaqAdministration* FbChannel::getAdministration( void )
+{
+   return static_cast<AllDaqAdministration*>(FgFeedbackChannel::getAdministration());
+}
+
 inline
 CommandLine* FbChannel::getCommandLine( void )
 {
-   return getParent()->getParent()->getCommandLine();
+   return getAdministration()->getCommandLine();
 }
 
 #if 0

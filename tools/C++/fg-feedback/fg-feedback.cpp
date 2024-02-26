@@ -143,7 +143,7 @@ void FbChannel::onInit( void )
    if( getCommandLine()->doNotPlot() )
       return;
 
-   if( getParent()->getParent()->isRunningOnScu() )
+   if( getAdministration()->isRunningOnScu() )
       return;
 
    if( m_pPlot != nullptr )
