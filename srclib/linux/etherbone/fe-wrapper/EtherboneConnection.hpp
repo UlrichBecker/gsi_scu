@@ -20,8 +20,12 @@
   #include <boost/interprocess/sync/scoped_lock.hpp>
 #endif
 
-//#include "feSupport/scu/etherbone/Constants.hpp"
-#include "Constants.hpp"
+#ifdef CONFIG_NO_GSI_INCLUDE_PATH
+  #include "Constants.hpp"
+#else
+  #include "feSupport/scu/etherbone/Constants.hpp"
+#endif
+
 #ifndef EB_DEFAULT_TIMEOUT
    #define EB_DEFAULT_TIMEOUT 5000
 #endif
