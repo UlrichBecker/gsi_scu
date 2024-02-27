@@ -20,7 +20,7 @@
   #include <boost/interprocess/sync/scoped_lock.hpp>
 #endif
 
-#ifdef CONFIG_NO_GSI_INCLUDE_PATH
+#ifdef CONFIG_NO_INCLUDE_PATHS
   #include "Constants.hpp"
 #else
   #include "feSupport/scu/etherbone/Constants.hpp"

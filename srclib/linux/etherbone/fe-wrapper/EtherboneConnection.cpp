@@ -6,7 +6,7 @@
  *      Revised: 2018 by Ulrich Becker
  */
 
-#ifdef CONFIG_N0_INCLUDE_PATHS
+#ifdef CONFIG_NO_INCLUDE_PATHS
  #include "EtherboneConnection.hpp"
  #include <Constants.hpp>
  #include <BusException.hpp>
