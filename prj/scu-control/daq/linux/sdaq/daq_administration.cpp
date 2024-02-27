@@ -278,7 +278,7 @@ bool DaqAdministration::registerDevice( DaqDevice* pDevice )
       pDevice->m_maxChannels = readMaxChannels( pDevice->m_deviceNumber );
    }
    else
-      pDevice->m_maxChannels= 4; //TODO
+      pDevice->m_maxChannels = DaqDevice::MAX_CHANNELS;
 
    m_maxChannels          += pDevice->m_maxChannels;
    pDevice->m_pParent     = this;
@@ -434,7 +434,7 @@ uint16_t DaqAdministration::crcPolynom( uint16_t x )
  */
 void DaqAdministration::onErrorCrc( void )
 {
-
+   //DEBUG_MESSAGE_M_FUNCTION( "" );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -486,7 +486,7 @@ uint DaqAdministration::distributeData( void )
                         static_cast<uint>(Bus::SCUBUS_START_SLOT),
                         static_cast<uint>(Bus::MAX_SCU_SLAVES) ) ||
        !isDevicePresent( descriptorGetSlot() ) ||
-       ( descriptorGetChannel() >= 4 )
+       ( descriptorGetChannel() >= DaqDevice::MAX_CHANNELS )
      )
    {
       onErrorDescriptor( m_poBlockBuffer->descriptor );

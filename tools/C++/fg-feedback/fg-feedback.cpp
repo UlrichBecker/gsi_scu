@@ -78,7 +78,8 @@ void onUexpectedException( void )
 /*! ---------------------------------------------------------------------------
  */
 FbChannel::FbChannel( uint iterfaceAddress )
-   :FgFeedbackChannel( iterfaceAddress )
+  // :FgFeedbackChannel( iterfaceAddress )
+   :FgFeedbackTuple(iterfaceAddress )
    ,m_pPlot( nullptr )
    ,m_startTime( 0 )
    ,m_lastTime( 0 )
@@ -237,8 +238,7 @@ void FbChannel::addItem( const uint64_t time,
 /*! ---------------------------------------------------------------------------
  * @dotfile fg-feedback.gv
  */
-void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
-                                              DAQ_T setValue )
+void FbChannel::onData( TUPLE_T oTuple )
 {
    m_callCount++;
 
@@ -251,17 +251,17 @@ void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
 
       cout << "fg-" << getSocket() << '-' << getFgNumber() << ":  ";
       if( getCommandLine()->isVerbose() )
-         cout     << daq::wrToTimeDateString( wrTimeStamp );
+         cout     << daq::wrToTimeDateString( oTuple.m_timestamp );
       else
-         cout     << wrTimeStamp;
-      cout << ",   set: " << setValue
-           << ",   act: " << actValue
+         cout     << oTuple.m_timestamp;
+      cout << ",   set: " << oTuple.m_setValue
+           << ",   act: " << oTuple.m_actValue
            << ",   count: " << m_callCount
            << endl;
       return;
    }
 
-   m_currentTime = wrTimeStamp;
+   m_currentTime = oTuple.m_timestamp;
    if( m_state != START )
    {
       uint64_t timeinterval = m_currentTime - m_lastTime;
@@ -291,7 +291,7 @@ void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
             m_startTime = m_currentTime;
             if( getCommandLine()->isContinuePlottingEnabled() )
                m_timeToPlot = m_currentTime + getPlotIntervalTime();
-            addItem( 0, actValue, setValue, !isSetValueInvalid() );
+            addItem( 0, oTuple.m_actValue, oTuple.m_setValue, !isSetValueInvalid() );
             m_minTime = static_cast<uint64_t>(~0);
             m_maxTime = 0;
             m_callCount++;
@@ -305,7 +305,7 @@ void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
             {
                FSM_TRANSITION_NEXT( PLOT, color = green );
             }
-            addItem( plotTime, actValue, setValue, !isSetValueInvalid() );
+            addItem( plotTime, oTuple.m_actValue, oTuple.m_setValue, !isSetValueInvalid() );
             if( getCommandLine()->isContinuePlottingEnabled() &&
                 (m_currentTime >= m_timeToPlot) )
             {
@@ -332,8 +332,8 @@ void FbChannel::onData( uint64_t wrTimeStamp, DAQ_T actValue,
    }
    while( next );
 
-   m_lastSetRawValue = setValue;
-   m_lastActRawValue = actValue;
+   m_lastSetRawValue = oTuple.m_setValue;
+   m_lastActRawValue = oTuple.m_actValue;
    m_lastTime = m_currentTime;
 }
 

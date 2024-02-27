@@ -470,7 +470,8 @@ class FgFeedbackTuple: public FgFeedbackChannel
 {
 public:
    /*!
-    * @brief Tuple type for white rabbit: timestamp, actual value and set value.
+    * @brief DAQ-tuple type for white rabbit- timestamp, actual value
+    *        and set value.
     */
    struct TUPLE_T
    { /*!
@@ -515,16 +516,56 @@ protected:
     */
    virtual void onData( TUPLE_T oTuple ) = 0;
 
+   /*!
+    * @brief Optional over-writable callback function becomes invoked in the
+    *        case if a time stamp error has been detected.
+    * @note For debug purposes.
+    * @param oTuple Tuple with possibly wrong time stamp.
+    */
+   virtual void onTimestampError( TUPLE_T oTuple ) {}
+
+#ifdef CONFIG_MIL_FG
+   /*!
+    * @brief Optional callback function for debug purposes becomes
+    *        invoked for all incoming MIL data tuples.
+    */
+   virtual void onMilData( TUPLE_T oTuple ) {}
+#endif
+
 private:
 
    void onData( uint64_t wrTimeStampTAI,
                 DAQ_T actlValue,
                 DAQ_T setValue ) override
    {
-      FgFeedbackTuple::onData( { .m_timestamp = wrTimeStampTAI,
-                                 .m_actValue  = actlValue,
-                                 .m_setValue  = setValue } );
+      onData( { .m_timestamp = wrTimeStampTAI,
+                .m_actValue  = actlValue,
+                .m_setValue  = setValue } );
    }
+
+   void onTimestampError( const uint64_t timestamp,
+                          DAQ_T actlValue,
+                          DAQ_T setValue ) override
+   {
+      onTimestampError( { .m_timestamp = timestamp,
+                          .m_actValue  = actlValue,
+                          .m_setValue  = setValue } );
+   }
+
+#ifdef CONFIG_MIL_FG
+   /*!
+    * @brief Optional callback function for debug purposes becomes
+    *        invoked for all incoming MIL data tuples.
+    */
+   void onMilData( const uint64_t timestamp,
+                   DAQ_T actlValue,
+                   DAQ_T setValue ) override
+   {
+      onMilData( { .m_timestamp = timestamp,
+                   .m_actValue  = actlValue,
+                   .m_setValue  = setValue } );
+   }
+#endif
 };
 
 static_assert( sizeof(FgFeedbackChannel) == sizeof(FgFeedbackTuple),

@@ -144,7 +144,7 @@ void EbRamAccess::readRam( RAM_DAQ_PAYLOAD_T* pData,
 }
 
 #ifdef CONFIG_EB_TIME_MEASSUREMENT //==========================================
-   #ifdef COMFIG_EB_TIME_MEASSUREMENT_TO_STDERR
+   #ifdef CONFIG_EB_TIME_MEASSUREMENT_TO_STDERR
      #warning "Timemeasurment output to stderr is active"
    #endif
 /*! ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ void EbRamAccess::stopTimeMeasurement( const std::size_t size, const WB_ACCESS_T
 
    if( newDuration > m_oMaxDuration.m_duration )
    {
-   #ifdef COMFIG_EB_TIME_MEASSUREMENT_TO_STDERR
+   #ifdef CONFIG_EB_TIME_MEASSUREMENT_TO_STDERR
       std::cerr << "WB max duration: " << newDuration << " us" << std::endl;
    #endif
       m_oMaxDuration.m_duration  = newDuration;
@@ -167,7 +167,7 @@ void EbRamAccess::stopTimeMeasurement( const std::size_t size, const WB_ACCESS_T
 
    if( newDuration < m_oMinDuration.m_duration )
    {
-   #ifdef COMFIG_EB_TIME_MEASSUREMENT_TO_STDERR
+   #ifdef CONFIG_EB_TIME_MEASSUREMENT_TO_STDERR
       std::cerr << "WB min duration: " << newDuration << " us" << std::endl;
    #endif
       m_oMinDuration.m_duration  = newDuration;

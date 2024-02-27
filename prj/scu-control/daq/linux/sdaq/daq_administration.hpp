@@ -502,6 +502,8 @@ protected:
    CHANNEL_LIST_T     m_channelPtrList;
 
 public:
+   constexpr static uint MAX_CHANNELS = 4;
+
    /*!
     * @brief Constructor
     * @see DaqAdministration::registerDevice

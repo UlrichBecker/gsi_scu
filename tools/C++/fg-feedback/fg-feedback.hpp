@@ -86,7 +86,7 @@ class CommandLine;
 class AllDaqAdministration;
 
 //////////////////////////////////////////////////////////////////////////////
-class FbChannel: public FgFeedbackChannel
+class FbChannel: public FgFeedbackTuple
 {
    friend class Plot;
    constexpr static uint64_t c_minimumPlotInterval = daq::NANOSECS_PER_SEC / 10;
@@ -177,8 +177,7 @@ private:
    void onActSetTimestampDeviation( const uint64_t setTimeStamp,
                                     const uint64_t actTimestamp ) override;
 
-   void onData( uint64_t wrTimeStamp, DAQ_T actValue,
-                                      DAQ_T setValue ) override;
+   void onData( TUPLE_T oTuple ) override;
 
    void addItem( const uint64_t time,
                  const DAQ_T actValue,
