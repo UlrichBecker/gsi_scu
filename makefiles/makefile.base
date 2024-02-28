@@ -34,7 +34,14 @@ endif
 
 GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $$1}' )
 
-GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "453" ] && echo "1" )
+GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "485" ] && echo "1" )
+
+ifdef GCC_LEGACY
+   DEFINES += _BSD_SOURCE
+   DEFINES += _POSIX_C_SOURCE
+else
+   DEFINES += _DEFAULT_SOURCE
+endif
 
 ifdef IS_IN_GITHUB_ACTION
   DEFINES += CONFIG_IS_IN_GITHUB_ACTION
@@ -160,7 +167,7 @@ endif
 
 GENERATED_DIR ?= $(dir $(MIAN_MODULE))generated
 INCLUDE_DIRS  += $(GENERATED_DIR)
-DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)
+DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)_$(GCC_VERSION)
 WORK_DIR      ?= $(DEPLOY_DIR)/work
 TARGET_DIR    ?= $(DEPLOY_DIR)/result
 ASM_DIR       ?= $(DEPLOY_DIR)/asm
