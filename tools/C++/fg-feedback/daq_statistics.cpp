@@ -72,21 +72,21 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
 
    for( auto& i: m_daqChannelList )
    {
-      if( i.m_serialNumber == serialNumber )
-      {
-         i.m_counter++;
-         i.m_counterUpdated = true;
-         if( !daqDescriptorWasDaq( &rDescriptor ) )
-            return;
-         if( static_cast<DAQ_SEQUENCE_T>(i.m_lastSequence + 1) != i.m_actualSequence )
-         {
-            i.m_sequenceError = true;
-            i.m_sequenceErrorCount++;
-         }
-         i.m_lastSequence = i.m_actualSequence;
-         i.m_actualSequence = daqDescriptorGetSequence( &rDescriptor );
+      if( i.m_serialNumber != serialNumber )
+         continue;
+     
+      i.m_counter++;
+      i.m_counterUpdated = true;
+      if( !daqDescriptorWasDaq( &rDescriptor ) )
          return;
+      if( static_cast<DAQ_SEQUENCE_T>(i.m_lastSequence + 1) != i.m_actualSequence )
+      {
+         i.m_sequenceError = true;
+         i.m_sequenceErrorCount++;
       }
+      i.m_lastSequence = i.m_actualSequence;
+      i.m_actualSequence = daqDescriptorGetSequence( &rDescriptor );
+      return;
    }
 
    if( m_daqChannelList.size() > (MAX_FG_CHANNELS * 2) )
@@ -95,7 +95,7 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
       return;
    }
 
-   const BLOCK_T newBlock =
+   m_daqChannelList.push_back(
    {
       .m_serialNumber       = serialNumber,
       .m_slot               = static_cast<uint>(daqDescriptorGetSlot( &rDescriptor )),
@@ -106,8 +106,7 @@ void Statistics::add( DAQ_DESCRIPTOR_T& rDescriptor )
       .m_actualSequence     = daqDescriptorGetSequence( &rDescriptor ),
       .m_sequenceError      = false,
       .m_sequenceErrorCount = 0
-   };
-   m_daqChannelList.push_back( newBlock );
+   } );
 
    if( m_daqChannelList.size() > 1 )
    {

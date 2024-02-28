@@ -83,7 +83,7 @@ STATIC unsigned int getTenthDegree( const uint32_t v )
  * @ingroup TEMPERATURE
  * @brief Definition of the states of the finite state machine (FSM)
  */
-typedef enum: uint32_t
+typedef enum
 {
    FSM_DECLARE_STATE( ST_START, color = blue, label = 'Start of temperature\nwatching.' ),
    FSM_DECLARE_STATE( ST_NORMAL, color = green, label = 'Tamperature is whithin\nnormal range.'),
