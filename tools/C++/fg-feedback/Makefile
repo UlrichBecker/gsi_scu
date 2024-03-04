@@ -15,9 +15,13 @@ FOR_SCU_AND_ACC := 1
 #USE_NAMED_MUTEX := 1
 
 USE_ADDAC_DAQ_BLOCK_STATISTICS := 1
+USE_TUPLE_STATISTICS := 1
 
 ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
    DEFINES += CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
+endif
+ifdef USE_TUPLE_STATISTICS
+   DEFINES += CONFIG_USE_TUPLE_STATISTICS
 endif
 
 MIAN_MODULE := fg-feedback.cpp
@@ -32,6 +36,9 @@ SOURCE += fb_command_line.cpp
 SOURCE += fb_plot.cpp
 ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
   SOURCE += daq_statistics.cpp
+endif
+ifdef USE_TUPLE_STATISTICS
+  SOURCE += tuple_statistics.cpp
 endif
 
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
@@ -133,12 +140,12 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
 #CALL_ARGS = --generate_doc_tagged
 
-# CALL_ARGS = scuxl0035 -vadt1
-# CALL_ARGS = scuxl0035 -vS
-# CALL_ARGS = scuxl0035 -aN
+# CALL_ARGS = scuxl0692.acc.gsi.de -vadt1
+# CALL_ARGS = scuxl0692.acc.gsi.de -vS
+ CALL_ARGS = scuxl0692.acc.gsi.de -aN
 #CALL_ARGS = scuxl0212 -aqzt1 -I200 -T"X11 size 800,150"
-CALL_ARGS = scuxl0692.acc.gsi.de -azrdQOt1 -I250 -T"X11 size 800,150"  -u0
-#CALL_ARGS = scuxl0035.acc.gsi.de -I200 -rQO
+#CALL_ARGS = scuxl0692.acc.gsi.de -azrdQOt1 -I250 -T"X11 size 800,150"  -u0
+#CALL_ARGS = scuxl0692.acc.gsi.de -I200 -rQ
 #CALL_ARGS = scuxl0162 -azt1 -I200 -T"X11 size 800,150"
 
 # CALL_ARGS = scuxl0035 -vy

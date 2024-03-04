@@ -249,7 +249,7 @@ void FbChannel::onData( TUPLE_T oTuple )
          return;
    #endif
 
-      cout << "fg-" << getSocket() << '-' << getFgNumber() << ":  ";
+      cout << getFgName() << ":  ";
       if( getCommandLine()->isVerbose() )
          cout     << daq::wrToTimeDateString( oTuple.m_timestamp );
       else
