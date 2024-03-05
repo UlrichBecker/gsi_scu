@@ -51,7 +51,10 @@ class TupleStatistics
    std::vector<TUPLE_ITEM_T> m_tupleList;
 
    AllDaqAdministration* m_pParent;
-
+#ifdef CONFIG_MIL_FG
+   bool                  mAddacPresent;
+   bool                  mMilPresent;
+#endif
 public:
    using TUPLE_T = FgFeedbackTuple::TUPLE_T;
 

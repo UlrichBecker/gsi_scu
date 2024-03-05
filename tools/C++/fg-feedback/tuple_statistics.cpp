@@ -33,6 +33,10 @@ using namespace std;
  */
 TupleStatistics::TupleStatistics( AllDaqAdministration* pParent )
    :m_pParent( pParent )
+#ifdef CONFIG_MIL_FG
+   ,mAddacPresent( false )
+   ,mMilPresent( false )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
    clear();
@@ -72,6 +76,11 @@ void TupleStatistics::add( FbChannel* pChannel, const TUPLE_T& rTuple )
       .m_count      = 1,
       .m_hasUpdated = true
    });
+
+   if( pChannel->isMil() )
+      mMilPresent = true;
+   else
+      mAddacPresent = true;
 
    if( m_tupleList.size() > 1 )
    {
