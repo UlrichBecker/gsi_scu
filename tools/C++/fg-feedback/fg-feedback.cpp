@@ -41,6 +41,7 @@ fesa-fg-load --dev ~kain/fgtest/aeg/gs11mu2.rmp xgs11mu3 -v
  #include "fb_command_line.hpp"
  #include "fb_plot.hpp"
  #include <daq_calculations.hpp>
+ #include "tuple_statistics.hpp"
 #endif
 #include "fg-feedback.hpp"
 
@@ -78,7 +79,6 @@ void onUexpectedException( void )
 /*! ---------------------------------------------------------------------------
  */
 FbChannel::FbChannel( uint iterfaceAddress )
-  // :FgFeedbackChannel( iterfaceAddress )
    :FgFeedbackTuple(iterfaceAddress )
    ,m_pPlot( nullptr )
    ,m_startTime( 0 )
@@ -93,7 +93,6 @@ FbChannel::FbChannel( uint iterfaceAddress )
    ,m_callCount( 0 )
 {
    reset();
-
 }
 
 /*! ---------------------------------------------------------------------------
@@ -248,7 +247,7 @@ void FbChannel::onData( TUPLE_T oTuple )
       if( getCommandLine()->isMakeStatistic() )
          return;
    #endif
-
+#if 0
       cout << getFgName() << ":  ";
       if( getCommandLine()->isVerbose() )
          cout     << daq::wrToTimeDateString( oTuple.m_timestamp );
@@ -258,6 +257,9 @@ void FbChannel::onData( TUPLE_T oTuple )
            << ",   act: " << oTuple.m_actValue
            << ",   count: " << m_callCount
            << endl;
+#else
+      getAdministration()->getTupleStatistics()->add( this, oTuple );
+#endif
       return;
    }
 
@@ -387,11 +389,13 @@ AllDaqAdministration::AllDaqAdministration( CommandLine* m_poCommandLine,
                                             const std::string& ebAddress )
    :FgFeedbackAdministration( new DaqEb::EtherboneConnection( ebAddress ) )
    ,m_poCommandLine( m_poCommandLine )
+   ,m_poTupleStatistics( nullptr )
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    ,m_oStatistics( this )
 #endif
 {
    setFifoAlarmThreshold();
+   m_poTupleStatistics = new TupleStatistics( this );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -409,6 +413,8 @@ AllDaqAdministration::~AllDaqAdministration( void )
    {
       delete device;
    }
+   if( m_poTupleStatistics != nullptr )
+      delete m_poTupleStatistics;
 }
 
 /*! ---------------------------------------------------------------------------

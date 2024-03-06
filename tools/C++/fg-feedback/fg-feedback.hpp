@@ -84,7 +84,7 @@ class Plot;
 class Device;
 class CommandLine;
 class AllDaqAdministration;
-
+class TupleStatistics;
 //////////////////////////////////////////////////////////////////////////////
 class FbChannel: public FgFeedbackTuple
 {
@@ -112,6 +112,8 @@ class FbChannel: public FgFeedbackTuple
    using PLOT_LIST_T = std::vector<PLOT_T>;
 
    Plot*                 m_pPlot;
+   TupleStatistics*      m_pTupleStatistics;
+
    DAQ_T                 m_lastSetRawValue;
    DAQ_T                 m_lastActRawValue;
    uint64_t              m_startTime;
@@ -125,7 +127,7 @@ class FbChannel: public FgFeedbackTuple
    PLOT_LIST_T::iterator m_iterator;
    bool                  m_singleShoot;
    uint                  m_callCount;
-
+   
 public:
    FbChannel( uint iterfaceAddress );
    virtual ~FbChannel( void );
@@ -225,7 +227,8 @@ class AllDaqAdministration: public FgFeedbackAdministration
 {
    friend class CommandLine;
 
-   CommandLine*   m_poCommandLine;
+   CommandLine*      m_poCommandLine;
+   TupleStatistics*  m_poTupleStatistics;
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
    daq::Statistics m_oStatistics;
@@ -247,6 +250,11 @@ public:
 
    bool isRunningOnScu( void ) const;
 
+   TupleStatistics*  getTupleStatistics( void )
+   {
+      assert( m_poTupleStatistics != nullptr );
+      return m_poTupleStatistics;
+   }
 //TODO  void onUnregistered( RingItem* pUnknownItem )  override;
 
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS

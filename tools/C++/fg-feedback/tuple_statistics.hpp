@@ -27,7 +27,8 @@
 #include <vector>
 #include <functional>
 #include <iostream>
-#include "fg-feedback.hpp"
+#include <scu_fg_feedback.hpp>
+//#include "fg-feedback.hpp"
 
 #ifndef CONFIG_USE_TUPLE_STATISTICS
 #error Macro CONFIG_USE_TUPLE_STATISTICS has to be defined in Makefile!
@@ -35,40 +36,37 @@
 
 namespace Scu
 {
-namespace daq
-{
 
 ///////////////////////////////////////////////////////////////////////////////
 class TupleStatistics
 {
    struct TUPLE_ITEM_T
    {
-      FbChannel*                m_pChannel;
+      FgFeedbackTuple*          m_pChannel;
       uint                      m_count;
       bool                      m_hasUpdated;
    };
 
    std::vector<TUPLE_ITEM_T> m_tupleList;
 
-   AllDaqAdministration* m_pParent;
+   FgFeedbackAdministration* m_pParent;
 #ifdef CONFIG_MIL_FG
-   bool                  mAddacPresent;
-   bool                  mMilPresent;
+   bool                  m_AddacPresent;
+   bool                  m_MilPresent;
 #endif
 public:
    using TUPLE_T = FgFeedbackTuple::TUPLE_T;
 
-   TupleStatistics( AllDaqAdministration* pParent );
+   TupleStatistics( FgFeedbackAdministration* pParent );
    ~TupleStatistics( void );
 
    void clear( void );
 
-   void add( FbChannel* pChannel, const TUPLE_T& rTuple );
+   void add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple );
 
    void print( const TUPLE_T& rTuple );
 };
 
-} /* namespace daq */
 } /* namespace Scu */
 
 #endif

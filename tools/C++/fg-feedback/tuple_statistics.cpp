@@ -23,19 +23,21 @@
  ******************************************************************************
  */
 #include <algorithm>
+#include "fg-feedback.hpp"
+#include <scu_fg_feedback.hpp>
 #include "tuple_statistics.hpp"
 
 
-using namespace Scu::daq;
+using namespace Scu;
 using namespace std;
 
 /*!----------------------------------------------------------------------------
  */
-TupleStatistics::TupleStatistics( AllDaqAdministration* pParent )
+TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
    :m_pParent( pParent )
 #ifdef CONFIG_MIL_FG
-   ,mAddacPresent( false )
-   ,mMilPresent( false )
+   ,m_AddacPresent( false )
+   ,m_MilPresent( false )
 #endif
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
@@ -58,7 +60,7 @@ void TupleStatistics::clear( void )
 
 /*!----------------------------------------------------------------------------
  */
-void TupleStatistics::add( FbChannel* pChannel, const TUPLE_T& rTuple )
+void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
 {
    for( auto& i: m_tupleList )
    {
@@ -78,9 +80,9 @@ void TupleStatistics::add( FbChannel* pChannel, const TUPLE_T& rTuple )
    });
 
    if( pChannel->isMil() )
-      mMilPresent = true;
+      m_MilPresent = true;
    else
-      mAddacPresent = true;
+      m_AddacPresent = true;
 
    if( m_tupleList.size() > 1 )
    {
@@ -113,6 +115,31 @@ void TupleStatistics::print( const TUPLE_T& rTuple )
       << "\e[" << y << ";24Hact: " << rTuple.m_actValue;
    }
    cout << endl;
+
+#ifdef CONFIG_MIL_FG
+   if( m_MilPresent )
+   {
+      const auto level = static_cast<float>(m_pParent->getMilFiFoLevelPerTenThousand()) / 100.0;
+      if( level > 98.0 )
+         cout << ESC_ERROR;
+      else if( level > 90.0 )
+         cout << ESC_WARNING;
+      cout << "MIL-DAQ- FiFo- level: " << fixed << setprecision(2) << setw( 6 ) << level << '%'
+           << ESC_NORMAL << endl;
+   }
+   if( m_AddacPresent )
+   {
+#endif
+      const auto level = static_cast<float>(m_pParent->getAddacFiFoLevelPerTenThousand()) / 100.0;
+      if( level > 98.0 )
+         cout << ESC_ERROR;
+      else if( level > 90.0 )
+         cout << ESC_WARNING;
+      cout << "ADDAC-DAQ- FiFo- level: " << fixed << setprecision(2) << setw( 6 ) << level << '%'
+           << ESC_NORMAL << endl;
+#ifdef CONFIG_MIL_FG
+   }
+#endif
 }
 
 //================================== EOF ======================================
