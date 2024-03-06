@@ -247,19 +247,7 @@ void FbChannel::onData( TUPLE_T oTuple )
       if( getCommandLine()->isMakeStatistic() )
          return;
    #endif
-#if 0
-      cout << getFgName() << ":  ";
-      if( getCommandLine()->isVerbose() )
-         cout     << daq::wrToTimeDateString( oTuple.m_timestamp );
-      else
-         cout     << oTuple.m_timestamp;
-      cout << ",   set: " << oTuple.m_setValue
-           << ",   act: " << oTuple.m_actValue
-           << ",   count: " << m_callCount
-           << endl;
-#else
       getAdministration()->getTupleStatistics()->add( this, oTuple );
-#endif
       return;
    }
 

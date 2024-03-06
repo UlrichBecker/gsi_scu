@@ -50,6 +50,7 @@ class TupleStatistics
    std::vector<TUPLE_ITEM_T> m_tupleList;
 
    FgFeedbackAdministration* m_pParent;
+   bool                  m_first;
 #ifdef CONFIG_MIL_FG
    bool                  m_AddacPresent;
    bool                  m_MilPresent;

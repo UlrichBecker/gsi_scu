@@ -35,6 +35,7 @@ using namespace std;
  */
 TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
    :m_pParent( pParent )
+   ,m_first( true )
 #ifdef CONFIG_MIL_FG
    ,m_AddacPresent( false )
    ,m_MilPresent( false )
@@ -56,6 +57,7 @@ TupleStatistics::~TupleStatistics( void )
 void TupleStatistics::clear( void )
 {
    m_tupleList.clear();
+   m_first = true;
 }
 
 /*!----------------------------------------------------------------------------
@@ -79,10 +81,12 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
       .m_hasUpdated = true
    });
 
+#ifdef CONFIG_MIL_FG
    if( pChannel->isMil() )
       m_MilPresent = true;
    else
       m_AddacPresent = true;
+#endif
 
    if( m_tupleList.size() > 1 )
    {
@@ -102,6 +106,11 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
  */
 void TupleStatistics::print( const TUPLE_T& rTuple )
 {
+   if( m_first )
+   {
+      m_first = false;
+      cout << ESC_CLR_SCR << flush;
+   }
    uint y = 0;
    for( auto& i: m_tupleList )
    {
@@ -109,12 +118,13 @@ void TupleStatistics::print( const TUPLE_T& rTuple )
       if( !i.m_hasUpdated )
          continue;
       i.m_hasUpdated = false;
-      cout << "\e[" << y << ";1H" << y << "\e[" << y << ";4H" << i.m_pChannel->getFgName()
-      << " Count: " << i.m_count
-      << "\e[" << y << ";16Hset: " << rTuple.m_setValue
-      << "\e[" << y << ";24Hact: " << rTuple.m_actValue;
+      cout << "\e[" << y << ";1H" ESC_CLR_LINE << y
+           << "\e[" << y << ";4H" << i.m_pChannel->getFgName()
+           << "\e[" << y << ";16HCount: " << i.m_count
+           << "\e[" << y << ";34Hset: " << daq::rawToVoltage(rTuple.m_setValue) << " V"
+           << "\e[" << y << ";48Hact: " << daq::rawToVoltage(rTuple.m_actValue) << " V";
    }
-   cout << endl;
+   cout << "\e[" << y << ";1H" << endl;
 
 #ifdef CONFIG_MIL_FG
    if( m_MilPresent )
