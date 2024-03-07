@@ -24,7 +24,6 @@
  */
 #include <algorithm>
 #include "fg-feedback.hpp"
-#include <scu_fg_feedback.hpp>
 #include "tuple_statistics.hpp"
 
 
@@ -42,6 +41,7 @@ TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
 #endif
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+   m_printTime = daq::getSysMicrosecs();
    clear();
 }
 
@@ -68,17 +68,30 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
    {
       if( i.m_pChannel != pChannel )
          continue;
+
+      /*
+       * Detecting whether a function generator has stopped.
+       */
+      if( rTuple.m_setValue == i.m_oTuple.m_setValue )
+      {
+         if( i.m_stopCount < MAX_SET_CONSTANT_TIMES )
+            i.m_stopCount++;
+      }
+      else
+         i.m_stopCount = 0;
+
+      i.m_oTuple = rTuple;
       i.m_count++;
-      i.m_hasUpdated = true;
-      print( rTuple );
+      print();
       return;
    }
 
    m_tupleList.push_back(
    {
-      .m_pChannel   = pChannel,
-      .m_count      = 1,
-      .m_hasUpdated = true
+      .m_pChannel      = pChannel,
+      .m_oTuple        = rTuple,
+      .m_stopCount     = 0,
+      .m_count         = 1,
    });
 
 #ifdef CONFIG_MIL_FG
@@ -99,33 +112,44 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
             });
    }
 
-   print( rTuple );
+   print();
 }
 
 /*!----------------------------------------------------------------------------
  */
-void TupleStatistics::print( const TUPLE_T& rTuple )
+void TupleStatistics::print( void )
 {
+   uint64_t time = daq::getSysMicrosecs();
+   if( m_printTime >= time )
+      return;
+   m_printTime = time + 250000;
+
    if( m_first )
    {
       m_first = false;
       cout << ESC_CLR_SCR << flush;
    }
    uint y = 0;
-   for( auto& i: m_tupleList )
+   for( const auto& i: m_tupleList )
    {
       y++;
-      if( !i.m_hasUpdated )
-         continue;
-      i.m_hasUpdated = false;
+      /*!
+       * Has this function generator stopped?
+       */
+      if( i.m_stopCount >= MAX_SET_CONSTANT_TIMES )
+         cout << ESC_FG_RED;
+      else
+         cout << ESC_FG_GREEN;
+
       cout << "\e[" << y << ";1H" ESC_CLR_LINE << y
            << "\e[" << y << ";4H" << i.m_pChannel->getFgName()
            << "\e[" << y << ";16HCount: " << i.m_count
-           << "\e[" << y << ";34Hset: " << daq::rawToVoltage(rTuple.m_setValue) << " V"
-           << "\e[" << y << ";48Hact: " << daq::rawToVoltage(rTuple.m_actValue) << " V";
+           << "\e[" << y << ";34Hset: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
+           << "\e[" << y << ";48Hact: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
    }
-   cout << "\e[" << y << ";1H" << endl;
 
+   cout << "\e[" << y << ";1H" << endl;
+   cout << ESC_CLR_LINE;
 #ifdef CONFIG_MIL_FG
    if( m_MilPresent )
    {

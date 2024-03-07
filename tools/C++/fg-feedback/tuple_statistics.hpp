@@ -40,11 +40,15 @@ namespace Scu
 ///////////////////////////////////////////////////////////////////////////////
 class TupleStatistics
 {
+   static constexpr uint MAX_SET_CONSTANT_TIMES = 1000;
+   using TUPLE_T = FgFeedbackTuple::TUPLE_T;
+
    struct TUPLE_ITEM_T
    {
-      FgFeedbackTuple*          m_pChannel;
-      uint                      m_count;
-      bool                      m_hasUpdated;
+      FgFeedbackTuple*  m_pChannel;
+      TUPLE_T           m_oTuple;
+      uint              m_stopCount;
+      uint              m_count;
    };
 
    std::vector<TUPLE_ITEM_T> m_tupleList;
@@ -55,9 +59,9 @@ class TupleStatistics
    bool                  m_AddacPresent;
    bool                  m_MilPresent;
 #endif
-public:
-   using TUPLE_T = FgFeedbackTuple::TUPLE_T;
+   uint64_t              m_printTime;
 
+public:
    TupleStatistics( FgFeedbackAdministration* pParent );
    ~TupleStatistics( void );
 
@@ -65,7 +69,7 @@ public:
 
    void add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple );
 
-   void print( const TUPLE_T& rTuple );
+   void print( void );
 };
 
 } /* namespace Scu */
