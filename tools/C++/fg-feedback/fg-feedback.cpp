@@ -259,7 +259,10 @@ void FbChannel::onData( TUPLE_T oTuple )
       m_maxTime = std::max( m_maxTime, timeinterval );
    }
 
-   if( !isMil() &&
+   if(
+#ifdef CONFIG_MIL_FG
+      !isMil() &&
+#endif
       getCommandLine()->isContinuePlottingEnabled() &&
       ((m_callCount % getCommandLine()->getPlotInterval()) != 0)
      )
