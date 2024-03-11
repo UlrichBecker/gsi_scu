@@ -49,6 +49,7 @@ class TupleStatistics
       TUPLE_T           m_oTuple;
       uint              m_stopCount;
       uint              m_count;
+      uint              m_frequency;
    };
 
    std::vector<TUPLE_ITEM_T> m_tupleList;
@@ -60,6 +61,7 @@ class TupleStatistics
    bool                  m_MilPresent;
 #endif
    uint64_t              m_printTime;
+   uint64_t              m_gateTime;
 
 public:
    TupleStatistics( FgFeedbackAdministration* pParent );

@@ -42,6 +42,7 @@ TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
    m_printTime = daq::getSysMicrosecs();
+   m_gateTime = m_printTime;
    clear();
 }
 
@@ -92,6 +93,7 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
       .m_oTuple        = rTuple,
       .m_stopCount     = 0,
       .m_count         = 1,
+      .m_frequency     = 0
    });
 
 #ifdef CONFIG_MIL_FG
@@ -122,7 +124,13 @@ void TupleStatistics::print( void )
    uint64_t time = daq::getSysMicrosecs();
    if( m_printTime >= time )
       return;
-   m_printTime = time + 250000;
+   m_printTime = time + daq::MICROSECS_PER_SEC / 4;
+
+   const uint64_t deltaTime = time - m_gateTime;
+   if( deltaTime >= daq::MICROSECS_PER_SEC )
+   {
+      m_gateTime = time;
+   }
 
    if( m_first )
    {
@@ -130,7 +138,7 @@ void TupleStatistics::print( void )
       cout << ESC_CLR_SCR << flush;
    }
    uint y = 0;
-   for( const auto& i: m_tupleList )
+   for( auto& i: m_tupleList )
    {
       y++;
       /*!
@@ -141,10 +149,15 @@ void TupleStatistics::print( void )
       else
          cout << ESC_FG_GREEN;
 
+      if( m_gateTime == time )
+      {
+         i.m_frequency = i.m_count * daq::MICROSECS_PER_SEC / deltaTime;
+         i.m_count = 0;
+      }
       cout << "\e[" << y << ";1H" ESC_CLR_LINE << y
            << "\e[" << y << ";4H" << i.m_pChannel->getFgName()
-           << "\e[" << y << ";16HCount: " << i.m_count
-           << "\e[" << y << ";34Hset: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
+           << "\e[" << y << ";16HTuples: " << i.m_frequency << " Hz"
+              "\e[" << y << ";34Hset: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
            << "\e[" << y << ";48Hact: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
    }
 
