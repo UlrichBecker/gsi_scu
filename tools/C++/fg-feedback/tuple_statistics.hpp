@@ -27,6 +27,7 @@
 #include <vector>
 #include <functional>
 #include <iostream>
+#include <TAverageBuilder.hpp>
 #include <scu_fg_feedback.hpp>
 //#include "fg-feedback.hpp"
 
@@ -45,11 +46,12 @@ class TupleStatistics
 
    struct TUPLE_ITEM_T
    {
-      FgFeedbackTuple*  m_pChannel;
-      TUPLE_T           m_oTuple;
-      uint              m_stopCount;
-      uint              m_count;
-      uint              m_frequency;
+      FgFeedbackTuple*      m_pChannel;
+      TUPLE_T               m_oTuple;
+      uint                  m_stopCount;
+      uint                  m_count;
+      uint                  m_frequency;
+      TAverageBuilder<uint> m_oAverage;
    };
 
    std::vector<TUPLE_ITEM_T> m_tupleList;

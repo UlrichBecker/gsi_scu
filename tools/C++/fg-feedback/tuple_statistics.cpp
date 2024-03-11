@@ -30,6 +30,8 @@
 using namespace Scu;
 using namespace std;
 
+
+
 /*!----------------------------------------------------------------------------
  */
 TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
@@ -156,7 +158,7 @@ void TupleStatistics::print( void )
       }
       cout << "\e[" << y << ";1H" ESC_CLR_LINE << y
            << "\e[" << y << ";4H" << i.m_pChannel->getFgName()
-           << "\e[" << y << ";16HTuples: " << i.m_frequency << " Hz"
+           << "\e[" << y << ";16HTuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
               "\e[" << y << ";34Hset: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
            << "\e[" << y << ";48Hact: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
    }
