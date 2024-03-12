@@ -162,9 +162,15 @@ void TupleStatistics::print( void )
               "\e[" << y << ";34Hset: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
            << "\e[" << y << ";48Hact: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
    }
-
    cout << "\e[" << y << ";1H" << endl;
-   cout << ESC_CLR_LINE;
+
+   {
+      static uint i = 0;
+      static const char fan[] = { '|', '/', '-', '\\' };
+      cout << fan[i++] << ESC_CLR_LINE << endl;
+      i %= ARRAY_SIZE( fan );
+   }
+
 #ifdef CONFIG_MIL_FG
    if( m_MilPresent )
    {
