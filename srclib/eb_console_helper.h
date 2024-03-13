@@ -121,8 +121,47 @@ STATIC inline void clrline( void )
 #ifdef __cplusplus
 } /* namespace gsi */
 } /* extern "C" */
-#endif
+
+namespace gsi
+{
+#include <iostream>
+
+template< typename T1, typename T2 >
+class SMANIP2
+{
+   std::ostream& (*m_fp)( std::ostream&, T1, T2 );
+   const T1 m_tp1;
+   const T2 m_tp2;
+
+public:
+   SMANIP2( std::ostream& (*f)( std::ostream&, T1, T2 ), T1 t1, T2 t2 )
+      :m_fp( f )
+      ,m_tp1( t1 )
+      ,m_tp2( t2 )
+      {}
+      
+   friend std::ostream& operator<<( std::ostream& rOut, const SMANIP2 sm )
+   {
+       (*(sm.m_fp))( rOut, sm.m_tp1, sm.m_tp2 );
+       return rOut;
+   }
+};
+
+inline
+std::ostream& __setxy( std::ostream& rOut, int x, int y )
+{
+   rOut << ESC_XY( << x <<, << y << );
+   return rOut;
+}
+
+inline
+SMANIP2<int, int> setxy( int x, int y )
+{
+   return SMANIP2<int, int> (__setxy, x, y );
+}
 
 
+} /* namespace gsi */
+#endif /* ifdef __cplusplus */
 #endif /* ifndef _EB_CONSOLE_HELPER_H */
 /*================================== EOF ====================================*/

@@ -31,7 +31,7 @@ template <typename T = unsigned int> class TAverageBuilder
     std::vector<T>                      m_vector;
     typename std::vector<T>::iterator   m_it;
     T                                   m_summe;
-    bool                                m_isReady;
+    bool                                m_isValid;
 
 public:
 
@@ -45,7 +45,7 @@ public:
 
     void init( T val )
     {
-        m_isReady = false;
+        m_isValid = false;
         m_summe = val * m_vector.size();
         for( auto& item : m_vector )
         {
@@ -67,7 +67,7 @@ public:
         if (m_it == m_vector.end())
         {
             m_it = m_vector.begin();
-            m_isReady = true;
+            m_isValid = true;
         }
     }
 
@@ -93,9 +93,9 @@ public:
         return m_vector.size();
     }
 
-    bool isReady( void ) const
+    bool isValid( void ) const
     {
-        return m_isReady;
+        return m_isValid;
     }
 };
 

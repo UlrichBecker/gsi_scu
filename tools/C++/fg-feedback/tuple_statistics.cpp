@@ -150,7 +150,7 @@ void TupleStatistics::print( void )
        */
       if( i.m_stopCount >= MAX_SET_CONSTANT_TIMES )
          cout << ESC_FG_RED;
-      else if( i.m_oAverage.isReady() ) 
+      else if( i.m_oAverage.isValid() ) 
          cout << ESC_FG_GREEN;
       else
          cout << ESC_FG_BLUE;
@@ -160,13 +160,23 @@ void TupleStatistics::print( void )
          i.m_frequency = i.m_count * daq::MICROSECS_PER_SEC / deltaTime;
          i.m_count = 0;
       }
+#if 0
       cout << ESC_XY( "1", << y << ) ESC_CLR_LINE << y
            << ESC_XY( "4", << y << ) << i.m_pChannel->getFgName()
            << ESC_XY( "16", << y << ) "Tuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
               ESC_XY( "34", << y << ) "set: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
               ESC_XY( "48", << y << ) "act: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
+#else
+      cout << gsi::setxy( 1, y ) << ESC_CLR_LINE << y
+           << gsi::setxy( 4, y ) << i.m_pChannel->getFgName()
+           << gsi::setxy( 1, y ) << "Tuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
+           << gsi::setxy( 34, y ) << "set: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
+           << gsi::setxy( 48, y ) << "act: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
+        
+#endif
    }
-   cout << ESC_XY( "1", << y << ) << endl;
+  // cout << ESC_XY( "1", << y << ) << endl;
+   cout << gsi::setxy( 1, y ) << endl;
 
    {
       static uint i = 0;
