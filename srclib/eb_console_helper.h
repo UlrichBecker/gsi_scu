@@ -127,21 +127,30 @@ STATIC inline void clrline( void )
 namespace gsi
 {
 
-template< typename T1, typename T2 >
+/*!
+ * @ingroup PRINTF
+ * @brief Manipulation template for stream manipulators with two parameters.
+ * @date 07.06.1999
+ * 
+ * I wrote that 25 years ago for the REA-Elektronik company!
+ * It was for the LC-Display of the REA- ECS Elektronic Cach System.
+ * Instead of std::ostrean it was the class LCDOSTREAM.
+ */
+template< typename T1, typename T2, typename ST = std::ostream >
 class SMANIP2
 {
-   std::ostream& (*m_fp)( std::ostream&, T1, T2 );
+   ST& (*m_fp)( ST&, T1, T2 );
    const T1 m_tp1;
    const T2 m_tp2;
 
 public:
-   SMANIP2( std::ostream& (*f)( std::ostream&, T1, T2 ), T1 t1, T2 t2 )
+   SMANIP2( ST& (*f)( ST&, T1, T2 ), T1 t1, T2 t2 )
       :m_fp( f )
       ,m_tp1( t1 )
       ,m_tp2( t2 )
       {}
       
-   friend std::ostream& operator<<( std::ostream& rOut, const SMANIP2 sm )
+   friend ST& operator<<( ST& rOut, const SMANIP2 sm )
    {
        (*(sm.m_fp))( rOut, sm.m_tp1, sm.m_tp2 );
        return rOut;
@@ -158,9 +167,8 @@ std::ostream& __setxy( std::ostream& rOut, int x, int y )
 inline
 SMANIP2<int, int> setxy( int x, int y )
 {
-   return SMANIP2<int, int> (__setxy, x, y );
+   return SMANIP2<int, int>(__setxy, x, y );
 }
-
 
 } /* namespace gsi */
 #endif /* ifdef __cplusplus */
