@@ -53,6 +53,8 @@ TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
 TupleStatistics::~TupleStatistics( void )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+   if( !m_first )
+      cout << ESC_CLR_SCR << flush;
 }
 
 /*!----------------------------------------------------------------------------
