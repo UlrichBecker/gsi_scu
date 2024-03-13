@@ -166,10 +166,10 @@ void TupleStatistics::print( void )
            << "\e[" << y << ";48Hact: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
 #else
       cout << ESC_XY( "1", << y << ) ESC_CLR_LINE << y
-           << ESC_XY( "1", << y << ) << i.m_pChannel->getFgName()
-           << ESC_XY( "1", << y << ) "Tuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
-              ESC_XY( "1", << y << ) "set: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
-              ESC_XY( "1", << y << ) "act: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
+           << ESC_XY( "4", << y << ) << i.m_pChannel->getFgName()
+           << ESC_XY( "16", << y << ) "Tuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
+              ESC_XY( "34", << y << ) "set: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
+              ESC_XY( "48", << y << ) "act: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
 
 #endif
    }
