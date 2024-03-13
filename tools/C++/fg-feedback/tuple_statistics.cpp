@@ -30,8 +30,6 @@
 using namespace Scu;
 using namespace std;
 
-
-
 /*!----------------------------------------------------------------------------
  */
 TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
@@ -53,8 +51,10 @@ TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
 TupleStatistics::~TupleStatistics( void )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
+#ifndef CONFIG_DEBUG_MESSAGES
    if( !m_first )
-      cout << ESC_CLR_SCR << flush;
+      cout << ESC_CLR_SCR ESC_XY( "1", "1" ) << flush;
+#endif
 }
 
 /*!----------------------------------------------------------------------------
