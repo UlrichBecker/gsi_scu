@@ -150,8 +150,10 @@ void TupleStatistics::print( void )
        */
       if( i.m_stopCount >= MAX_SET_CONSTANT_TIMES )
          cout << ESC_FG_RED;
-      else
+      else if( i.m_oAverage.isReady() ) 
          cout << ESC_FG_GREEN;
+      else
+         cout << ESC_FG_BLUE;
 
       if( m_gateTime == time )
       {

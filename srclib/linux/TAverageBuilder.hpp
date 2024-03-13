@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        TAverageBuilder.h
+// Name:        TAverageBuilder.hpp
 // Purpose:     Template for building of sliding average values.
 // Author:      Ulrich Becker (www.INKATRON.de)
 // Modified by:
@@ -7,7 +7,7 @@
 // Copyright:   Sartorius Lab Instruments GmbH & Co. KG, 2017
 ///////////////////////////////////////////////////////////////////////////////
 /*!
- * @file      TAverageBuilder.h
+ * @file      TAverageBuilder.hpp
  * @brief     Template for building of sliding average values.
  * @author    Ulrich Becker
  * @copyright Sartorius Lab Instruments GmbH & Co. KG, 2017
@@ -31,6 +31,7 @@ template <typename T = unsigned int> class TAverageBuilder
     std::vector<T>                      m_vector;
     typename std::vector<T>::iterator   m_it;
     T                                   m_summe;
+    bool                                m_isReady;
 
 public:
 
@@ -44,6 +45,7 @@ public:
 
     void init( T val )
     {
+        m_isReady = false;
         m_summe = val * m_vector.size();
         for( auto& item : m_vector )
         {
@@ -65,6 +67,7 @@ public:
         if (m_it == m_vector.end())
         {
             m_it = m_vector.begin();
+            m_isReady = true;
         }
     }
 
@@ -88,6 +91,11 @@ public:
     std::size_t getSize( void ) const
     {
         return m_vector.size();
+    }
+
+    bool isReady( void ) const
+    {
+        return m_isReady;
     }
 };
 
