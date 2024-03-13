@@ -122,9 +122,10 @@ STATIC inline void clrline( void )
 } /* namespace gsi */
 } /* extern "C" */
 
+#include <iostream>
+
 namespace gsi
 {
-#include <iostream>
 
 template< typename T1, typename T2 >
 class SMANIP2
