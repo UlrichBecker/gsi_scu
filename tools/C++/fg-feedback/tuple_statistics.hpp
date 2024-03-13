@@ -44,14 +44,20 @@ class TupleStatistics
    static constexpr uint MAX_SET_CONSTANT_TIMES = 1000;
    using TUPLE_T = FgFeedbackTuple::TUPLE_T;
 
+   class FrqencyAverage: public TAverageBuilder<uint>
+   {
+   public:
+      FrqencyAverage( void ): TAverageBuilder(60) {}
+   };
+   
    struct TUPLE_ITEM_T
    {
-      FgFeedbackTuple*      m_pChannel;
-      TUPLE_T               m_oTuple;
-      uint                  m_stopCount;
-      uint                  m_count;
-      uint                  m_frequency;
-      TAverageBuilder<uint> m_oAverage;
+      FgFeedbackTuple*  m_pChannel;
+      TUPLE_T           m_oTuple;
+      uint              m_stopCount;
+      uint              m_count;
+      uint              m_frequency;
+      FrqencyAverage    m_oAverage;
    };
 
    std::vector<TUPLE_ITEM_T> m_tupleList;
