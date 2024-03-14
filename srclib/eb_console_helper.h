@@ -122,7 +122,9 @@ STATIC inline void clrline( void )
 } /* namespace gsi */
 } /* extern "C" */
 
-#include <iostream>
+#ifndef __lm32__
+   #include <iostream>
+#endif
 
 namespace gsi
 {
@@ -136,9 +138,14 @@ namespace gsi
  * It was for the LC-Display of the REA- ECS Elektronic Cach System.
  * Instead of std::ostrean it was the class LCDOSTREAM.
  */
-template< typename T1, typename T2, typename ST = std::ostream >
+template< typename T1, typename T2, typename ST >
 class SMANIP2
 {
+   static_assert( std::is_class<ST>::value,
+                  "Type ST is not a class!" );
+   static_assert( std::is_base_of<std::ostream, ST>::value,
+                  "Type ST has not the base std::ostream!" );
+
    ST& (*m_fp)( ST&, T1, T2 );
    const T1 m_tp1;
    const T2 m_tp2;
@@ -148,26 +155,49 @@ public:
       :m_fp( f )
       ,m_tp1( t1 )
       ,m_tp2( t2 )
-      {}
+   {}
       
    friend ST& operator<<( ST& rOut, const SMANIP2 sm )
    {
-       (*(sm.m_fp))( rOut, sm.m_tp1, sm.m_tp2 );
-       return rOut;
+      (*(sm.m_fp))( rOut, sm.m_tp1, sm.m_tp2 );
+      return rOut;
    }
 };
 
-inline
-std::ostream& __setxy( std::ostream& rOut, int x, int y )
+/*!
+ * @ingroup PRINTF
+ * @brief Helper function for stream-manipulator "setxy()"
+ * @see setxy
+ */
+template< typename ST >
+ST& __setxy( ST& rOut, int x, int y )
 {
    rOut << ESC_XY( << x <<, << y << );
    return rOut;
 }
 
-inline
-SMANIP2<int, int> setxy( int x, int y )
+#undef ESC_XY
+
+/*!
+ * @ingroup PRINTF
+ * @brief Stream-manipulator sets the cursor of the text terminal on
+ *        the given position.
+ * @param x Column, default: 1
+ * @param y Line; default 1
+ * Example:
+ * @code
+ * std::cout << gsi::setxy( 10, 3 ) << "Hello world!" << std::flush;
+ * @endcode
+ */
+template< typename ST = std::ostream >
+SMANIP2<int, int, ST> setxy( int x = 1, int y = 1 )
 {
-   return SMANIP2<int, int>(__setxy, x, y );
+   static_assert( std::is_class<ST>::value,
+                  "Type ST is not a class!" );
+   static_assert( std::is_base_of<std::ostream, ST>::value,
+                  "Type ST has not the base std::ostream!" );
+
+   return SMANIP2<int, int, ST>(__setxy<ST>, x, y );
 }
 
 } /* namespace gsi */

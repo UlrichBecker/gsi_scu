@@ -53,7 +53,7 @@ TupleStatistics::~TupleStatistics( void )
    DEBUG_MESSAGE_M_FUNCTION( "" );
 #ifndef CONFIG_DEBUG_MESSAGES
    if( !m_first )
-      cout << ESC_CLR_SCR ESC_XY( "1", "1" ) << flush;
+      cout << ESC_CLR_SCR << gsi::setxy() << flush;
 #endif
 }
 
@@ -184,7 +184,7 @@ void TupleStatistics::print( void )
       else if( level > 90.0 )
          cout << ESC_WARNING;
       cout << "MIL-DAQ- FiFo- level: " << fixed << setprecision(2) << setw( 6 ) << level << '%'
-           << ESC_NORMAL << endl;
+           << ESC_NORMAL ESC_CLR_LINE << endl;
    }
    if( m_AddacPresent )
    {
