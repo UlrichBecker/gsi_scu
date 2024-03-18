@@ -30,6 +30,15 @@
 using namespace Scu;
 using namespace std;
 
+#define FOR_EACH_FB_CHANNEL( fbAdmin, channelPtrName )              \
+   static_assert( std::is_class<TYPEOF(fbAdmin)>::value,            \
+      "Macro argument fbAdmin is not a class!" );                   \
+   static_assert( std::is_base_of<TYPEOF(fbAdmin),                  \
+                                  FgFeedbackAdministration>::value, \
+      "Class of macro argument fbAdmin has not the base-class"      \
+      " FgFeedbackAdministration !" );                              \
+   for( auto& __pDev: fbAdmin )                                     \
+      for( auto& channelPtrName: *__pDev )
 
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
@@ -292,6 +301,18 @@ int main( const int argc, const char** ppArgv )
 
       myScu.setMaxEbCycleDataLen(100);
 
+#if 0
+      for( auto& pDev: myScu )
+         for( auto& pChannel: *pDev )
+         {
+            cout << pChannel->getFgName();
+         }
+#else
+      FOR_EACH_FB_CHANNEL( myScu, pCurrentChannel )
+      {
+         cout << pCurrentChannel->getFgName();
+      }
+#endif
       /*
        * Polling loop. This could be a own thread as well.
        */
@@ -307,7 +328,7 @@ int main( const int argc, const char** ppArgv )
          uint remainingData = myScu.distributeData();
 
          /*
-          * To reduce the duration of the function distributeData() in some cases
+          * To reduce the duration of the functiomaken distributeData() in some cases
           * there are still data sets in the DDR3-buffer.
           * The return value has the number of data-sets which are still in
           * the DDR3-buffer which shall be read by the next call of distributeData().

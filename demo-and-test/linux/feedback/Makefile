@@ -68,7 +68,8 @@ INCLUDE_DIRS += $(SCU_DIR)/fg
 INCLUDE_DIRS += $(DAQ_DIR)/lm32
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/mdaq
 INCLUDE_DIRS += $(DAQ_LINUX_DIR)/sdaq
-INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/generated
+#INCLUDE_DIRS += $(SCU_DIR)/lm32-non-os_exe/SCU3/generated
+INCLUDE_DIRS += $(SCU_DIR)/lm32-rtos_exe/SCU3/generated
 
 ifdef USE_NAMED_MUTEX
  LIBS += pthread
@@ -98,10 +99,9 @@ LIBS += pthread
 LIBS += stdc++
 
 
-# CALL_ARGS         = "tcp/scuxl0107"
 # CALL_ARGS         = "tcp/scuxl0192"
 # CALL_ARGS         = "tcp/scuxl0212"
- CALL_ARGS         = "tcp/scuxl0035"
+ CALL_ARGS         = "tcp/scuxl0692"
 # CALL_ARGS = "tcp/scuxl0118"
 REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
