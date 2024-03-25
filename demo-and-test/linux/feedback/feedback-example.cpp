@@ -30,16 +30,6 @@
 using namespace Scu;
 using namespace std;
 
-#define FOR_EACH_FB_CHANNEL( fbAdmin, channelPtrName )              \
-   static_assert( std::is_class<TYPEOF(fbAdmin)>::value,            \
-      "Macro argument fbAdmin is not a class!" );                   \
-   static_assert( std::is_base_of<TYPEOF(fbAdmin),                  \
-                                  FgFeedbackAdministration>::value, \
-      "Class of macro argument fbAdmin has not the base-class"      \
-      " FgFeedbackAdministration !" );                              \
-   for( auto& __pDev: fbAdmin )                                     \
-      for( auto& channelPtrName: *__pDev )
-
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  * Specialization of class "FgFeedbackChannel" so that the callback function
@@ -301,18 +291,19 @@ int main( const int argc, const char** ppArgv )
 
       myScu.setMaxEbCycleDataLen(100);
 
-#if 0
-      for( auto& pDev: myScu )
-         for( auto& pChannel: *pDev )
-         {
-            cout << pChannel->getFgName();
-         }
-#else
+      cout << "Registered feedback channel(s):" << endl;
+      /*
+       * The following macro is a loop control for all registered objects of type
+       * FgFeedbackChannel or its derived types.
+       * In contrast to the loop above which counts all existing function generators:
+       * "for( const auto& fg: myScu.getFgList() )" counts this macro only the
+       * registered feedback channels.
+       */
       FOR_EACH_FB_CHANNEL( myScu, pCurrentChannel )
       {
-         cout << pCurrentChannel->getFgName();
+         cout << pCurrentChannel->getFgName() << endl;
       }
-#endif
+
       /*
        * Polling loop. This could be a own thread as well.
        */
