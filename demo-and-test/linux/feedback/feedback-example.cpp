@@ -183,7 +183,7 @@ int main( const int argc, const char** ppArgv )
          cout << "Slot " << fg.getSlot()
               << ", Version: " << fg.getVersion()
               << ", Bits: " << fg.getOutputBits()
-              << ", fg-" << fg.getSocket() << '-' << fg.getDevice()
+              << ", " << fg.getName()
               << "\tDAQ: " << (fg.isMIL()? "MIL" : "ADDAC/ACU") << endl;
       }
 
@@ -203,8 +203,7 @@ int main( const int argc, const char** ppArgv )
        * function generator via the iterator pointing to the list begin.
        */
       const auto& pMyFirstFoundFg = myScu.getFgList().begin();
-      cout << "Using first found FG: \"fg-" << pMyFirstFoundFg->getSocket() << '-'
-           << pMyFirstFoundFg->getDevice() << "\" its a "
+      cout << "Using first found FG: \"" << pMyFirstFoundFg->getName() << "\" its a "
            << (pMyFirstFoundFg->isMIL()? "MIL" : "ADDAC/ACU") << "-device" << endl;
 
 
@@ -260,7 +259,7 @@ int main( const int argc, const char** ppArgv )
        */
       myFeedBackDevice.registerChannel( &myFeedBackChannel );
 
-      /*
+      /*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
        * For info and debug purposes only:
        * Before the registration the device doesn't know yet what type it belongs to.
        */

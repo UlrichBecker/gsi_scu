@@ -67,12 +67,18 @@ public:
 
       /*!
        * @brief Returns the MIL bus address of the device
-       *        or the device number when it's a non MIL function generator.
+       *        or the device number when it's a ADDAC function generator.
        */
       uint getDevice( void ) const
       {
          return device;
       }
+
+      /*!
+       * @brief Returns the name of the function generator.
+       *        E.g.: "fg-10-1"
+       */
+      const std::string getName( void ) const;
 
       /*!
        * @brief Returns the version number of the function generator.

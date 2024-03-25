@@ -34,6 +34,23 @@ using namespace gsi;
 
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
+ */
+const std::string FgList::FgListItem::getName( void ) const
+{
+   std::string retStr;
+
+   retStr += "fg-";
+   retStr += std::to_string( getSocket() );
+   retStr += '-';
+   retStr += std::to_string( getDevice() );
+
+   return retStr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 FgList::FgList( void )
    :m_lm32SoftwareVersion( 0 )
@@ -42,6 +59,7 @@ FgList::FgList( void )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 FgList::~FgList( void )
 {
@@ -49,6 +67,7 @@ FgList::~FgList( void )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 void FgList::scan( daq::EbRamAccess* pEbAccess )
 {
@@ -57,6 +76,7 @@ void FgList::scan( daq::EbRamAccess* pEbAccess )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 #ifdef CONFIG_FW_VERSION_3
   #define busy fg_rescan_busy
@@ -162,6 +182,7 @@ void FgList::sync( daq::EbRamAccess* pEbAccess )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 bool FgList::isPresent( const uint socket, const uint device )
 {
@@ -174,6 +195,7 @@ bool FgList::isPresent( const uint socket, const uint device )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 bool FgList::isSocketUsed( const uint socket )
 {
@@ -184,6 +206,7 @@ bool FgList::isSocketUsed( const uint socket )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 uint FgList::getNumOfFoundMilFg( void )
 {
@@ -197,6 +220,7 @@ uint FgList::getNumOfFoundMilFg( void )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @see scu_fg_list.hpp
  */
 uint FgList::getNumOfFoundNonMilFg( void )
 {
