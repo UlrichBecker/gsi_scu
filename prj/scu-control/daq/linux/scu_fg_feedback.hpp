@@ -729,7 +729,11 @@ public:
     */
    bool isAddac( void ) const
    {
+   #ifdef CONFIG_MIL_FG
       return (getAddac() != nullptr);
+   #else
+      return true;
+   #endif
    }
 
    /*!
