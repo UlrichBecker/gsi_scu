@@ -9,6 +9,7 @@
 /*!
  * @file      TAverageBuilder.hpp
  * @brief     Template for building of sliding average values.
+ * @note Header only!
  * @author    Ulrich Becker
  * @copyright Sartorius Lab Instruments GmbH & Co. KG, 2017
  * @date      2017.06.22
@@ -55,15 +56,16 @@ public:
 
     T getAverage( void )
     {
-        return m_summe / m_vector.size();
+        assert( m_vector.size() > 0 );
+        return m_summe / static_cast<T>(m_vector.size());
     }
 
-    void calculate( T newVal )
+    void calculate( const T newVal )
     {
         m_summe -= *m_it;
         m_summe += newVal;
         *m_it = newVal;
-        m_it++;
+        ++m_it;
         if (m_it == m_vector.end())
         {
             m_it = m_vector.begin();
@@ -71,13 +73,13 @@ public:
         }
     }
 
-    TAverageBuilder& operator=( T newVal )
+    TAverageBuilder& operator=( const T newVal )
     {
         calculate( newVal );
         return *this;
     }
 
-    T operator()( T newVal )
+    T operator()( const T newVal )
     {
         calculate( newVal );
         return getAverage();

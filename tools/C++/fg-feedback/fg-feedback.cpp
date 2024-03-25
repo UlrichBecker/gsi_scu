@@ -664,7 +664,21 @@ int fbMain( int argc, char** ppArgv )
                intervalTime = it + cmdLine.getPollInterwalTime() * 1000;
             if( doReceive )
             {
-               remainingData = pDaqAdmin->distributeData();
+               try
+               {
+                  remainingData = pDaqAdmin->distributeData();
+               }
+               catch( daq::DaqException& e )
+               {
+                  repeat = true;
+                  ERROR_MESSAGE( "ADDAC/ACU-DAQ Exception occurred: \"" << e.what() << "\"\n"
+                                 << e.getStatusString() );
+               }
+               catch( MiLdaq::Exception& e )
+               {
+                  repeat = true;
+                  ERROR_MESSAGE( "MIL Exception occurred: \"" << e.what() << '"' );
+               }
             #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
                pDaqAdmin->printStatistic();
             #endif
