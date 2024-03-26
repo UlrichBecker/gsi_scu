@@ -189,7 +189,7 @@ YT interpolate( const XT x, const XT x1, const YT y1, const XT x2, const YT y2 )
  * @ingroup DAQ
  * @brief Converts raw data of the DAQ ADC in to voltage.
  * @param rawData raw data from the DAQ ADC.
- * @param maxVss Difference of minimum and maximum voltage
+ * @param maxVpp Difference of minimum and maximum voltage (voltage peak-peak)
  * @return Voltage in the range -maxVpp/2 to +maxVpp/2
  */
 template< typename IT, typename FT = float >
