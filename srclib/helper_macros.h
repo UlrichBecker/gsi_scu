@@ -315,6 +315,26 @@
 #define NO_RETURN __attribute__((noreturn))
 
 /*!
+ * @brief For case statements in a switch-case structure where no break
+ *        or return is present.
+ *
+ * This is necessary when the gcc- option "-Wimplicit-fallthrough=0" is
+ * given.
+ * Example:
+ * @code
+ * switch( x )
+ * {
+ *    case 1: FALL_THROUGH
+ *    case 2:
+ *      // do something for both cases...
+ *    break;
+ * }
+ * @endcode
+ * @see https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
+ */
+#define FALL_THROUGH __attribute__((fallthrough))
+
+/*!
  * @brief Setting of the optimization level for a function.
  *
  * This macro is used to specify that a function is to be compiled with
