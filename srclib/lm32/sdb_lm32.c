@@ -339,7 +339,9 @@ STATIC SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
    {
       switch( getRecordType( pRecord ) )
       {
-         case SDB_BRIDGE: case SDB_DEVICE: case SDB_MSI:
+         case SDB_BRIDGE: FALL_THROUGH;
+         case SDB_DEVICE: FALL_THROUGH;
+         case SDB_MSI:
          {
             const uint32_t msiFirst = msiBase + msiAddr;
             if( compareId( pRecord, venId, devId ) )
