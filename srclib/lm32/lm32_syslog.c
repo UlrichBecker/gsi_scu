@@ -241,9 +241,9 @@ STATIC inline bool isPaddingChar( const char c )
 {
    switch( c )
    {
-      case '0': FALL_THROUGH;
-      case ' ': FALL_THROUGH;
-      case '.': FALL_THROUGH;
+      case '0': FALL_THROUGH
+      case ' ': FALL_THROUGH
+      case '.': FALL_THROUGH
       case '_':
       {
          return true;
@@ -402,17 +402,17 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap )
                switch( *format )
                {
                #ifndef CONFIG_NO_BINARY_PRINTF_FORMAT
-                  case 'b': FALL_THROUGH;
+                  case 'b': FALL_THROUGH
                #endif
-                  case 'S': FALL_THROUGH;
-                  case 's': FALL_THROUGH;
-                  case 'c': FALL_THROUGH;
-                  case 'X': FALL_THROUGH;
-                  case 'x': FALL_THROUGH;
-                  case 'p': FALL_THROUGH;
-                  case 'i': FALL_THROUGH;
-                  case 'd': FALL_THROUGH;
-                  case 'u': FALL_THROUGH;
+                  case 'S': FALL_THROUGH
+                  case 's': FALL_THROUGH
+                  case 'c': FALL_THROUGH
+                  case 'X': FALL_THROUGH
+                  case 'x': FALL_THROUGH
+                  case 'p': FALL_THROUGH
+                  case 'i': FALL_THROUGH
+                  case 'd': FALL_THROUGH
+                  case 'u': FALL_THROUGH
                   case 'o':
                   {
                      item.param[i++] = va_arg( ap, typeof(item.param[0]) );

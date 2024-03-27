@@ -662,9 +662,9 @@ inline bool Lm32Logd::isPaddingChar( const char c )
 {
    switch( c )
    {
-      case '0': FALL_THROUGH;
-      case ' ': FALL_THROUGH;
-      case '.': FALL_THROUGH;
+      case '0': FALL_THROUGH
+      case ' ': FALL_THROUGH
+      case '.': FALL_THROUGH
       case '_':
       {
          return true;
@@ -827,7 +827,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
                assert( ai < ARRAY_SIZE(item.param) );
                switch( format[i] )
                {
-                  case 'S': FALL_THROUGH;
+                  case 'S': FALL_THROUGH
                   case 's':
                   {
                      if( gsi::isInRange( item.param[ai], Lm32Access::OFFSET, Lm32Access::MAX_ADDR ) )
@@ -871,7 +871,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
                      paddingSize = sizeof(uint32_t) * 2;
                      break;
                   }
-                  case 'i': FALL_THROUGH;
+                  case 'i': FALL_THROUGH
                   case 'd':
                   {
                      base = 10;

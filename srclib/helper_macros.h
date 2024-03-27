@@ -332,7 +332,7 @@
  * @endcode
  * @see https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
  */
-#define FALL_THROUGH __attribute__((fallthrough))
+#define FALL_THROUGH __attribute__((fallthrough));
 
 /*!
  * @brief Setting of the optimization level for a function.
