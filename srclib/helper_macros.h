@@ -332,7 +332,11 @@
  * @endcode
  * @see https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
  */
-#define FALL_THROUGH __attribute__((fallthrough));
+#if (COMPILER_VERSION_NUMBER > 485)
+   #define FALL_THROUGH __attribute__((fallthrough));
+#else
+   #define FALL_THROUGH
+#endif
 
 /*!
  * @brief Setting of the optimization level for a function.
