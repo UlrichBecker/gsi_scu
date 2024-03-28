@@ -332,7 +332,7 @@
  * @endcode
  * @see https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
  */
-#if (COMPILER_VERSION_NUMBER > 485)
+#if __GNUC__ >= 7
    #define FALL_THROUGH __attribute__((fallthrough));
 #else
    #define FALL_THROUGH
