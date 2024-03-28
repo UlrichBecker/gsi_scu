@@ -12,9 +12,10 @@
 
 if [ ! -n "${OECORE_SDK_VERSION}" ]
 then
-   echo "ERROR: YOCTO SDK is not active!" 1>&2
-   exit 1
+   echo "WARNING: YOCTO SDK is not active!" 1>&2
 fi
+
+GCC_VERSION=$(gcc --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $1}')
 
 if [ "$1" = "os" ]
 then
@@ -24,7 +25,13 @@ else
 fi
 
 SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
-LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_${OECORE_SDK_VERSION}/result/libscu_fg_feedback.a
+
+if [ -n "${OECORE_SDK_VERSION}" ]
+then
+   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_${GCC_VERSION}_sdk_${OECORE_SDK_VERSION}/result/libscu_fg_feedback.a
+else
+   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_${GCC_VERSION}/result/libscu_fg_feedback.a
+fi
 
 if $EXPORT_FREE_RTOS_VERSION
 then
@@ -32,7 +39,6 @@ then
 else
    LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
 fi
-
 
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
