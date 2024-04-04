@@ -923,7 +923,13 @@ void FgFeedbackAdministration::scan( const bool doRescan )
  */
 void FgFeedbackAdministration::registerDevice( FgFeedbackDevice* poDevice )
 {
-   assert( poDevice->m_pParent == nullptr );
+   if( poDevice->m_pParent != nullptr )
+   {
+      std::string str = "Device on socket ";
+      str += std::to_string( poDevice->getSocket() );
+      str += " already registered!";
+      throw daq::Exception( str );
+   }
 
    if( !isSocketUsed( poDevice->getSocket() ) )
    {
@@ -945,7 +951,7 @@ void FgFeedbackAdministration::registerDevice( FgFeedbackDevice* poDevice )
 #endif
    else
    {
-      assert( false );
+      throw daq::Exception( "FgFeedbackAdministration::registerDevice: Umknown device type!" );
    }
    poDevice->m_pParent = this;
    poDevice->generateAll();
