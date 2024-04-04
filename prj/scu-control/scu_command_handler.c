@@ -111,9 +111,9 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
    */
    switch( code )
    {
-      case FG_OP_RESET_CHANNEL:       /* Go immediately to next case. */
-      case FG_OP_ENABLE_CHANNEL:      /* Go immediately to next case. */
-      case FG_OP_DISABLE_CHANNEL:     /* Go immediately to next case. */
+      case FG_OP_RESET_CHANNEL:       FALL_THROUGH
+      case FG_OP_ENABLE_CHANNEL:      FALL_THROUGH
+      case FG_OP_DISABLE_CHANNEL:     FALL_THROUGH
       case FG_OP_CLEAR_HANDLER_STATE:
       {
          if( value < ARRAY_SIZE( g_aFgChannels ) )

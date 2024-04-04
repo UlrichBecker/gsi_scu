@@ -126,8 +126,8 @@ int fgListAdd( const uint8_t socked,
 
    switch( cid_group )
    {
-      case GRP_ADDAC1: /* directly to next case */
-      case GRP_ADDAC2: /* directly to next case */
+      case GRP_ADDAC1: FALL_THROUGH
+      case GRP_ADDAC2: FALL_THROUGH
       case GRP_DIOB:
       {  /* two FG */
          if( count < MAX_FG_MACROS )
