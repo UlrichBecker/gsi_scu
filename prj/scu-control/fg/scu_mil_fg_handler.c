@@ -1731,7 +1731,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
              //pMilData->waitingTime = pMilData->lastMessage.time + IRQ_WAITING_TIME;
             break;
          }
-   #endif
+      #endif
 
          case ST_FETCH_STATUS:
          { /*

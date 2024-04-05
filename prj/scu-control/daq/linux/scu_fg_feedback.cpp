@@ -167,7 +167,7 @@ FgFeedbackChannel::AddacFb::Receive::~Receive( void )
 bool FgFeedbackChannel::AddacFb::Receive::onDataBlock( daq::DAQ_DATA_T* pData,
                                                        std::size_t wordLen )
 {
-   const uint64_t timestamp = descriptorGetTimeStamp();
+   const auto timestamp = descriptorGetTimeStamp();
    const bool isSetData = (this == &m_pParent->m_oReceiveSetValue);
 
    m_pParent->m_pParent->onAddacDataBlock( isSetData,
@@ -189,17 +189,15 @@ bool FgFeedbackChannel::AddacFb::Receive::onDataBlock( daq::DAQ_DATA_T* pData,
       throw daq::Exception( str );
    }
 
-   m_blockLen = wordLen;
-   m_sequence = descriptorGetSequence();
+   m_blockLen   = wordLen;
+   m_sequence   = descriptorGetSequence();
    m_sampleTime = descriptorGetTimeBase();
 
-   const uint blockTime = m_sampleTime * m_blockLen;
-#ifdef _CONFIG_PATCH_DAQ_TIMESTAMP
-   #warning Compiler switch _CONFIG_PATCH_DAQ_TIMESTAMP is active!
-   m_timestamp += blockTime;
-   if( timestamp > (m_timestamp + blockTime) )
-#endif
-      m_timestamp = timestamp - blockTime;
+   /*
+    * Setting the timestamp at the begining of the ADDAC-DAQ-block, that means
+    * at the first sampled value of the block.
+    */
+   m_timestamp  = timestamp - m_sampleTime * m_blockLen;
 
    ::memcpy( m_aBuffer, pData, m_blockLen * sizeof(daq::DAQ_DATA_T) );
 
@@ -253,8 +251,6 @@ FgFeedbackChannel::AddacFb::~AddacFb( void )
    DEBUG_MESSAGE_M_FUNCTION("");
 }
 
-#define _CONFIG_COMPARE_SEQUENCE_NR
-
 /*! ---------------------------------------------------------------------------
  * @brief Forwarding of actual- and set- values to the higher software-layer
  *        once both data blocks has been received.
@@ -297,7 +293,7 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       throw daq::Exception( str );
    }
 
-   uint64_t timeStampSetVal = m_oReceiveSetValue.getTimestamp();
+   auto timeStampSetVal = m_oReceiveSetValue.getTimestamp();
 
    if( m_pParent->m_pParent->m_pParent->isPairingBySequence() )
    { /*
@@ -306,7 +302,7 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       * for the second channel.
       * This will accomplished by comparing the sequence numbers.
       */
-      const uint sequenceDeviation = ::abs( m_oReceiveSetValue.getSequence() -
+      const auto sequenceDeviation = ::abs( m_oReceiveSetValue.getSequence() -
                                             m_oReceiveActValue.getSequence() );
       if( sequenceDeviation != 0 )
       {
@@ -332,10 +328,13 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
    else
    { /*
       * +++ Pairing by timestamp +++
+      * That should be the default.
       */
-      const uint64_t timeStampActVal = m_oReceiveActValue.getTimestamp();
-      const uint diff = ::abs( static_cast<int64_t>(timeStampActVal - timeStampSetVal));
-      if( diff > (2 * m_oReceiveSetValue.getSampleTime() ) )
+      const auto timeStampActVal = m_oReceiveActValue.getTimestamp();
+      const auto diff = ::abs( static_cast<int64_t>(timeStampActVal - timeStampSetVal));
+      static_assert( REL_PHASE_TOLERANCE == 1 || REL_PHASE_TOLERANCE == 2,
+                     "Relative phase tolerance shall be one or two!" );
+      if( diff > (REL_PHASE_TOLERANCE * m_oReceiveSetValue.getSampleTime()) )
       { /*
          * Is the time deviation between set- and actual- value-block
          * greater than a specific value, then it have to be wait for the
@@ -637,11 +636,11 @@ void FgFeedbackDevice::generate( FgFeedbackChannel* pFeedbackChannel )
    assert( pFeedbackChannel->m_pCommon == nullptr );
    assert( m_pParent != nullptr );
 
-   const daq::DAQ_DEVICE_TYP_T type = getTyp();
+   const auto type = getTyp();
    DEBUG_MESSAGE( "generating channel for device type: " << deviceType2String( type ) );
 
 #ifdef CONFIG_MIL_FG
-   MiLdaq::DaqDevice* pMilDev = dynamic_cast<MiLdaq::DaqDevice*>(m_poDevice);
+   auto pMilDev = dynamic_cast<MiLdaq::DaqDevice*>(m_poDevice);
    /*
     * Is this object a MIL device?
     */
@@ -656,12 +655,18 @@ void FgFeedbackDevice::generate( FgFeedbackChannel* pFeedbackChannel )
    }
 #endif // ifdef CONFIG_MIL_FG
 
-   daq::DaqDevice* pAddacDev = dynamic_cast<daq::DaqDevice*>(m_poDevice);
+   auto pAddacDev = dynamic_cast<daq::DaqDevice*>(m_poDevice);
    /*
     * Here a ADDAC/ACU object is provided.
     */
-   assert( pAddacDev != nullptr );
-
+   if( pAddacDev == nullptr )
+   {
+   #ifdef CONFIG_MIL_FG
+      throw daq::Exception( "A ADDAC-device object is expected!" );
+   #else
+      throw daq::Exception( "Unknown device object!" );
+   #endif
+   }
 
    /*
     * The feedback channel object becomes registered in a ADDAC/ACU device so

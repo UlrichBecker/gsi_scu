@@ -132,7 +132,7 @@ private:
    class AddacFb: public Common
    {
       friend class FgFeedbackDevice;
-
+      static constexpr uint REL_PHASE_TOLERANCE = 2;
       /*!
        * @brief Object type containing the data buffer for received actual or
        *        set values of a ADDAC-DAQ data block.
