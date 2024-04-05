@@ -50,6 +50,8 @@
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
 #endif
 
+#define CONFIG_TMPERATURE_ERROR_MSG
+
 /*!
  * @ingroup TEMPERATURE
  * @todo Introducing a additional warning for low temperature.
@@ -112,12 +114,13 @@ typedef struct
     */
    bool      wasGradientError;
 
+#ifdef CONFIG_TMPERATURE_ERROR_MSG
    /*!
     * @brief Sensor error detected.
     *        Prevents multiple error log messages.
     */
    unsigned int errorMsgPeriod;
-
+#endif
    /*!
     * @brief Name of the temperature sensor.
     */
@@ -181,19 +184,25 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       {
          .pCurrentTemp = &BOARD_TEMP,
          .name = "board",
+      #ifdef CONFIG_TMPERATURE_ERROR_MSG
          .errorMsgPeriod = 0,
+      #endif
          FSM_INIT_FSM( ST_START, color = blue )
       },
       {
          .pCurrentTemp = &BACKPLANE_TEMP,
          .name = "backplane",
+      #ifdef CONFIG_TMPERATURE_ERROR_MSG
          .errorMsgPeriod = 0,
+      #endif
          .state = ST_START
       },
       {
          .pCurrentTemp = &EXTERN_TEMP,
          .name = "extern",
+      #ifdef CONFIG_TMPERATURE_ERROR_MSG
          .errorMsgPeriod = 0,
+      #endif
          .state = ST_START
       }
    };
@@ -230,15 +239,17 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
-
+      #ifdef CONFIG_TMPERATURE_ERROR_MSG
          if( pWatchTemp->errorMsgPeriod > 0 )
              pWatchTemp->errorMsgPeriod--;
+      #endif
 
          if( *pWatchTemp->pCurrentTemp == INVALID_TEMPERATURE )
          { /*
             * Impossible temperature received, perhaps the sensor is demaged or not present.
             * Jump to the next temperature sensor.
             */
+         #ifdef CONFIG_TMPERATURE_ERROR_MSG
             if( pWatchTemp->errorMsgPeriod == 0 )
             { /*
                * To post this message every hour is enough.
@@ -248,6 +259,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
                         "ERROR: Temperature sensor \"%s\" failed!"
                         ESC_NORMAL, pWatchTemp->name  );
             }
+         #endif
             continue;
          }
 
