@@ -701,6 +701,8 @@ public:
       return dynamic_cast<MiLdaq::DaqDevice*>(m_poDevice);
    }
 
+#endif /* ifdef CONFIG_MIL_FG */
+
    /*!
     * @brief Returns "true" if this object has been mutated to a MIL- object
     *        after registration in object of FgFeedbackAdministration,
@@ -708,9 +710,12 @@ public:
     */
    bool isMil( void ) const
    {
+   #ifdef CONFIG_MIL_FG
       return (getMil() != nullptr);
+   #else
+      return false;
+   #endif
    }
-#endif /* ifdef CONFIG_MIL_FG */
 
    /*!
     * @brief Returns the pointer to the ADDAC/ACU device if this object
