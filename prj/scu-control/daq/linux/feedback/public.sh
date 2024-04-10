@@ -13,6 +13,14 @@
 if [ ! -n "${OECORE_SDK_VERSION}" ]
 then
    echo "WARNING: YOCTO SDK is not active!" 1>&2
+   if [ "${HOSTNAME:0:5}" = "asl74" ]
+   then
+      LIB_SUFFIX="ACC7"
+   else
+      LIB_SUFFIX=""
+   fi
+else
+   LIB_SUFFIX="Yocto${OECORE_SDK_VERSION}"
 fi
 
 GCC_VERSION=$(gcc --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $1}')
@@ -90,7 +98,7 @@ else
    DESTINATION_BASE_DIR="${HOME}/gsi-export/daq-fg/${FW_VERSION}${VERSION_DIR}/"
 fi
 HEADER_DIR="${DESTINATION_BASE_DIR}include/"
-LIB_DIR="${DESTINATION_BASE_DIR}/lib/"
+LIB_DIR="${DESTINATION_BASE_DIR}/lib${LIB_SUFFIX}/"
 LM32_BIN_DIR="${DESTINATION_BASE_DIR}lm32_firmware"
 EXAMPLE_DIR="${DESTINATION_BASE_DIR}example"
 
