@@ -373,6 +373,9 @@ bool Lm32Logd::_updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
    if( rAdmin.admin.indexes.capacity != m_capacity )
       return false;
 
+   /*
+    * All seems to be OK.
+    */
    return true;
 }
 
@@ -611,15 +614,34 @@ void Lm32Logd::readItems( void )
 
    updateFiFoAdmin( fifoAdmin );
    if( fifoAdmin.admin.wasRead != 0 )
+   { /*
+      * Last posted messages was not yet acknowledged by LM32,
+      * therefore there are no new messages present.
+      */
+      /*!
+       * @todo In very rare cases there still seem to be problems here.
+       *       Workaround: Restart this application by option -r.
+       */
       return;
+   }
 
    uint size = sysLogFifoGetSize( &fifoAdmin );
    if( size == 0 )
+   { /*
+      * No log-messages present.
+      */
       return;
+   }
 
    if( (size % SYSLOG_FIFO_ITEM_SIZE) != 0 )
+   { /*
+      * Log messages not jet compleated by LM32.
+      */
+      /*!
+       * @todo Check this - maybe this could be a problem!
+       */
       return;
-
+   }
    m_fiFoAdmin = fifoAdmin;
 
    if( m_pMiddleBuffer == nullptr )
