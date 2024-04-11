@@ -9,6 +9,15 @@
 ## (c)     GSI Helmholtz Centre for Heavy Ion Research GmbH                  ##
 ## Date:   14.10.2020                                                        ##
 ###############################################################################
+ESC_ERROR="\e[1m\e[31m"
+ESC_SUCCESS="\e[1m\e[32m"
+ESC_NORMAL="\e[0m"
+
+die()
+{
+   echo -e $ESC_ERROR"ERROR: $@"$ESC_NORMAL 1>&2
+   exit 1;
+}
 
 if [ ! -n "${OECORE_SDK_VERSION}" ]
 then
@@ -23,7 +32,13 @@ else
    LIB_SUFFIX="Yocto${OECORE_SDK_VERSION}"
 fi
 
-GCC_VERSION=$(gcc --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $1}')
+
+if [ ! -n "${OECORE_SDK_VERSION}" ]
+then
+   CC=gcc
+fi
+
+GCC_VERSION=$($CC --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $1}')
 
 if [ "$1" = "os" ]
 then
@@ -36,7 +51,7 @@ SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
 
 if [ -n "${OECORE_SDK_VERSION}" ]
 then
-   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_${GCC_VERSION}_sdk_${OECORE_SDK_VERSION}/result/libscu_fg_feedback.a
+   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_${OECORE_SDK_VERSION}_${GCC_VERSION}/result/libscu_fg_feedback.a
 else
    LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_${GCC_VERSION}/result/libscu_fg_feedback.a
 fi
@@ -50,33 +65,33 @@ fi
 
 EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
 
+if [ ! -f "Makefile" ]
+then
+   die "Makefile in \"$PWD\" not found!"
+fi
 
 COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v "/etherbone\.h"  | grep -v Constants\.hpp )
 
 if [ ! -f "$LIB_FILE" ]
 then
-   echo "Library file: \"$LIB_FILE\" not found!" 1>&2
-   exit 1
+   die "Library file: \"$LIB_FILE\" not found!"
 fi
 
 if [ ! -f "$LM32_FW" ]
 then
-  echo "LM32 firmware file: \"$LM32_FW\" not found!" 1>&2
-  exit 1
+  die "LM32 firmware file: \"$LM32_FW\" not found!"
 fi
 
 if [ ! -f "$EXAMPLE_FILE" ]
 then
-   echo "Example file \"$EXAMPLE_FILE\" not found" 1>&2
-   exit 1
+   die "Example file \"$EXAMPLE_FILE\" not found"
 fi
 
 for i in $COPY_LIST
 do
    if [ ! -f "$i" ]
    then
-      echo "Header file: \"$i\" not found!" 1>&2
-      exit 1
+      die "Header file: \"$i\" not found!"
    fi
 done
 
