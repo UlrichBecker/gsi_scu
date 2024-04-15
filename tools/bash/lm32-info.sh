@@ -59,7 +59,7 @@ then
    exit $?
 else
    #
-   # Script ts running on remote-PC
+   # Script is running on remote-PC
    #
    if [ ! -n "$GSI_USERNAME" ]
    then
