@@ -1740,7 +1740,7 @@ void FgFeedbackAdministration::MilDaqAdministration::onDataReadingPause( void )
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief Loop clntrol macko for browsing all registered objects of type
+ * @brief Loop control macko for browsing all registered objects of type
  *        FgFeedbackChannel or its derived types.
  *
  * example:
