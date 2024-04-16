@@ -334,7 +334,7 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       const uint diff = ::abs( static_cast<int64_t>(timeStampActVal - timeStampSetVal));
       static_assert( REL_PHASE_TOLERANCE == 1 || REL_PHASE_TOLERANCE == 2,
                      "Relative phase tolerance shall be one or two!" );
-      if( diff > (REL_PHASE_TOLERANCE * m_oReceiveSetValue.getSampleTime()) )
+      if( diff > static_cast<uint>(REL_PHASE_TOLERANCE * m_oReceiveSetValue.getSampleTime()) )
       { /*
          * Is the time deviation between set- and actual- value-block
          * greater than a specific value, then it have to be wait for the
