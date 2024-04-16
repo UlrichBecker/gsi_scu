@@ -331,7 +331,7 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       * That should be the default.
       */
       const auto timeStampActVal = m_oReceiveActValue.getTimestamp();
-      const auto diff = ::abs( static_cast<int64_t>(timeStampActVal - timeStampSetVal));
+      const uint diff = ::abs( static_cast<int64_t>(timeStampActVal - timeStampSetVal));
       static_assert( REL_PHASE_TOLERANCE == 1 || REL_PHASE_TOLERANCE == 2,
                      "Relative phase tolerance shall be one or two!" );
       if( diff > (REL_PHASE_TOLERANCE * m_oReceiveSetValue.getSampleTime()) )
