@@ -59,7 +59,7 @@ fi
 
 if [ -n "$(uname -r | grep "yocto" )" ]
 then
-   log_error "No LM32-log-daemon vor Yocto-ramdisk present yet!"
+   log_error "No LM32-log-daemon for Yocto-ramdisk present yet!"
 else
    log "Starting LM32-logging-daemon, target: \"${LM32_LOG_TARGET}\""
    $LM32_LOGD -Habd=${LM32_LOG_TARGET} 2>>$ERROR_LOG
