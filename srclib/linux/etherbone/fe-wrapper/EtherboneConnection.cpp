@@ -73,6 +73,30 @@ const char* EtherboneConnection::__makeMutexName( const std::string& rName )
 }
 #endif // ifndef CONFIG_EB_USE_NORMAL_MUTEX
 
+EtherboneConnection* EtherboneConnection::c_pSelf = nullptr;
+
+/* ----------------------------------------------------------------------------
+ */
+EtherboneConnection* EtherboneConnection::getInstance( const std::string netaddress,
+                                                       uint timeout )
+{
+   if( c_pSelf == nullptr )
+      c_pSelf = new EtherboneConnection( netaddress, timeout );
+
+   return c_pSelf;
+}
+
+/* ----------------------------------------------------------------------------
+ */
+void EtherboneConnection::releaseInstance()
+{
+   if( c_pSelf != nullptr )
+   {
+      delete c_pSelf;
+      c_pSelf = nullptr;
+   }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /* ----------------------------------------------------------------------------
  */

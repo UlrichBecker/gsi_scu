@@ -54,6 +54,20 @@ namespace FeSupport {
           using SCOPED_MUTEX_T = IPC::scoped_lock<MUTEX_T>;
        #endif
           /*!
+           * @brief Static class-function creates a single instance if not already created
+           *        and/or gives the pointer to this instance back.
+           * @author Ulrich Becker
+           */
+          static EtherboneConnection* getInstance( const std::string netaddress = "/dev/wbm0",
+                                                   uint timeout = EB_DEFAULT_TIMEOUT );
+
+          /*!
+           * @brief Counterpart of getInstance(), invokes the destructor if the instance has existed.
+           * @author Ulrich Becker
+           */
+          static void releaseInstance();
+
+          /*!
            * \brief Basic constuctor
            */
           EtherboneConnection(std::string netaddress, uint timeout = EB_DEFAULT_TIMEOUT );
@@ -280,6 +294,11 @@ namespace FeSupport {
           // debug flag, when set detailed infos for each etherbone access
           // will be printed to console output
           bool debug_;
+
+          /*!
+           * @brief Stores the pointer of an instance from itself.
+           */
+          static EtherboneConnection* c_pSelf;
 
           static std::string c_mutexName;
           static const char* __makeMutexName( const std::string& rName );
