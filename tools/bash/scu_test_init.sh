@@ -57,8 +57,13 @@ else
    log_error "LM32-application: \"${LM32_APP_DIR}${LM32_APP}\" not found!"
 fi
 
-log "Starting LM32-logging-daemon, target: \"${LM32_LOG_TARGET}\""
-$LM32_LOGD -Habd=${LM32_LOG_TARGET} 2>>$ERROR_LOG
+if [ -n "$(uname -r | grep "yocto" )" ]
+then
+   log_error "No LM32-log-daemon vor Yocto-ramdisk present yet!"
+else
+   log "Starting LM32-logging-daemon, target: \"${LM32_LOG_TARGET}\""
+   $LM32_LOGD -Habd=${LM32_LOG_TARGET} 2>>$ERROR_LOG
+fi
 
 log "Starting \"socat\""
 $SOCAT tcp-listen:60368,reuseaddr,fork file:/dev/wbm0 2>>$ERROR_LOG
