@@ -82,7 +82,18 @@ EtherboneConnection* EtherboneConnection::getInstance( const std::string netaddr
 {
    if( c_pSelf == nullptr )
       c_pSelf = new EtherboneConnection( netaddress, timeout );
-
+#ifndef CONFIG_CHECK_NO_EB_ADDRESS
+   else if( c_pSelf->getNetAddress() != netaddress )
+   {
+      std::stringstream stream;
+      stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
+             << __LINE__ << " Different net-addresses -> current: "
+             << c_pSelf->getNetAddress()
+             << ", requested: "
+             << netaddress;
+      throw BusException( stream.str() );
+   }
+#endif
    return c_pSelf;
 }
 
