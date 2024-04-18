@@ -67,6 +67,7 @@ namespace FeSupport {
            */
           static void releaseInstance();
 
+// not yet!      private:
           /*!
            * \brief Basic constuctor
            */
@@ -76,7 +77,7 @@ namespace FeSupport {
            * \brief Destructor
            */
           virtual ~EtherboneConnection();
-
+      public:
 #ifndef CONFIG_EB_USE_NORMAL_MUTEX
           /*!
            * \brief check if named mutex is locked

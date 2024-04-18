@@ -60,6 +60,7 @@ EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
 {
    DEBUG_MESSAGE_M_FUNCTION( rScuName );
    m_pEbc = new EBC::EtherboneConnection( rScuName, timeout );
+  // m_pEbc = EBC::EtherboneConnection::getInstance( rScuName, timeout );
    DEBUG_MESSAGE( "m_pEbc->connect();" );
    m_pEbc->connect();
    c_useCount++;
@@ -83,6 +84,7 @@ EtherboneAccess::~EtherboneAccess( void )
    {
       DEBUG_MESSAGE( "delete m_pEbc;" );
       delete m_pEbc;
+      //EBC::EtherboneConnection::releaseInstance();
    }
 }
 
