@@ -73,38 +73,55 @@ const char* EtherboneConnection::__makeMutexName( const std::string& rName )
 }
 #endif // ifndef CONFIG_EB_USE_NORMAL_MUTEX
 
-EtherboneConnection* EtherboneConnection::c_pSelf = nullptr;
+
+EtherboneConnection::OBJ_ADMIN_T EtherboneConnection::c_oAdmin =
+{
+   .ptr_   = nullptr,
+   .count_ = 0
+};
 
 /* ----------------------------------------------------------------------------
  */
-EtherboneConnection* EtherboneConnection::getInstance( const std::string netaddress,
-                                                       uint timeout )
+EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string netaddress,
+                                                             uint timeout )
 {
-   if( c_pSelf == nullptr )
-      c_pSelf = new EtherboneConnection( netaddress, timeout );
-#ifndef CONFIG_CHECK_NO_EB_ADDRESS
-   else if( c_pSelf->getNetAddress() != netaddress )
+   if( c_oAdmin.count_ == 0 )
+   {
+      assert( c_oAdmin.ptr_ == nullptr );
+      c_oAdmin.ptr_ = new EtherboneConnection( netaddress, timeout );
+   }
+   else if( c_oAdmin.ptr_->getNetAddress() != netaddress )
    {
       std::stringstream stream;
       stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
              << __LINE__ << " Different net-addresses -> current: "
-             << c_pSelf->getNetAddress()
+             << c_oAdmin.ptr_->getNetAddress()
              << ", requested: "
              << netaddress;
       throw BusException( stream.str() );
    }
-#endif
-   return c_pSelf;
+
+   c_oAdmin.count_++;
+   return c_oAdmin.ptr_;
 }
 
 /* ----------------------------------------------------------------------------
  */
-void EtherboneConnection::releaseInstance()
+void EtherboneConnection::releaseInstance( PTR_T ptr )
 {
-   if( c_pSelf != nullptr )
+   assert( c_oAdmin.ptr_ == ptr );
+
+   if( c_oAdmin.count_ > 0 )
    {
-      delete c_pSelf;
-      c_pSelf = nullptr;
+      assert( c_oAdmin.ptr_ != nullptr );
+      c_oAdmin.count_--;
+      if( c_oAdmin.count_ == 0 )
+      {
+         if( c_oAdmin.ptr_->isConnected() )
+            c_oAdmin.ptr_->disconnect();
+         delete c_oAdmin.ptr_;
+         c_oAdmin.ptr_ = nullptr;
+      }
    }
 }
 

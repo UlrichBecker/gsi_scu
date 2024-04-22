@@ -53,19 +53,27 @@ namespace FeSupport {
           using MUTEX_T        = IPC::named_mutex;
           using SCOPED_MUTEX_T = IPC::scoped_lock<MUTEX_T>;
        #endif
+
+          using PTR_T  = EtherboneConnection*;
+          struct OBJ_ADMIN_T
+          {
+             PTR_T  ptr_;
+             uint   count_;
+          };
+
           /*!
            * @brief Static class-function creates a single instance if not already created
            *        and/or gives the pointer to this instance back.
            * @author Ulrich Becker
            */
-          static EtherboneConnection* getInstance( const std::string netaddress = "/dev/wbm0",
-                                                   uint timeout = EB_DEFAULT_TIMEOUT );
+          static PTR_T getInstance( const std::string netaddress = "/dev/wbm0",
+                                    uint timeout = EB_DEFAULT_TIMEOUT );
 
           /*!
            * @brief Counterpart of getInstance(), invokes the destructor if the instance has existed.
            * @author Ulrich Becker
            */
-          static void releaseInstance();
+          static void releaseInstance( PTR_T );
 
 // not yet!      private:
           /*!
@@ -299,7 +307,7 @@ namespace FeSupport {
           /*!
            * @brief Stores the pointer of an instance from itself.
            */
-          static EtherboneConnection* c_pSelf;
+          static OBJ_ADMIN_T c_oAdmin;
 
           static std::string c_mutexName;
           static const char* __makeMutexName( const std::string& rName );

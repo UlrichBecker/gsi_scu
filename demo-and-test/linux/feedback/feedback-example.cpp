@@ -103,7 +103,7 @@ int main( const int argc, const char** ppArgv )
       }
 
       cout << "Wishbone-device: " << ebDeviceName << endl;
-
+#if 0
       /*
        * Building a object of etherbone-connection for the communication
        * whith a DAQ via wishbone/etherbone.
@@ -141,7 +141,9 @@ int main( const int argc, const char** ppArgv )
        * re-scan will made or not. If true a re-scan will made.
        */
       FgFeedbackAdministration myScu( &ebConnection, false );
-
+#else
+      FgFeedbackAdministration myScu( DaqEb::EtherboneConnection::getInstance(ebDeviceName) );
+#endif
 
       /*
        * The following command is optional and has only an effect if the DDR3-RAM
@@ -338,8 +340,9 @@ int main( const int argc, const char** ppArgv )
        *          its allow to made the disconnect outside as well.
        *          Otherwise a "Segmentation fault" occurs!
        */
-      ebConnection.disconnect();
+      //ebConnection.disconnect();
 
+      DaqEb::EtherboneConnection::releaseInstance( myScu.getEbAccess()->getEbPtr() );
       cout << "End..." << endl;
 
    } // end try()

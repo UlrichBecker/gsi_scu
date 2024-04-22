@@ -82,8 +82,13 @@ __EOH__
 #------------------------------------------------------------------------------
 printTemperature()
 {
-   local temp="0x$(lm32-read $1 $2)"
-   printf "%d.%u °C\n" $((temp/16)) $(((temp&0x0F)*10/16))
+   local temp="0x$(lm32-read.sh $1 $2)"
+   if [ "$temp" = "0xFFFFFFFF" ]
+   then
+      echo -e $ESC_ERROR"failed!"$ESC_NORMAL
+   else
+      printf "%d.%u °C\n" $((temp/16)) $(((temp&0x0F)*10/16))
+   fi
 }
 
 #==============================================================================
@@ -130,12 +135,12 @@ else
    TARGET=""
 fi
 
-if [ ! -n "$(which lm32-read 2>/dev/null)" ]
+if [ ! -n "$(which lm32-read.sh 2>/dev/null)" ]
 then
    die "\"lm32-read\" not found!"
 fi
 
-if [ "$(lm32-read $1 $ADDR_MAGIC_NUMBER)" != "$MAGIC_NUMBER" ]
+if [ "$(lm32-read.sh $1 $ADDR_MAGIC_NUMBER)" != "$MAGIC_NUMBER" ]
 then
    die "Magic number not found!"
 fi

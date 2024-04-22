@@ -844,7 +844,7 @@ public:
 
    static constexpr uint  VALUE_SHIFT = (BIT_SIZEOF( DAQ_T ) - BIT_SIZEOF( daq::DAQ_DATA_T ));
    static constexpr DAQ_T DEFAULT_THROTTLE_THRESHOLD = 10;
-   static constexpr uint  DEFAULT_THROTTLE_TIMEOUT   = 10;
+   static constexpr uint  DEFAULT_THROTTLE_TIMEOUT   = 100;
 
 private:
    /*!
