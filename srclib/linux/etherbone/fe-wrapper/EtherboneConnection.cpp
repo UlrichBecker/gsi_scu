@@ -100,6 +100,16 @@ EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string n
              << netaddress;
       throw BusException( stream.str() );
    }
+   else if( c_oAdmin.ptr_->timeout_ != timeout )
+   {
+      std::stringstream stream;
+      stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
+             << __LINE__ << " Different timeout values -> current: "
+             << c_oAdmin.ptr_->timeout_
+             << ", requested: "
+             << timeout;
+      throw BusException( stream.str() );
+   }
 
    c_oAdmin.count_++;
    return c_oAdmin.ptr_;
