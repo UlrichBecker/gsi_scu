@@ -229,7 +229,7 @@ namespace FeSupport {
            */
           bool isConnected() const
           {
-             return connectionOpened;
+             return connectionOpenCount_ > 0;
           }
 
           /*!
@@ -294,8 +294,11 @@ namespace FeSupport {
           // device to talk too
           etherbone::Device eb_device_;
 
-          // This flag shows weather the connection was opened
-          bool connectionOpened;
+          /*!
+           * @brief Becomes incremented by each calls of function connect()
+           *        and decremented by each function calls of function disconnect()
+           */
+          uint connectionOpenCount_;
 
           // Contains the error Message in case the operation fails
           std::string errorMessage_;

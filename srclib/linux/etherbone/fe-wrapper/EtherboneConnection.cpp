@@ -147,7 +147,7 @@ EtherboneConnection::EtherboneConnection(std::string netaddress,
    ,netaddress_(netaddress)
 #endif
    ,timeout_( timeout )
-   ,connectionOpened(false)
+   ,connectionOpenCount_(0)
    ,debug_(false)
 {
    // check if mutex is already locked
@@ -160,6 +160,7 @@ EtherboneConnection::EtherboneConnection(std::string netaddress,
  */
 EtherboneConnection::~EtherboneConnection()
 {
+   disconnect();
 }
 
 #ifndef CONFIG_EB_USE_NORMAL_MUTEX
@@ -215,30 +216,31 @@ bool EtherboneConnection::checkMutex(bool unlock)
  */
 void EtherboneConnection::connect()
 {
-   eb_status_t status;
-
    SCOPED_MUTEX_T lock(_sysMu);
 
-   status = eb_socket_.open(0, EB_ADDRX|EB_DATAX);
-   if( status != EB_OK )
+   if( connectionOpenCount_ == 0 )
    {
-      std::stringstream stream;
-      stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
-             << __LINE__ << ": Error opening etherbone socket: " << status;
-         throw BusException(stream.str());
-   }
+      eb_status_t status = eb_socket_.open(0, EB_ADDRX|EB_DATAX);
+      if( status != EB_OK )
+      {
+         std::stringstream stream;
+         stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
+                << __LINE__ << ": Error opening etherbone socket: " << status;
+            throw BusException(stream.str());
+      }
 
-   status = eb_device_.open( eb_socket_, netaddress_.c_str(),
-                             EB_ADDRX|EB_DATAX);
-   if( status != EB_OK )
-   {
-      std::stringstream stream;
-      stream << __FILE__ << "::" << __FUNCTION__ << "::"
-             << std::dec << __LINE__ << ": Error opening etherbone device: "
-             << netaddress_ << " Error code: " << status;
-      throw BusException(stream.str());
+      status = eb_device_.open( eb_socket_, netaddress_.c_str(),
+                                EB_ADDRX|EB_DATAX);
+      if( status != EB_OK )
+      {
+         std::stringstream stream;
+         stream << __FILE__ << "::" << __FUNCTION__ << "::"
+                << std::dec << __LINE__ << ": Error opening etherbone device: "
+                << netaddress_ << " Error code: " << status;
+         throw BusException(stream.str());
+      }
    }
-   this->connectionOpened = true;
+   connectionOpenCount_++;
 }
 
 /* ----------------------------------------------------------------------------
@@ -246,9 +248,15 @@ void EtherboneConnection::connect()
 void EtherboneConnection::disconnect()
 {
    SCOPED_MUTEX_T lock(_sysMu);
-   eb_device_.close();
-   eb_socket_.close();
-   this->connectionOpened = false;
+   if( connectionOpenCount_ > 0 )
+   {
+      connectionOpenCount_--;
+      if( connectionOpenCount_ == 0 )
+      {
+         eb_device_.close();
+         eb_socket_.close();
+      }
+   }
 }
 
 /* ----------------------------------------------------------------------------
@@ -279,7 +287,7 @@ uint64_t EtherboneConnection::findDeviceBaseAddress( VendorId vendorId,
 {
    eb_status_t status;
 
-   if (!this->connectionOpened)
+   if (!connectionOpenCount_)
    {
       std::stringstream stream;
       stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
@@ -755,8 +763,8 @@ void EtherboneConnection::doRead(etherbone::address_t eb_address,
                                  const uint16_t size) {
 
   if ( size == 1 ) {
-    SCOPED_MUTEX_T lock(_sysMu);
     {
+      SCOPED_MUTEX_T lock(_sysMu);
       eb_device_.read(eb_address, format, data);
       if (debug_)
         std::cout << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__
@@ -877,8 +885,8 @@ void EtherboneConnection::doWrite(const etherbone::address_t &eb_address,
                                   const uint16_t size) {
 
   if ( size == 1 ) {
-    SCOPED_MUTEX_T lock(_sysMu);
     {
+      SCOPED_MUTEX_T lock(_sysMu);
       eb_device_.write(eb_address, format, data[0]);
       if (debug_)
         std::cout << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__
@@ -890,8 +898,8 @@ void EtherboneConnection::doWrite(const etherbone::address_t &eb_address,
     etherbone::Cycle eb_cycle;
     eb_status_t status;
 
-    SCOPED_MUTEX_T lock(_sysMu);
     {
+      SCOPED_MUTEX_T lock(_sysMu);
       if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK) {
         // TODO: a specific exception would be nice
         std::string status_str(eb_status(status));
@@ -934,8 +942,8 @@ void EtherboneConnection::doVectorWrite(const etherbone::address_t &eb_address,
    etherbone::Cycle eb_cycle;
    eb_status_t status;
 
-   SCOPED_MUTEX_T lock(_sysMu);
-   { //?
+   {
+      SCOPED_MUTEX_T lock(_sysMu);
       if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK)
       {
         // TODO: a specific exception would be nice
@@ -975,7 +983,7 @@ void EtherboneConnection::doVectorWrite(const etherbone::address_t &eb_address,
                         << status_str << std::endl;
          throw BusException(messageBuilder.str());
       }
-   } //?
+   }
 }
 } /* namespace EtherboneAccesss */
 } // namespace Scu
