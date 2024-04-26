@@ -87,7 +87,7 @@ EtherboneAccess::~EtherboneAccess( void )
    {
       DEBUG_MESSAGE( "delete m_pEbc;" );
       delete m_pEbc; // deprecated
-      //EBC::EtherboneConnection::releaseInstance();
+      //EBC::EtherboneConnection::releaseInstance(m_pEbc);
    }
 }
 
