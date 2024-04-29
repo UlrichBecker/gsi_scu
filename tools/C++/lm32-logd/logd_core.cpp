@@ -105,6 +105,15 @@ int Lm32Logd::StringBuffer::sync( void )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/*!
+ * @brief Macro for log-messages which concerns the log-daemon self.
+ */
+#define LOG_SELF( msg... )           \
+{                                    \
+    m_isError = true;                \
+    *this << msg << std::flush;      \
+}
+
 /*! ---------------------------------------------------------------------------
  */
 Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
@@ -175,10 +184,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
          m_poTerminal->reset();
 
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << text << std::flush;
-      }
+         LOG_SELF( text )
 
       throw std::runtime_error( text );
    }
@@ -190,10 +196,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       text += " differs from the actual number: ";
       text += to_string(static_cast<int>((m_capacity - SYSLOG_FIFO_ADMIN_SIZE)/SYSLOG_FIFO_ITEM_SIZE));
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << text << std::flush;
-      }
+         LOG_SELF( text )
       else
          WARNING_MESSAGE( text );
    }
@@ -206,10 +209,8 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       errText += to_string( SYSLOG_FIFO_ADMIN_SIZE + SYSLOG_FIFO_ITEM_SIZE );
       errText += " 64-bit words shall be requested.";
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << errText << std::flush;
-      }
+         LOG_SELF( errText )
+
       throw std::runtime_error( errText );
    }
 
@@ -317,10 +318,7 @@ void Lm32Logd::read( const uint index,
    catch( std::exception& e )
    {
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << e.what() << endl;
-      }
+         LOG_SELF( e.what() )
       throw e;
    }
 }
@@ -339,10 +337,7 @@ void Lm32Logd::write( const uint index,
    catch( std::exception& e )
    {
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << e.what() << endl;
-      }
+         LOG_SELF( e.what() )
       throw e;
    }
 }
@@ -389,10 +384,7 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
    const char* text = "Fifo error. Trying to reinitialize FiFo.";
 
    if( m_rCmdLine.isDemonize() )
-   {
-      m_isError = true;
-      *this << text << std::endl;
-   }
+      LOG_SELF( text << "\n" )
    else
       WARNING_MESSAGE( text );
 
@@ -403,10 +395,8 @@ void Lm32Logd::updateFiFoAdmin( SYSLOG_FIFO_ADMIN_T& rAdmin )
 
    text = "LM32 syslog FiFo is corrupt!";
    if( m_rCmdLine.isDemonize() )
-   {
-      m_isError = true;
-      *this << text << std::endl;
-   }
+      LOG_SELF( text << "\n" )
+
    throw std::runtime_error( text );
 }
 
@@ -462,10 +452,7 @@ uint Lm32Logd::readLm32( char* pData, std::size_t len, const std::size_t offset 
    catch( std::exception& e )
    {
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << e.what() << endl;
-      }
+         LOG_SELF( e.what() )
       throw e;
    }
    return len;
@@ -488,10 +475,8 @@ uint Lm32Logd::readStringFromLm32( std::string& rStr, uint addr, const bool alwa
    {
       string errTxt = "String address is corrupt!";
       if( m_rCmdLine.isDemonize() )
-      {
-         m_isError = true;
-         *this << errTxt << endl;
-      }
+         LOG_SELF( errTxt )
+
       throw std::runtime_error( errTxt );
    }
 
@@ -703,8 +688,7 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
 
    if( item.filter >= BIT_SIZEOF( CommandLine::FILTER_FLAG_T ) )
    {
-      m_isError = true;
-      *this << "Filter value " << item.filter <<  " out of range!" << std::endl;
+      LOG_SELF( "Filter value " << item.filter <<  " out of range!\n" )
       return;
    }
 
@@ -724,9 +708,8 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       */
       if( (m_lastTimestamp - timestamp) > daq::NANOSECS_PER_SEC )
       {
-         m_isError = true;
-         *this << "Invalid timestamp: last: " << m_lastTimestamp
-               << ", actual: " << timestamp << std::endl;
+         LOG_SELF( "Invalid timestamp: last: " << m_lastTimestamp
+                 << ", actual: " << timestamp )
          m_lastTimestamp = 0;
          return;
       }
@@ -760,11 +743,9 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
 
    if( !gsi::isInRange( item.format, Lm32Access::OFFSET, Lm32Access::MAX_ADDR ) )
    {
-      m_isError = true;
-      *this << "Address of format string is invalid: 0x"
-            << std::hex << std::uppercase << std::setfill('0')
-            << std::setw( 8 ) << item.format << std::dec << " !"
-            << std::endl;
+      LOG_SELF( "Address of format string is invalid: 0x"
+                << std::hex << std::uppercase << std::setfill('0')
+                << std::setw( 8 ) << item.format << std::dec << " !\n" )
       return;
    }
 
@@ -856,12 +837,10 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
                         readStringFromLm32( rOutput, item.param[ai] );
                      else
                      {
-                        m_isError = true;
-                        *this << "String address of parameter " << (ai+1)
-                              << " is invalid: 0x"
-                              << std::hex  << std::uppercase << std::setfill('0')
-                              << std::setw( 8 ) << item.param[ai] << std::dec << " !"
-                              << std::flush;
+                        LOG_SELF( "String address of parameter " << (ai+1)
+                                  << " is invalid: 0x"
+                                  << std::hex  << std::uppercase << std::setfill('0')
+                                  << std::setw( 8 ) << item.param[ai] << std::dec << " !\n" )
                      }
                      ai++;
                      done = true;
