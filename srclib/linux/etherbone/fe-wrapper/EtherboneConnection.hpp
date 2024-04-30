@@ -233,6 +233,16 @@ namespace FeSupport {
           }
 
           /*!
+           * @brief Returns the number of requested connections.
+           * @note For debug purposes only.
+           * @author UB
+           */
+          uint getConnectionCounter() const
+          {
+             return connectionOpenCount_;
+          }
+
+          /*!
            * @brief Returns the net address given as first argument of
            *        the constructor.
            * @author UB
@@ -264,6 +274,9 @@ namespace FeSupport {
            * @brief Optional callback function becomes invoked during
            *        the final socked polling in the functions
            *        EtherboneConnection::write and EtherboneConnection::read.
+           * @todo This class is not inheritable, since introducing
+           *       getInstance() and releaseInstance(). Therefore replace
+           *       this function by a function-pointer if they will need sometime.
            * @retval true Continue the polling loop
            * @retval false Polling loop will break.
            * @author UB
