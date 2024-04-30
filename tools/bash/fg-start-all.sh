@@ -38,6 +38,18 @@ isInArgument()
 }
 
 #------------------------------------------------------------------------------
+whatIsRunning()
+{
+   local i=0
+   local fgs=$(ps | grep saft-fg-ctl | awk '{print $6}')
+   for fg in $fgs
+   do
+      let i=$i+1
+      echo "$i: "$fg
+   done
+}
+
+#------------------------------------------------------------------------------
 printHelp()
 {
    cat << __EOH__
@@ -69,6 +81,10 @@ Options:
 -f, --feedback
    Using "fg-feedback -L" for initializing the FG-list will used
    that means no rescan will made.
+
+-q, --query
+   Displays the current running function generators which has been started
+   by this program.
 
 Example:
 $PROG_NAME sinus.fgw 1 3 5
@@ -157,6 +173,10 @@ do
          "f")
             USE_FG_FEEDBACK=true
          ;;
+         "q")
+            whatIsRunning
+            exit 0
+         ;;
          "-")
             B=${A#*-}
             case ${B%=*} in
@@ -180,6 +200,10 @@ do
                ;;
                "feedback")
                   USE_FG_FEEDBACK=true
+               ;;
+               "query")
+                  whatIsRunning
+                  exit 0
                ;;
                *)
                   die "Unknown long option \"-${A}\"!"
