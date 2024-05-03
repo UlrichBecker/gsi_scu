@@ -287,7 +287,7 @@ uint64_t EtherboneConnection::findDeviceBaseAddress( VendorId vendorId,
 {
    eb_status_t status;
 
-   if (!connectionOpenCount_)
+   if (!isConnected())
    {
       std::stringstream stream;
       stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
@@ -779,12 +779,7 @@ void EtherboneConnection::doRead(etherbone::address_t eb_address,
       SCOPED_MUTEX_T lock(_sysMu);
       if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK) {
         // TODO: a specific exception would be nice
-        std::string status_str(eb_status(status));
-        std::stringstream messageBuilder;
-        messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__ << ": "
-                       << "ERROR: opening etherbone cycle failed! - "
-                       << "ErrorCode: " << status << " ErrorMsg: " << status_str << std::endl;
-        throw BusException(messageBuilder.str());
+         EB_THROW_CYC_OPEN_ERROR(status);
       }
 
       // read data block
@@ -794,12 +789,7 @@ void EtherboneConnection::doRead(etherbone::address_t eb_address,
 
       if ((status = eb_cycle.close()) != EB_OK) {
         // TODO: a specific exception would be nice
-        std::string status_str(eb_status(status));
-        std::stringstream messageBuilder;
-        messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__ << ": "
-                       << "ERROR: closing etherbone cycle failed! - "
-                       << "ErrorCode: " << status << " ErrorMsg: " << status_str << std::endl;
-        throw BusException(messageBuilder.str());
+        EB_THROW_CYC_CLOSE_ERROR(status);
       }
     } // End of Mutex scope
     if (debug_) {
@@ -825,17 +815,9 @@ void EtherboneConnection::doVectorRead( const etherbone::address_t &eb_address,
 
    {
       SCOPED_MUTEX_T lock(_sysMu);
-      if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK)
-      {
+      if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK) {
         // TODO: a specific exception would be nice
-         std::string status_str(eb_status(status));
-         std::stringstream messageBuilder;
-         messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::"
-                        << std::dec << __LINE__
-                        << ": ERROR: opening etherbone cycle failed! - "
-                        "ErrorCode: " << status << " ErrorMsg: " << status_str
-                        << std::endl;
-         throw BusException(messageBuilder.str());
+         EB_THROW_CYC_OPEN_ERROR( status );
       }
 
       // read data block
@@ -851,14 +833,7 @@ void EtherboneConnection::doVectorRead( const etherbone::address_t &eb_address,
       if ((status = eb_cycle.close()) != EB_OK)
       {
       // TODO: a specific exception would be nice
-         std::string status_str(eb_status(status));
-         std::stringstream messageBuilder;
-         messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::"
-                        << std::dec << __LINE__
-                        << ": ERROR: closing etherbone cycle failed! - "
-                        "ErrorCode: " << status << " ErrorMsg: "
-                        << status_str << std::endl;
-         throw BusException(messageBuilder.str());
+         EB_THROW_CYC_CLOSE_ERROR( status );
       }
    } // End of Mutex scope
 
@@ -902,12 +877,7 @@ void EtherboneConnection::doWrite(const etherbone::address_t &eb_address,
       SCOPED_MUTEX_T lock(_sysMu);
       if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK) {
         // TODO: a specific exception would be nice
-        std::string status_str(eb_status(status));
-        std::stringstream messageBuilder;
-        messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__ << ": "
-                       << "ERROR: opening etherbone cycle failed! - "
-                       << "ErrorCode: " << status << " ErrorMsg: " << status_str << std::endl;
-        throw BusException(messageBuilder.str());
+        EB_THROW_CYC_OPEN_ERROR( status );
       }
 
       // write data block
@@ -920,12 +890,7 @@ void EtherboneConnection::doWrite(const etherbone::address_t &eb_address,
       }
       if ((status = eb_cycle.close()) != EB_OK) {
         // TODO: a specific exception would be nice
-        std::string status_str(eb_status(status));
-        std::stringstream messageBuilder;
-        messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec << __LINE__ << ": "
-                       << "ERROR: closing etherbone cycle failed! - "
-                       << "ErrorCode: " << status << " ErrorMsg: " << status_str << std::endl;
-        throw BusException(messageBuilder.str());
+         EB_THROW_CYC_CLOSE_ERROR( status );
       }
     }
   } // else
@@ -947,14 +912,7 @@ void EtherboneConnection::doVectorWrite(const etherbone::address_t &eb_address,
       if ((status = eb_cycle.open(eb_device_, this, eb_block)) != EB_OK)
       {
         // TODO: a specific exception would be nice
-         std::string status_str(eb_status(status));
-         std::stringstream messageBuilder;
-         messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
-                        << __LINE__
-                        << ": ERROR: opening etherbone cycle failed! - "
-                        "ErrorCode: " << status << " ErrorMsg: " << status_str
-                        << std::endl;
-         throw BusException(messageBuilder.str());
+         EB_THROW_CYC_OPEN_ERROR( status );
       }
 
        // write data block
@@ -974,14 +932,7 @@ void EtherboneConnection::doVectorWrite(const etherbone::address_t &eb_address,
       if ((status = eb_cycle.close()) != EB_OK)
       {
          // TODO: a specific exception would be nice
-         std::string status_str(eb_status(status));
-         std::stringstream messageBuilder;
-         messageBuilder << __FILE__ << "::" << __FUNCTION__ << "::"
-                        << std::dec << __LINE__
-                        << ": ERROR: closing etherbone cycle failed! - "
-                        "ErrorCode: " << status << " ErrorMsg: "
-                        << status_str << std::endl;
-         throw BusException(messageBuilder.str());
+         EB_THROW_CYC_CLOSE_ERROR( status );
       }
    }
 }
