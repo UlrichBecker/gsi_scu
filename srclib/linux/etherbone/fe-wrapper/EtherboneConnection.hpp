@@ -75,7 +75,7 @@ namespace FeSupport {
            */
           static void releaseInstance( PTR_T );
 
-// not yet!      private:
+     private:
           /*!
            * \brief Basic constuctor
            */

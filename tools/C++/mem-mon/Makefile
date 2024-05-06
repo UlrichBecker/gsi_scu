@@ -48,7 +48,7 @@ LIBS += stdc++
 # DEBUG = 1
 # DEFINES += CONFIG_DEBUG_MESSAGES
 
-CALL_ARGS = scuxl0035 -va1,10 -a2,200 -a0x4711,3001 -a0xabcd,1000000
+CALL_ARGS = scuxl0692.acc.gsi.de -va1,10 -a2,200 -a0x4711,3001 -a0xabcd,1000000
 #CALL_ARGS = scuxl0035 -vD
 
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)

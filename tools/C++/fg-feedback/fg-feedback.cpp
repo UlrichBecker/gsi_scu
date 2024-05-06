@@ -378,7 +378,8 @@ Device::~Device( void )
  */
 AllDaqAdministration::AllDaqAdministration( CommandLine* m_poCommandLine,
                                             const std::string& ebAddress )
-   :FgFeedbackAdministration( new DaqEb::EtherboneConnection( ebAddress ) )
+   //:FgFeedbackAdministration( new DaqEb::EtherboneConnection( ebAddress ) )
+   :FgFeedbackAdministration( DaqEb::EtherboneConnection::getInstance( ebAddress ) )
    ,m_poCommandLine( m_poCommandLine )
    ,m_poTupleStatistics( nullptr )
 #ifdef CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
@@ -406,6 +407,8 @@ AllDaqAdministration::~AllDaqAdministration( void )
    }
    if( m_poTupleStatistics != nullptr )
       delete m_poTupleStatistics;
+
+   DaqEb::EtherboneConnection::releaseInstance( getEbAccess()->getEbPtr() );
 }
 
 /*! ---------------------------------------------------------------------------

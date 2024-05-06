@@ -12,7 +12,7 @@
 DEFINES += VERSION=1.9
 FOR_SCU_AND_ACC := 1
 
-DEBUG = 1
+#DEBUG = 1
 #DEFINES += DEBUGLEVEL
 #USE_NAMED_MUTEX := 1
 USE_STATIC_LIBS := 1
@@ -47,7 +47,7 @@ else
  DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
 endif
 ifdef USE_STATIC_LIBS
- ifndef USE_NAMED_MUTEX
+ ifdef USE_NAMED_MUTEX
   ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
  endif
  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
@@ -60,7 +60,8 @@ endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0692.acc.gsi.de -Hbakv -I200 -m1000 -M2000
+#CALL_ARGS = scuxl0692.acc.gsi.de -Hbakv -I200 -m1000 -M2000
+CALL_ARGS = scuxl0692.acc.gsi.de -B
 
 DOX_EXTRACT_PRIVATE = YES
 

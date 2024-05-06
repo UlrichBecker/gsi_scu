@@ -261,7 +261,7 @@ int main( const int argc, const char** ppArgv )
        */
       myFeedBackDevice.registerChannel( &myFeedBackChannel );
 
-      /*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
+      /*
        * For info and debug purposes only:
        * Before the registration the device doesn't know yet what type it belongs to.
        */
