@@ -106,7 +106,11 @@ ifdef USE_STATIC_LIBS
  ifdef USE_NAMED_MUTEX
   ADDITIONAL_OBJECTS += $(THIRD_PARTY_DIR)/boost/1.54.0/lib/x86_64/libboost_system.a
  endif
-  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+ ifdef OECORE_SDK_VERSION
+    ADDITIONAL_OBJECTS += libetherbone.a #TODO
+ else
+    ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
+ endif
 else
  ifdef USE_NAMED_MUTEX
   LIBS += boost_system

@@ -41,7 +41,13 @@ fi
 EB_FWLOAD=/usr/bin/eb-fwload
 EB_RESET=/usr/bin/eb-reset
 
-LM32_LOGD=${COMMON_INIT_DIR}tools/lm32-logd
+if [ "$(uname -r)" = "3.10.101-rt111-scu03" ]
+then
+   LM32_LOGD=${COMMON_INIT_DIR}tools/scuxl/lm32-logd
+else
+   LM32_LOGD=${COMMON_INIT_DIR}tools/yocto/lm32-logd
+fi
+
 LM32_LOG_TARGET=/var/log/lm32.log
 
 SOCAT=/usr/bin/socat
@@ -57,9 +63,9 @@ else
    log_error "LM32-application: \"${LM32_APP_DIR}${LM32_APP}\" not found!"
 fi
 
-if [ -n "$(uname -r | grep "yocto" )" ]
+if [ ! -x "$LM32_LOGD" ]
 then
-   log_error "No LM32-log-daemon for Yocto-ramdisk present yet!"
+   log_error "No LM32-log-daemon present"
 else
    log "Starting LM32-logging-daemon, target: \"${LM32_LOG_TARGET}\""
    $LM32_LOGD -Habd=${LM32_LOG_TARGET} 2>>$ERROR_LOG

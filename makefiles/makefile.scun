@@ -10,6 +10,10 @@
 ###############################################################################
 MAKEFILE_DIR ?= $(REPOSITORY_DIR)/makefiles
 
+ifndef OECORE_SDK_VERSION
+   $(warning "Project will not build by Yocto-SDK!")
+endif
+
 include $(MAKEFILE_DIR)/scu_dirs.inc
 EB_API_DIR   = $(IP_CORE_DIR)/etherbone-core/api
 
