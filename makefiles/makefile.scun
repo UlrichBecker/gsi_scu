@@ -66,11 +66,11 @@ endif # ifdef SCU_URL
 ifeq ($(shell echo $${HOSTNAME:0:4}), asl7)
 
 ifdef OECORE_SDK_VERSION
-   PUBLIC_TARGET ?= /common/usr/cscofe/bin/yocto
-   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/yocto
+   PUBLIC_TARGET ?= /common/usr/cscofe/bin/yocto/
+   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/yocto/
 else
-   PUBLIC_TARGET ?= /common/usr/cscofe/bin/scuxl
-   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/scuxl
+   PUBLIC_TARGET ?= /common/usr/cscofe/bin/scuxl/
+   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/scuxl/
 endif
 .PHONY: public
 public: $(BIN_FILE)
