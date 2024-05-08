@@ -50,11 +50,7 @@ ifdef USE_STATIC_LIBS
  ifdef USE_NAMED_MUTEX
   ADDITIONAL_OBJECTS += $(BOOST_LIB_DIR)/libboost_system.a
  endif
- ifdef OECORE_SDK_VERSION
-    ADDITIONAL_OBJECTS += libetherbone.a
- else
-    ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
- endif
+  ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
  ifdef USE_NAMED_MUTEX
   LIBS += boost_system

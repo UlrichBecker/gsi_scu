@@ -15,10 +15,8 @@ ifndef OECORE_SDK_VERSION
 endif
 
 include $(MAKEFILE_DIR)/scu_dirs.inc
-EB_API_DIR   = $(IP_CORE_DIR)/etherbone-core/api
 
-
-
+EB_API_DIR           = $(IP_CORE_DIR)/etherbone-core/api
 ETHERBONE_DIR        = $(SCU_LIB_SRC_LINUX_DIR)/etherbone
 
 OPT_PARSER_DIR       = $(SCU_LIB_SRC_LINUX_DIR)/command_line_option_parser_cpp11/src
@@ -26,9 +24,13 @@ LINUX_PROCESS_ID_DIR = $(SCU_LIB_SRC_LINUX_DIR)/get_linux_process_id/src
 GNU_PLOT_STREAM_DIR  = $(SCU_LIB_SRC_LINUX_DIR)/gnu-plotstream/src
 EB_FE_WRAPPER_DIR    = $(ETHERBONE_DIR)/fe-wrapper
 EB_API_DIR           = $(ETHERBONE_DIR)/etherbone-core/api
-EB_LIB_DIR           = $(EB_API_DIR)/libs
+ifdef OECORE_SDK_VERSION
+   EB_LIB_DIR        = $(SCU_LIB_SRC_LINUX_DIR)/etherbone-yocto/lib/
+else
+   EB_LIB_DIR        = $(EB_API_DIR)/libs
+endif
 
-DEFINES += CONFIG_N0_INCLUDE_PATHS
+DEFINES += CONFIG_NO_INCLUDE_PATHS
 
 INCLUDE_DIRS += $(EB_FE_WRAPPER_DIR)
 INCLUDE_DIRS += $(EB_API_DIR)
@@ -62,8 +64,14 @@ endif # ifndef IS_LIBRARY
 endif # ifdef SCU_URL
 
 ifeq ($(shell echo $${HOSTNAME:0:4}), asl7)
-PUBLIC_TARGET ?= /common/usr/cscofe/bin/
-PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/
+
+ifdef OECORE_SDK_VERSION
+   PUBLIC_TARGET ?= /common/usr/cscofe/bin/yocto
+   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/yocto
+else
+   PUBLIC_TARGET ?= /common/usr/cscofe/bin/scuxl
+   PUBLIC_SCU_TARGET ?= /common/export/nfsinit/global/tools/scuxl
+endif
 .PHONY: public
 public: $(BIN_FILE)
 ifdef FOR_SCU_AND_ACC
@@ -77,7 +85,7 @@ else
 endif # ifdef FOR_SCU
 endif # ifdef FOR_SCU_AND_ACC
 else
-  # $(error Makefile is not running on ASL!)
+   # $(error Makefile is not running on ASL!)
 endif # ifeq ($(shell echo $${HOSTNAME:0:5}), asl74)
 
 #=================================== EOF ======================================

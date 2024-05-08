@@ -38,11 +38,7 @@ else
  DEFINES += CONFIG_EB_USE_NORMAL_MUTEX
 endif
 ifdef USE_STATIC_LIBS
- ifdef OECORE_SDK_VERSION
-    ADDITIONAL_OBJECTS += libetherbone.a #TODO
- else
-    ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
- endif
+ ADDITIONAL_OBJECTS += $(EB_LIB_DIR)/libetherbone.a
 else
  LIBS += etherbone
 endif

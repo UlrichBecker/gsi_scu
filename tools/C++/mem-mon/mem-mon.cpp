@@ -40,6 +40,7 @@ using namespace std;
 using namespace Scu::mmu;
 namespace EB = FeSupport::Scu::Etherbone;
 
+#ifndef CONFIG_OECORE_SDK_VERSION
 /*! ---------------------------------------------------------------------------
  */
 void onUnexpectedException( void )
@@ -47,13 +48,15 @@ void onUnexpectedException( void )
    ERROR_MESSAGE( "Unexpected exception occurred!" );
    throw 0;     // throws int (in exception-specification)
 }
-
+#endif
 
 /*! ---------------------------------------------------------------------------
  */
 int main( int argc, char** ppArgv )
 {
+#ifndef CONFIG_OECORE_SDK_VERSION
    set_unexpected( onUnexpectedException );
+#endif
    try
    {
       CommandLine oCmdLine( argc, ppArgv );
