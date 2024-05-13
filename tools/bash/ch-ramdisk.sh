@@ -13,9 +13,12 @@ ESC_ERROR="\e[1m\e[31m"
 ESC_SUCCESS="\e[1m\e[32m"
 ESC_NORMAL="\e[0m"
 
+ORIGIN_DIR=$(pwd)
+
 die()
 {
    echo -e $ESC_ERROR"ERROR: $@"$ESC_NORMAL 1>&2
+   cd $ORIGIN_DIR
    exit 1;
 }
 
@@ -47,7 +50,11 @@ then
    then
       die "Folder \"$NFS_INIT_DIR\" not found!"
    fi
-   SCU=$RAMDISK_LNK_DIR/$SCU_NAME
+
+
+   cd $RAMDISK_LNK_DIR
+   #SCU=$RAMDISK_LNK_DIR/$SCU_NAME
+   SCU=$SCU_NAME
    if [ ! -L "$SCU" ]
    then
       die "SCU \"$SCU_NAME\" not found!"
@@ -55,10 +62,12 @@ then
    if [ "$RD_NAME" = "-i" ]
    then
       basename $(readlink $SCU)
+      cd $ORIGIN_DIR
       exit 0
    fi
 
-   RAMDISK=$RAMDISK_LNK_DIR/$RD_NAME
+   #RAMDISK=$RAMDISK_LNK_DIR/$RD_NAME
+   RAMDISK=$RD_NAME
    if [ ! -f "$RAMDISK" ]
    then
       die "RAM-disc file \"$RD_NAME\" not found"
@@ -66,6 +75,7 @@ then
    if [ "$(basename $(readlink $SCU))" = "$RD_NAME" ]
    then
       echo "Nothing to do..."
+      cd $ORIGIN_DIR
       exit 0
    fi
 
@@ -89,7 +99,9 @@ then
   # then
   #    die "Symbolic link \"$NFS_INIT_DIR/50_fesa_dev\" not found!"
   # fi
+   cd $ORIGIN_DIR
    echo "done"
+   cd $ORIGIN_DIR
 else
    #
    # Script is running on remote-PC
