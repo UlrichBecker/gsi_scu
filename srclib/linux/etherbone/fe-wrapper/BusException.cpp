@@ -5,7 +5,7 @@
  *      Author: rapp
  */
 
-#ifdef CONFIG_N0_INCLUDE_PATHS
+#ifdef CONFIG_NO_INCLUDE_PATHS
  #include "BusException.hpp"
 #else
  #include "feSupport/scu/etherbone/BusException.hpp"
