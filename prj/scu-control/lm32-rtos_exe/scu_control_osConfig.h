@@ -19,7 +19,7 @@
  */
 #include <scu_control_os.h>
 
-#define configMINIMAL_STACK_SIZE 64
+#define configMINIMAL_STACK_SIZE               64
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
@@ -112,8 +112,13 @@
 #define TASK_PRIO_STD         1
 
 #define TASK_PRIO_MAIN        TASK_PRIO_STD
-#define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD
 #define TASK_PRIO_TEMPERATURE TASK_PRIO_STD
+
+#if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+ #define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD + 1
+#else
+ #define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD
+#endif
 
 #ifdef CONFIG_USE_ADDAC_FG_TASK
  #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )

@@ -236,6 +236,7 @@ void daqTaskResume( void )
 }
 
 #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+#warning CONFIG_SLEEP_DAQ_TASK doesnt work yet!
 /*! ---------------------------------------------------------------------------
  * @see scu_task_daq.h
  */
