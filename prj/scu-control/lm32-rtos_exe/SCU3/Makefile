@@ -36,10 +36,7 @@ BASE_DIR = $(shell pwd)/..
 STACK_SIZE  =  512
 #NO_LTO := 1
 
-
 # SCU_URL = scuxl0118
-### SCU_URL = scuxl0107
-# SCU_URL = scuxl0035
 # SCU_URL = scuxl0192
 # SCU_URL = scuxl0212
 # SCU_URL = scuxl0331
