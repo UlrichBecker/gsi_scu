@@ -30,6 +30,10 @@
    #define EB_DEFAULT_TIMEOUT 5000
 #endif
 
+#ifndef EB_DEFAULT_CONNECTION
+  #define EB_DEFAULT_CONNECTION "dev/wbm0"
+#endif
+
 namespace FeSupport {
   namespace Scu {
     /*!
@@ -66,7 +70,7 @@ namespace FeSupport {
            *        and/or gives the pointer to this instance back.
            * @author Ulrich Becker
            */
-          static PTR_T getInstance( const std::string netaddress = "/dev/wbm0",
+          static PTR_T getInstance( const std::string& netaddress = EB_DEFAULT_CONNECTION,
                                     uint timeout = EB_DEFAULT_TIMEOUT );
 
           /*!
@@ -79,7 +83,8 @@ namespace FeSupport {
           /*!
            * \brief Basic constuctor
            */
-          EtherboneConnection(std::string netaddress, uint timeout = EB_DEFAULT_TIMEOUT );
+          EtherboneConnection( const std::string& netaddress = EB_DEFAULT_CONNECTION,
+                               uint timeout = EB_DEFAULT_TIMEOUT );
 
           /*!
            * \brief Destructor

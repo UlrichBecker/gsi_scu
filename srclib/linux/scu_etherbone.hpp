@@ -1,6 +1,7 @@
 /*!
  * @file scu_etherbone.hpp
- * @brief Base class for wishbone or etherbone connections
+ * @brief Base class for wishbone or etherbone connections.\n
+ *        Inheritable version for class EtherboneConnection.
  * @see scu_etherbone.cpp
  * @see EtherboneConnection.hpp
  * @see EtherboneConnection.cpp
@@ -48,27 +49,31 @@ namespace Scu
  */
 class EtherboneAccess
 {
+public:
+   using PTR_T = EBC::EtherboneConnection::PTR_T;
+
+private:
    /*!
     * @brief Class variable is the instances counter of this class.
     */
-   static uint               c_useCount;
+   static uint c_useCount;
 
    /*!
     * @brief Pointer to the object of type EtherboneConnection
     */
-   EBC::EtherboneConnection* m_pEbc;
+   PTR_T       m_pEbc;
 
    /*!
     * @brief Keeps the information for the destructor whether the etherbone object
     *        comes from external or was self created.
     */
-   bool                      m_fromExtern;
+   bool        m_fromExtern;
 
    /*!
     * @brief Keeps the information for the destructor whether the etherbone object
     *        was already connected or not.
     */
-   bool                      m_selfConnected;
+   bool        m_selfConnected;
 
 public:
 
@@ -78,7 +83,7 @@ public:
     * @see getEb
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   EtherboneAccess( EBC::EtherboneConnection* pEbc );
+   EtherboneAccess( PTR_T pEbc );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and
@@ -87,7 +92,8 @@ public:
     *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
     * @param timeout Response timeout.
     */
-   EtherboneAccess( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT );
+   EtherboneAccess( const std::string& rScuName = EB_DEFAULT_CONNECTION,
+                    uint timeout = EB_DEFAULT_TIMEOUT );
 
    /*!
     * @brief Destructur makes a disconnect, when this object has connected self
@@ -102,9 +108,18 @@ public:
     * It can be used as argument for constructors of further objects which
     * based on this class.
     */
-   EBC::EtherboneConnection* getEb( void )
+   PTR_T getEb( void )
    {
       return m_pEbc;
+   }
+
+   /*!
+    * @brief Returns the number of requested connections.
+    * @note For debug purposes only.
+    */
+   uint getConnectionCounter( void ) const
+   {
+      return m_pEbc->getConnectionCounter();
    }
 
    /*!

@@ -82,7 +82,7 @@ EtherboneConnection::OBJ_ADMIN_T EtherboneConnection::c_oAdmin =
 
 /* ----------------------------------------------------------------------------
  */
-EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string netaddress,
+EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string& netaddress,
                                                              uint timeout )
 {
    if( c_oAdmin.count_ == 0 )
@@ -138,7 +138,7 @@ void EtherboneConnection::releaseInstance( PTR_T ptr )
 ///////////////////////////////////////////////////////////////////////////////
 /* ----------------------------------------------------------------------------
  */
-EtherboneConnection::EtherboneConnection(std::string netaddress,
+EtherboneConnection::EtherboneConnection( const std::string& netaddress,
                                                          unsigned int timeout)
 #ifdef CONFIG_EB_USE_NORMAL_MUTEX
    :netaddress_(netaddress)

@@ -1,6 +1,7 @@
 /*!
  * @file scu_etherbone.cpp
- * @brief Base class for wishbone or etherbone connections
+ * @brief Base class for wishbone or etherbone connections.\n
+ *        Inheritable version for class EtherboneConnection.
  * @see scu_etherbone.hpp
  * @see EtherboneConnection.hpp
  * @see EtherboneConnection.cpp
@@ -53,7 +54,7 @@ EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
 
 /*!----------------------------------------------------------------------------
  */
-EtherboneAccess::EtherboneAccess( std::string& rScuName, uint timeout )
+EtherboneAccess::EtherboneAccess( const std::string& rScuName, uint timeout )
    :m_pEbc( nullptr )
    ,m_fromExtern( false )
    ,m_selfConnected( true )
