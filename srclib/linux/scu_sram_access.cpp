@@ -31,7 +31,7 @@ using namespace Scu;
 
 /*!----------------------------------------------------------------------------
  */
-SramAccess::SramAccess( EBC::EtherboneConnection* pEbc )
+SramAccess::SramAccess( PTR_T pEbc )
    :RamAccess( pEbc )
 {
    init();
@@ -39,7 +39,7 @@ SramAccess::SramAccess( EBC::EtherboneConnection* pEbc )
 
 /*!----------------------------------------------------------------------------
  */
-SramAccess::SramAccess( std::string& rScuName, uint timeout )
+SramAccess::SramAccess( const std::string& rScuName, uint timeout )
    :RamAccess( rScuName, timeout )
 {
    init();

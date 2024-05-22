@@ -43,7 +43,7 @@ protected:
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   RamAccess( EBC::EtherboneConnection* pEbc )
+   RamAccess( PTR_T pEbc )
       :EtherboneAccess( pEbc )
    {
    }
@@ -55,7 +55,8 @@ protected:
     *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
     * @param timeout Response timeout.
     */
-   RamAccess( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT )
+   RamAccess( const std::string& rScuName = EB_DEFAULT_CONNECTION,
+              uint timeout = EB_DEFAULT_TIMEOUT )
       :EtherboneAccess( rScuName, timeout )
    {
    }

@@ -56,7 +56,7 @@ public:
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   Lm32Access( EBC::EtherboneConnection* pEbc );
+   Lm32Access( PTR_T pEbc );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and
@@ -65,7 +65,8 @@ public:
     *                 In the case this application runs on a SCU then the name is "/dev/wbm0"
     * @param timeout Response timeout.
     */
-   Lm32Access( std::string& rScuName, uint timeout = EB_DEFAULT_TIMEOUT );
+   Lm32Access( const std::string& rScuName = EB_DEFAULT_CONNECTION,
+               uint timeout = EB_DEFAULT_TIMEOUT );
 
    ~Lm32Access( void );
 

@@ -86,7 +86,7 @@ public:
     *                   Value of -1 (default) means never reading in burst-mode.\n
     *                   Value of 0 means always reading in in burst-mode.
     */
-   Ddr3Access( EBC::EtherboneConnection* pEbc, int burstLimit = NEVER_BURST );
+   Ddr3Access( PTR_T pEbc, int burstLimit = NEVER_BURST );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and
@@ -99,7 +99,8 @@ public:
     *                   Value of 0 means always reading in in burst-mode.
     * @param timeout Etherbone response timeout.
     */
-   Ddr3Access( std::string& rScuName, int burstLimit = NEVER_BURST, uint timeout = EB_DEFAULT_TIMEOUT );
+   Ddr3Access( const std::string& rScuName = EB_DEFAULT_CONNECTION,
+               int burstLimit = NEVER_BURST, uint timeout = EB_DEFAULT_TIMEOUT );
 
    /*!
     * @brief Destructur makes a disconnect, when this object has connected self

@@ -30,7 +30,7 @@ using namespace Scu;
 
 /*!----------------------------------------------------------------------------
  */
-Lm32Access::Lm32Access( EBC::EtherboneConnection* pEbc )
+Lm32Access::Lm32Access( PTR_T pEbc )
    :EtherboneAccess( pEbc )
 {
    init();
@@ -38,7 +38,7 @@ Lm32Access::Lm32Access( EBC::EtherboneConnection* pEbc )
 
 /*!----------------------------------------------------------------------------
  */
-Lm32Access::Lm32Access( std::string& rScuName, uint timeout )
+Lm32Access::Lm32Access( const std::string& rScuName, uint timeout )
    :EtherboneAccess( rScuName, timeout )
 {
    init();

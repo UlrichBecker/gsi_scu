@@ -49,7 +49,7 @@ Ddr3Access::Ddr3Mutex::~Ddr3Mutex( void )
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc, int burstLimit )
+Ddr3Access::Ddr3Access( PTR_T pEbc, int burstLimit )
    :RamAccess( pEbc )
    ,m_burstLimit( burstLimit )
    ,m_oMutex( pEbc->getNetAddress() )
@@ -59,7 +59,7 @@ Ddr3Access::Ddr3Access( EBC::EtherboneConnection* pEbc, int burstLimit )
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Access( std::string& rScuName, int burstLimit, uint timeout )
+Ddr3Access::Ddr3Access( const std::string& rScuName, int burstLimit, uint timeout )
    :RamAccess( rScuName, timeout )
    ,m_burstLimit( burstLimit )
    ,m_oMutex( rScuName )
