@@ -45,7 +45,7 @@ using namespace daq;
 ///////////////////////////////////////////////////////////////////////////////
 /*!----------------------------------------------------------------------------
  */
-EbRamAccess::Lm32ShMemAccess::Lm32ShMemAccess( DaqEb::EtherboneConnection* poEb )
+EbRamAccess::Lm32ShMemAccess::Lm32ShMemAccess( EBC_PTR_T poEb )
    :Lm32Access( poEb )
 {
    /*
@@ -60,7 +60,7 @@ EbRamAccess::Lm32ShMemAccess::Lm32ShMemAccess( DaqEb::EtherboneConnection* poEb 
 /*! ---------------------------------------------------------------------------
  * @see daq_eb_ram_buffer.hpp
  */
-EbRamAccess::EbRamAccess( DaqEb::EtherboneConnection* poEb )
+EbRamAccess::EbRamAccess( EBC_PTR_T poEb )
    :m_oLm32( poEb )
    ,m_poRamBuffer( nullptr )
 #ifdef CONFIG_EB_TIME_MEASSUREMENT

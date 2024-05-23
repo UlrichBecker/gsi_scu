@@ -797,7 +797,7 @@ protected:
    DEVICE_LIST_T  m_devicePtrList;
 
 public:
-   DaqAdministration( DaqEb::EtherboneConnection* poEtherbone,
+   DaqAdministration( EBC_PTR_T poEtherbone,
                       const bool doReset = true,
                       const bool doSendCommand = true
                     );

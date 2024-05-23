@@ -168,6 +168,9 @@ public:
  */
 class DaqBaseInterface
 {
+public:
+   using EBC_PTR_T = EtherboneAccess::EBC_PTR_T;
+
 protected:
    using EB_STATUS_T  = eb_status_t;
 
@@ -195,7 +198,8 @@ public:
    /*!
     * @brief Constructor variant for object of type DaqEb::EtherboneConnection
     */
-   DaqBaseInterface( DaqEb::EtherboneConnection* poEtherbone, const uint64_t dataTimeout = 0 );
+   //DaqBaseInterface( DaqEb::EtherboneConnection* poEtherbone, const uint64_t dataTimeout = 0 );
+   DaqBaseInterface( EBC_PTR_T poEtherbone, const uint64_t dataTimeout = 0 );
 
    /*!
     * @brief Constructor variant for object of type DaqAccess
@@ -226,7 +230,7 @@ public:
    /*!
     * @brief returns a pointer of the object of type DaqEb::EtherboneConnection
     */
-   DaqEb::EtherboneConnection* getEbPtr( void ) const
+   EBC_PTR_T getEbPtr( void ) const
    {
       return m_poEbAccess->getEbPtr();
    }

@@ -44,7 +44,7 @@ public:
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   SramAccess( PTR_T pEbc );
+   SramAccess( EBC_PTR_T pEbc );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and

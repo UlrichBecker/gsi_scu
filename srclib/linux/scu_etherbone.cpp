@@ -36,13 +36,13 @@ uint EtherboneAccess::c_useCount = 0;
 
 /*!----------------------------------------------------------------------------
  */
-EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
+EtherboneAccess::EtherboneAccess( EBC_PTR_T pEbc )
    :m_pEbc( pEbc )
    ,m_fromExtern( true )
    ,m_selfConnected( false )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
-   assert( dynamic_cast<EBC::EtherboneConnection*>(m_pEbc) != nullptr );
+   assert( dynamic_cast<EBC_PTR_T>(m_pEbc) != nullptr );
    if( !m_pEbc->isConnected() )
    {
       DEBUG_MESSAGE( "m_pEbc->connect();" );
@@ -55,13 +55,12 @@ EtherboneAccess::EtherboneAccess( EBC::EtherboneConnection* pEbc )
 /*!----------------------------------------------------------------------------
  */
 EtherboneAccess::EtherboneAccess( const std::string& rScuName, uint timeout )
-   :m_pEbc( nullptr )
+   :m_pEbc( EBC::EtherboneConnection::getInstance( rScuName, timeout ) )
    ,m_fromExtern( false )
    ,m_selfConnected( true )
 {
    DEBUG_MESSAGE_M_FUNCTION( rScuName );
-  // m_pEbc = new EBC::EtherboneConnection( rScuName, timeout ); //deprecated
-   m_pEbc = EBC::EtherboneConnection::getInstance( rScuName, timeout );
+
    if( !m_pEbc->isConnected() )
    {
       DEBUG_MESSAGE( "m_pEbc->connect();" );
@@ -87,7 +86,6 @@ EtherboneAccess::~EtherboneAccess( void )
    if( !m_fromExtern )
    {
       DEBUG_MESSAGE( "delete m_pEbc;" );
-      //delete m_pEbc; // deprecated
       EBC::EtherboneConnection::releaseInstance(m_pEbc);
    }
 }

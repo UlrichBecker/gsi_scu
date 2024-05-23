@@ -86,7 +86,7 @@ public:
     *                   Value of -1 (default) means never reading in burst-mode.\n
     *                   Value of 0 means always reading in in burst-mode.
     */
-   Ddr3Access( PTR_T pEbc, int burstLimit = NEVER_BURST );
+   Ddr3Access( EBC_PTR_T pEbc, int burstLimit = NEVER_BURST );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and

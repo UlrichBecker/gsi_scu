@@ -62,6 +62,10 @@ namespace daq
  */
 class EbRamAccess
 {
+public:
+   using EBC_PTR_T = EtherboneAccess::EBC_PTR_T;
+
+private:
    /*!
     * @brief Specializing the class Lm32Access for shared-memory accesses
     *        of LM32.
@@ -69,7 +73,7 @@ class EbRamAccess
    class Lm32ShMemAccess: public Lm32Access
    {
    public:
-      Lm32ShMemAccess( DaqEb::EtherboneConnection* );
+      Lm32ShMemAccess( EBC_PTR_T );
    };
 
    /*!
@@ -132,7 +136,7 @@ public:
     *        already been done outside.
     * @param poEb Pointer to the object of type EtherboneConnection.
     */
-   EbRamAccess( DaqEb::EtherboneConnection* poEb );
+   EbRamAccess( EBC_PTR_T poEb );
 
    /*!
     * @brief Destructor terminates the ehtherbone connection if the connection was made

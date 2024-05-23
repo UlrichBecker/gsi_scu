@@ -80,7 +80,7 @@ public:
     *        already been done outside and probes the LM32-firmware.
     * @param poEb Pointer to the object of type EtherboneConnection.
     */
-   DaqAccess( DaqEb::EtherboneConnection* poEb );
+   DaqAccess( EBC_PTR_T poEb );
 
    /*!
     * @brief Destructor terminates the ehtherbone connection if the

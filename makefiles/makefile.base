@@ -346,11 +346,16 @@ devargs:
 
 OPT_CPPCHECK ?= -q
 OPT_CPPCHECK += -D__GNUC__
+OPT_CPPCHECK += --check-level=exhaustive
 
-CPPCHECK              ?= cppcheck
+CPPCHECK     ?= cppcheck
 CPPCHECK_WITH_OPTIONS = $(CPPCHECK) $(OPT_CPPCHECK) $(OPT_INCLUDE) $(OPT_DEFINES) -D__CPPCHECK__
 .PHONY: check
 check:
+	$(QUIET)if [ ! -x $$(which $(CPPCHECK) ) ]; then                                 \
+	   echo -e $(ESC_FG_RED)"ERROR: \"$(CPPCHECK)\" is not installed!"$(ESC_NORMAL); \
+	   exit 1;                                                                       \
+	fi
 	$(QUIET)(for i in $(_SOURCE); do                                    \
 		echo "checking: " $$(basename $$i);                         \
 		case "$${i##*.}" in                                         \

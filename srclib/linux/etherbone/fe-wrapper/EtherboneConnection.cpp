@@ -82,7 +82,7 @@ EtherboneConnection::OBJ_ADMIN_T EtherboneConnection::c_oAdmin =
 
 /* ----------------------------------------------------------------------------
  */
-EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string& netaddress,
+EtherboneConnection::EBC_PTR_T EtherboneConnection::getInstance( const std::string& netaddress,
                                                              uint timeout )
 {
    if( c_oAdmin.count_ == 0 )
@@ -90,25 +90,30 @@ EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string& 
       assert( c_oAdmin.ptr_ == nullptr );
       c_oAdmin.ptr_ = new EtherboneConnection( netaddress, timeout );
    }
-   else if( c_oAdmin.ptr_->getNetAddress() != netaddress )
+   else
    {
-      std::stringstream stream;
-      stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
-             << __LINE__ << " Different net-addresses -> current: "
-             << c_oAdmin.ptr_->getNetAddress()
-             << ", requested: "
-             << netaddress;
-      throw BusException( stream.str() );
-   }
-   else if( c_oAdmin.ptr_->timeout_ != timeout )
-   {
-      std::stringstream stream;
-      stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
-             << __LINE__ << " Different timeout values -> current: "
-             << c_oAdmin.ptr_->timeout_
-             << ", requested: "
-             << timeout;
-      throw BusException( stream.str() );
+      assert( c_oAdmin.ptr_ != nullptr );
+      if( c_oAdmin.ptr_->getNetAddress() != netaddress )
+      {
+         std::stringstream stream;
+         stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
+                << __LINE__ << " Different net-addresses -> current: "
+                << c_oAdmin.ptr_->getNetAddress()
+                << ", requested: "
+                << netaddress;
+         throw BusException( stream.str() );
+      }
+
+      if( c_oAdmin.ptr_->timeout_ != timeout )
+      {
+         std::stringstream stream;
+         stream << __FILE__ << "::" << __FUNCTION__ << "::" << std::dec
+                << __LINE__ << " Different timeout values -> current: "
+                << c_oAdmin.ptr_->timeout_
+                << ", requested: "
+                << timeout;
+         throw BusException( stream.str() );
+      }
    }
 
    c_oAdmin.count_++;
@@ -117,7 +122,7 @@ EtherboneConnection::PTR_T EtherboneConnection::getInstance( const std::string& 
 
 /* ----------------------------------------------------------------------------
  */
-void EtherboneConnection::releaseInstance( PTR_T ptr )
+void EtherboneConnection::releaseInstance( EBC_PTR_T ptr )
 {
    assert( c_oAdmin.ptr_ == ptr );
 
@@ -127,8 +132,6 @@ void EtherboneConnection::releaseInstance( PTR_T ptr )
       c_oAdmin.count_--;
       if( c_oAdmin.count_ == 0 )
       {
-         if( c_oAdmin.ptr_->isConnected() )
-            c_oAdmin.ptr_->disconnect();
          delete c_oAdmin.ptr_;
          c_oAdmin.ptr_ = nullptr;
       }

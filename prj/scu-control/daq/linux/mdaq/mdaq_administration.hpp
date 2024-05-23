@@ -295,7 +295,7 @@ protected:
    DEVICE_LIST_T  m_devicePtrList;
 
 public:
-   DaqAdministration( DaqEb::EtherboneConnection* poEtherbone );
+   DaqAdministration( EBC_PTR_T poEtherbone );
    DaqAdministration( DaqAccess* poEbAccess );
    virtual ~DaqAdministration( void );
 

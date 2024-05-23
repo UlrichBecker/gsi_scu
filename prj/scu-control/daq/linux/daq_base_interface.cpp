@@ -31,7 +31,7 @@ using namespace Scu;
 ///////////////////////////////////////////////////////////////////////////////
 /*! --------------------------------------------------------------------------
  */
-DaqBaseInterface::DaqBaseInterface( DaqEb::EtherboneConnection* poEtherbone,
+DaqBaseInterface::DaqBaseInterface( EBC_PTR_T poEtherbone,
                                     const uint64_t dataTimeout )
    :m_poEbAccess( new DaqAccess( poEtherbone ) )
    ,m_ebAccessSelfCreated( true )

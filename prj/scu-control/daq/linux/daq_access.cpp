@@ -33,7 +33,7 @@ using namespace Scu;
 ///////////////////////////////////////////////////////////////////////////////
 /*!----------------------------------------------------------------------------
  */
-DaqAccess::DaqAccess( DaqEb::EtherboneConnection* poEb )
+DaqAccess::DaqAccess( EBC_PTR_T poEb )
    :daq::EbRamAccess( poEb )
    ,m_addacDaqLM32Offset( INVALID_OFFSET )
 #ifdef CONFIG_MIL_FG

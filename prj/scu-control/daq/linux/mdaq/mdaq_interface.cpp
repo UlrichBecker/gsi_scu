@@ -32,7 +32,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  */
-DaqInterface::DaqInterface( DaqEb::EtherboneConnection* poEtherbone )
+DaqInterface::DaqInterface( EBC_PTR_T poEtherbone )
    :DaqBaseInterface( poEtherbone, c_dataTimeout )
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );

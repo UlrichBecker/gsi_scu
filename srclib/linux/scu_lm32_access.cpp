@@ -30,7 +30,7 @@ using namespace Scu;
 
 /*!----------------------------------------------------------------------------
  */
-Lm32Access::Lm32Access( PTR_T pEbc )
+Lm32Access::Lm32Access( EBC_PTR_T pEbc )
    :EtherboneAccess( pEbc )
 {
    init();

@@ -213,7 +213,7 @@ public:
    /*!
     * @brief Constructor variant for a object of type EtherboneConnection
     */
-   DaqInterface( DaqEb::EtherboneConnection* poEtherbone );
+   DaqInterface( EBC_PTR_T poEtherbone );
 
    /*!
     * @brief Constructor variant for a object of type DaqAccess

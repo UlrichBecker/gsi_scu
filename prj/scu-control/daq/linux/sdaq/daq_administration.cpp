@@ -191,7 +191,7 @@ void DaqDevice::reset( void )
 
 /*! ---------------------------------------------------------------------------
  */
-DaqAdministration::DaqAdministration( DaqEb::EtherboneConnection* poEtherbone,
+DaqAdministration::DaqAdministration( EBC_PTR_T poEtherbone,
                                       const bool doReset,
                                       const bool doSendCommand
                                     )

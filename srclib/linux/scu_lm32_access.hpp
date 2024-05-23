@@ -56,7 +56,7 @@ public:
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   Lm32Access( PTR_T pEbc );
+   Lm32Access( EBC_PTR_T pEbc );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and

@@ -813,6 +813,7 @@ class FgFeedbackAdministration
 
 public:
    using DAQ_T          = FgFeedbackDevice::DAQ_T;
+   using EBC_PTR_T      = DaqBaseInterface::EBC_PTR_T;
 
 #ifdef CONFIG_EB_TIME_MEASSUREMENT
    /*!
@@ -984,7 +985,7 @@ public:
     * @param doRescan If true then a rescan command will send to the
     *                 LM32 -application.
     */
-   FgFeedbackAdministration( DaqEb::EtherboneConnection* poEtherbone, const bool doRescan = false );
+   FgFeedbackAdministration( EBC_PTR_T poEtherbone, const bool doRescan = false );
 
    /*!
     * @brief Second constructor variant:

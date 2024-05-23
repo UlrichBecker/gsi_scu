@@ -46,11 +46,18 @@ namespace Scu
 /*!----------------------------------------------------------------------------
  * @brief This wrapper class makes it possible to inherit without changing
  *        other modules that also access etherbone.
+ * @todo Since the introduction of a central singleton object of the class
+ *       EtherboneConnection there is unnecessary and redundant code in this
+ *       class. Remove this occasionally.
  */
 class EtherboneAccess
 {
 public:
-   using PTR_T = EBC::EtherboneConnection::PTR_T;
+   /*!
+    * @brief Pointer-type for object of class EtherboneConnection
+    * @see EtherboneConnection.hpp
+    */
+   using EBC_PTR_T = EBC::EtherboneConnection::EBC_PTR_T;
 
 private:
    /*!
@@ -61,7 +68,7 @@ private:
    /*!
     * @brief Pointer to the object of type EtherboneConnection
     */
-   PTR_T       m_pEbc;
+   EBC_PTR_T   m_pEbc;
 
    /*!
     * @brief Keeps the information for the destructor whether the etherbone object
@@ -83,7 +90,7 @@ public:
     * @see getEb
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   EtherboneAccess( PTR_T pEbc );
+   EtherboneAccess( EBC_PTR_T pEbc );
 
    /*!
     * @brief Constructor which creates a object of type EtherboneConnection and
@@ -108,7 +115,7 @@ public:
     * It can be used as argument for constructors of further objects which
     * based on this class.
     */
-   PTR_T getEb( void )
+   EBC_PTR_T getEb( void )
    {
       return m_pEbc;
    }

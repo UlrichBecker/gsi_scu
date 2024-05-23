@@ -49,7 +49,7 @@ Ddr3Access::Ddr3Mutex::~Ddr3Mutex( void )
 
 /*!----------------------------------------------------------------------------
  */
-Ddr3Access::Ddr3Access( PTR_T pEbc, int burstLimit )
+Ddr3Access::Ddr3Access( EBC_PTR_T pEbc, int burstLimit )
    :RamAccess( pEbc )
    ,m_burstLimit( burstLimit )
    ,m_oMutex( pEbc->getNetAddress() )

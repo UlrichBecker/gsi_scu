@@ -858,7 +858,7 @@ void FgFeedbackAdministration::MilDaqAdministration::onFifoAlarm( void )
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
  */
-FgFeedbackAdministration::FgFeedbackAdministration( DaqEb::EtherboneConnection* poEtherbone,
+FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
                                                     const bool doRescan )
    :m_oAddacDaqAdmin( this, poEtherbone )
 #ifdef CONFIG_MIL_FG

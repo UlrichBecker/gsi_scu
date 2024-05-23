@@ -114,7 +114,7 @@ const std::string daq::status2String( DAQ_OP_STATE_T status )
 /*! ---------------------------------------------------------------------------
  * @brief Constructor of class daq::DaqInterface
  */
-DaqInterface::DaqInterface( DaqEb::EtherboneConnection* poEtherbone,
+DaqInterface::DaqInterface( EBC_PTR_T poEtherbone,
                             const bool doReset,
                             const bool doSendCommand
                           )

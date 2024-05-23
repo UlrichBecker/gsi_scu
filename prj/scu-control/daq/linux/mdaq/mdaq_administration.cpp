@@ -144,7 +144,7 @@ void DaqDevice::onReset( void )
 ///////////////////////////////////////////////////////////////////////////////
 /*-----------------------------------------------------------------------------
  */
-DaqAdministration::DaqAdministration( DaqEb::EtherboneConnection* poEtherbone )
+DaqAdministration::DaqAdministration( EBC_PTR_T poEtherbone )
   :DaqInterface( poEtherbone )
 #ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE
   ,m_pfPollDaqData( nullptr )

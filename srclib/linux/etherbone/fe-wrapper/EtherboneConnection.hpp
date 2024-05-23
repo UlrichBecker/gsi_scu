@@ -58,38 +58,68 @@ namespace FeSupport {
           using SCOPED_MUTEX_T = IPC::scoped_lock<MUTEX_T>;
        #endif
 
-          using PTR_T  = EtherboneConnection*;
+          /*!
+           * @brief Central definition of the pionter type for
+           *        whisbone/etherbone accesses.
+           *
+           * If necessary it can be changed here in a smart-pointer,
+           * e.g. shared_ptr<>
+           *
+           * @author Ulrich Becker
+           */
+          using EBC_PTR_T  = EtherboneConnection*;
+
+          /*!
+           * @brief Object for administrating a singelton object of the type
+           *        "EtherboneConnection".
+           *
+           * In the case that in the future there are more than one wishbone
+           * interfaces on a FEC, so this object becomes to a item-type of
+           * a linked list.
+           * @author Ulrich Becker
+           */
           struct OBJ_ADMIN_T
-          {
-             PTR_T  ptr_;
-             uint   count_;
+          {  /*!
+              * @brief Pointer of the single object of type
+              *        "EtherboneConnection*".
+              */
+             EBC_PTR_T ptr_;
+
+             /*!
+              * @brief Instances counter.
+              */
+             uint      count_;
           };
 
           /*!
            * @brief Static class-function creates a single instance if not already created
            *        and/or gives the pointer to this instance back.
+           * @return Pointer to the object of type "EtherboneConnection".
            * @author Ulrich Becker
            */
-          static PTR_T getInstance( const std::string& netaddress = EB_DEFAULT_CONNECTION,
-                                    uint timeout = EB_DEFAULT_TIMEOUT );
+          static EBC_PTR_T getInstance( const std::string& netaddress = EB_DEFAULT_CONNECTION,
+                                        uint timeout = EB_DEFAULT_TIMEOUT );
 
           /*!
            * @brief Counterpart of getInstance(), invokes the destructor if the instance has existed.
+           * @param ptr Return-value of getInstance(), at the moment only for debug purposes meaningful.
            * @author Ulrich Becker
            */
-          static void releaseInstance( PTR_T );
+          static void releaseInstance( EBC_PTR_T ptr );
 
      private:
           /*!
-           * \brief Basic constuctor
+           * \brief Basic constuctor, becomes invoked by the function getInstance() if
+           *        it is the first instance.
            */
           EtherboneConnection( const std::string& netaddress = EB_DEFAULT_CONNECTION,
                                uint timeout = EB_DEFAULT_TIMEOUT );
 
           /*!
-           * \brief Destructor
+           * \brief Destructor, becomes invoked by the function releaseInstance() if
+           *        it is the last instance.
            */
-          virtual ~EtherboneConnection();
+           virtual ~EtherboneConnection();
       public:
 #ifndef CONFIG_EB_USE_NORMAL_MUTEX
           /*!

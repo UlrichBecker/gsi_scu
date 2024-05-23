@@ -157,7 +157,7 @@ public:
    constexpr static std::size_t  c_pmHiresPayloadLen =
                                        c_hiresPmDataLen - c_discriptorWordSize;
 // --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
-   DaqInterface( DaqEb::EtherboneConnection* poEtherbone,
+   DaqInterface( EBC_PTR_T poEtherbone,
                  const bool doReset = true,
                  const bool doSendCommand = true
                );

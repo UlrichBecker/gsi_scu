@@ -31,7 +31,7 @@ using namespace Scu;
 
 /*!----------------------------------------------------------------------------
  */
-SramAccess::SramAccess( PTR_T pEbc )
+SramAccess::SramAccess( EBC_PTR_T pEbc )
    :RamAccess( pEbc )
 {
    init();

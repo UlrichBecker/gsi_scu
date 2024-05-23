@@ -43,7 +43,7 @@ protected:
     *        It establishes a connection if not already done.
     * @param pEbc Pointer to object of type EtherboneConnection
     */
-   RamAccess( PTR_T pEbc )
+   RamAccess( EBC_PTR_T pEbc )
       :EtherboneAccess( pEbc )
    {
    }
