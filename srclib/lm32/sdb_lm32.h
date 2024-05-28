@@ -32,6 +32,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+namespace Scu {
 #endif
 
 /*!
@@ -131,7 +132,8 @@ SDB_LOCATION_T* sdbSerarchRecursive( SDB_RECORD_T* pParentSdb,
 #endif /* ifdef __DOXYGEN__ */
 
 #ifdef __cplusplus
-}
+} /* namespace Scu */
+} /* extern "C" */
 #endif
 
 #endif /* ifndef _SDB_LM32_H */

@@ -110,7 +110,7 @@
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  */
 #include "eb_console_helper.h"
-#include "mini_sdb.h"
+#include "sdb_lm32.h"
 #include "helper_macros.h"
 
 
@@ -127,8 +127,8 @@ class SysInit
 public:
    SysInit( void )
    {
-      ::discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
-      ::uart_init_hw();      // init UART, required for printf...
+      Scu::discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
+     // uart_init_hw();      // init UART, required for printf...
       gsi::clrscr();
       gsi::gotoxy( 0, 0 );
       ::mprintf( ESC_FG_MAGENTA

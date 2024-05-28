@@ -124,7 +124,6 @@ STATIC inline void clrline( void )
 
 #ifndef __lm32__
    #include <iostream>
-#endif
 
 namespace gsi
 {
@@ -201,6 +200,7 @@ SMANIP2<int, int, ST> setxy( int x = 1, int y = 1 )
 }
 
 } /* namespace gsi */
+#endif /* ifdef __lm32__ */
 #endif /* ifdef __cplusplus */
 #endif /* ifndef _EB_CONSOLE_HELPER_H */
 /*================================== EOF ====================================*/
