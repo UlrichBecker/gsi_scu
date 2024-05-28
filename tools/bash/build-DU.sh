@@ -102,7 +102,11 @@ if [ -x "$BINARY_FILE" ]
 then
    if [ -d "$EXPORT_DIR" ]
    then
-     echo "Exporting: ${DU_NAME} to ${TARGET}"
+     if [ ! -d "${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}" ]
+     then
+        die "Target directory \"${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}\" not found! Maybe the first build process had not made by Eclipse."
+     fi
+     echo -e $ESC_SUCCESS"*** Build was successful, exporting executable: \"${DU_NAME}\" to \"${TARGET}\" ***"$ESC_NORMAL
      cp -u ${BINARY_FILE} ${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}/${DU_NAME}
    else
      die "Export directory \"$EXPORT_DIR\" not found!" 1>&2
