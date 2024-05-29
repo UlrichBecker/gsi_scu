@@ -114,7 +114,7 @@
 #include "helper_macros.h"
 
 
-#if COMPILER_VERSION_NUMBER < 70300
+#if (COMPILER_VERSION_NUMBER < 70300) && !defined(__CPPCHECK__)
   #error This module requieres the gcc-version 7.3.0 or higher.
 #endif
 #ifndef __lm32__
@@ -127,8 +127,6 @@ class SysInit
 public:
    SysInit( void )
    {
-      Scu::discoverPeriphery(); // mini-sdb: get info on important Wishbone infrastructure
-     // uart_init_hw();      // init UART, required for printf...
       gsi::clrscr();
       gsi::gotoxy( 0, 0 );
       ::mprintf( ESC_FG_MAGENTA
