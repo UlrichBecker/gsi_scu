@@ -74,7 +74,7 @@ fi
 
 if [ ! -n "$BINARY_SUFFIX" ]
 then
-   BINARY_SUFFIX=_S
+   BINARY_SUFFIX=_M
 fi
 
 if [ ! -n "$BINARY_DIR_SUFFIX" ]
