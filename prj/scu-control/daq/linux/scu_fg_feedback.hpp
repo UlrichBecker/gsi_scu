@@ -1235,6 +1235,12 @@ public:
     *
     * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
     *                to be called before!
+    *
+    * Example for obtaining the fifo-level in percent
+    * e.g. for a FESA aquisition property:
+    * @code
+    * const auto level = static_cast<float>(getAddacFiFoLevelPerTenThousand()) / 100.0;
+    * @endcode
     */
    uint getAddacFiFoLevelPerTenThousand( void )
    {
@@ -1289,6 +1295,12 @@ public:
     *
     * @note CAUTION: Obtaining valid data so the function updateMemAdmin() has
     *                to be called before!
+    *
+    * Example for obtaining the fifo-level in percent
+    * e.g. for a FESA aquisition property:
+    * @code
+    * const auto level = static_cast<float>(getMilFiFoLevelPerTenThousand()) / 100.0;
+    * @endcode
     */
     uint getMilFiFoLevelPerTenThousand( void )
     {
