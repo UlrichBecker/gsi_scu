@@ -21,12 +21,12 @@ die()
 
 if [ ! -n "${OECORE_SDK_VERSION}" ]
 then
-   echo "WARNING: YOCTO SDK is not active!" 1>&2
    if [ "${HOSTNAME:0:5}" = "asl74" ]
    then
+      echo "WARNING: YOCTO SDK is not active!" 1>&2
       LIB_SUFFIX="ACC7"
    else
-      LIB_SUFFIX=""
+      die "YOCTO SDK is not active!"
    fi
 else
    LIB_SUFFIX="Yocto${OECORE_SDK_VERSION}"
@@ -70,7 +70,7 @@ then
    die "Makefile in \"$PWD\" not found!"
 fi
 
-COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v "/etherbone\.h"  | grep -v Constants\.hpp )
+COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v "/etherbone\.h"  | grep -v Constants\.hpp | grep  -v BusException\.hpp)
 
 if [ ! -f "$LIB_FILE" ]
 then
