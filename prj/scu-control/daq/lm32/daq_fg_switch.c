@@ -31,7 +31,13 @@
 #include <eb_console_helper.h>
 #include "daq_fg_switch.h"
 
+//#define CONFIG_NO_DAQ_AUTOSWITCHING
+
 extern DAQ_ADMIN_T g_scuDaqAdmin;
+
+#ifdef CONFIG_NO_DAQ_AUTOSWITCHING
+  #warning DAQ-autoswitching will not implemented!
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @see daq_main.h
@@ -40,13 +46,13 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
                           const uint32_t tag )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
-
+#ifndef CONFIG_NO_DAQ_AUTOSWITCHING
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
 
-#ifdef CONFIG_NON_DAQ_FG_SUPPORT
+ #ifdef CONFIG_NON_DAQ_FG_SUPPORT
    if( (pDaqDevice == NULL) || (pDaqDevice->type == UNKNOWN))
       return;
-#endif
+ #endif
    DAQ_ASSERT( pDaqDevice != NULL );
 
    const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
@@ -70,6 +76,9 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
       daqChannelSample1msOn( pSetChannel );
       daqChannelSample1msOn( pActChannel );
    }
+#else
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not enabled!" );
+#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -78,13 +87,13 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
 void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d )\n" ESC_NORMAL, __func__, slot, fgNum );
-
+#ifndef CONFIG_NO_DAQ_AUTOSWITCHING
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
 
-#ifdef CONFIG_NON_DAQ_FG_SUPPORT
+ #ifdef CONFIG_NON_DAQ_FG_SUPPORT
    if( (pDaqDevice == NULL) || (pDaqDevice->type == UNKNOWN))
       return;
-#endif
+ #endif
    DAQ_ASSERT( pDaqDevice != NULL );
 
    const unsigned int setChannelNumber = daqGetSetDaqNumberOfFg( fgNum, pDaqDevice->type );
@@ -100,6 +109,9 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
       daqChannelSample1msOff( pSetChannel );
       daqChannelSample1msOff( pActChannel );
    }
+#else
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not disabled!" );
+#endif
 }
 
 /*================================== EOF ====================================*/
