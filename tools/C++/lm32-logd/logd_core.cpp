@@ -110,7 +110,7 @@ int Lm32Logd::StringBuffer::sync( void )
  */
 #define LOG_SELF( msg... )           \
 {                                    \
-    m_isError = true;                \
+    setError();                      \
     *this << msg << std::flush;      \
 }
 
