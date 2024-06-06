@@ -298,8 +298,14 @@ Lm32Logd::~Lm32Logd( void )
  */
 void Lm32Logd::setBurstLimit( int burstLimit )
 {
+   /*
+    * Checking wether it is the DDR3-RAM of SCU3 and not the SRAM of SCU4.
+    */
    if( dynamic_cast<Ddr3Access*>(m_oMmu.getRamAccess()) != nullptr )
-   {
+   { /*
+      * Yes, it is the DDR3-RAM, so the function Ddr3Access::setBurstLimit() is
+      * available.
+      */
       static_cast<Ddr3Access*>(m_oMmu.getRamAccess())->setBurstLimit( burstLimit );
    }
 }
