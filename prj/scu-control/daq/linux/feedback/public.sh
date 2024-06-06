@@ -121,17 +121,26 @@ mkdir -p $HEADER_DIR
 mkdir -p $LIB_DIR
 mkdir -p $LM32_BIN_DIR
 mkdir -p $EXAMPLE_DIR
+
+echo -e "Copying \"$(basename $LIB_FILE)\"\\tto \"$LIB_DIR\""
 cp -u $LIB_FILE $LIB_DIR
+
+echo -e "Copying \"$(basename $LM32_FW)\"\\tto \"$LM32_BIN_DIR\""
 cp -u $LM32_FW $LM32_BIN_DIR
+
+echo -e "Copying \"$(basename $EXAMPLE_FILE)\"\\tto \"$EXAMPLE_DIR\""
 cp -u $EXAMPLE_FILE $EXAMPLE_DIR
+
+echo
 
 n=0
 for i in $COPY_LIST
 do
+   echo -e "Copying \"$(basename $i)\"\\tto \"$HEADER_DIR\""
    cp -u $i $HEADER_DIR 2>/dev/null
    [ "$?" == "0" ] && ((n++))
 done
-
+echo "============================================"
 echo "$n header files copied to $HEADER_DIR"
 
 #=================================== EOF ======================================
