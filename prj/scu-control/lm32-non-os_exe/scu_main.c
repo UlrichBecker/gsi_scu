@@ -49,6 +49,11 @@
  #include "daq_main.h"
 #endif
 
+#define CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
+
+#if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && defined( CONFIG_MIL_FG ) && defined( CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES )
+#warning CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES is defined and aktive for debug purposes only!
+#endif
 
 #if !(defined( CONFIG_SCU3 ) != defined( CONFIG_SCU4 ))
   #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
@@ -292,8 +297,11 @@ ONE_TIME_CALL void initInterrupt( void )
    /*
     * Is at least one MIL function generator present?
     */
+   #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    if( milGetNumberOfFg() > 0 )
-   { /*
+   {
+   #endif
+      /*
       * Trying to use the timer interrupt for MIL-handling.
       */
       SCU_LM32_TIMER_T* pTimer = lm32TimerGetWbAddress();
@@ -305,15 +313,18 @@ ONE_TIME_CALL void initInterrupt( void )
                  ESC_NORMAL );
       }
       else
-      { /*
+      {  /*
          * Frequency of timer-interrupt: CPU_FREQUENCY / f_interrupt
          */
          lm32TimerSetPeriod( pTimer, CPU_FREQUENCY / 10000 );
          lm32TimerEnable( pTimer );
          irqRegisterISR( TIMER_IRQ, NULL, onScuTimerInterrupt );
          g_milUseTimerinterrupt = true;
+
       }
+   #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    }
+   #endif
  #else
    STATIC_ASSERT( MAX_LM32_INTERRUPTS == 1 );
  #endif
