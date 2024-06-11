@@ -229,7 +229,7 @@ inline FG_REGISTER_T* addacFgPrepare( const void* pScuBus,
    #ifdef _CONFIG_IRQ_ENABLE_IN_START_FG
       scuBusEnableSlaveInterrupt( pScuBus, slot );
    #endif
-      *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) |= pAddacObj->fgIrqMask;
+      *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) = pAddacObj->fgIrqMask;
       *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) |= pAddacObj->fgIrqMask;
 
 
@@ -281,8 +281,12 @@ inline void addacFgDisableIrq( const void* pScuBus,
 {
    FG_ASSERT( dev < ARRAY_SIZE(mg_devTab) );
 
-   *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) &= ~mg_devTab[dev].fgIrqMask;
-
+   const uint16_t fgIrqMask = mg_devTab[dev].fgIrqMask;
+   ATOMIC_SECTION()
+   {
+      *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) &= ~fgIrqMask;
+      *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) = fgIrqMask;
+   }
 #if defined( CONFIG_SCU_DAQ_INTEGRATION ) && defined( CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ)
   /*
    * Disabling of both daq-channels for the feedback of set- and actual values
