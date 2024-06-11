@@ -167,7 +167,6 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
 
    queueScuBusIrq.slot = slot;
-
    while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
    {
    #ifdef CONFIG_USE_ADDAC_FG_TASK
