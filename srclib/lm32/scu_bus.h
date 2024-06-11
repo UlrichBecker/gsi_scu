@@ -277,6 +277,28 @@ uint16_t scuBusGetAndResetIterruptPendingFlags( const void* pScuBusBase,
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS INTERRUPT
+ * @brief Resets one or more interrupt pending flags of a SCU-bus slave.
+ *
+ * The purpose of this function is to reset possible pending interrupts,
+ * when the corresponding service is already disabled.
+ * @param pScuBusBase Base-address of SU-bus.
+ * @param slot Slave- respectively slot- number of slave.
+ * @param flags Or-linked pending flags which has to be deleted.
+ */
+STATIC inline
+void scuBusResetInterruptPendingFlags( const void* pScuBusBase,
+                                       const unsigned int slot,
+                                       const uint16_t flags )
+{
+   /*
+    * The interrupt pending flags becomes deleted by writing a one in
+    * the concerning bit position(s).
+    */
+   *scuBusGetInterruptActiveFlagRegPtr( pScuBusBase, slot ) = flags;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup SCU_BUS INTERRUPT
  * @brief Returns the pointer of the interrupt enable register of the given
  *        SCU-bus slave.
  * @param pScuBusBase Base-address of SU-bus.
