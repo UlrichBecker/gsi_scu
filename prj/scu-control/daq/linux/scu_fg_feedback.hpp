@@ -985,14 +985,15 @@ public:
     *        this constructor.
     * @note If the wishbone/etherbone connection not already open then
     *       this constructor will do that.
-    * @param netaddress Textstring with the whoshbone device. Default "dev/wbm0".
-    *                   If the whishbone device already open, then this parameter has no effect.
+    * @param netaddress Textstring with the wishbone device. Default: "dev/wbm0".
+    *                   If the wishbone device already open, then this parameter has no effect.
     *                   If this parameter differs to the already opened device,
     *                   then an exception will thrown.
     * @param doRescan If true then a rescan command will send to the
     *                 LM32 -application.
-    * @param timeout Timeout in milliseconds of the etherbone connection.
-    *                If the whishbone device already open, then this parameter has no effect.
+    * @param timeout Timeout in milliseconds of the wishbone/etherbone connection.
+    *                Default: 5000 ms
+    *                If the wishbone device already open, then this parameter has no effect.
     *                If this parameter differs to the already opened device,
     *                then an exception will thrown.
     */
