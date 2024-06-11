@@ -969,6 +969,11 @@ private:
    DAQ_T                      m_throttleThreshold;
    uint64_t                   m_throttleTimeout;
 
+   /*!
+    * @brief Info flag for the destructor.
+    */
+   bool                       m_ebSelfAcquired;
+
 protected:
    #define DEVICE_LIST_BASE std::list
    using DEVICE_LIST_T = DEVICE_LIST_BASE<FgFeedbackDevice*>;
@@ -976,7 +981,26 @@ protected:
 
 public:
    /*!
-    * @brief First constructor variant: Establishes a wishbone/etherbone
+    * @brief First constructor variant: Object of etherbone becomes acquired by
+    *        this constructor.
+    * @note If the wishbone/etherbone connection not already open then
+    *       this constructor will do that.
+    * @param netaddress Textstring with the whoshbone device. Default "dev/wbm0".
+    *                   If the whishbone device already open, then this parameter has no effect.
+    *                   If this parameter differs to the already opened device,
+    *                   then an exception will thrown.
+    * @param doRescan If true then a rescan command will send to the
+    *                 LM32 -application.
+    * @param timeout Timeout in milliseconds of the etherbone connection.
+    *                If the whishbone device already open, then this parameter has no effect.
+    *                If this parameter differs to the already opened device,
+    *                then an exception will thrown.
+    */
+   FgFeedbackAdministration( const std::string& netaddress = EB_DEFAULT_CONNECTION,
+                             const bool doRescan = false,
+                             uint timeout = EB_DEFAULT_TIMEOUT );
+   /*!
+    * @brief Second constructor variant: Establishes a wishbone/etherbone
     *        connection and initialized the communication between
     *        Linux-host and LM32 application.
     * @note If the wishbone/etherbone connection not already open then
@@ -988,7 +1012,7 @@ public:
    FgFeedbackAdministration( EBC_PTR_T poEtherbone, const bool doRescan = false );
 
    /*!
-    * @brief Second constructor variant:
+    * @brief Third constructor variant:
     * @param poEbAccess Pointer to a object of type DaqAccess
     * @param doRescan If true then a rescan command will send to the
     *                 LM32 -application.

@@ -142,7 +142,7 @@ int main( const int argc, const char** ppArgv )
        */
       FgFeedbackAdministration myScu( &ebConnection, false );
 #else
-      FgFeedbackAdministration myScu( DaqEb::EtherboneConnection::getInstance(ebDeviceName) );
+      FgFeedbackAdministration myScu( ebDeviceName, false );
 #endif
 
       /*
@@ -342,7 +342,7 @@ int main( const int argc, const char** ppArgv )
        */
       //ebConnection.disconnect();
 
-      DaqEb::EtherboneConnection::releaseInstance( myScu.getEbAccess()->getEbPtr() );
+      //DaqEb::EtherboneConnection::releaseInstance( myScu.getEbAccess()->getEbPtr() );
       cout << "End..." << endl;
 
    } // end try()

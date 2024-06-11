@@ -856,6 +856,22 @@ void FgFeedbackAdministration::MilDaqAdministration::onFifoAlarm( void )
 #endif /* ifdef CONFIG_MIL_FG */
 
 ///////////////////////////////////////////////////////////////////////////////
+FgFeedbackAdministration::FgFeedbackAdministration( const std::string& netaddress,
+                                                    const bool doRescan,
+                                                    uint timeout )
+   :m_oAddacDaqAdmin( this, DaqEb::EtherboneConnection::getInstance( netaddress, timeout ) )
+#ifdef CONFIG_MIL_FG
+   ,m_oMilDaqAdmin( this, m_oAddacDaqAdmin.getEbAccess() )
+#endif
+   ,m_lm32Swi( m_oAddacDaqAdmin.getEbAccess() )
+   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
+   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
+   ,m_ebSelfAcquired( true )
+{
+   DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
+   scan( doRescan );
+}
+
 /*! ---------------------------------------------------------------------------
  */
 FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
@@ -867,6 +883,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
    ,m_lm32Swi( m_oAddacDaqAdmin.getEbAccess() )
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
+   ,m_ebSelfAcquired( false )
 {
    DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
@@ -883,6 +900,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
   ,m_lm32Swi( poEbAccess )
   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILISEC )
+  ,m_ebSelfAcquired( false )
 {
    DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
@@ -896,6 +914,9 @@ FgFeedbackAdministration::~FgFeedbackAdministration( void )
 
    for( const auto& pDev: m_lDevList )
       pDev->m_pParent = nullptr;
+
+   if( m_ebSelfAcquired )
+      DaqEb::EtherboneConnection::releaseInstance( m_oAddacDaqAdmin.getEbAccess()->getEbPtr() );
 }
 
 /*! ---------------------------------------------------------------------------

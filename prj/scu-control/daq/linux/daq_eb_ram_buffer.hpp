@@ -148,7 +148,7 @@ public:
     * @brief Returns the pointer of the etherbone connection object of type:
     *        EtherboneConnection:
     */
-   DaqEb::EtherboneConnection* getEbPtr( void )
+   EBC_PTR_T getEbPtr( void )
    {
       return m_oLm32.getEb();
    }
