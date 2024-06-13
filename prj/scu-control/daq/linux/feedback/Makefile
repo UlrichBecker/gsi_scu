@@ -21,14 +21,13 @@ else
   TARGET := $(LIBRRARY_NAME)
 endif
 
-$(info Building static library $(TARGET) )
-
 ifndef OECORE_SDK_VERSION
 ifneq ($(shell echo $${HOSTNAME:0:5}), asl74)
-  # $(error ERROR: This library has to be build by Yocto-SDK or on ACC7)
+   $(error ERROR: This library has to be build by Yocto-SDK or on ACC7)
 endif
 endif
 
+$(info Building static library $(TARGET) )
 
 SCU_DIR        = $(PRJ_DIR)/scu-control
 DAQ_DIR        = $(SCU_DIR)/daq
