@@ -688,6 +688,7 @@ void FgFeedbackDevice::generate( FgFeedbackChannel* pFeedbackChannel )
  */
 void FgFeedbackDevice::registerChannel( FgFeedbackChannel* pFeedbackChannel )
 {
+   DEBUG_MESSAGE_M_FUNCTION( pFeedbackChannel->getFgNumber() );
    if( pFeedbackChannel->m_pParent != nullptr )
    {
       std::string str = "Feedback channel number ";
@@ -747,6 +748,7 @@ void FgFeedbackDevice::registerChannel( FgFeedbackChannel* pFeedbackChannel )
  */
 void FgFeedbackDevice::unregisterChannel( FgFeedbackChannel* pFeedbackChannel )
 {
+   DEBUG_MESSAGE_M_FUNCTION( pFeedbackChannel->getFgNumber() );
    if( pFeedbackChannel->m_pParent != this )
       return;
 
@@ -949,6 +951,7 @@ void FgFeedbackAdministration::scan( const bool doRescan )
  */
 void FgFeedbackAdministration::registerDevice( FgFeedbackDevice* poDevice )
 {
+   DEBUG_MESSAGE_M_FUNCTION( poDevice->getSocket() );
    if( poDevice->m_pParent != nullptr )
    {
       std::string str = "Device on socket ";
@@ -988,6 +991,7 @@ void FgFeedbackAdministration::registerDevice( FgFeedbackDevice* poDevice )
  */
 void FgFeedbackAdministration::unregisterDevice( FgFeedbackDevice* poDevice )
 {
+   DEBUG_MESSAGE_M_FUNCTION( poDevice->getSocket() );
    if( poDevice->m_pParent != this )
       return;
 
