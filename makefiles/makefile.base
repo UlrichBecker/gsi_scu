@@ -165,9 +165,14 @@ ifdef LIB_DIRS
 endif
 
 
+
 GENERATED_DIR ?= $(dir $(MIAN_MODULE))generated
 INCLUDE_DIRS  += $(GENERATED_DIR)
-DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)_$(GCC_VERSION)
+ifdef DEBUG
+   DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)_$(GCC_VERSION)_dbg
+else
+   DEPLOY_DIR    ?= ./deploy_$(CPU)$(DEPLOY_APPENDIX)_$(GCC_VERSION)
+endif
 WORK_DIR      ?= $(DEPLOY_DIR)/work
 TARGET_DIR    ?= $(DEPLOY_DIR)/result
 ASM_DIR       ?= $(DEPLOY_DIR)/asm

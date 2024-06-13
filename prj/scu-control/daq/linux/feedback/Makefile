@@ -10,12 +10,22 @@
 ## Date:    14.10.2020                                                       ##
 ###############################################################################
 STATIC_LIBRARY := 1
+LIBRRARY_NAME := scu_fg_feedback
 
-TARGET         := scu_fg_feedback
+#DEBUG = 1
+
+ifdef DEBUG
+  TARGET := $(LIBRRARY_NAME)_dbg
+  DEFINES += CONFIG_DEBUG_MESSAGES
+else
+  TARGET := $(LIBRRARY_NAME)
+endif
+
+$(info Building static library $(TARGET) )
 
 ifndef OECORE_SDK_VERSION
 ifneq ($(shell echo $${HOSTNAME:0:5}), asl74)
-   $(error ERROR: This library has to be build by Yocto-SDK or on ACC7)
+  # $(error ERROR: This library has to be build by Yocto-SDK or on ACC7)
 endif
 endif
 

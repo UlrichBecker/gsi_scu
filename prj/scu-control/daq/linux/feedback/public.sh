@@ -47,23 +47,32 @@ else
    EXPORT_FREE_RTOS_VERSION=false
 fi
 
-SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)
+SOURCE_BASE_DIR=$(git rev-parse --show-toplevel)/
+
+if [ -n "$DEBUG" ]
+then
+   DBG_SUFFIX="_dbg"
+else
+   DBG_SUFFIX=""
+fi
+
+LIB_BASE_DIR="prj/scu-control/daq/linux/feedback/"
 
 if [ -n "${OECORE_SDK_VERSION}" ]
 then
-   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_sdk_${OECORE_SDK_VERSION}_${GCC_VERSION}/result/libscu_fg_feedback.a
+   LIB_FILE=${SOURCE_BASE_DIR}${LIB_BASE_DIR}deploy_x86_64_sdk_${OECORE_SDK_VERSION}_${GCC_VERSION}${DBG_SUFFIX}/result/libscu_fg_feedback${DBG_SUFFIX}.a
 else
-   LIB_FILE=${SOURCE_BASE_DIR}/prj/scu-control/daq/linux/feedback/deploy_x86_64_${GCC_VERSION}/result/libscu_fg_feedback.a
+   LIB_FILE=${SOURCE_BASE_DIR}${LIB_BASE_DIR}deploy_x86_64_${GCC_VERSION}${DBG_SUFFIX}/result/libscu_fg_feedback${DBG_SUFFIX}.a
 fi
 
 if $EXPORT_FREE_RTOS_VERSION
 then
-   LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-rtos_exe/SCU3/deploy_lm32/result/scu3_control_os.bin
+   LM32_FW=${SOURCE_BASE_DIR}prj/scu-control/lm32-rtos_exe/SCU3/deploy_lm32/result/scu3_control_os.bin
 else
-   LM32_FW=${SOURCE_BASE_DIR}/prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
+   LM32_FW=${SOURCE_BASE_DIR}prj/scu-control/lm32-non-os_exe/SCU3/deploy_lm32/result/scu3_control.bin
 fi
 
-EXAMPLE_FILE=${SOURCE_BASE_DIR}/demo-and-test/linux/feedback/feedback-example.cpp
+EXAMPLE_FILE=${SOURCE_BASE_DIR}demo-and-test/linux/feedback/feedback-example.cpp
 
 if [ ! -f "Makefile" ]
 then
