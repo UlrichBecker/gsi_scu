@@ -41,6 +41,10 @@ extern "C" {
 
 extern SW_QUEUE_T g_queueAlarm;
 
+#ifdef CONFIG_HANDLE_UNKNOWN_MSI
+extern SW_QUEUE_T g_queueUnknownMsi;
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @brief Put a message in the given queue object.
  *

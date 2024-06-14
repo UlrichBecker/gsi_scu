@@ -50,6 +50,9 @@
  * a overflow.
  */
 QUEUE_CREATE_STATIC( g_queueAlarm, MAX_FG_CHANNELS, SW_QUEUE_T* );
+#ifdef CONFIG_HANDLE_UNKNOWN_MSI
+QUEUE_CREATE_STATIC( g_queueUnknownMsi, 2, MSI_ITEM_T );
+#endif
 
 /*!----------------------------------------------------------------------------
  * @see queue_watcher.h
@@ -58,38 +61,49 @@ void queuePollAlarm( void )
 {
    void* pOverflowedQueue;
 
-   if( !queuePopSave( &g_queueAlarm, &pOverflowedQueue ) )
-      return;
-
-   const char* str = "unknown";
-   #define QEUE2STRING( name ) if( &name == pOverflowedQueue ) str = #name
-
-   QEUE2STRING( g_queueSaftCmd );
-#ifdef CONFIG_SCU_DAQ_INTEGRATION
-   QEUE2STRING( g_queueAddacDaq );
-#endif
-#ifdef CONFIG_MIL_FG
-   QEUE2STRING( g_queueMilFg );
-#endif
-#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
-   QEUE2STRING( g_queueFg );
-#endif
-   #undef QEUE2STRING
-
-#if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
-   if( pOverflowedQueue != &g_ecaEvent )
+   if( queuePopSave( &g_queueAlarm, &pOverflowedQueue ) )
    {
-#endif
-      scuLog( LM32_LOG_ERROR, ESC_ERROR
-              "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
-              ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
-#if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
+
+      const char* str = "unknown";
+      #define QEUE2STRING( name ) if( &name == pOverflowedQueue ) str = #name
+
+      QEUE2STRING( g_queueSaftCmd );
+   #ifdef CONFIG_SCU_DAQ_INTEGRATION
+      QEUE2STRING( g_queueAddacDaq );
+   #endif
+   #ifdef CONFIG_MIL_FG
+      QEUE2STRING( g_queueMilFg );
+   #endif
+   #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
+      QEUE2STRING( g_queueFg );
+   #endif
+      #undef QEUE2STRING
+
+   #if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
+      if( pOverflowedQueue != &g_ecaEvent )
+      {
+   #endif
+         scuLog( LM32_LOG_ERROR, ESC_ERROR
+                 "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
+                 ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
+   #if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
+      }
+      else
+      {
+         scuLog( LM32_LOG_ERROR, ESC_ERROR
+                 "ERROR: ECA-event-queue has overflowed! Capacity: %d\n"
+                 ESC_NORMAL, g_ecaEvent.capacity );
+      }
+   #endif
    }
-   else
+#ifdef CONFIG_HANDLE_UNKNOWN_MSI
+   MSI_ITEM_T m;
+   if( queuePopSave( &g_queueUnknownMsi, &m ) )
    {
-      scuLog( LM32_LOG_ERROR, ESC_ERROR
-              "ERROR: ECA-event-queue has overflowed! Capacity: %d\n"
-              ESC_NORMAL, g_ecaEvent.capacity );
+      lm32Log( LM32_LOG_WARNING, ESC_WARNING
+               "WARNING: Unknown MSI received. msg: %04X, addr: %04X, sel: %04X"
+               ESC_NORMAL,
+               m.msg, m.adr, m.sel );
    }
 #endif
 }

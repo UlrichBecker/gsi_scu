@@ -245,7 +245,9 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
 
          default:
          {
-            FG_ASSERT( false );
+         #ifdef CONFIG_HANDLE_UNKNOWN_MSI
+            queuePushWatched( &g_queueUnknownMsi, &m );
+         #endif
             break;
          }
       }
