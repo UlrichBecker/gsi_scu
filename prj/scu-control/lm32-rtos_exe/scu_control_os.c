@@ -317,7 +317,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
      #endif /* if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY ) */
          default:
          {
-         #ifdef CONFIG_HANDLE_UNKNOWN_MSI
+         #if defined( CONFIG_HANDLE_UNKNOWN_MSI ) && defined( CONFIG_QUEUE_ALARM  )
             queuePushWatched( &g_queueUnknownMsi, &m );
          #endif
             break;
@@ -334,6 +334,19 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
  */
 ONE_TIME_CALL void initInterrupt( void )
 {
+#ifdef CONFIG_SCU_DAQ_INTEGRATION
+   queueReset( &g_queueAddacDaq );
+#endif
+#ifdef CONFIG_MIL_FG
+   queueReset( &g_queueMilFg );
+   evDelete( &g_ecaEvent );
+#endif
+#ifdef CONFIG_QUEUE_ALARM
+   queueReset( &g_queueAlarm );
+ #ifdef CONFIG_HANDLE_UNKNOWN_MSI
+   queueReset( &g_queueUnknownMsi );
+ #endif
+#endif
    initCommandHandler();
    irqRegisterISR( ECA_INTERRUPT_NUMBER, NULL, onScuMSInterrupt );
    scuLog( LM32_LOG_INFO, "IRQ table configured: 0b%b\n", irqGetMaskRegister() );
@@ -405,7 +418,9 @@ STATIC void taskMain( void* pTaskData UNUSED )
          i %= ARRAY_SIZE( fan );
       }
    #endif
+   #ifdef CONFIG_QUEUE_ALARM
       queuePollAlarm();
+   #endif
    #ifdef CONFIG_USE_FG_MSI_TIMEOUT
       wdtPoll();
    #endif

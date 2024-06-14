@@ -245,7 +245,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
 
          default:
          {
-         #ifdef CONFIG_HANDLE_UNKNOWN_MSI
+         #if defined( CONFIG_HANDLE_UNKNOWN_MSI ) && defined( CONFIG_QUEUE_ALARM  )
             queuePushWatched( &g_queueUnknownMsi, &m );
          #endif
             break;
@@ -287,6 +287,9 @@ ONE_TIME_CALL void initInterrupt( void )
 #endif
 #ifdef CONFIG_QUEUE_ALARM
    queueReset( &g_queueAlarm );
+ #ifdef CONFIG_HANDLE_UNKNOWN_MSI
+   queueReset( &g_queueUnknownMsi );
+ #endif
 #endif
 #ifndef _CONFIG_NO_INTERRUPT
    IRQ_ASSERT( irqGetAtomicNestingCount() == 1 );
