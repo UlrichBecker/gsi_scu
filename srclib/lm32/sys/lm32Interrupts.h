@@ -216,7 +216,15 @@ void irqRegisterISR( const unsigned int intNum, void* pContext,
  *               connected to (0 to 31).
  * @see irqDisableSpecific
  */
+
 void irqEnableSpecific( const unsigned int intNum );
+
+/*! ---------------------------------------------------------------------------
+ * @see Returns true when the corresponding interrupt is enabled.
+ * @param intNum Interrupt line number that your component is
+ *               connected to (0 to 31).
+ */
+bool irqIsSpecificEnabled( const unsigned int intNum );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT

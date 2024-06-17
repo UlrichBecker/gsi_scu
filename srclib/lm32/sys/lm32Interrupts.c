@@ -440,6 +440,14 @@ void irqDisableSpecific( const unsigned int intNum )
 /*! ---------------------------------------------------------------------------
  * @see lm32Interrupts.h
  */
+bool irqIsSpecificEnabled( const unsigned int intNum )
+{
+   return (irqGetMaskRegister() & _irqGetPendingMask( intNum )) != 0;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see lm32Interrupts.h
+ */
 void irqEnableSpecific( const unsigned int intNum )
 {
    IRQ_ASSERT( intNum < ARRAY_SIZE( ISREntryTable ) );

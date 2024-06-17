@@ -326,6 +326,18 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
    }
 }
 
+#if (configUSE_TICK_HOOK == 1 )
+/*! ---------------------------------------------------------------------------
+ * @brief Callback function becomes invoked by each timer interrupt.
+ */
+#warning vApplicationTickHook() becomes implemented!
+void vApplicationTickHook( void )
+{
+   if( irqIsSpecificEnabled( ECA_INTERRUPT_NUMBER ) )
+      onScuMSInterrupt( ECA_INTERRUPT_NUMBER, NULL );
+}
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
  * @brief Installs the interrupt callback function and clears the interrupt

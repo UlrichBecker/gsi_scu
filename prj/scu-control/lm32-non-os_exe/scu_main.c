@@ -263,7 +263,9 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
 STATIC void onScuTimerInterrupt( const unsigned int intNum UNUSED,
                                  const void* pContext UNUSED )
 {
+#ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    milExecuteTasks();
+#endif
 }
 #endif
 

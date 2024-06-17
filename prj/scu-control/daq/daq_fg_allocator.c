@@ -82,7 +82,7 @@ unsigned int daqGetSetDaqNumberOfFg( const unsigned int fgNum,
    DAQ_FG_ASSERT( fgNum < MAX_FG_PER_SLAVE );
    switch( type )
    {
-      case DIOB: /* CAUTION: DIOB is a workaround! No break here. */
+      case DIOB:  FALL_THROUGH /* CAUTION: DIOB is a workaround! */
       case ADDAC:
       { /*
          * Returning of DAQ-channel number of ADDAC function generators
@@ -119,7 +119,7 @@ unsigned int daqGetActualDaqNumberOfFg( const unsigned int fgNum,
    DAQ_FG_ASSERT( fgNum < MAX_FG_PER_SLAVE );
    switch( type )
    {
-      case DIOB: /* CAUTION: DIOB is a workaround! No break here. */
+      case DIOB:  FALL_THROUGH /* CAUTION: DIOB is a workaround! */
       case ADDAC:
       { /*
          * Returning of DAQ-channel number of ADDAC function generators
