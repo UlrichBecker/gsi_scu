@@ -56,6 +56,7 @@
 
 #ifdef CONFIG_SCU
  #include <sdb_lm32.h>
+ #include <scu_msi.h>
 #endif
 
 #ifdef CONFIG_RTOS_PEDANTIC_CHECK
@@ -228,8 +229,12 @@ void dbgPrintValue( const uint32_t v )
  * @param pContext User tunnel  (start address of timer registers but
  *                 not used in this case)
  */
-STATIC void onTimerInterrupt( const unsigned int intNum, const void* pContext )
+STATIC void onTimerInterrupt( const unsigned int intNum,
+                              const void* pContext UNUSED )
 {
+#ifdef CONFIG_SCU
+   irqMsiPop( intNum );
+#endif
    xTaskIncrementTick();
 #if configUSE_PREEMPTION == 1
    vTaskSwitchContext();

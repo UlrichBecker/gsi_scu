@@ -260,9 +260,10 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
  * @brief Interrupt callback function for timer-tick it drives the
  *        MIL-FG handler
  */
-STATIC void onScuTimerInterrupt( const unsigned int intNum UNUSED,
+STATIC void onScuTimerInterrupt( const unsigned int intNum,
                                  const void* pContext UNUSED )
 {
+   irqMsiPop( intNum );
 #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    milExecuteTasks();
 #endif
