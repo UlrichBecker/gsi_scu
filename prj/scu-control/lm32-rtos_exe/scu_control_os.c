@@ -57,6 +57,10 @@
   #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
 #endif
 
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+extern unsigned int g_msiCnt;
+#endif
+
 #if ( configCHECK_FOR_STACK_OVERFLOW != 0 )
 /*! ---------------------------------------------------------------------------
  * @ingroup OVERWRITABLE
@@ -254,10 +258,16 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 STATIC void onScuMSInterrupt( const unsigned int intNum,
                               const void* pContext UNUSED )
 {
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+   unsigned int msiCnt = 0;
+#endif
    MSI_ITEM_T m;
 
    while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
    {
+   #ifdef CONFIG_COUNT_MSI_PER_IRQ
+      msiCnt++;
+   #endif
       switch( GET_LOWER_HALF( m.adr )  )
       {
          case ADDR_SCUBUS:
@@ -324,6 +334,10 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
          }
       }
    }
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+   if( g_msiCnt < msiCnt )
+      g_msiCnt = msiCnt;
+#endif
 }
 
 #if (configUSE_TICK_HOOK == 1 )

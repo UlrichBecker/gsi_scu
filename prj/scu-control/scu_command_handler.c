@@ -38,6 +38,10 @@ extern void*          g_pScu_mil_base;
   #warning "DEBUG_SAFTLIB is defined! This could lead to timing problems!"
 #endif
 
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+unsigned int g_msiCnt = 0;
+#endif
+
 //#define CONFIG_DEBUG_SWI
 
 /*
@@ -208,7 +212,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
        #ifdef CONFIG_MIL_FG
          fgMilClearHandlerState( value );
        #else
-         lm32Log( LM32_LOG_ERROR, ESC_ERROR "No MIL support!\n" ESC_NORMAL );
+         lm32Log( LM32_LOG_ERROR, ESC_ERROR "No MIL support!" ESC_NORMAL );
        #endif
          break;
       }
@@ -223,7 +227,16 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_TEMPERATURE_WATCHER )
          printTemperatures();
       #else
-         lm32Log( LM32_LOG_WARNING, "No history support!\n" );
+         lm32Log( LM32_LOG_WARNING, "No history support!" );
+      #endif
+      #ifdef CONFIG_COUNT_MSI_PER_IRQ
+         unsigned int msiCnt;
+         ATOMIC_SECTION()
+         {
+            msiCnt = g_msiCnt;
+            g_msiCnt = 0;
+         }
+         lm32Log( LM32_LOG_INFO, "Maximun MSIs per IRQ: %u", msiCnt );
       #endif
          break;
       }
@@ -231,7 +244,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
       default:
       {
          lm32Log( LM32_LOG_ERROR, ESC_ERROR
-                  "Error: Unknown MSI-command! op-code: 0x04%X, value: 0x%04X\n"
+                  "Error: Unknown MSI-command! op-code: 0x04%X, value: 0x%04X"
                   ESC_NORMAL, code, value );
          break;
       }

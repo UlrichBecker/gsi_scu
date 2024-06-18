@@ -78,7 +78,9 @@ TIME_MEASUREMENT_T g_irqTimeMeasurement = TIME_MEASUREMENT_INITIALIZER;
  */
 bool g_milUseTimerinterrupt = false;
 #endif
-
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+extern unsigned int g_msiCnt;
+#endif
 
 #ifdef CONFIG_MIL_FG
 #ifdef _CONFIG_MIL_EV_QUEUE
@@ -176,11 +178,17 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 STATIC void onScuMSInterrupt( const unsigned int intNum,
                               const void* pContext UNUSED )
 {
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+   unsigned int msiCnt = 0;
+#endif
    MSI_ITEM_T m;
 
    TRACE_MIL_DRQ( "0\n" );
    while( irqMsiCopyObjectAndRemoveIfActive( &m, intNum ) )
    {
+   #ifdef CONFIG_COUNT_MSI_PER_IRQ
+      msiCnt++;
+   #endif
       TRACE_MIL_DRQ( "1\n" );
       switch( GET_LOWER_HALF( m.adr )  )
       {
@@ -252,6 +260,10 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
          }
       }
    }
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+   if( g_msiCnt < msiCnt )
+      g_msiCnt = msiCnt;
+#endif
 }
 
 #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && defined( CONFIG_MIL_FG )
@@ -263,7 +275,8 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
 STATIC void onScuTimerInterrupt( const unsigned int intNum,
                                  const void* pContext UNUSED )
 {
-   irqMsiPop( intNum );
+   MSI_ITEM_T m;
+   irqMsiCopyObjectAndRemove( &m, intNum );
 #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    milExecuteTasks();
 #endif
@@ -426,6 +439,7 @@ void main( void )
    milInitTasks();
    dbgPrintMilTaskData();
 #endif
+
    initializeGlobalPointers();
    tellMailboxSlot();
 

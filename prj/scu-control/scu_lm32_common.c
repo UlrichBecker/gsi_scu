@@ -53,6 +53,10 @@ void* g_pScu_mil_base    = NULL;
 void* g_pMil_irq_base    = NULL;
 #endif
 
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+extern unsigned int g_msiCnt;
+#endif
+
 /*====================== Begin of shared memory area ========================*/
 /*!
  * @brief Memory space of shared memory for communication with Linux-host
@@ -89,6 +93,9 @@ void initializeGlobalPointers( void )
    g_pMil_irq_base = (uint32_t*)find_device_adr( GSI, MIL_IRQ_CTRL );
    if( (int)g_pMil_irq_base == ERROR_NOT_FOUND )
       die( "Interrupt control for MIL-bus not found!" );
+#endif
+#ifdef CONFIG_COUNT_MSI_PER_IRQ
+   g_msiCnt = 0;
 #endif
 }
 

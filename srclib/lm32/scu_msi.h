@@ -240,7 +240,7 @@ STATIC inline void irqMsiPop( const unsigned int intNum )
  * @param pItem Pointer to target object where the data shall copied.
  * @param intNum Interrupt number of the corresponding interrupt.
  */
-STATIC inline void irqMsiCopyObjectAndRemove( MSI_ITEM_T* const pItem,
+STATIC inline void irqMsiCopyObjectAndRemove( volatile MSI_ITEM_T* const pItem,
                                               const unsigned int intNum )
 {
    pItem->msg = IRQ_MSI_ITEM_ACCESS( msg, intNum );
@@ -276,13 +276,14 @@ STATIC inline void irqMsiCopyObjectAndRemove( MSI_ITEM_T* const pItem,
  * @endcode
  */
 STATIC inline 
-bool irqMsiCopyObjectAndRemoveIfActive( MSI_ITEM_T* const pItem,
+bool irqMsiCopyObjectAndRemoveIfActive( volatile MSI_ITEM_T* const pItem,
                                                     const unsigned int intNum )
 {
    const uint32_t mask = _irqGetPendingMask( intNum );
 
-   if( (IRQ_MSI_CONTROL_ACCESS( status ) & mask) == 0 )
-      return false;
+   //if( (IRQ_MSI_CONTROL_ACCESS( status ) & mask) == 0 )
+   //   return false;
+   bool status = (IRQ_MSI_CONTROL_ACCESS( status ) & mask) != 0;
 
    pItem->msg = IRQ_MSI_ITEM_ACCESS( msg, intNum );
    pItem->adr = IRQ_MSI_ITEM_ACCESS( adr, intNum );
@@ -290,7 +291,8 @@ bool irqMsiCopyObjectAndRemoveIfActive( MSI_ITEM_T* const pItem,
 
    IRQ_MSI_CONTROL_ACCESS( pop ) = mask;
 
-   return true;
+   //return true;
+   return status;
 }
 
 #ifdef __cplusplus
