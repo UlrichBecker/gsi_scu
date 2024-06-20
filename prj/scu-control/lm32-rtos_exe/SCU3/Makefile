@@ -11,6 +11,8 @@
 BASE_VERSION = 4
 SUB_VERSION  = 6.5
 
+DEFINES += CONFIG_HANDLE_UNUSED_ECAS
+
 #------------------------------------------------------------------------------
  SCU_MIL := 1
 # MIL_GAP := 1

@@ -86,15 +86,23 @@ inline void ecaHandler( void )
 #endif
 
    if( !ecaTestTagAndPop( g_eca.pQueue, g_eca.tag ) )
+   {
+      lm32Log( LM32_LOG_ERROR, ESC_ERROR "Invalid ECA-tag: 0x%04X; expected: 0x%04X !" ESC_NORMAL,
+               g_eca.pQueue->tag, g_eca.tag );
       return;
+   }
+
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA with tag: 0x%04X received" ESC_NORMAL,
+            g_eca.pQueue->tag );
+
 
 #ifdef CONFIG_MIL_PIGGY
-   bool                 isMilDevArmed = false;
+   bool isMilDevArmed = false;
 #endif
-   SCUBUS_SLAVE_FLAGS_T active_sios   = 0; /* bitmap with active sios */
+   SCUBUS_SLAVE_FLAGS_T activeSioSlaves = 0; /* bitmap with active sios */
 
    /*
-    * Check if there are armed SCI SIO MIL or extention MIL
+    * Check if there are armed SCU SIO MIL or extention MIL
     * function generator(s).
     */
    for( unsigned int channel = 0; channel < ARRAY_SIZE(g_shared.oSaftLib.oFg.aRegs); channel++ )
@@ -123,7 +131,7 @@ inline void ecaHandler( void )
 
       const unsigned int slot = getFgSlotNumber( socket );
       if( (slot != 0) && isMilScuBusFg( socket ) )
-         active_sios |= scuBusGetSlaveFlag( slot );
+         activeSioSlaves |= scuBusGetSlaveFlag( slot );
    }
 
 #ifdef CONFIG_MIL_PIGGY
@@ -134,11 +142,11 @@ inline void ecaHandler( void )
    /*
     * Send broadcast start to active SIO SCI-BUS-slaves
     */
-   if( active_sios != 0 ) ECA_ATOMIC_SECTION()
+   if( activeSioSlaves != 0 ) ECA_ATOMIC_SECTION()
    {  /*
        * Select active SIO slaves.
        */
-      scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), MULTI_SLAVE_SEL, active_sios );
+      scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), MULTI_SLAVE_SEL, activeSioSlaves );
 
       /*
        * Send broadcast.
@@ -146,7 +154,7 @@ inline void ecaHandler( void )
       scuBusSetSlaveValue16( scuBusGetBroadcastAddr( g_pScub_base ), MIL_SIO3_TX_CMD, MIL_BROADCAST );
    }
 
-  // mprintf( "SIO: %08b\n", active_sios );
+  // mprintf( "SIO: %08b\n", activeSioSlaves );
 }
 
 /* ================================= EOF ====================================*/

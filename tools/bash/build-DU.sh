@@ -133,14 +133,16 @@ then
    JOBS=8
 fi
 
-cd $FESA_CLASS_NAME
-make -j$JOBS $MAKE_ARG
-if [ "$?" != "0" ]
+if [ "$1" != "i" ]
 then
-   die "Can't build \"$FESA_CLASS_NAME\"!"
+   cd $FESA_CLASS_NAME
+   make -j$JOBS $MAKE_ARG
+   if [ "$?" != "0" ]
+   then
+      die "Can't build \"$FESA_CLASS_NAME\"!"
+   fi
+   cd $ORIGIN_DIR
 fi
-
-cd $ORIGIN_DIR
 
 if [ "$1" = "C" ]
 then
@@ -149,21 +151,25 @@ then
 fi
 
 cd $DU_NAME
-make -j$JOBS $MAKE_ARG
-if [ "$?" != "0" ]
-then
-   die "Can't build \"${DU_NAME}\"!"
-fi
 
-if [ "$1" = "clean" ]
+if [ "$1" != "i" ]
 then
-   cd $ORIGIN_DIR
-   exit 0
-fi
+   make -j$JOBS $MAKE_ARG
+   if [ "$?" != "0" ]
+   then
+      die "Can't build \"${DU_NAME}\"!"
+   fi
 
-if [ ! -x "$BINARY_FILE" ]
-then
-   die "Binary \"$BINARY_FILE\" not found!"
+   if [ "$1" = "clean" ]
+   then
+      cd $ORIGIN_DIR
+      exit 0
+   fi
+
+   if [ ! -x "$BINARY_FILE" ]
+   then
+      die "Binary \"$BINARY_FILE\" not found!"
+   fi
 fi
 
 if [ ! -d "${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}" ]
@@ -171,8 +177,11 @@ then
    die "Target directory \"${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}\" not found! Maybe the first build process had not made by Eclipse."
 fi
 
-echo -e $ESC_SUCCESS"*** Build was successful, exporting executable: \"${DU_NAME}\" to \"${TARGET}\" ***"$ESC_NORMAL
-cp -u ${BINARY_FILE} ${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}/${DU_NAME}
+if [ "$1" != "i" ]
+then
+   echo -e $ESC_SUCCESS"*** Build was successful, exporting executable: \"${DU_NAME}\" to \"${TARGET}\" ***"$ESC_NORMAL
+   cp -u ${BINARY_FILE} ${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}/${DU_NAME}
+fi
 
 TEST_DIR=src/test
 if [ ! -d "$TEST_DIR" ]
@@ -198,7 +207,9 @@ if [ "$?" = "0" ]
 then
    echo "Content of \"${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}\":"
    ls -g ${EXPORT_DIR}/${DU_NAME}${BINARY_DIR_SUFFIX}
-   echo "done"
+   echo -e $ESC_SUCCESS"done"$ESC_NORMAL
+else
+   die "Can't copy instance-file: \"$INSTANCE_FILE\""
 fi
 cd $ORIGIN_DIR
 #=================================== EOF ======================================

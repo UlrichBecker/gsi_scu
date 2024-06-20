@@ -33,6 +33,11 @@ STATIC TaskHandle_t mg_taskMilHandle = NULL;
 
 EV_CREATE_STATIC( g_ecaEvent, MAX_FG_CHANNELS );
 
+bool taskIsMilTaskRunning( void )
+{
+   return mg_taskMilHandle != NULL;
+}
+
 /*! ---------------------------------------------------------------------------
  * @ingroup RTOS_TASK
  * @brief RTOS- task for MIL-FGs and MIL-DAQs
@@ -69,7 +74,6 @@ STATIC void taskMil( void* pTaskData UNUSED )
       if( evPopSave( &g_ecaEvent ) )
       {
          ecaHandler();
-         lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );
       }
       milExecuteTasks();
    }

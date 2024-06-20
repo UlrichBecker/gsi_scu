@@ -278,6 +278,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
             { /*
                * ECA event received
                */
+              // mprintf( "*\n" );
                evPushWatched( &g_ecaEvent );
              #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
                taskWakeupMilFromISR();
@@ -451,6 +452,19 @@ STATIC void taskMain( void* pTaskData UNUSED )
       wdtPoll();
    #endif
       commandHandler();
+   #if defined( CONFIG_MIL_FG ) && defined( CONFIG_HANDLE_UNUSED_ECAS )
+      if( !taskIsMilTaskRunning() )
+      {
+         if( evPopSave( &g_ecaEvent ) )
+         {
+            ecaTestTagAndPop( g_eca.pQueue, g_eca.tag );
+            lm32Log( LM32_LOG_WARNING, ESC_WARNING
+                     "Unused ECA with tag: 0x%04X received!"
+                     ESC_NORMAL,
+                     g_eca.pQueue->tag );
+         }
+      }
+   #endif
       TASK_YIELD();
    }
 }

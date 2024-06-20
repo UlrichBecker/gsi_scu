@@ -41,6 +41,12 @@ extern EVENT_T g_ecaEvent;
 
 /*!----------------------------------------------------------------------------
  * @ingroup RTOS_TASK
+ * @brief Returns "true" if the MIL-tasp is running.
+ */
+bool taskIsMilTaskRunning( void );
+
+/*!----------------------------------------------------------------------------
+ * @ingroup RTOS_TASK
  * @brief Starts the RTOS- MIL task for MIL-FGs and MIL-DAQs,
  *        or - if not successful - it stops the CPU with a final
  *        error- log message.

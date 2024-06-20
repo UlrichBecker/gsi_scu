@@ -275,8 +275,9 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
 STATIC void onScuTimerInterrupt( const unsigned int intNum,
                                  const void* pContext UNUSED )
 {
-   MSI_ITEM_T m;
-   irqMsiCopyObjectAndRemove( &m, intNum );
+   //MSI_ITEM_T m;
+   //irqMsiCopyObjectAndRemove( &m, intNum );
+   irqMsiCleanQueue( intNum );
 #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    milExecuteTasks();
 #endif
@@ -388,7 +389,7 @@ ONE_TIME_CALL void schedule( void )
    if( evPopSave( &g_ecaEvent ) )
    {
       ecaHandler();
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );
+      //lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );
    }
   #endif
  #endif

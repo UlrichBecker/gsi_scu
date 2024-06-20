@@ -295,6 +295,19 @@ bool irqMsiCopyObjectAndRemoveIfActive( volatile MSI_ITEM_T* const pItem,
    return status;
 }
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup INTERRUPT
+ * @brief Coelas the hardware MSI-queue is this queue will not used.
+ * @note This function is mandatory for interrupt-routins which doesn't use
+ *       the this queue. E.g.: the timer-interrupt.
+ * @param intNum Interrupt number of the corresponding interrupt.
+ */
+STATIC inline void irqMsiCleanQueue( const unsigned int intNum )
+{
+   volatile MSI_ITEM_T m;
+   irqMsiCopyObjectAndRemove( &m, intNum );
+}
+
 #ifdef __cplusplus
 }
 #endif
