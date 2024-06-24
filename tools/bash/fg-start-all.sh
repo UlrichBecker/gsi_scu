@@ -365,7 +365,7 @@ do
          echo -e ${ESC_FG_CYAN}"${n}: activating SIO-MIL-FG ${dev} on slot ${slot}: $i"${ESC_NORMAL}
       else
          #
-         # MIL over extension
+         # MIL over extension (piggy)
          #
          if [ "$lastSlot" -ne "$slot" ]
          then

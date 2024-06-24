@@ -335,7 +335,7 @@ ONE_TIME_CALL void initInterrupt( void )
                  ESC_NORMAL );
       }
       else
-      {  /*
+      { /*
          * Frequency of timer-interrupt: CPU_FREQUENCY / f_interrupt
          */
          lm32TimerSetPeriod( pTimer, CPU_FREQUENCY / 10000 );
