@@ -49,9 +49,6 @@ extern "C"
 namespace Scu
 {
 #endif
-
-
-
 /*!
  * @brief Bit masks of the function generators control register.
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/FunctionGeneratorQuadratic#cntrl_reg
@@ -94,8 +91,6 @@ typedef enum
     */
    FG_FREQU   = 0xE000
 } FG_MASK_T;
-
-
 
 /*!
  * @brief Definition of flag-masks and constants for ADDAC/ACU- and MIL-
@@ -215,7 +210,7 @@ typedef struct PACKED_SIZE
 
    /*!
     * @brief Mil device address in the case of MIL FG or
-    *        device number in the case of non MIL FG.
+    *        device number in the case of ADDAC FG.
     */
    uint8_t device;
 
@@ -232,12 +227,10 @@ typedef struct PACKED_SIZE
    uint8_t outputBits;
 } FG_MACRO_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( FG_MACRO_T, socket ) == 0 );
 STATIC_ASSERT( offsetof( FG_MACRO_T, device ) == offsetof( FG_MACRO_T, socket ) + sizeof( uint8_t ) );
 STATIC_ASSERT( offsetof( FG_MACRO_T, outputBits ) == offsetof( FG_MACRO_T, version ) + sizeof( uint8_t ) );
 STATIC_ASSERT( sizeof( FG_MACRO_T ) == sizeof( uint32_t ) );
-#endif
 
 /*!
  * @brief Constants for mask out the bit values of the polynomials
@@ -274,9 +267,7 @@ typedef struct PACKED_SIZE
 #endif
 } FG_CONTROL_REG_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof(FG_CONTROL_REG_T) == sizeof(uint32_t) );
-#endif
 
 /*!
  * @brief Helper type for bit or integer access
@@ -289,9 +280,7 @@ typedef union PACKED_SIZE
    FG_CONTROL_REG_T  bv;
 } __FG_CONTROL_REG_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( __FG_CONTROL_REG_T ) == sizeof(uint32_t) );
-#endif
 
 /*!
  * @ingroup SHARED_MEMORY
@@ -334,10 +323,7 @@ typedef struct PACKED_SIZE
    __FG_CONTROL_REG_T control;
 } FG_PARAM_SET_T;
 
-
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( FG_PARAM_SET_T ) == 12 );
-#endif
 
 /*!
  * @see FG_CHANNEL_REG_T::state
@@ -406,10 +392,8 @@ typedef struct PACKED_SIZE
    LINUX_CONST FG_REG_STATE_T state;
 } FG_CHANNEL_REG_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( FG_REG_STATE_T ) == sizeof( uint32_t ) );
 STATIC_ASSERT( sizeof( FG_CHANNEL_REG_T ) == sizeof( uint32_t ) * 7 );
-#endif
 
 /*!
  * @ingroup SHARED_MEMORY
@@ -421,9 +405,7 @@ typedef struct PACKED_SIZE
   FG_PARAM_SET_T pset[BUFFER_SIZE];
 } FG_CHANNEL_BUFFER_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( sizeof( FG_CHANNEL_BUFFER_T ) == sizeof( FG_PARAM_SET_T ) * BUFFER_SIZE );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns "true" in the case the function generator belonging to the
