@@ -24,6 +24,8 @@ ifdef USE_TUPLE_STATISTICS
    DEFINES += CONFIG_USE_TUPLE_STATISTICS
 endif
 
+DEFINES += CONFIG_FG_FEEDBACK
+
 MIAN_MODULE := fg-feedback.cpp
 
 SCU_DIR        = $(PRJ_DIR)/scu-control

@@ -56,6 +56,7 @@ DaqAccess::~DaqAccess( void )
 void DaqAccess::probe( void )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
+   DEBUG_MESSAGE( "Probeing LM32- firmware..." );
    uint32_t actMagicNumber;
 
    m_addacDaqLM32Offset = INVALID_OFFSET;
@@ -99,11 +100,17 @@ void DaqAccess::probe( void )
    { /*
       * It seems that a real single ADDAC-DAQ application is running.
       */
+      DEBUG_MESSAGE( "Single DAQ- test-application detected without FG-support!" );
+#ifdef CONFIG_FG_FEEDBACK
+      throw daq::Exception( "Wrong LM32- firmware" );
+#else
       return;
+#endif
    }
 
    if( actMagicNumber != FG_MAGIC_NUMBER )
    {
+      DEBUG_MESSAGE( "No appropriate LM32- application found!" );
       throw daq::Exception( "Neither DAQ-application nor FG-application "
                             "in LM32 found!" );
 
@@ -131,6 +138,7 @@ void DaqAccess::probe( void )
       * A old LM32-firmware has been detected.
       * MIL-DAQ-data becomes stored in LM32- shared memory area.
       */
+      DEBUG_MESSAGE( "Firmware-version where MIL-DAQ- data becomes stored in LM32 memory." );
       m_addacDaqLM32Offset = OLD_ADDAC_DAQ_OFFSET;
       return;
    }
@@ -143,6 +151,7 @@ void DaqAccess::probe( void )
    { /*
       * Old LM32-firmware without ADDAC-DAQ-support is running.
       */
+      DEBUG_MESSAGE( "Legacy LM32-firmware detected without ADDAC-DAQ- support." );
       return;
    }
 
@@ -153,8 +162,11 @@ void DaqAccess::probe( void )
    { /*
       * LM32-firmware with MIL-DAQ-data in DDR3-RAM is running.
       */
+      DEBUG_MESSAGE( "LM32-firmware detected where MIL-DAQ-date becomes stored in DDR3-RAM or SRAM." );
       m_addacDaqLM32Offset = ADDAC_DAQ_OFFSET;
+      return;
    }
+   DEBUG_MESSAGE( "Probeing failed!" );
 }
 
 //================================== EOF ======================================

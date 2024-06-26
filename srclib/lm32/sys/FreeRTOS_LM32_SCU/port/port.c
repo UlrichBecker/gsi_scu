@@ -235,7 +235,7 @@ STATIC void onTimerInterrupt( const unsigned int intNum,
 #ifdef CONFIG_SCU
    //MSI_ITEM_T m;
    //irqMsiCopyObjectAndRemove( &m, intNum );
-   irqMsiCleanQueue( intNum );
+  // irqMsiCleanQueue( intNum );
   // irqMsiPop( intNum );
 #endif
    xTaskIncrementTick();

@@ -21,6 +21,8 @@ else
   TARGET := $(LIBRRARY_NAME)
 endif
 
+DEFINES += CONFIG_FG_FEEDBACK
+
 ifndef OECORE_SDK_VERSION
 ifneq ($(shell echo $${HOSTNAME:0:5}), asl74)
    $(error ERROR: This library has to be build by Yocto-SDK or on ACC7)

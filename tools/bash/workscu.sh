@@ -173,10 +173,13 @@ then
 fi
 
 SCU_URL=$1
-if [ ! -n "$(echo $SCU_URL | grep $GSI_POSTFIX )" ]
-then
-   SCU_URL=${SCU_URL}${GSI_POSTFIX}
-fi
+#if [ ! -n "$(echo $SCU_URL | grep $GSI_POSTFIX )" ]
+#then
+    #
+    # TODO: Sometimes is the following codline necessary and sometimes not. Why?
+    #
+#   SCU_URL=${SCU_URL}${GSI_POSTFIX}
+#fi
 
 ASL_URL=asl${ASL_NO}${GSI_POSTFIX}
 checkTarget $SCU_URL
@@ -197,5 +200,6 @@ sleep 3
 rm ./$TOOL_SCRIPT
 rm ./$LOG_SCRIPT
 rm ./$CON_SCRIPT
+
 
 #=================================== EOF ======================================
