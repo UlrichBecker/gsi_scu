@@ -162,11 +162,14 @@ void DaqAccess::probe( void )
    { /*
       * LM32-firmware with MIL-DAQ-data in DDR3-RAM is running.
       */
-      DEBUG_MESSAGE( "LM32-firmware detected where MIL-DAQ-date becomes stored in DDR3-RAM or SRAM." );
+      DEBUG_MESSAGE( "LM32-firmware detected where MIL-DAQ-data becomes stored in DDR3-RAM or SRAM." );
       m_addacDaqLM32Offset = ADDAC_DAQ_OFFSET;
       return;
    }
    DEBUG_MESSAGE( "Probeing failed!" );
+#ifdef CONFIG_FG_FEEDBACK
+   throw daq::Exception( "Probeing of LM32-firmware failed!" );
+#endif
 }
 
 //================================== EOF ======================================
