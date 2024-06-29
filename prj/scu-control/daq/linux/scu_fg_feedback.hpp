@@ -1461,30 +1461,38 @@ public:
     * @ingroup REGISTRATION
     * @brief Template returns a pointer to a registered channel object.
     * @param CT Inherit class of FgFeedbackChannel or class FgFeedbackChannel.
-    * @param socket Device number.
-    * @param channelNumber Channel number
+    * @param DT Inherit class of FgFeedbackDevice or class FgFeedbackDevice
+    * @param ST Datatype which includes the socket number respectively the slave-number.
+    *           Default is unsigned int
+    * @param NT Datatype which includes the channel number. Default is unsigned int.
+    * @param oSocketIncluded Device number.
+    * @param oChannelNumberIncluded Channel number
     * @retval !=nullptr Pointer to the channel object.
     * @retval ==nullptr Channel not present respectively not registered.
     * Example:
     * @code
     * fg-4-1
     *    | |
-    *    | +- channelNumber
+    *    | +- channel-number
     *    +--- socket
     * @endcode
     */
-   template< typename CT = FgFeedbackChannel >
-   CT* getChannel( const uint socket, const uint channelNumber )
+   template< typename CT = FgFeedbackChannel, typename DT = FgFeedbackDevice, typename ST = uint, typename NT = uint >
+   CT* getChannel( ST oSocketIncluded, NT oChannelNumberIncluded )
    {
       static_assert( std::is_class<CT>::value,
                      "CT is not a class!" );
       static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
                      "CT has not the base class FgFeedbackChannel!" );
+      static_assert( std::is_base_of<FgFeedbackDevice, DT>::value,
+                     "DT has not the base class FgFeedbackDevice!" );
+      static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
+                     "CT has not the base class FgFeedbackChannel!" );
 
-      FgFeedbackDevice* pDev = getDevice( socket );
+      auto pDev = static_cast<DT*>(getDevice( oSocketIncluded ));
       if( pDev == nullptr )
          return nullptr;
-      return static_cast<CT*>(pDev->getChannel( channelNumber ));
+      return static_cast<CT*>(pDev->getChannel( oChannelNumberIncluded ));
    }
    
    /*!
@@ -1533,20 +1541,23 @@ public:
     *        this will made too.
     * @param CT Inherit class of FgFeedbackChannel
     * @param DT Inherit class of FgFeedbackDevice or class FgFeedbackDevice
-    * @param socket Device-number.
-    * @param channelNumber Channel-number.
+    * @param ST Datatype which includes the socket number respectively the slave-number.
+    *           Default is unsigned int
+    * @param NT Datatype which includes the channel number. Default is unsigned int.
+    * @param oSocketIncluded Device-number, or object which includes the device-number
+    * @param oChannelNumberIncluded Channel-number, or object which includes the channel-number
     * @retval true  Channel object has been new created. 
     * @retval false Channel object is already present.
     * Example:
     * @code
     * fg-4-1
     *    | |
-    *    | +- channelNumber
-    *    +--- socket
+    *    | +- channel-number
+    *    +--- socket respectively slot number of slave with or-linked MIL-flags.
     * @endcode
     */
-   template< typename CT, typename DT = FgFeedbackDevice >
-   bool buildAndRegisterChannel( const uint socket, const uint channelNumber )
+   template< typename CT, typename DT = FgFeedbackDevice, typename ST = uint, typename NT = uint  >
+   bool buildAndRegisterChannel( ST oSocketIncluded, NT oChannelNumberIncluded )
    {
       static_assert( std::is_class<CT>::value,
                      "CT is not a class!" );
@@ -1557,17 +1568,17 @@ public:
       static_assert( std::is_base_of<FgFeedbackChannel, CT>::value,
                      "CT has not the base class FgFeedbackChannel!" );
 
-      auto pDev = static_cast<DT*>(getDevice( socket ));
+      auto pDev = static_cast<DT*>(getDevice( oSocketIncluded ));
       if( pDev == nullptr )
       {
-         pDev = new DT( socket );
+         pDev = new DT( oSocketIncluded );
          registerDevice( pDev );
       }
 
-      auto pChannel = static_cast<CT*>(pDev->getChannel( channelNumber ));
+      auto pChannel = static_cast<CT*>(pDev->getChannel( oChannelNumberIncluded ));
       if( pChannel == nullptr )
       {
-         pChannel = new CT( channelNumber );
+         pChannel = new CT( oChannelNumberIncluded );
          pDev->registerChannel( pChannel );
          return true;
       }
