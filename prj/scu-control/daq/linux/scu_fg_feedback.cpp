@@ -633,6 +633,7 @@ void FgFeedbackDevice::generateAll( void )
  */
 void FgFeedbackDevice::generate( FgFeedbackChannel* pFeedbackChannel )
 {
+   DEBUG_MESSAGE_M_FUNCTION( pFeedbackChannel->getFgNumber() );
    assert( pFeedbackChannel->m_pCommon == nullptr );
    assert( m_pParent != nullptr );
 
