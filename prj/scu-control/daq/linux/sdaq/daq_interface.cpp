@@ -508,22 +508,31 @@ uint DaqInterface::getDeviceNumber( const uint slotNumber )
  */
 DaqInterface::RETURN_CODE_T DaqInterface::readSlotStatus( void )
 {
+   m_maxDevices = 0;
+   m_slotFlags  = 0;
    sendCommand( DAQ_OP_GET_SLOTS );
    readParam1();
    if( m_oSharedData.operation.retCode == DAQ_RET_OK )
    {
+   #ifdef CONFIG_DEBUG_MESSAGES
+      std::string usedSlots;
+   #endif
       m_slotFlags = m_oSharedData.operation.ioData.param1;
-      m_maxDevices = 0;
       for( uint slot = c_startSlot; slot <= c_maxSlots; slot++ )
       {
          if( isDevicePresent( slot ) )
+         {
             m_maxDevices++;
+         #ifdef CONFIG_DEBUG_MESSAGES
+            usedSlots += '#';
+         #endif
+         }
+      #ifdef CONFIG_DEBUG_MESSAGES
+         else
+            usedSlots += '_';
+      #endif
       }
-   }
-   else
-   {
-      m_slotFlags  = 0;
-      m_maxDevices = 0;
+      DEBUG_MESSAGE( "Slots with ADDAC-DAQ-slaves: " << usedSlots );
    }
    return static_cast<RETURN_CODE_T>( m_oSharedData.operation.retCode );;
 }
@@ -604,6 +613,9 @@ DAQ_DEVICE_TYP_T DaqInterface::readDeviceType( const uint deviceNumber )
    writeParam1();
    sendCommand( DAQ_OP_GET_DEVICE_TYPE );
    readParam1();
+   DEBUG_MESSAGE( "Device-type in slot " << deviceNumber <<
+                  " is: " <<
+                  deviceType2String(static_cast<DAQ_DEVICE_TYP_T>(m_oSharedData.operation.ioData.param1)));
    return static_cast<DAQ_DEVICE_TYP_T>(m_oSharedData.operation.ioData.param1);
 }
 
