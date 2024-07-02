@@ -613,7 +613,7 @@ DAQ_DEVICE_TYP_T DaqInterface::readDeviceType( const uint deviceNumber )
    writeParam1();
    sendCommand( DAQ_OP_GET_DEVICE_TYPE );
    readParam1();
-   DEBUG_MESSAGE( "Device-type in slot " << deviceNumber <<
+   DEBUG_MESSAGE( "Device-type of device-number " << deviceNumber <<
                   " is: " <<
                   deviceType2String(static_cast<DAQ_DEVICE_TYP_T>(m_oSharedData.operation.ioData.param1)));
    return static_cast<DAQ_DEVICE_TYP_T>(m_oSharedData.operation.ioData.param1);
