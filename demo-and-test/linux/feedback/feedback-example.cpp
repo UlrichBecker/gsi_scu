@@ -281,6 +281,9 @@ int main( const int argc, const char** ppArgv )
        */
       cout << "Device type: " << deviceType2String( myFeedBackDevice.getTyp() ) << endl;
 
+
+      cout << "Number of registered feedback channels: " << myScu.getNumberOfRegisteredChannels() << endl;
+
       /*
        * Function "daq::getSysMicrosecs()" is defined in "daq_calculations.hpp"
        * The following loop will run for 10 seconds.

@@ -230,12 +230,10 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          lm32Log( LM32_LOG_WARNING, "No history support!" );
       #endif
       #ifdef CONFIG_COUNT_MSI_PER_IRQ
-         unsigned int msiCnt;
-         ATOMIC_SECTION()
-         {
-            msiCnt = g_msiCnt;
-            g_msiCnt = 0;
-         }
+         criticalSectionEnter();
+         unsigned int msiCnt = g_msiCnt;
+         g_msiCnt = 0;
+         criticalSectionExit();
          lm32Log( LM32_LOG_INFO, "Maximun MSIs per IRQ: %u", msiCnt );
       #endif
          break;

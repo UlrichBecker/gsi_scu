@@ -1003,6 +1003,18 @@ void FgFeedbackAdministration::unregisterDevice( FgFeedbackDevice* poDevice )
 
 /*! ---------------------------------------------------------------------------
  */
+uint FgFeedbackAdministration::getNumberOfRegisteredChannels( void )
+{
+   uint ret = 0;
+
+   for( const auto& i: m_lDevList )
+      ret += i->getNumberOfRegisteredChannels();
+
+   return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 FgFeedbackDevice* FgFeedbackAdministration::getDevice( const uint socket )
 {
    for( const auto& i: m_lDevList )

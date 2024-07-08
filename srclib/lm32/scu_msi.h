@@ -281,9 +281,9 @@ bool irqMsiCopyObjectAndRemoveIfActive( volatile MSI_ITEM_T* const pItem,
 {
    const uint32_t mask = _irqGetPendingMask( intNum );
 
-   //if( (IRQ_MSI_CONTROL_ACCESS( status ) & mask) == 0 )
-   //   return false;
-   bool status = (IRQ_MSI_CONTROL_ACCESS( status ) & mask) != 0;
+   if( (IRQ_MSI_CONTROL_ACCESS( status ) & mask) == 0 )
+      return false;
+   //bool status = (IRQ_MSI_CONTROL_ACCESS( status ) & mask) != 0;
 
    pItem->msg = IRQ_MSI_ITEM_ACCESS( msg, intNum );
    pItem->adr = IRQ_MSI_ITEM_ACCESS( adr, intNum );
@@ -291,8 +291,8 @@ bool irqMsiCopyObjectAndRemoveIfActive( volatile MSI_ITEM_T* const pItem,
 
    IRQ_MSI_CONTROL_ACCESS( pop ) = mask;
 
-   //return true;
-   return status;
+   return true;
+   //return status;
 }
 
 /*! ---------------------------------------------------------------------------

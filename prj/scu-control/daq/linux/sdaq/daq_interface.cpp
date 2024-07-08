@@ -532,7 +532,9 @@ DaqInterface::RETURN_CODE_T DaqInterface::readSlotStatus( void )
             usedSlots += '_';
       #endif
       }
+   #ifdef CONFIG_DEBUG_MESSAGES
       DEBUG_MESSAGE( "Slots with ADDAC-DAQ-slaves: " << usedSlots );
+   #endif
    }
    return static_cast<RETURN_CODE_T>( m_oSharedData.operation.retCode );;
 }

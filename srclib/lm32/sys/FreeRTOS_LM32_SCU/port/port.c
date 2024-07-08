@@ -233,10 +233,7 @@ STATIC void onTimerInterrupt( const unsigned int intNum,
                               const void* pContext UNUSED )
 {
 #ifdef CONFIG_SCU
-   //MSI_ITEM_T m;
-   //irqMsiCopyObjectAndRemove( &m, intNum );
-  // irqMsiCleanQueue( intNum );
-  // irqMsiPop( intNum );
+   irqMsiCleanQueue( intNum );
 #endif
    xTaskIncrementTick();
 #if configUSE_PREEMPTION == 1

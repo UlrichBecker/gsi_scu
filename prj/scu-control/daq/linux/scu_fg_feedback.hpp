@@ -752,6 +752,16 @@ public:
 
    /*!
     * @ingroup REGISTRATION
+    * @brief Returns the number of feedback-channels which has been
+    *        registered in this device.
+    */
+   uint getNumberOfRegisteredChannels( void )
+   {
+      return m_lChannelList.size();
+   }
+
+   /*!
+    * @ingroup REGISTRATION
     * @brief Helper function for browsing in the list of registered channel objects.
     * @see FgFeedbackAdministration::begin
     * @returns Start-iterator of the pointer of registered
@@ -1509,6 +1519,24 @@ public:
     * @see registerDevice
     */
    void unregisterDevice( FgFeedbackDevice* poDevice );
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns the number of feedback- devices which has been
+    *        registered in this object.
+    */
+   uint getNumberOfRegisteredDevices( void )
+   {
+      return m_lDevList.size();
+   }
+
+   /*!
+    * @ingroup REGISTRATION
+    * @brief Returns the number of all feedback- channels which has been
+    *        registered in all devices which has been registered in
+    *        this administration object.
+    */
+   uint getNumberOfRegisteredChannels( void );
 
    /*!
     * @ingroup REGISTRATION
