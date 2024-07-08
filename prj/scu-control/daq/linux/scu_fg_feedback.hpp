@@ -988,7 +988,10 @@ protected:
    #define DEVICE_LIST_BASE std::list
    using DEVICE_LIST_T = DEVICE_LIST_BASE<FgFeedbackDevice*>;
    DEVICE_LIST_T m_devicePtrList;
-
+#ifdef CONFIG_DEBUG_MESSAGES
+private:
+   bool                        m_dbgIsFirstCall;
+#endif
 public:
    /*!
     * @brief First constructor variant: Object of etherbone becomes acquired by
@@ -1058,7 +1061,7 @@ public:
    /*!
     * @brief Enables or disables the pairing of set and actual values
     *        of non-MIL DAQs by sequence number.
-    * @param pairingBySequence If true than the pairing by sequence number
+    * @param pairingBySequence If true then the pairing by sequence number
     *                          is active, else the pairing will made by
     *                          the timestamp.
     */

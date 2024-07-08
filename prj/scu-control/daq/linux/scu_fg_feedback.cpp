@@ -870,6 +870,9 @@ FgFeedbackAdministration::FgFeedbackAdministration( const std::string& netaddres
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
    ,m_ebSelfAcquired( true )
+#ifdef CONFIG_DEBUG_MESSAGES
+   ,m_dbgIsFirstCall( true )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
@@ -887,6 +890,9 @@ FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
    ,m_ebSelfAcquired( false )
+#ifdef CONFIG_DEBUG_MESSAGES
+   ,m_dbgIsFirstCall( true )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
@@ -904,6 +910,9 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILISEC )
   ,m_ebSelfAcquired( false )
+#ifdef CONFIG_DEBUG_MESSAGES
+  ,m_dbgIsFirstCall( true )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION(getScuDomainName());
    scan( doRescan );
@@ -1061,7 +1070,13 @@ uint FgFeedbackAdministration::distributeData( void )
  #endif
    daq::DaqAdministration::distributeData();
 #endif
-
+#ifdef CONFIG_DEBUG_MESSAGES
+   if( m_dbgIsFirstCall )
+   {
+      m_dbgIsFirstCall = false;
+      DEBUG_MESSAGE_M_FUNCTION("");
+   }
+#endif
    uint remainingData = 0;
    for( const auto& poDaqAdmin: m_vPollList )
       remainingData += poDaqAdmin->distributeData();
