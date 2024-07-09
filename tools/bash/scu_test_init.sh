@@ -41,7 +41,7 @@ then
    rm $ERROR_LOG
 fi
 
-if [ -n "$(echo $0 | grep 96)" ]
+if [ -n "$(echo $0 | grep 46)" ]
 then
    LM32_APP=scu3_control_os.bin   # Version with FreeRTOS (beta!)
 else
@@ -75,6 +75,8 @@ else
    log_error "LM32-application: \"${LM32_APP_DIR}${LM32_APP}\" not found!"
 fi
 
+
+
 # Is it the old RAM-disc?
 if [ "$(uname -r)" = "3.10.101-rt111-scu03" ]
 then
@@ -93,21 +95,21 @@ else
    log_error "No LM32-log-daemon present"
 fi
 
-if [ ! -n "$(ps | grep socat | grep -v grep)" ]
-then
-   SOCAT=/usr/bin/socat
-   if [ -x "$SOCAT" ]
-   then
-      log "Starting \"socat\""
-      $SOCAT tcp-listen:60368,reuseaddr,fork file:/dev/wbm0 2>>$ERROR_LOG
-   else
-      log_error "\"socat\" not found!"
-   fi
-else
-   log "\"socat\" is alredy running."
-fi
+#if [ ! -n "$(ps | grep socat | grep -v grep)" ]
+#then
+#   SOCAT=/usr/bin/socat
+#   if [ -x "$SOCAT" ]
+#   then
+#      log "Starting \"socat\""
+#      $SOCAT tcp-listen:60368,reuseaddr,fork file:/dev/wbm0 2>>$ERROR_LOG
+#   else
+#      log_error "\"socat\" not found!"
+#   fi
+#else
+#   log "\"socat\" is alredy running."
+#fi
 
-if [ -f "$ERROR_LOG" ]
+if [ -f "$ERROR_LOG" ] && [ -n "$(cat $ERROR_LOG)" ]
 then
    log_error $(cat $ERROR_LOG)
 fi
