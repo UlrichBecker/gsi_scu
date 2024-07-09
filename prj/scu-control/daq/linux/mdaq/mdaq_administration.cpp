@@ -152,6 +152,9 @@ DaqAdministration::DaqAdministration( EBC_PTR_T poEtherbone )
   ,m_pMiddleBufferMem( nullptr )
   ,m_middleBufferSize( 0 )
   ,m_nextReadOutTime( 0 )
+#ifdef CONFIG_DEBUG_MESSAGES
+  ,m_dbgIsFirstCall( true )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
    initPtr();
@@ -167,6 +170,9 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess )
   ,m_pMiddleBufferMem( nullptr )
   ,m_middleBufferSize( 0 )
   ,m_nextReadOutTime( 0 )
+#ifdef CONFIG_DEBUG_MESSAGES
+  ,m_dbgIsFirstCall( true )
+#endif
 {
    DEBUG_MESSAGE_M_FUNCTION( "" );
    initPtr();
@@ -305,6 +311,13 @@ uint DaqAdministration::distributeData( void )
  */
 uint DaqAdministration::distributeDataOld( void )
 {
+#ifdef CONFIG_DEBUG_MESSAGES
+   if( m_dbgIsFirstCall )
+   {
+      m_dbgIsFirstCall = false;
+      DEBUG_MESSAGE_M_FUNCTION( "" );
+   }
+#endif
    if( !readRingPosition() ) // WB-access
       return 0;
    uint size = getBufferSize();
@@ -346,6 +359,13 @@ uint DaqAdministration::distributeDataNew( void )
 uint DaqAdministration::distributeData( void )
 #endif
 {
+#ifdef CONFIG_DEBUG_MESSAGES
+   if( m_dbgIsFirstCall )
+   {
+      m_dbgIsFirstCall = false;
+      DEBUG_MESSAGE_M_FUNCTION( "" );
+   }
+#endif
 //   if( m_nextReadOutTime > daq::getSysMicrosecs() )
 //      return 0;
    /*

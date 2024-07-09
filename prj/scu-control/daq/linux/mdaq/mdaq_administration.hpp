@@ -282,7 +282,9 @@ class DaqAdministration: public DaqInterface
    uint             m_lastReadIndex;
 #endif
    USEC_T           m_nextReadOutTime;
-
+#ifdef CONFIG_DEBUG_MESSAGES
+   bool             m_dbgIsFirstCall;
+#endif
 protected:
 
    #define MIL_DEVICE_LIST_BASE std::list

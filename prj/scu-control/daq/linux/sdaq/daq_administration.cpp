@@ -199,6 +199,9 @@ DaqAdministration::DaqAdministration( EBC_PTR_T poEtherbone,
    ,m_poBlockBuffer( nullptr )
    ,m_maxChannels( 0 )
    ,m_receiveCount( 0 )
+#ifdef CONFIG_DEBUG_MESSAGES
+   ,m_dbgIsFirstCall( true )
+#endif
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    ,m_elapsedTime( 0 )
 #endif
@@ -218,6 +221,9 @@ DaqAdministration::DaqAdministration( DaqAccess* poEbAccess,
    ,m_poBlockBuffer( nullptr )
    ,m_maxChannels( 0 )
    ,m_receiveCount( 0 )
+#ifdef CONFIG_DEBUG_MESSAGES
+   ,m_dbgIsFirstCall( true )
+#endif
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    ,m_elapsedTime( 0 )
 #endif
@@ -441,6 +447,13 @@ void DaqAdministration::onErrorCrc( void )
  */
 uint DaqAdministration::distributeData( void )
 {
+#ifdef CONFIG_DEBUG_MESSAGES
+   if( m_dbgIsFirstCall )
+   {
+      m_dbgIsFirstCall = false;
+      DEBUG_MESSAGE_M_FUNCTION( "" );
+   }
+#endif
    assert( m_poBlockBuffer != nullptr );
    /*
     * Getting the number of DDR3 memory items which has to be copied

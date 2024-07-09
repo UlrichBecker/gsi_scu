@@ -786,7 +786,9 @@ class DaqAdministration: public DaqInterface
    BLOCK_BUFFER_T*   m_poBlockBuffer;
    uint              m_maxChannels;
    uint              m_receiveCount;
-
+#ifdef CONFIG_DEBUG_MESSAGES
+   bool              m_dbgIsFirstCall;
+#endif
 protected:
 #ifdef CONFIG_DAQ_TIME_MEASUREMENT
    USEC_T            m_elapsedTime;
