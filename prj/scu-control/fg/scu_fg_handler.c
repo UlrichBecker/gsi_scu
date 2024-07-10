@@ -299,9 +299,9 @@ inline void addacFgDisableIrq( const void* pScuBus,
 /*! --------------------------------------------------------------------------
  * @see scu_fg_handler.h
  */
-inline void addacFgDisable( const void* pScuBus,
-                            const unsigned int slot,
-                            const unsigned int dev )
+void addacFgDisable( const void* pScuBus,
+                     const unsigned int slot,
+                     const unsigned int dev )
 {
    FG_ASSERT( dev < ARRAY_SIZE(mg_devTab) );
 
@@ -348,12 +348,15 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
                     pThis->cntrl_reg.bv.number, &pset ) )
    {
       if( fgIsStarted( pThis->cntrl_reg.bv.number ) )
+      {
+         const unsigned int socket = getSocket( pThis->cntrl_reg.bv.number );
+         const unsigned int device = getDevice( pThis->cntrl_reg.bv.number );
          lm32Log( LM32_LOG_ERROR, ESC_ERROR
                   "ERROR: Buffer of ADDAC-FG: fg-%u-%u, channel: %u is empty!\n" ESC_NORMAL,
-                  getSocket(pThis->cntrl_reg.bv.number),
-                  getDevice(pThis->cntrl_reg.bv.number),
-                  pThis->cntrl_reg.bv.number
+                  socket, device, pThis->cntrl_reg.bv.number
                 );
+         addacFgDisable( g_pScub_base, socket, device );
+      }
       return false;
    }
 
