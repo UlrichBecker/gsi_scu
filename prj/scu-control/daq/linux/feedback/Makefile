@@ -61,6 +61,7 @@ SOURCE += $(DAQ_LINUX_DIR)/scu_fg_list.cpp
 SOURCE += $(DAQ_LINUX_DIR)/watchdog_poll.cpp
 SOURCE += $(DAQ_LINUX_DIR)/daq_base_interface.cpp
 SOURCE += $(DAQ_LINUX_DIR)/scu_fg_feedback.cpp
+SOURCE += $(DAQ_LINUX_DIR)/tuple_statistics.cpp
 SOURCE += $(SCU_LIB_SRC_DIR)/fifo/circular_index.c
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_etherbone.cpp
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/scu_ddr3_access.cpp

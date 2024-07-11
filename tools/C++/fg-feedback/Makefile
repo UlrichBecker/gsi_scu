@@ -40,7 +40,7 @@ ifdef USE_ADDAC_DAQ_BLOCK_STATISTICS
   SOURCE += daq_statistics.cpp
 endif
 ifdef USE_TUPLE_STATISTICS
-  SOURCE += tuple_statistics.cpp
+  SOURCE +=  $(DAQ_LINUX_DIR)/tuple_statistics.cpp
 endif
 
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
