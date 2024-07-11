@@ -28,6 +28,10 @@
    #define CONFIG_USE_ADDAC_DAQ_BLOCK_STATISTICS
 #endif
 
+#ifndef CONFIG_USE_TUPLE_STATISTICS
+   #define CONFIG_USE_TUPLE_STATISTICS
+#endif
+
 /*!
  * @brief MIL-DAQ-buffer-handlong is backward compatible to the old
  *        LM32-firmware
