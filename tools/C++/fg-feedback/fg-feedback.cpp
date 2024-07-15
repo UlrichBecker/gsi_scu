@@ -687,6 +687,7 @@ int fbMain( int argc, char** ppArgv )
             #endif
             }
          }
+         pDaqAdmin->getTupleStatistics()->print();
          ::usleep( 100 );
       }
       DEBUG_MESSAGE( "Loop left" );

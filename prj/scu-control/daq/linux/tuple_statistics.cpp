@@ -118,8 +118,6 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
                return a.m_pChannel->getSocket() < b.m_pChannel->getSocket();
             });
    }
-
-   print();
 }
 
 /*!----------------------------------------------------------------------------
