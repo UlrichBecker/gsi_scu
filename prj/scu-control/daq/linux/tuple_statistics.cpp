@@ -44,6 +44,10 @@ TupleStatistics::TupleStatistics( FgFeedbackAdministration* pParent )
    DEBUG_MESSAGE_M_FUNCTION( "" );
    m_printTime = daq::getSysMicrosecs();
    m_gateTime = m_printTime;
+#ifdef CONFIG_MIL_FG
+   m_AddacPresent = m_pParent->getNumOfFoundNonMilFg() > 0;
+   m_MilPresent   = m_pParent->getNumOfFoundMilFg() > 0;
+#endif
    clear();
 }
 

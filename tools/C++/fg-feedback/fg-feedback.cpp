@@ -665,6 +665,7 @@ int fbMain( int argc, char** ppArgv )
          {
             if( it >= intervalTime )
                intervalTime = it + cmdLine.getPollInterwalTime() * 1000;
+
             if( doReceive )
             {
                try
@@ -686,8 +687,8 @@ int fbMain( int argc, char** ppArgv )
                pDaqAdmin->printStatistic();
             #endif
             }
+            pDaqAdmin->getTupleStatistics()->print();
          }
-         pDaqAdmin->getTupleStatistics()->print();
          ::usleep( 100 );
       }
       DEBUG_MESSAGE( "Loop left" );
