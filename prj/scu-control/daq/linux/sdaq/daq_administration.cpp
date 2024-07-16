@@ -502,6 +502,7 @@ uint DaqAdministration::distributeData( void )
        ( descriptorGetChannel() >= DaqDevice::MAX_CHANNELS )
      )
    {
+      sendWasRead( c_ramBlockShortLen );
       onErrorDescriptor( m_poBlockBuffer->descriptor );
       return getCurrentNumberOfData();
    }

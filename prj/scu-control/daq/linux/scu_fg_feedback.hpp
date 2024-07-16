@@ -353,6 +353,27 @@ public:
 #endif
 
    /*!
+    * @brief Returns "true" if the current received tuple belongs
+    *        to the continuous mode.
+    * @note In the case of MIL-DAQ always "true" will return.
+    */
+   bool isContinous( void );
+
+   /*!
+    * @brief Returns "true" if the current received tuple belongs
+    *        to the post-mortem mode.
+    * @note In the case of MIL-DAQ always "false" will return.
+    */
+   bool isPostMortem( void );
+
+   /*!
+    * @brief Retuens "true" if the current received tuple belongs
+    *        to the high resolution mode.
+    * @note In the case of MIL-DAQ always false will return.
+    */
+   bool isHighResolution( void );
+
+   /*!
     * @brief Returns "true" in the case of gap-reading when the last received
     *        set-value was invalid.
     * @note This function can be used within the the callback function "onData"
@@ -1715,6 +1736,30 @@ public:
     #ifdef CONFIG_MIL_FG
       setMilFifoAlarmThreshold( threshold );
     #endif
+   }
+
+   /*!
+    * @brief Returns true when the received block are continuous data.
+    */
+   bool addacWasContinous( void )
+   {
+      return m_oAddacDaqAdmin.descriptorWasContinuous();
+   }
+
+   /*!
+    * @brief Returns true when the received block are Post-Mortem data.
+    */
+   bool addacWasPostMortem( void )
+   {
+      return m_oAddacDaqAdmin.descriptorWasPostMortem();
+   }
+
+   /*!
+    * @brief Returns true when the received block are High-Resolution data.
+    */
+   bool addacWasHighResolution( void )
+   {
+      return m_oAddacDaqAdmin.descriptorWasHighResolution();
    }
 
 protected:

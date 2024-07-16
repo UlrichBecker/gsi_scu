@@ -490,6 +490,42 @@ std::string FgFeedbackChannel::getFgName( void )
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_feedback.hpp
  */
+bool FgFeedbackChannel::isContinous( void )
+{
+#ifdef CONFIG_MIL_FG
+   if( isMil() )
+      return true;
+#endif
+   return getAdministration()->addacWasContinous();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_fg_feedback.hpp
+ */
+bool FgFeedbackChannel::isPostMortem( void )
+{
+#ifdef CONFIG_MIL_FG
+   if( isMil() )
+      return false;
+#endif
+   return getAdministration()->addacWasPostMortem();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_fg_feedback.hpp
+ */
+bool FgFeedbackChannel::isHighResolution( void )
+{
+#ifdef CONFIG_MIL_FG
+   if( isMil() )
+      return false;
+#endif
+   return getAdministration()->addacWasHighResolution();
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_fg_feedback.hpp
+ */
 bool FgFeedbackChannel::isSetValueInvalid( void )
 {
    if( m_pCommon == nullptr )
