@@ -92,7 +92,6 @@ void TupleStatistics::add( FgFeedbackTuple* pChannel, const TUPLE_T& rTuple )
 
       i.m_oTuple = rTuple;
       i.m_count++;
-      print();
       return;
    }
 
