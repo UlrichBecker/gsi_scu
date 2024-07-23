@@ -265,8 +265,10 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
    if( m_oReceiveActValue.getBlockLen() == 0 )
       return;
 
+#ifdef CONFIG_DBG_DAQ_PAIRING
    DEBUG_MESSAGE( "set sequence: " << static_cast<uint>(m_oReceiveSetValue.getSequence()) );
    DEBUG_MESSAGE( "act sequence: " << static_cast<uint>(m_oReceiveActValue.getSequence()) );
+#endif
 
    /*
     * Safety check: The data length of both blocks have to be equal!
