@@ -1885,14 +1885,10 @@ void FgFeedbackAdministration::MilDaqAdministration::onDataReadingPause( void )
  *                       for each loop pass. This pointer is only within
  *                       this loop visible.
  */
-#define FOR_EACH_FB_CHANNEL( fbAdmin, channelPtrName )              \
-   static_assert( std::is_class<TYPEOF(fbAdmin)>::value,            \
-      "Macro argument fbAdmin is not a class!" );                   \
-   static_assert( std::is_base_of<TYPEOF(fbAdmin),                  \
-                                  FgFeedbackAdministration>::value, \
-      "Class of macro argument fbAdmin has not the base-class"      \
-      " FgFeedbackAdministration !" );                              \
-   for( const auto& __pDev: fbAdmin )                               \
+#define FOR_EACH_FB_CHANNEL( fbAdmin, channelPtrName )               \
+   static_assert( std::is_class<TYPEOF(fbAdmin)>::value,             \
+      "Macro argument " #fbAdmin " is not a instance of a class!" ); \
+   for( const auto& __pDev: fbAdmin )                                \
       for( auto& channelPtrName: *__pDev )
 
 ///////////////////////////////////////////////////////////////////////////////
