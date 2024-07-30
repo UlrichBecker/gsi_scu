@@ -73,21 +73,58 @@ static_assert( EB_DATA32 == sizeof(uint32_t), "" );
  */
 int Lm32Logd::StringBuffer::sync( void )
 {
-   static const char* errorMessage = "ERROR: lm32-logd self: ";
+   std::stringstream selfMessage;
+
+   if( m_rParent.m_isError )
+   { /*
+      * Self logging...
+      */
+      if( m_rParent.m_rCmdLine.isPrintFilter() )
+      { /*
+         * In the case of self-logging there is no valid
+         * filter to print.
+         */
+         selfMessage << "##, ";
+      }
+      if( !m_rParent.m_rCmdLine.isNoTimestamp() )
+      { /*
+         * In the case of self-logging there is no valid white rabbit
+         * timestamp present so a WR-timestamp becomes emulated by the
+         * PC-system-time by a lower accuracy of factor 1000.
+         * That's better than nothing.
+         */
+         daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000;
+         if( !m_rParent.m_rCmdLine.isUtc() )
+             selfTimestamp = daq::utcToWrt( selfTimestamp );
+
+         if( m_rParent.m_rCmdLine.isHumanReadableTimestamp() )
+         {
+            selfMessage << daq::wrToTimeDateString( selfTimestamp );
+            selfMessage << " + " << std::setw( 9 ) << std::setfill( '0' )
+                        << (selfTimestamp % daq::NANOSECS_PER_SEC) << " ns";
+         }
+         else
+         {
+            selfMessage << selfTimestamp;
+         }
+         selfMessage << ": ";
+      }
+      selfMessage << "ERROR: lm32-logd self: ";
+   }
 
    if( m_rParent.m_rCmdLine.isDemonize() )
    {
       if( m_rParent.m_logfile.is_open() )
       {
          if( m_rParent.m_isError )
-            m_rParent.m_logfile << errorMessage << str() << std::flush;
+            m_rParent.m_logfile << selfMessage.str() << str() << std::flush;
          else
             m_rParent.m_logfile << str() << std::flush;
       }
       else if( m_rParent.m_isSyslogOpen )
       {
          if( m_rParent.m_isError )
-            ::syslog( LOG_ERR, "%s%s", errorMessage, str().c_str() );
+            ::syslog( LOG_ERR, "%s%s", selfMessage.str().c_str(), str().c_str() );
          else
             ::syslog( LOG_NOTICE, "%s", str().c_str() );
       }
@@ -95,7 +132,7 @@ int Lm32Logd::StringBuffer::sync( void )
    else
    {
       if( m_rParent.m_isError )
-         ERROR_MESSAGE( str() );
+         ERROR_MESSAGE( selfMessage.str() << str() );
       else
          std::cout << str() << std::flush;
    }

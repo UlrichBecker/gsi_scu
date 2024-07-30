@@ -61,6 +61,13 @@ constexpr uint32_t MICROSECS_PER_SEC = 1000000;
  */
 constexpr uint NANOSECS_PER_MILISEC = 1000000;
 
+/*!
+ * @ingroup DAQ
+ * @brief Difference in nanoseconds between universal time (UTC)
+ *        and white rabbit time TAI.
+ */
+constexpr uint64_t DELTA_UTC_TAI_NS = 37 * NANOSECS_PER_SEC;
+
 using USEC_T = uint64_t;
 
 /*! ---------------------------------------------------------------------------
@@ -122,8 +129,8 @@ inline TIME_DATE_T& wrToTimeDate( TIME_DATE_T& rTm, uint64_t wrt )
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ
- * @brief Concerts the white rabbit time to the universal time.
- * @todo At the moment the difference between white rabbit time ant the
+ * @brief Converts the white rabbit time into the universal time.
+ * @todo At the moment the difference between white rabbit time and the
  *       universal time is 37 seconds, but in the future this can changes!
  *       Remove this hard coded offset by a dynamic offset.
  * @param wrt White rabbit time.
@@ -131,7 +138,22 @@ inline TIME_DATE_T& wrToTimeDate( TIME_DATE_T& rTm, uint64_t wrt )
  */
 inline uint64_t wrtToUtc( uint64_t wrt )
 {
-   return wrt - 37 * NANOSECS_PER_SEC;
+   assert( wrt >= DELTA_UTC_TAI_NS );
+   return wrt - DELTA_UTC_TAI_NS;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ
+ * @brief Converts the universal time into the white rabbit time.
+ * @todo At the moment the difference between white rabbit time and the
+ *       universal time is 37 seconds, but in the future this can changes!
+ *       Remove this hard coded offset by a dynamic offset.
+ * @param utc Universal time time.
+ * @return White rabbit time
+ */
+inline uint64_t utcToWrt( uint64_t utc )
+{
+   return utc + DELTA_UTC_TAI_NS;
 }
 
 /*! ---------------------------------------------------------------------------
