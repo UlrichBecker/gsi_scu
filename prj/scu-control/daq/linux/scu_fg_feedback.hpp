@@ -394,6 +394,31 @@ public:
       return m_lastTimestamp;
    }
 
+   /*!
+    * @brief Converts a DAQ-raw-data word into a usable
+    *        floatingpoint value.
+    * @note There is the possibility to override this in
+    *       a higher software layer.
+    * E.g. this will used in the function TupleStatistics::print().
+    * @param rawData Raw data word.
+    * @return Floatingpoint value.
+    */
+   virtual double convertFromRawValue( DAQ_T rawData )
+   {
+      return daq::rawToVoltage( rawData );
+   }
+
+   /*!
+    * @brief Returns the unit for this channel.
+    * @note There is the possibility to override this in
+    *       a higher software layer.
+    * E.g. this will used in the function TupleStatistics::print().
+    */
+   virtual std::string getUnit( void )
+   {
+      return "V";
+   }
+
 protected:
    /*!
     * @brief Callback function becomes invoked for each incoming data item which

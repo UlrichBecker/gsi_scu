@@ -165,8 +165,9 @@ void TupleStatistics::print( void )
       cout << gsi::setxy( 1, y ) << ESC_CLR_LINE << y
            << gsi::setxy( 4, y ) << i.m_pChannel->getFgName()
            << gsi::setxy( 16, y ) << "Tuples: " << i.m_oAverage( i.m_frequency ) << " Hz"
-           << gsi::setxy( 34, y ) << "set: " << daq::rawToVoltage(i.m_oTuple.m_setValue) << " V"
-           << gsi::setxy( 48, y ) << "act: " << daq::rawToVoltage(i.m_oTuple.m_actValue) << " V" ESC_NORMAL;
+           << gsi::setxy( 34, y ) << "set: " << i.m_pChannel->convertFromRawValue(i.m_oTuple.m_setValue) << " " << i.m_pChannel->getUnit()
+           << gsi::setxy( 58, y ) << "act: " << i.m_pChannel->convertFromRawValue(i.m_oTuple.m_actValue) << " " << i.m_pChannel->getUnit()
+           << ESC_NORMAL;
    }
    cout << gsi::setxy( 1, y ) << endl;
 
