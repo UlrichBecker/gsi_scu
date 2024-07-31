@@ -69,6 +69,16 @@ public:
     */
    using DAQ_FLOAT_T = double;
 
+   /*!
+    * @brief Maximum integer value of the DAQ AD-converter.
+    */
+   static constexpr DAQ_T       MAX_ADC_VALUE_I = static_cast<DAQ_T>(~0);
+
+   /*!
+    * @brief Maximum floating point value of the DAQ AD-converter.
+    */
+   static constexpr DAQ_FLOAT_T MAX_ADC_VALUE_F = static_cast<DAQ_FLOAT_T>(MAX_ADC_VALUE_I);
+
 private:
    /*!
     * @brief Common object type for ADDAC/ACU- and MIL- feedback channel
