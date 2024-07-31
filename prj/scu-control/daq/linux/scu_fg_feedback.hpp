@@ -64,6 +64,10 @@ public:
  #else
    using DAQ_T = uint32_t;
  #endif
+   /*!
+    * @brief Purpose: can easy change here (and only here) in float or double if necessary.
+    */
+   using DAQ_FLOAT_T = double;
 
 private:
    /*!
@@ -403,7 +407,7 @@ public:
     * @param rawData Raw data word.
     * @return Floatingpoint value.
     */
-   virtual double convertFromRawValue( DAQ_T rawData )
+   virtual DAQ_FLOAT_T convertFromRawValue( DAQ_T rawData )
    {
       return daq::rawToVoltage( rawData );
    }
