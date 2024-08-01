@@ -353,6 +353,8 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       }
    }
 
+   timeStampSetVal = m_pParent->m_pParent->m_pParent->onConvertTimestamp( timeStampSetVal );
+
    /*
     * Forwarding of set- and actual- values to the higher software layer.
     */
@@ -387,6 +389,7 @@ void FgFeedbackChannel::MilFb::Receive::onData( uint64_t wrTimeStampTAI,
                                                 MiLdaq::MIL_DAQ_T actlValue,
                                                 MiLdaq::MIL_DAQ_T setValue )
 {
+   wrTimeStampTAI = m_pParent->m_pParent->m_pParent->m_pParent->onConvertTimestamp( wrTimeStampTAI );
    if( m_pParent->m_pParent->m_lastTimestamp < wrTimeStampTAI )
    {
       m_pParent->m_pParent->onMilData( wrTimeStampTAI, actlValue, setValue );

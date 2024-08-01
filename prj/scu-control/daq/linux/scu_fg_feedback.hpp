@@ -1102,6 +1102,15 @@ public:
    virtual ~FgFeedbackAdministration( void );
 
    /*!
+    * @brief Can be used in a higher software layer
+    *        to convert the timestamp from TAI to UTC.
+    */
+   virtual uint64_t onConvertTimestamp( uint64_t timestamp )
+   {
+      return timestamp;
+   }
+
+   /*!
     * @brief Returns the SCU LAN domain name or the name of the wishbone
     *        device.
     */
