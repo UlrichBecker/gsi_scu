@@ -127,6 +127,8 @@ class Lm32Logd: public std::iostream
 
    Terminal*            m_poTerminal;
 
+   int64_t              m_taiToUtcOffset;
+
 public:
    /*!
     * @brief Constructor makes all necessary initialization

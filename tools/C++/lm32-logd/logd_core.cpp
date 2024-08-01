@@ -30,6 +30,9 @@
  #include <scu_mmu_tag.h>
  #include <daq_calculations.hpp>
  #include <message_macros.hpp>
+ #ifdef CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+   #include "Time.hpp"
+ #endif
  #include "logd_core.hpp"
 #endif
 
@@ -93,9 +96,7 @@ int Lm32Logd::StringBuffer::sync( void )
          * PC-system-time by a lower accuracy of factor 1000.
          * That's better than nothing.
          */
-         daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000;
-         if( !m_rParent.m_rCmdLine.isUtc() )
-             selfTimestamp = daq::utcToWrt( selfTimestamp );
+         daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000 - m_rParent.m_taiToUtcOffset;
 
          if( m_rParent.m_rCmdLine.isHumanReadableTimestamp() )
          {
@@ -164,6 +165,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
    ,m_isSyslogOpen( false )
    ,m_pMiddleBuffer( nullptr )
    ,m_poTerminal( nullptr )
+   ,m_taiToUtcOffset( 0 )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
 
@@ -203,11 +205,24 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
          cout << idStr << endl;
          if( m_poTerminal != nullptr )
             m_poTerminal->reset();
+         /*
+          * In this case the work is done.
+          */
          ::exit( EXIT_SUCCESS );
       }
 
       *this << idStr << std::flush;
    }
+
+   if( !m_rCmdLine.isNoTimestamp() && m_rCmdLine.isUtc() )
+   {
+   #ifdef CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+      m_taiToUtcOffset = saftlib::UTC_offset_TAI( daq::getSysMicrosecs() * 1000 );
+   #else
+      m_taiToUtcOffset = daq::DELTA_UTC_TAI_NS;
+   #endif
+   }
+   DEBUG_MESSAGE( "m_taiToUtcOffset: " << m_taiToUtcOffset );
 
    setBurstLimit( m_rCmdLine.getBurstLimit() );
 
@@ -741,7 +756,12 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
          return;
    }
 
-   const uint64_t timestamp = m_rCmdLine.isUtc()? daq::wrtToUtc(item.timestamp) : item.timestamp;
+   if( m_taiToUtcOffset > static_cast<TYPEOF(m_taiToUtcOffset)>(item.timestamp) )
+   {
+      LOG_SELF( "Incorrect timestamp, the time is much too early: " << item.timestamp );
+      return;
+   }
+   const uint64_t timestamp = item.timestamp - m_taiToUtcOffset;
 
    if( m_lastTimestamp >= timestamp )
    { /*

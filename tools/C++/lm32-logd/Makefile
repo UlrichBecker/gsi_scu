@@ -9,7 +9,7 @@
 ## Date:     21.04.2022                                                      ##
 ###############################################################################
 
-DEFINES += VERSION=1.10
+DEFINES += VERSION=1.11
 FOR_SCU_AND_ACC := 1
 
 #DEBUG = 1
@@ -17,10 +17,15 @@ FOR_SCU_AND_ACC := 1
 #USE_NAMED_MUTEX := 1
 USE_STATIC_LIBS := 1
 
+#USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC := 1
+
 MIAN_MODULE := lm32-logd.cpp
 
 SOURCE += logd_cmdline.cpp
 SOURCE += logd_core.cpp
+ifdef USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+   SOURCE += Time.cpp
+endif
 SOURCE += $(SCU_LIB_SRC_LINUX_DIR)/daqt_read_stdin.cpp
 SOURCE += $(OPT_PARSER_DIR)/parse_opts.cpp
 SOURCE += $(LINUX_PROCESS_ID_DIR)/find_process.c
@@ -36,6 +41,10 @@ SOURCE += $(EB_FE_WRAPPER_DIR)/BusException.cpp
 
 INCLUDE_DIRS += $(PRJ_DIR)/scu-control/daq
 
+ifdef USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+   DEFINES += DATADIR="(char*)"
+   DEFINES += CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+endif
 DEFINES += CONFIG_AUTODOC_OPTION
 DEFINES += CONFIG_SCU_USE_DDR3
 DEFINES += _GNU_SOURCE
@@ -60,8 +69,8 @@ endif
 
 LIBS += stdc++
 
-#CALL_ARGS = scuxl0692.acc.gsi.de -Hbakv -I200 -m1000 -M2000
-CALL_ARGS = scuxl0692.acc.gsi.de -B
+CALL_ARGS = scuxl0692.acc.gsi.de -HUbakv -I200 -m1000 -M2000
+#CALL_ARGS = scuxl0692.acc.gsi.de -B
 
 DOX_EXTRACT_PRIVATE = YES
 
