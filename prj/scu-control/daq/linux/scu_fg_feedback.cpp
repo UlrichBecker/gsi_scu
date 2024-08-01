@@ -353,7 +353,10 @@ void FgFeedbackChannel::AddacFb::finalizeBlock( void )
       }
    }
 
-   timeStampSetVal = m_pParent->m_pParent->m_pParent->onConvertTimestamp( timeStampSetVal );
+   /*
+    * Converting TAI to UTC if requested.
+    */
+   timeStampSetVal -= m_pParent->m_pParent->m_pParent->getTaiToUtcOffset();
 
    /*
     * Forwarding of set- and actual- values to the higher software layer.
@@ -389,7 +392,10 @@ void FgFeedbackChannel::MilFb::Receive::onData( uint64_t wrTimeStampTAI,
                                                 MiLdaq::MIL_DAQ_T actlValue,
                                                 MiLdaq::MIL_DAQ_T setValue )
 {
-   wrTimeStampTAI = m_pParent->m_pParent->m_pParent->m_pParent->onConvertTimestamp( wrTimeStampTAI );
+   /*
+    * Converting TAI to UTC if requested.
+    */
+   wrTimeStampTAI -= m_pParent->m_pParent->m_pParent->m_pParent->getTaiToUtcOffset();
    if( m_pParent->m_pParent->m_lastTimestamp < wrTimeStampTAI )
    {
       m_pParent->m_pParent->onMilData( wrTimeStampTAI, actlValue, setValue );
@@ -911,6 +917,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( const std::string& netaddres
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
    ,m_ebSelfAcquired( true )
+   ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
    ,m_dbgIsFirstCall( true )
 #endif
@@ -931,6 +938,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
    ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
    ,m_ebSelfAcquired( false )
+   ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
    ,m_dbgIsFirstCall( true )
 #endif
@@ -951,6 +959,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILISEC )
   ,m_ebSelfAcquired( false )
+  ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
   ,m_dbgIsFirstCall( true )
 #endif

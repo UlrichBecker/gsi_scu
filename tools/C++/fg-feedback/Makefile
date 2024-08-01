@@ -144,9 +144,9 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
 #CALL_ARGS = --generate_doc_tagged
 
-# CALL_ARGS = scuxl0692.acc.gsi.de -vadt1
+CALL_ARGS = scuxl0692.acc.gsi.de -vadt1 -I250 -T"X11 size 800,150"
 # CALL_ARGS = scuxl0692.acc.gsi.de -vS
-CALL_ARGS = scuxl0692.acc.gsi.de -aN -I100
+# CALL_ARGS = scuxl0692.acc.gsi.de -aN -I100
 # CALL_ARGS = scuxl0212 -aqzt1 -I200 -T"X11 size 800,150"
 #CALL_ARGS = scuxl0692.acc.gsi.de -azrdQOt1 -I250 -T"X11 size 800,150"  -u0
 #CALL_ARGS = scuxl0692.acc.gsi.de -I200 -rQ

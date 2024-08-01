@@ -1048,6 +1048,8 @@ protected:
    #define DEVICE_LIST_BASE std::list
    using DEVICE_LIST_T = DEVICE_LIST_BASE<FgFeedbackDevice*>;
    DEVICE_LIST_T m_devicePtrList;
+
+   int64_t                     m_taiToUtcOffset;
 #ifdef CONFIG_DEBUG_MESSAGES
 private:
    bool                        m_dbgIsFirstCall;
@@ -1102,15 +1104,6 @@ public:
    virtual ~FgFeedbackAdministration( void );
 
    /*!
-    * @brief Can be used in a higher software layer
-    *        to convert the timestamp from TAI to UTC.
-    */
-   virtual uint64_t onConvertTimestamp( uint64_t timestamp )
-   {
-      return timestamp;
-   }
-
-   /*!
     * @brief Returns the SCU LAN domain name or the name of the wishbone
     *        device.
     */
@@ -1125,6 +1118,15 @@ public:
    daq::EbRamAccess* getEbAccess( void )
    {
       return m_oAddacDaqAdmin.getEbAccess();
+   }
+
+   /*!
+    * @brief Returns the offset in nanoseconds for converting the
+    *        TAT timestamp to UTC timestamp.
+    */
+   int64_t getTaiToUtcOffset( void )
+   {
+      return m_taiToUtcOffset;
    }
 
    /*!
