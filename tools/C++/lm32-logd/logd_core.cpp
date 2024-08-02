@@ -96,7 +96,9 @@ int Lm32Logd::StringBuffer::sync( void )
          * PC-system-time by a lower accuracy of factor 1000.
          * That's better than nothing.
          */
-         daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000 - m_rParent.m_taiToUtcOffset;
+         daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000;
+         if( !m_rParent.m_rCmdLine.isUtc() )
+            selfTimestamp += m_rParent.m_taiToUtcOffset;
 
          if( m_rParent.m_rCmdLine.isHumanReadableTimestamp() )
          {
@@ -214,7 +216,7 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       *this << idStr << std::flush;
    }
 
-   if( !m_rCmdLine.isNoTimestamp() && m_rCmdLine.isUtc() )
+   if( !m_rCmdLine.isNoTimestamp() )
    {
    #ifdef CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
       m_taiToUtcOffset = saftlib::UTC_offset_TAI( daq::getSysMicrosecs() * 1000 );
@@ -761,7 +763,9 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       LOG_SELF( "Incorrect timestamp, the time is much too early: " << item.timestamp );
       return;
    }
-   const uint64_t timestamp = item.timestamp - m_taiToUtcOffset;
+   uint64_t timestamp = item.timestamp;
+   if( m_rCmdLine.isUtc() )
+      timestamp -= m_taiToUtcOffset;
 
    if( m_lastTimestamp >= timestamp )
    { /*
