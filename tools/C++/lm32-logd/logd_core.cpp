@@ -97,8 +97,9 @@ int Lm32Logd::StringBuffer::sync( void )
          * That's better than nothing.
          */
          daq::USEC_T selfTimestamp = daq::getSysMicrosecs() * 1000;
-         if( !m_rParent.m_rCmdLine.isUtc() )
+         if( !m_rParent.m_rCmdLine.isUtc() || (m_rParent.m_rCmdLine.getLocalTimeOffset() == 0) )
             selfTimestamp += m_rParent.m_taiToUtcOffset;
+         selfTimestamp += m_rParent.m_rCmdLine.getLocalTimeOffset();
 
          if( m_rParent.m_rCmdLine.isHumanReadableTimestamp() )
          {
@@ -764,8 +765,10 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
       return;
    }
    uint64_t timestamp = item.timestamp;
-   if( m_rCmdLine.isUtc() )
+   if( m_rCmdLine.isUtc() || (m_rCmdLine.getLocalTimeOffset() != 0) )
       timestamp -= m_taiToUtcOffset;
+   timestamp += m_rCmdLine.getLocalTimeOffset();
+
 
    if( m_lastTimestamp >= timestamp )
    { /*

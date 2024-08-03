@@ -60,11 +60,12 @@ private:
    uint          m_maxItemsPerInterval;
    int           m_burstLimit;
    uint          m_maxItems;
+   int           m_localTimeOffset;
    FILTER_FLAG_T m_filterFlags;
    std::string   m_scuUrl;
    std::string   m_logFile;
 
-   static uint readInteger( const std::string& );
+   static int readInteger( const std::string& );
 
 public:
    CommandLine( int argc, char** ppArgv );
@@ -185,6 +186,11 @@ public:
    uint getMaxItemsInMemory( void )
    {
       return m_maxItems;
+   }
+
+   int getLocalTimeOffset( void )
+   {
+      return m_localTimeOffset;
    }
 
 private:

@@ -63,6 +63,21 @@ constexpr uint NANOSECS_PER_MILISEC = 1000000;
 
 /*!
  * @ingroup DAQ
+ * @brief Calculation factor converting nanoseconds to minutes and vice
+ *        versa
+ */
+constexpr uint64_t NANOSECS_PER_MIN = NANOSECS_PER_SEC * 60;
+
+/*!
+ * @ingroup DAQ
+ * @brief Calculation factor converting nanoseconds to hours and vice
+ *        versa
+ */
+constexpr uint64_t NANOSECS_PER_HOUR = NANOSECS_PER_MIN * 60;
+
+
+/*!
+ * @ingroup DAQ
  * @brief Difference in nanoseconds between universal time (UTC)
  *        and white rabbit time TAI.
  */

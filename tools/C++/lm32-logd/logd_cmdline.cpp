@@ -25,6 +25,7 @@
 #include <scu_env.hpp>
 #include <message_macros.hpp>
 #include <scu_ddr3_access.hpp>
+#include <daq_calculations.hpp>
 #include "logd_cmdline.hpp"
 
 using namespace std;
@@ -472,6 +473,26 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
       .m_shortOpt = 'U',
       .m_longOpt  = "utc",
       .m_helpText = "Converts the white rabbit timestamp in to universal time (UTC)."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         const int lto = readInteger( poParser->getOptArg() );
+         if( (lto < -12) || (lto > +12) )
+         {
+            throw runtime_error( "Local time offset is out of the alowed range of +/- 12h!" );
+         }
+         static_cast<CommandLine*>(poParser)->m_localTimeOffset = lto * daq::NANOSECS_PER_HOUR;
+         DEBUG_MESSAGE( "LTO: " << static_cast<CommandLine*>(poParser)->m_localTimeOffset );
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'l',
+      .m_longOpt  = "localTimeOffset",
+      .m_helpText = "PARAM specifies the time zone in hours if the timestamps should be given in the current local time.\n"
+                    "If this option is used, a conversion from TAI to UTC is also done before.\n"
+                    "Unfortunately, this option is necessary if lm32-logd is invoked on the SCU, as it only knows UTC."
    }
 
 }; // CommandLine::c_optList
@@ -479,9 +500,9 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
 ///////////////////////////////////////////////////////////////////////////////
 /*! ---------------------------------------------------------------------------
 */
-uint CommandLine::readInteger( const string& roStr )
+int CommandLine::readInteger( const string& roStr )
 {
-   uint retVal;
+   int retVal;
    try
    {
       retVal = stoi( roStr, nullptr, (roStr[0] == '0' && roStr[1] == 'x')? 16 : 10 );
@@ -519,6 +540,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_maxItemsPerInterval( DEFAULT_MAX_ITEMS )
    ,m_burstLimit( Ddr3Access::NEVER_BURST )
    ,m_maxItems( DEFAULT_MAX_ITEMS_IN_MEMORY )
+   ,m_localTimeOffset( 0 )
    ,m_filterFlags( 0 )
 {
    DEBUG_MESSAGE_M_FUNCTION("");
