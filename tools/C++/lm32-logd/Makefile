@@ -66,10 +66,15 @@ else
  endif
  LIBS += etherbone
 endif
+ifdef DEBUG
+DEFINES += CONFIG_DEBUG_MESSAGES
+endif
 
 LIBS += stdc++
 
-CALL_ARGS = scuxl0692.acc.gsi.de -HUbakv -I200 -m1000 -M2000
+
+
+CALL_ARGS = scuxl0692.acc.gsi.de -HUbakv -I200 -m1000 -M2000 -l-2
 #CALL_ARGS = scuxl0692.acc.gsi.de -B
 
 DOX_EXTRACT_PRIVATE = YES

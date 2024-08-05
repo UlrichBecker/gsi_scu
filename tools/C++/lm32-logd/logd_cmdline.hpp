@@ -60,7 +60,7 @@ private:
    uint          m_maxItemsPerInterval;
    int           m_burstLimit;
    uint          m_maxItems;
-   int           m_localTimeOffset;
+   int64_t       m_localTimeOffset;
    FILTER_FLAG_T m_filterFlags;
    std::string   m_scuUrl;
    std::string   m_logFile;
@@ -188,7 +188,7 @@ public:
       return m_maxItems;
    }
 
-   int getLocalTimeOffset( void )
+   int64_t getLocalTimeOffset( void )
    {
       return m_localTimeOffset;
    }

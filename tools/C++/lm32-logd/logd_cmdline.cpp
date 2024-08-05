@@ -494,7 +494,6 @@ CommandLine::OPT_LIST_T CommandLine::c_optList =
                     "If this option is used, a conversion from TAI to UTC is also done before.\n"
                     "Unfortunately, this option is necessary if lm32-logd is invoked on the SCU, as it only knows UTC."
    }
-
 }; // CommandLine::c_optList
 
 ///////////////////////////////////////////////////////////////////////////////
