@@ -31,6 +31,7 @@
  #include <daq_calculations.hpp>
  #include <message_macros.hpp>
  #ifdef CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
+   #include <scu_env.hpp>
    #include "Time.hpp"
  #endif
  #include "logd_core.hpp"
@@ -217,13 +218,32 @@ Lm32Logd::Lm32Logd( RamAccess* poRam, CommandLine& rCmdLine )
       *this << idStr << std::flush;
    }
 
-   if( !m_rCmdLine.isNoTimestamp() )
+   if( !m_rCmdLine.isNoTimestamp() && (m_rCmdLine.isUtc() || (m_rCmdLine.getLocalTimeOffset() != 0)) )
    {
    #ifdef CONFIG_USE_SAFTLIB_MODULE_FOR_TAI_TO_UTC
-      m_taiToUtcOffset = saftlib::UTC_offset_TAI( daq::getSysMicrosecs() * 1000 );
-   #else
-      m_taiToUtcOffset = daq::DELTA_UTC_TAI_NS;
+      if( isRunningOnScu() )
+      {
+         try
+         {
+            m_taiToUtcOffset = saftlib::UTC_offset_TAI( daq::getSysMicrosecs() * 1000 );
+         }
+         catch( std::exception& e )
+         {
+            m_taiToUtcOffset = daq::DELTA_UTC_TAI_NS;
+            string msg( e.what() );
+            msg.pop_back();
+            msg += "! Using -";
+            msg += to_string( m_taiToUtcOffset );
+            msg += "ns as TAI to UTC offset.";
+            if( m_rCmdLine.isDemonize() )
+               LOG_SELF( msg )
+            else
+               WARNING_MESSAGE( msg );
+         }
+      }
+      else
    #endif
+         m_taiToUtcOffset = daq::DELTA_UTC_TAI_NS;
    }
    DEBUG_MESSAGE( "m_taiToUtcOffset: " << m_taiToUtcOffset );
 
