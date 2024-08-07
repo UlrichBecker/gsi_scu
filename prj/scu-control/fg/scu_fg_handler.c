@@ -347,6 +347,7 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
                     &g_shared.oSaftLib.oFg.aRegs[0],
                     pThis->cntrl_reg.bv.number, &pset ) )
    {
+   #ifdef CONFIG_HANDLE_FG_FIFO_EMPTY_AS_ERROR
       if( fgIsStarted( pThis->cntrl_reg.bv.number ) )
       {
          const unsigned int socket = getSocket( pThis->cntrl_reg.bv.number );
@@ -357,6 +358,7 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
                 );
          addacFgDisable( g_pScub_base, socket, device );
       }
+   #endif
       return false;
    }
 

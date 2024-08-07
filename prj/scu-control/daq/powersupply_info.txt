@@ -1,0 +1,2 @@
+fesa-fg-dump --int gs01qs1f -l 1 -u 64
+fesa-fg-load --dev gs01qs1f.rmp DAQ_TEST_FG_3_0

@@ -398,12 +398,23 @@ void makeStop( const unsigned int channel )
 {
 
    fgDisableInterrupt( channel );
-   const SIGNAL_T signal = cbisEmpty( &g_shared.oSaftLib.oFg.aRegs[0], channel )?
-                             IRQ_DAT_STOP_EMPTY : IRQ_DAT_STOP_NOT_EMPTY;
-
-   sendSignal( signal,  channel );
+   if( cbisEmpty( &g_shared.oSaftLib.oFg.aRegs[0], channel ) )
+   {
+      sendSignal( IRQ_DAT_STOP_EMPTY,  channel );
+   }
+   else
+   {
+      sendSignal( IRQ_DAT_STOP_NOT_EMPTY,  channel );
+      lm32Log( LM32_LOG_ERROR, ESC_ERROR
+               "ERROR: fg-%u-%u, channel: %u has stopped!" ESC_NORMAL,
+               getSocket( channel ),
+               getDevice( channel ),
+               channel
+             );
+   }
    g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_STOPPED;
 
+#if 0
 #ifndef CONFIG_LOG_ALL_SIGNALS
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG
             "Signal: %s, fg-%u-%u, channel: %u\n" ESC_NORMAL,
@@ -411,6 +422,7 @@ void makeStop( const unsigned int channel )
             getSocket( channel ),
             getDevice( channel ),
             channel );
+#endif
 #endif
 }
 
