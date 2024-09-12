@@ -9,7 +9,7 @@
 ## Date:    12.10.2023                                                       ##
 ###############################################################################
 BASE_VERSION = 4
-SUB_VERSION  = 6.5
+SUB_VERSION  = 6.6
 
 DEFINES += CONFIG_HANDLE_UNUSED_ECAS
 

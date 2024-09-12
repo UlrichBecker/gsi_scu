@@ -53,6 +53,22 @@ FG_CHANNEL_T g_aFgChannels[MAX_FG_CHANNELS] =
 
 STATIC_ASSERT( ARRAY_SIZE(g_aFgChannels) == MAX_FG_CHANNELS );
 
+STATIC bool mg_fgLoggingActive = false;
+
+/*! ----------------------------------------------------------------------------
+ */
+inline bool isFgEnableLoggingActive( void )
+{
+   return mg_fgLoggingActive;
+}
+
+/*! ----------------------------------------------------------------------------
+ */
+inline void setFgLoggingEnnable( bool enable )
+{
+   mg_fgLoggingActive = enable;
+}
+
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
 
 #ifndef MSI_TIMEOUT
@@ -230,8 +246,11 @@ void fgEnableChannel( const unsigned int channel )
    const unsigned int socket = getSocket( channel );
    const unsigned int dev    = getDevice( channel );
 
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
-            __func__, channel, socket, dev );
+
+   if( isFgEnableLoggingActive() )
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
+               __func__, channel, socket, dev );
+
 
    enableMeassageSignaledInterrupts( socket );
 

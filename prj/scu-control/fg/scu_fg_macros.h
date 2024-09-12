@@ -98,6 +98,18 @@ typedef union HW_IMAGE
 STATIC_ASSERT( sizeof(FG_CTRL_RG_T) == sizeof(uint16_t));
 
 /*! ---------------------------------------------------------------------------
+ * @breif Returns "true" when log-messages for enabeling function-generators
+ *        are requested.
+ */
+bool isFgEnableLoggingActive( void );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Enables or disables the log messages for function-generator enabling.
+ * @param enable If true then the log-messages are enabled.
+ */
+void setFgLoggingEnnable( bool enable );
+
+/*! ---------------------------------------------------------------------------
  * @brief Returns the control register format for step, frequency select
  *        and channel number.
  * @param pPset Pointer to the polynomial data set.

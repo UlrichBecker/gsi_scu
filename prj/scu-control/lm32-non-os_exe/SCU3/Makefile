@@ -9,7 +9,7 @@
 ## Date:    12.10.2023                                                       ##
 ###############################################################################
 BASE_VERSION = 4
-SUB_VERSION  = 5.6
+SUB_VERSION  = 6.6
 TARGET  := scu3_control
 DEFINES += CONFIG_SCU3
 SCU3    := 1 

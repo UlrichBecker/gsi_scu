@@ -107,7 +107,8 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
    * When debug mode active only.
    */
    printSwIrqCode( code, value );
-   lm32Log( LM32_LOG_CMD, "MSI command: %s( %u )\n", fgCommand2String( code ), value );
+   if( (code != FG_OP_ENABLE_CHANNEL) || isFgEnableLoggingActive() )
+      lm32Log( LM32_LOG_CMD, "MSI command: %s( %u )\n", fgCommand2String( code ), value );
 
   /*
    * Verifying the command parameter for all commands with a
@@ -194,14 +195,12 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * Rescaning of all function generators.
          */
       #ifdef CONFIG_RTOS
-       // vTaskSuspendAll();
          taskDeleteAllRunningFgAndDaq();
       #endif
 
          scanFgs();
 
       #ifdef CONFIG_RTOS
-       // xTaskResumeAll();
          taskStartAllIfHwPresent();
       #endif
          break;
@@ -236,6 +235,9 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          criticalSectionExit();
          lm32Log( LM32_LOG_INFO, "Maximun MSIs per IRQ: %u", msiCnt );
       #endif
+         setFgLoggingEnnable( !isFgEnableLoggingActive() );
+         lm32Log( LM32_LOG_INFO, "FG-enable logging: %s",
+                  isFgEnableLoggingActive()? "enabled":"disabeled" );
          break;
       }
 
