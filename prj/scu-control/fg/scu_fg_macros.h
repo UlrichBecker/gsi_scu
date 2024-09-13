@@ -98,13 +98,38 @@ typedef union HW_IMAGE
 STATIC_ASSERT( sizeof(FG_CTRL_RG_T) == sizeof(uint16_t));
 
 /*! ---------------------------------------------------------------------------
- * @breif Returns "true" when log-messages for enabeling function-generators
+ * @brief Sets the "active by SAFTLIB- flag" of the concerned FG- channel.
+ * @see resetActiveBySaftLib
+ * @see fgIsActiveBySaftLib
+ */
+void setActiveBySaftLib( const unsigned int channel );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Resets the "active by SAFTLIB- flag" of the concerned FG- channel.
+ * @see setActiveBySaftLib
+ * @see fgIsActiveBySaftLib
+ */
+void resetActiveBySaftLib( const unsigned int channel );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Returns "true" when the concerning functiongenerator was switched
+ *        on by SAFT-LIB ane returns "false" once it was switched off by
+ *        SAFT-LIB.
+ * @see setActiveBySaftLib
+ * @see resetActiveBySaftLib
+ */
+bool fgIsActiveBySaftLib( const unsigned int channel );
+
+/*! ---------------------------------------------------------------------------
+ * @brief Returns "true" when log-messages for enabeling function-generators
  *        are requested.
+ * @see setFgLoggingEnnable
  */
 bool isFgEnableLoggingActive( void );
 
 /*! ---------------------------------------------------------------------------
  * @brief Enables or disables the log messages for function-generator enabling.
+ * @see isFgEnableLoggingActive
  * @param enable If true then the log-messages are enabled.
  */
 void setFgLoggingEnnable( bool enable );

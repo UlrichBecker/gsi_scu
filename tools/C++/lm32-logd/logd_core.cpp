@@ -122,7 +122,7 @@ int Lm32Logd::StringBuffer::sync( void )
       if( m_rParent.m_logfile.is_open() )
       {
          if( m_rParent.m_isError )
-            m_rParent.m_logfile << selfMessage.str() << str() << std::flush;
+            m_rParent.m_logfile << selfMessage.str() << str() << std::endl;
          else
             m_rParent.m_logfile << str() << std::flush;
       }

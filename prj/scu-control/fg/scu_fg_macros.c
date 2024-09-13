@@ -15,6 +15,9 @@
 #ifdef CONFIG_MIL_FG
    #include "scu_mil_fg_handler.h"
 #endif
+#ifdef CONFIG_SCU_DAQ_INTEGRATION
+   #include <daq_fg_switch.h>
+#endif
 
 #define CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ
 
@@ -54,6 +57,30 @@ FG_CHANNEL_T g_aFgChannels[MAX_FG_CHANNELS] =
 STATIC_ASSERT( ARRAY_SIZE(g_aFgChannels) == MAX_FG_CHANNELS );
 
 STATIC bool mg_fgLoggingActive = false;
+
+STATIC uint16_t mg_activeBySaftLibFlags = 0;
+STATIC_ASSERT( BIT_SIZEOF(mg_activeBySaftLibFlags) >= MAX_FG_CHANNELS );
+
+/*! ---------------------------------------------------------------------------
+*/
+inline void setActiveBySaftLib( const unsigned int channel )
+{
+    mg_activeBySaftLibFlags |= (1 << channel);
+}
+
+/*! ---------------------------------------------------------------------------
+*/
+inline void resetActiveBySaftLib( const unsigned int channel )
+{
+    mg_activeBySaftLibFlags &= ~(1 << channel);
+}
+
+/*! ---------------------------------------------------------------------------
+*/
+inline bool fgIsActiveBySaftLib( const unsigned int channel )
+{
+   return (mg_activeBySaftLibFlags & (1 << channel)) != 0;
+}
 
 /*! ----------------------------------------------------------------------------
  */
@@ -247,7 +274,7 @@ void fgEnableChannel( const unsigned int channel )
    const unsigned int dev    = getDevice( channel );
 
 
-   if( isFgEnableLoggingActive() )
+   if( isFgEnableLoggingActive() || !fgIsActiveBySaftLib( channel ) )
       lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
                __func__, channel, socket, dev );
 
@@ -271,6 +298,10 @@ void fgEnableChannel( const unsigned int channel )
        * Note: In the case of ADDAC/ACU-FGs the socket-number is equal
        *       to the slot number.
        */
+   #ifdef CONFIG_SCU_DAQ_INTEGRATION
+      if( !fgIsActiveBySaftLib( channel ) )
+         daqEnableFgFeedback( socket, dev, g_shared.oSaftLib.oFg.aRegs[channel].tag );
+   #endif
       pAddagFgRegs = addacFgPrepare( g_pScub_base,
                                      socket, dev,
                                      g_shared.oSaftLib.oFg.aRegs[channel].tag );
@@ -312,6 +343,7 @@ void fgEnableChannel( const unsigned int channel )
    } /* if( cbRead( ... ) != 0 ) */
 
    sendSignalArmed( channel );
+   setActiveBySaftLib( channel );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -343,6 +375,9 @@ void fgDisableChannel( const unsigned int channel )
        *       is equal to the socket number.
        */
       addacFgDisable( g_pScub_base, socket, dev );
+   #ifdef CONFIG_SCU_DAQ_INTEGRATION
+      daqDisableFgFeedback( socket, dev );
+   #endif
 #ifdef CONFIG_MIL_FG
    }
    else
@@ -365,15 +400,12 @@ void fgDisableChannel( const unsigned int channel )
                socket, dev, channel );
       flushCircularBuffer( pFgRegs );
    }
- //  else
- //  {
-      pFgRegs->state = STATE_STOPPED;
-      sendSignal( IRQ_DAT_DISARMED, channel );
- //  }
+   pFgRegs->state = STATE_STOPPED;
+   sendSignal( IRQ_DAT_DISARMED, channel );
 #ifdef CONFIG_USE_FG_MSI_TIMEOUT
    wdtDisable( channel );
 #endif
-
+   resetActiveBySaftLib( channel );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -420,12 +452,19 @@ void makeStop( const unsigned int channel )
    if( cbisEmpty( &g_shared.oSaftLib.oFg.aRegs[0], channel ) )
    {
       sendSignal( IRQ_DAT_STOP_EMPTY,  channel );
+      if( isFgEnableLoggingActive() )
+         lm32Log( LM32_LOG_DEBUG,
+                  ESC_DEBUG "IRQ_DAT_STOP_EMPTY fg-%u-%u, channel: %u FiFo is empty." ESC_NORMAL,
+                  getSocket( channel ),
+                  getDevice( channel ),
+                  channel
+                );
    }
    else
    {
       sendSignal( IRQ_DAT_STOP_NOT_EMPTY,  channel );
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
-               "ERROR: fg-%u-%u, channel: %u has stopped!" ESC_NORMAL,
+               "ERROR: IRQ_DAT_STOP_NOT_EMPTY fg-%u-%u, channel: %u has stopped!" ESC_NORMAL,
                getSocket( channel ),
                getDevice( channel ),
                channel

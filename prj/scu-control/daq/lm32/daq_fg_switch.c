@@ -46,8 +46,7 @@ extern DAQ_ADMIN_T g_scuDaqAdmin;
 void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
                           const uint32_t tag )
 {
-   if( isFgEnableLoggingActive() )
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %d, %d, 0x%04X )\n" ESC_NORMAL, __func__, slot, fgNum, tag );
 
 #ifndef CONFIG_NO_DAQ_AUTOSWITCHING
    DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, slot );
@@ -63,9 +62,8 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
    DAQ_CANNEL_T* pSetChannel = daqDeviceGetChannelObject( pDaqDevice, setChannelNumber );
    DAQ_CANNEL_T* pActChannel = daqDeviceGetChannelObject( pDaqDevice, actChannelNumber );
 
-   if( isFgEnableLoggingActive() )
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Enable DAQ-channels of FG %u: set %u and act %u\n" ESC_NORMAL,
-               fgNum, setChannelNumber, actChannelNumber );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Enable DAQ-channels of FG %u: set %u and act %u\n" ESC_NORMAL,
+            fgNum, setChannelNumber, actChannelNumber );
 
    ATOMIC_SECTION()
    {
@@ -81,8 +79,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
       daqChannelSample1msOn( pActChannel );
    }
 #else
-  if( isFgEnableLoggingActive() )
-     lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not enabled!" ESC_NORMAL );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not enabled!" ESC_NORMAL );
 #endif
 }
 

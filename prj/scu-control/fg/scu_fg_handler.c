@@ -10,10 +10,7 @@
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/AdcDac2Scu
  */
 #include <scu_fg_macros.h>
-#include <scu_fg_handler.h>
-#ifdef CONFIG_SCU_DAQ_INTEGRATION
- #include <daq_fg_switch.h>
-#endif
+#include "scu_fg_handler.h"
 
 /*!
  * @see scu_main.c
@@ -215,13 +212,6 @@ inline FG_REGISTER_T* addacFgPrepare( const void* pScuBus,
    FG_REGISTER_T* pAddagFgRegs = getFgRegisterPtrByOffsetAddr( pScuBus, slot,
                                                                pAddacObj->fgBaseAddr );
 
-#ifdef CONFIG_SCU_DAQ_INTEGRATION
-  /*
-   * Enabling of both daq-channels for the feedback of set- and actual values
-   * for this function generator channel.
-   */
-   daqEnableFgFeedback( slot, dev, tag );
-#endif
    ATOMIC_SECTION()
    { /*
       * Enable interrupts for the slave
@@ -287,13 +277,6 @@ inline void addacFgDisableIrq( const void* pScuBus,
       *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) &= ~fgIrqMask;
       *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) = fgIrqMask;
    }
-#if defined( CONFIG_SCU_DAQ_INTEGRATION ) && defined( CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ)
-  /*
-   * Disabling of both daq-channels for the feedback of set- and actual values
-   * for this function generator channel.
-   */
-   daqDisableFgFeedback( slot, dev );
-#endif
 }
 
 /*! --------------------------------------------------------------------------
@@ -317,14 +300,6 @@ void addacFgDisable( const void* pScuBus,
     * Unset FG mode in ADC
     */
    *scuBusGetSlaveRegisterPtr16( pAbsSlaveAddr, pAddacObj->dacControl ) &= ~DAC_FG_MODE;
-
-//#if defined( CONFIG_SCU_DAQ_INTEGRATION ) && !defined( CONFIG_DISABLE_FEEDBACK_IN_DISABLE_IRQ )
-  /*
-   * Disabling of both daq-channels for the feedback of set- and actual values
-   * for this function generator channel.
-   */
-   daqDisableFgFeedback( slot, dev );
-//#endif
 }
 
 

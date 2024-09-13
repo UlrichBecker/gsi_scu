@@ -107,7 +107,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
    * When debug mode active only.
    */
    printSwIrqCode( code, value );
-   if( (code != FG_OP_ENABLE_CHANNEL) || isFgEnableLoggingActive() )
+   if( (code != FG_OP_ENABLE_CHANNEL) || isFgEnableLoggingActive() || !fgIsActiveBySaftLib( value ) )
       lm32Log( LM32_LOG_CMD, "MSI command: %s( %u )\n", fgCommand2String( code ), value );
 
   /*
@@ -128,7 +128,9 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * In the case of a detected parameter error this function
          * becomes terminated.
          */
-         lm32Log( LM32_LOG_ERROR, "Value %d out of range!\n", value );
+         lm32Log( LM32_LOG_ERROR,
+                  ESC_ERROR "Value %d out of range!" ESC_NORMAL,
+                  value );
 
         /*
          * signal done to saftlib
@@ -149,11 +151,12 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          fgResetAndInit( g_shared.oSaftLib.oFg.aRegs,
                          value,
                          g_shared.oSaftLib.oFg.aMacros,
-                         (void*)g_pScub_base
+                         g_pScub_base
                         #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
                          ,g_pScu_mil_base
                         #endif
                        );
+         resetActiveBySaftLib( value );
        #ifdef CONFIG_USE_SENT_COUNTER
          g_aFgChannels[value].param_sent = 0;
        #endif
@@ -184,9 +187,6 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
          * Stop of a function generator.
          */
          fgDisableChannel( value );
-      #ifdef DEBUG_SAFTLIB
-         mprintf( "-%d ", value );
-      #endif
          break;
       }
 

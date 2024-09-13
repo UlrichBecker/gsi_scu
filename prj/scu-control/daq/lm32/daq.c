@@ -565,7 +565,7 @@ int daqDeviceFindChannels( DAQ_DEVICE_T* pThis, const unsigned int slot )
 
       pThis->maxChannels++;
       const char* text = ESC_FG_CYAN
-                         "%s-DAQ channel %2u in slot %2u initialized. Address: 0x%p\n"
+                         "%s-DAQ channel %2u on slot %2u initialized. Address: 0x%p\n"
                          ESC_NORMAL;
       lm32Log( LM32_LOG_INFO, text, daqDeviceTypeToString( pThis->type ),
                channel, daqChannelGetSlot( pCurrentChannel ),
