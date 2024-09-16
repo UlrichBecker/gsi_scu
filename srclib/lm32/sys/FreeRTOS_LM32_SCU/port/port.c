@@ -124,9 +124,10 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     * a arbitrary value.
     */
    CHECK_STACK_POSITION( 2 );
+#ifndef  __CPPCHECK__
    while( STACK_POSITION() < STK_RA )
       PUSH_STACK( STACK_POSITION() );
-
+#endif
    /*
     * =================== ra ====================
     * The return address will keep the task-function.
@@ -233,6 +234,11 @@ STATIC void onTimerInterrupt( const unsigned int intNum,
                               const void* pContext UNUSED )
 {
 #ifdef CONFIG_SCU
+   /*
+    * CAUTION!
+    * On SCU the belonging MSI table entry has to be read in any cases
+    * doesn't matter what interrupt it treats.
+    */
    irqMsiCleanQueue( intNum );
 #endif
    xTaskIncrementTick();

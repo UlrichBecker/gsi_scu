@@ -275,7 +275,7 @@ void fgEnableChannel( const unsigned int channel )
 
 
    if( isFgEnableLoggingActive() || !fgIsActiveBySaftLib( channel ) )
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u\n" ESC_NORMAL,
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u ): fg-%u-%u" ESC_NORMAL,
                __func__, channel, socket, dev );
 
 
@@ -301,6 +301,9 @@ void fgEnableChannel( const unsigned int channel )
    #ifdef CONFIG_SCU_DAQ_INTEGRATION
       if( !fgIsActiveBySaftLib( channel ) )
          daqEnableFgFeedback( socket, dev, g_shared.oSaftLib.oFg.aRegs[channel].tag );
+      else if( isFgEnableLoggingActive() )
+         lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "DAQs for fg-%u-%u already enabled." ESC_NORMAL,
+                  socket, dev );
    #endif
       pAddagFgRegs = addacFgPrepare( g_pScub_base,
                                      socket, dev,

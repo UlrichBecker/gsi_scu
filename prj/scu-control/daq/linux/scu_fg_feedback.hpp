@@ -1873,6 +1873,14 @@ protected:
     */
    virtual void onDataTimeout( const bool isMil ) {}
 
+
+   /*!
+    * @brief Optional callback function becomes invoked when the number
+    *        of data items in the DDR3 respectively SRAM is not dividable by
+    *        the expected number of data.
+    * @param isMil If true then the function has been invoked by a
+    *              MIL data-transfer.
+    */
    virtual void onDataError( const bool isMil );
 
    /*!

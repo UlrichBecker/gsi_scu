@@ -17,6 +17,7 @@
 #include <scu_lm32_common.h>
 #include <eb_console_helper.h>
 #include <scu_fg_handler.h>
+#include <string.h>
 #ifdef CONFIG_MIL_FG
  #include <scu_mil.h>
  #include <scu_mil_fg_handler.h>
@@ -79,8 +80,9 @@ void print_regs( void )
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_list.h
  */
-void fgListReset( FG_MACRO_T* pFgList )
+inline void fgListReset( FG_MACRO_T* pFgList )
 {
+#if 0
    for( unsigned int i = 0; i < MAX_FG_MACROS; i++ )
    {
       pFgList[i].socket     = 0;
@@ -88,6 +90,9 @@ void fgListReset( FG_MACRO_T* pFgList )
       pFgList[i].version    = 0;
       pFgList[i].outputBits = 0;
    }
+#else
+   memset( pFgList, 0, sizeof( FG_MACRO_T ) * MAX_FG_MACROS );
+#endif
 }
 
 /*! ---------------------------------------------------------------------------

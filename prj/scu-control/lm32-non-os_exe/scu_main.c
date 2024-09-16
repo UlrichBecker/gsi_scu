@@ -277,6 +277,11 @@ STATIC void onScuTimerInterrupt( const unsigned int intNum,
 {
    //MSI_ITEM_T m;
    //irqMsiCopyObjectAndRemove( &m, intNum );
+   /*
+    * CAUTION!
+    * On SCU the belonging MSI table entry has to be read in any cases
+    * doesn't matter what interrupt it treats.
+    */
    irqMsiCleanQueue( intNum );
 #ifndef CONFIG_ENABLE_TIMER_INTERRUPT_IN_ANY_CASES
    milExecuteTasks();
