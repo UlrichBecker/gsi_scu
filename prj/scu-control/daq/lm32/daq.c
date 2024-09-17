@@ -434,7 +434,7 @@ uint32_t daqDeviceGetTimeStampTag( register DAQ_DEVICE_T* pThis )
    DAQ_ASSERT( pThis != NULL );
    DAQ_ASSERT( pThis->pReg != NULL );
    STATIC_ASSERT( TS_CNTR_TAG_LW+1 == TS_CNTR_TAG_HW );
-   uint32_t tsTag = 0;
+   volatile uint32_t tsTag = 0;
 
    for( unsigned int i = 0; i < (sizeof(uint32_t)/sizeof(uint16_t)); i++ )
    {

@@ -107,7 +107,7 @@ namespace FeSupport {
            */
           static void releaseInstance( EBC_PTR_T ptr );
 
-    // !! temporary only! private:
+     private:
           /*!
            * \brief Basic constuctor, becomes invoked by the function getInstance() if
            *        it is the first instance.
