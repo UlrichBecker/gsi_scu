@@ -103,9 +103,22 @@ namespace FeSupport {
           /*!
            * @brief Counterpart of getInstance(), invokes the destructor if the instance has existed.
            * @param ptr Return-value of getInstance(), at the moment only for debug purposes meaningful.
+           *            It becomes eventually necessary in the future when more than one wishbone-ports
+           *            are present.
            * @author Ulrich Becker
            */
           static void releaseInstance( EBC_PTR_T ptr );
+
+          /*!
+           * @brief Class-function returns the current number of by getInstance created instances.
+           * @note This is for debug purposes only.
+           * @see getInstance
+           * @author Ulrich Becker
+           */
+          static uint getNumberOfInstances( void )
+          {
+             return c_oAdmin.count_;
+          }
 
      private:
           /*!
