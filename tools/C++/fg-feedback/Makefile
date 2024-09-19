@@ -9,7 +9,7 @@
 ## Date:     09.10.2020                                                      ##
 ###############################################################################
 REPOSITORY_DIR := $(shell git rev-parse --show-toplevel)
-DEFINES += VERSION=4.6.6
+DEFINES += VERSION=4.7.0
 FOR_SCU_AND_ACC := 1
 
 #USE_NAMED_MUTEX := 1
@@ -144,7 +144,7 @@ REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
 #CALL_ARGS = --generate_doc_tagged
 
-CALL_ARGS = scuxl0692.acc.gsi.de -vadt1 -I250 -T"X11 size 800,150"
+CALL_ARGS = scuxl0692.acc.gsi.de -vadt1 -I250 -T"X11 size 800,150" -p30
 # CALL_ARGS = scuxl0692.acc.gsi.de -vS
 # CALL_ARGS = scuxl0692.acc.gsi.de -aN -I100
 # CALL_ARGS = scuxl0212 -aqzt1 -I200 -T"X11 size 800,150"

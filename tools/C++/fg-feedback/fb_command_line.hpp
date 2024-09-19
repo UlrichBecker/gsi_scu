@@ -57,6 +57,7 @@ namespace Scu
 #if DEFAULT_PLOT_INTERVAL == 0
   #error DEFAULT_PLOT_INTERVAL shall not be zer0!
 #endif
+#define DEFAULT_CONSECUTIVE_POLL_MAXIMUM 100
 
 class AllDaqAdministration; // Loest Henne-Ei Problem...
 class FbChannel;
@@ -98,6 +99,7 @@ class CommandLine: public PARSER
    uint                       m_maxEbCycleDataLen;
    uint                       m_blockReadEbCycleGapTimeUs;
    uint                       m_distributeDataPollIntervall;
+   uint                       m_distributeDataPollMaximum;
 
    const bool                 m_isRunningOnScu;
 
@@ -232,6 +234,11 @@ public:
    uint getPollInterwalTime( void )
    {
       return m_distributeDataPollIntervall;
+   }
+
+   uint getDistributeDataPollMaximum( void )
+   {
+      return m_distributeDataPollMaximum;
    }
 
 protected:

@@ -568,6 +568,7 @@ int fbMain( int argc, char** ppArgv )
       constexpr uint gapReadTime = 10;
       uint intervalTime = 0;
       uint remainingData = 0;
+
       while( ((key = Terminal::readKey()) != '\e') && !repeat )
       {
          switch( key )
@@ -661,16 +662,31 @@ int fbMain( int argc, char** ppArgv )
          }
 
          const uint it = daq::getSysMicrosecs();
-         if( it >= intervalTime || remainingData != 0 )
+         if( it >= intervalTime )// || remainingData != 0 )
          {
             if( it >= intervalTime )
                intervalTime = it + cmdLine.getPollInterwalTime() * 1000;
 
+            uint maximum = 0;
             if( doReceive )
             {
                try
                {
-                  remainingData = pDaqAdmin->distributeData();
+                  do
+                  {
+                     remainingData = pDaqAdmin->distributeData();
+                     ::usleep( 1000 );
+                     maximum++;
+                     /*!
+                      * @todo Replace the fixed number of 1000 by a calculated mamber with the FiFo-size.
+                      */
+                     if( maximum >= cmdLine.getDistributeDataPollMaximum() )
+                     {
+                        ERROR_MESSAGE( "Maximum of consecutive call of distributeData() exceedet!" );
+                        break;
+                     }
+                  }
+                  while( remainingData != 0 );
                }
                catch( daq::DaqException& e )
                {
@@ -688,8 +704,10 @@ int fbMain( int argc, char** ppArgv )
             #endif
             }
             pDaqAdmin->getTupleStatistics()->print();
+            if( cmdLine.isVerbose() )
+                std::cout << ESC_CLR_LINE "Maximum: " << maximum << " " << std::endl;
          }
-         ::usleep( 100 );
+         ::usleep( 1000 );
       }
       DEBUG_MESSAGE( "Loop left" );
    }

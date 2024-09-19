@@ -726,6 +726,23 @@ vector<OPTION> CommandLine::c_optList =
    {
       OPT_LAMBDA( poParser,
       {
+         uint maxPoll;
+         if( readInteger( maxPoll, poParser->getOptArg() ) )
+            return -1;
+         DEBUG_MESSAGE( "max-poll: " << maxPoll );
+         static_cast<CommandLine*>(poParser)->m_distributeDataPollMaximum = maxPoll;
+         return 0;
+      }),
+      .m_hasArg   = OPTION::REQUIRED_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'p',
+      .m_longOpt  = "max-poll",
+      .m_helpText = "PARAM Specifies the maximum number of consecutive data-poll intervalls.\n"
+                    "The default is: " TO_STRING( DEFAULT_CONSECUTIVE_POLL_MAXIMUM )
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
          static_cast<CommandLine*>(poParser)->m_noPlot = true;
          return 0;
       }),
@@ -899,6 +916,7 @@ CommandLine::CommandLine( int argc, char** ppArgv )
    ,m_maxEbCycleDataLen( DEFAULT_MAX_EB_BLOCK_LEN )
    ,m_blockReadEbCycleGapTimeUs( DEFAULT_EB_CYCLE_GAP_TIME )
    ,m_distributeDataPollIntervall( 0 )
+   ,m_distributeDataPollMaximum( DEFAULT_CONSECUTIVE_POLL_MAXIMUM )
    ,m_isRunningOnScu( Scu::isRunningOnScu() )
    ,m_poAllDaq( nullptr )
    ,m_poCurrentDevice( nullptr )
