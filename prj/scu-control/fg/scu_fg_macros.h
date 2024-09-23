@@ -112,6 +112,12 @@ void setActiveBySaftLib( const unsigned int channel );
 void resetActiveBySaftLib( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
+ * @brief Resets all "active by SAFTLIB- flags"
+ * @see setActiveBySaftLib
+ */
+void resetAllActiveBySaftlib( void );
+
+/*! ---------------------------------------------------------------------------
  * @brief Returns "true" when the concerning functiongenerator was switched
  *        on by SAFT-LIB ane returns "false" once it was switched off by
  *        SAFT-LIB.

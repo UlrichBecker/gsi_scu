@@ -65,14 +65,21 @@ STATIC_ASSERT( BIT_SIZEOF(mg_activeBySaftLibFlags) >= MAX_FG_CHANNELS );
 */
 inline void setActiveBySaftLib( const unsigned int channel )
 {
-    mg_activeBySaftLibFlags |= (1 << channel);
+   mg_activeBySaftLibFlags |= (1 << channel);
 }
 
 /*! ---------------------------------------------------------------------------
 */
 inline void resetActiveBySaftLib( const unsigned int channel )
 {
-    mg_activeBySaftLibFlags &= ~(1 << channel);
+   mg_activeBySaftLibFlags &= ~(1 << channel);
+}
+
+/*! ---------------------------------------------------------------------------
+*/
+inline void resetAllActiveBySaftlib( void )
+{
+   mg_activeBySaftLibFlags = 0;
 }
 
 /*! ---------------------------------------------------------------------------

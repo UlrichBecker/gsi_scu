@@ -28,6 +28,9 @@
 #include <scu_lm32_macros.h>
 #include <daq_ramBuffer_lm32.h>
 #include <dbg.h>
+#ifndef CONFIG_DAQ_SINGLE_APP
+#include <scu_fg_macros.h>
+#endif
 #ifdef DEBUGLEVEL
   #include <eb_console_helper.h>
 #endif
@@ -226,6 +229,7 @@ STATIC DAQ_RETURN_CODE_T opRescan( DAQ_ADMIN_T* pDaqAdmin,
 #ifdef CONFIG_DAQ_SINGLE_APP
    daqScanScuBus( &pDaqAdmin->oDaqDevs );
 #else
+   resetAllActiveBySaftlib();
    daqScanScuBus( &pDaqAdmin->oDaqDevs, NULL );
 #endif
    return DAQ_RET_RESCAN;

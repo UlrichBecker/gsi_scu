@@ -205,12 +205,13 @@ void addDiobToFgList( const void* pScuBusBase,
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief Scans the whole SCU-bus for all kinda of function generators.
+ * @brief Scans the whole SCU-bus for all kinds of function generators.
  */
 ONE_TIME_CALL
 void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 {
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
+   resetAllActiveBySaftlib();
    scuDaqInitialize( &g_scuDaqAdmin, pFgList );
 #else
    scanScuBusFgsDirect( (void*)scub_adr, pFgList );
