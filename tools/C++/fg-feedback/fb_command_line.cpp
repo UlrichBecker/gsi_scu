@@ -534,6 +534,23 @@ vector<OPTION> CommandLine::c_optList =
          FgFeedbackAdministration* pAllDaq = getDaqAdministration( static_cast<CommandLine*>(poParser) );
          if( pAllDaq == nullptr )
             return -1;
+         pAllDaq->sendAddacDaqReset();
+         ::exit( EXIT_SUCCESS );
+         return 0;
+      }),
+      .m_hasArg   = OPTION::NO_ARG,
+      .m_id       = 0,
+      .m_shortOpt = 'R',
+      .m_longOpt  = "addac-reset",
+      .m_helpText = "Sends a reset command to the LM32 application which performs"
+                    " a reset of all existing ADDAC-DAQs."
+   },
+   {
+      OPT_LAMBDA( poParser,
+      {
+         FgFeedbackAdministration* pAllDaq = getDaqAdministration( static_cast<CommandLine*>(poParser) );
+         if( pAllDaq == nullptr )
+            return -1;
          pAllDaq->clearBuffer();
          ::exit( EXIT_SUCCESS );
          return 0;

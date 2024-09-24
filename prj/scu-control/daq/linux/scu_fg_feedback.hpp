@@ -1198,6 +1198,18 @@ public:
    }
 
    /*!
+    * @brief Sends a reset command for all existing  ADDAC-DAQs to the
+    *        LM32- application.
+    */
+   void sendAddacDaqReset( void )
+   {
+      const bool temp = m_oAddacDaqAdmin.isLM32CommandEnabled();
+      m_oAddacDaqAdmin.enableTimeCriticalCommands( true );
+      m_oAddacDaqAdmin.sendReset();
+      m_oAddacDaqAdmin.enableTimeCriticalCommands( temp );
+   }
+
+   /*!
     * @brief Sets the maximum number of DDR3-RAM payload data base items per etherbone cycle.
     *
     * That means the etherbone-cycle will divided in "maxLen/len" smaller etherbone cycles.

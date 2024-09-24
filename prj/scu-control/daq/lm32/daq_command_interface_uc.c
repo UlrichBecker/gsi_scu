@@ -155,7 +155,9 @@ DAQ_RETURN_CODE_T opReset( DAQ_ADMIN_T* pDaqAdmin,
    DBG_FUNCTION_INFO();
    daqBusReset( &pDaqAdmin->oDaqDevs );
    ramRingSharedReset( pDaqAdmin->oRam.pSharedObj );
-
+#ifndef CONFIG_DAQ_SINGLE_APP
+   resetAllActiveBySaftlib();
+#endif
    return DAQ_RET_OK;
 }
 

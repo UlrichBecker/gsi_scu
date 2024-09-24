@@ -130,7 +130,7 @@ private:
    uint                         m_maxDevices;
    DAQ_LAST_STATUS_T            m_lastStatus;
    const bool                   m_doReset;
-   const bool                   m_doSendCommand;
+   bool                         m_doSendCommand;
 
 protected:
    RAM_SCU_T                    m_oScuRam;
@@ -185,6 +185,11 @@ public:
    const bool isLM32CommandEnabled( void ) const
    {
       return m_doSendCommand;
+   }
+
+   void enableTimeCriticalCommands( bool enable )
+   {
+      m_doSendCommand = enable;
    }
 
    RETURN_CODE_T getLastReturnCode( void ) const
