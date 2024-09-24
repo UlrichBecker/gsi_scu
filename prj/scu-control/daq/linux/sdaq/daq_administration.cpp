@@ -45,8 +45,8 @@ bool DaqChannel::SequenceNumber::compare( uint8_t sequence )
    if( m_blockLost )
    {
       m_lostCount++;
-      DEBUG_MESSAGE( "ERROR: Sequence is " << sequence
-                      << ", expected: " << m_sequence );
+      DEBUG_MESSAGE( "ERROR: Sequence is " << static_cast<uint>(sequence)
+                      << ", expected: " << static_cast<uint>(m_sequence) );
    }
    m_continued = true;
    m_sequence = sequence;

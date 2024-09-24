@@ -120,7 +120,11 @@ void DaqBaseInterface::initRingAdmin( RAM_RING_SHARED_INDEXES_T* pAdmin,
  */
 void DaqBaseInterface::updateMemAdmin( void )
 {
-   RAM_RING_SHARED_INDEXES_T lm32Order;
+   RAM_RING_SHARED_INDEXES_T lm32Order
+   #ifdef __CPPCHECK__
+    = {0}
+   #endif
+   ;
 
    assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );
 
@@ -133,10 +137,11 @@ void DaqBaseInterface::updateMemAdmin( void )
                   sizeof( lm32Order.indexes.end ), "" );
 
    readLM32( &lm32Order.indexes.start,
-             sizeof( lm32Order.indexes.start )
+               sizeof( lm32Order.indexes.start )
              + sizeof( lm32Order.indexes.end )
              + sizeof( lm32Order.wasRead ),
              offsetof( RAM_RING_SHARED_INDEXES_T, indexes.start ) );
+
    BYTE_SWAP( m_poRingAdmin, lm32Order, indexes.start );
    BYTE_SWAP( m_poRingAdmin, lm32Order, indexes.end );
    BYTE_SWAP( m_poRingAdmin, lm32Order, wasRead );
@@ -187,7 +192,7 @@ uint DaqBaseInterface::getNumberOfNewData( void )
    if( (m_lastReadIndex == getReadIndex()) && (lastWasToRead != 0) )
    {
       sendWasRead( lastWasToRead );
-      DEBUG_MESSAGE( "Second sendWasRead( " << lastWasToRead << " );" );
+      // DEBUG_MESSAGE( "Second sendWasRead( " << lastWasToRead << " );" );
       return 0;
    }
    m_lastReadIndex = getReadIndex();

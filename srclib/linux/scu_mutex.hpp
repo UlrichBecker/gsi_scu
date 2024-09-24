@@ -216,7 +216,15 @@ public:
     */
    ~AutoUnlock( void )
    {
-      m_rMutex.unlock();
+   #ifdef __CPPCHECK__
+      try
+      {
+   #endif
+         m_rMutex.unlock();
+   #ifdef __CPPCHECK__
+      }
+      catch(...) {}
+   #endif
    }
 
 private:
