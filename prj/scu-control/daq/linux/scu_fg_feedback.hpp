@@ -1453,6 +1453,15 @@ public:
 #endif /* ifdef CONFIG_MIL_FG */
 
    /*!
+    * @brief Clears the buffer in DDR3-RAM respectively in SRAM
+    *        when the given threshold in percent has reached or exceeded.
+    * @param threshold Data-level in percent.
+    * @retval true Buffer has cleared.
+    * @retval false Buffer has not cleared.
+    */
+   bool clearBufferOnLevel( const uint threshold = 95 );
+
+   /*!
     * @brief Triggering a software interrupt in LM32 firmware
     * @param opCode Operation code
     * @param param  Optional parameter

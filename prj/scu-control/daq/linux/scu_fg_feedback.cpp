@@ -1157,6 +1157,23 @@ void FgFeedbackAdministration::clearBuffer( const bool update )
 
 /*! ---------------------------------------------------------------------------
  */
+bool FgFeedbackAdministration::clearBufferOnLevel( const uint threshold )
+{
+   bool ret = false;
+   for( const auto& poDaqAdmin: m_vPollList )
+   {
+      assert( poDaqAdmin->getRamCapacity() > 0 );
+      if( (poDaqAdmin->getCurrentNumberOfData() * 100) / poDaqAdmin->getRamCapacity() >= threshold )
+      {
+         poDaqAdmin->clearBufferRequest();
+         ret = true;
+      }
+   }
+   return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 void FgFeedbackAdministration::reset( void )
 {
 #ifdef __DOXYGEN__
