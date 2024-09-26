@@ -937,6 +937,11 @@ private:
       bool                      m_pairingBySequence;
 
    public:
+
+      static char* getVersion( void );
+
+      static char* getGitRevision( void );
+
       AddacAdministration( FgFeedbackAdministration* pParent, DaqEb::EtherboneConnection* poEtherbone )
         :daq::DaqAdministration( poEtherbone, false, false )
         ,m_pParent( pParent )
@@ -1055,6 +1060,16 @@ private:
    bool                        m_dbgIsFirstCall;
 #endif
 public:
+   /*!
+    * @brief Returns the version-string of this library.
+    */
+    static const char* getVersion( void );
+
+   /*!
+    * @brief Returns the GIT- commit-date and GIT revision-number of this library.
+    */
+    static const char* getGitRevision( void );
+
    /*!
     * @brief First constructor variant: Object of etherbone becomes acquired by
     *        this constructor.

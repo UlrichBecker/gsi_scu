@@ -906,6 +906,28 @@ void FgFeedbackAdministration::MilDaqAdministration::onFifoAlarm( void )
 #endif /* ifdef CONFIG_MIL_FG */
 
 ///////////////////////////////////////////////////////////////////////////////
+/*! ---------------------------------------------------------------------------
+ */
+const char* FgFeedbackAdministration::getVersion( void )
+{ /*
+   * The macro VERSION becones build by Makefile.
+   * CAUTION: Don't move this in to the hader file!
+   */
+   return const_cast<const char*>(TO_STRING( VERSION ));
+}
+
+/*! ---------------------------------------------------------------------------
+ */
+const char* FgFeedbackAdministration::getGitRevision( void )
+{ /*
+   * The macro GIT_REVISION becones build by Makefile.
+   * CAUTION: Don't move this in to the hader file!
+   */
+   return const_cast<const char*>(TO_STRING( GIT_REVISION ));
+}
+
+/*! ---------------------------------------------------------------------------
+ */
 FgFeedbackAdministration::FgFeedbackAdministration( const std::string& netaddress,
                                                     const bool doRescan,
                                                     uint timeout )
