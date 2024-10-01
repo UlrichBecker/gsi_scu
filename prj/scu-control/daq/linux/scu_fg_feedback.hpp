@@ -1199,7 +1199,7 @@ public:
     */
    uint getThrottleTimeout( void ) const
    {
-      return m_throttleTimeout / daq::NANOSECS_PER_MILISEC;
+      return m_throttleTimeout / daq::NANOSECS_PER_MILLISEC;
    }
 
    /*!
@@ -1209,7 +1209,7 @@ public:
     */
    void setThrottleTimeout( const uint throttleTimeout = DEFAULT_THROTTLE_TIMEOUT )
    {
-      m_throttleTimeout = throttleTimeout * daq::NANOSECS_PER_MILISEC;
+      m_throttleTimeout = throttleTimeout * daq::NANOSECS_PER_MILLISEC;
    }
 
    /*!

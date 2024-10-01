@@ -937,7 +937,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( const std::string& netaddres
 #endif
    ,m_lm32Swi( m_oAddacDaqAdmin.getEbAccess() )
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
-   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
+   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILLISEC )
    ,m_ebSelfAcquired( true )
    ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
@@ -958,7 +958,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( EBC_PTR_T poEtherbone,
 #endif
    ,m_lm32Swi( m_oAddacDaqAdmin.getEbAccess() )
    ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
-   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILISEC )
+   ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT * daq::NANOSECS_PER_MILLISEC )
    ,m_ebSelfAcquired( false )
    ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
@@ -979,7 +979,7 @@ FgFeedbackAdministration::FgFeedbackAdministration( DaqAccess* poEbAccess,
 #endif
   ,m_lm32Swi( poEbAccess )
   ,m_throttleThreshold( DEFAULT_THROTTLE_THRESHOLD << VALUE_SHIFT )
-  ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILISEC )
+  ,m_throttleTimeout( DEFAULT_THROTTLE_TIMEOUT  * daq::NANOSECS_PER_MILLISEC )
   ,m_ebSelfAcquired( false )
   ,m_taiToUtcOffset( 0 )
 #ifdef CONFIG_DEBUG_MESSAGES
