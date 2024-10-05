@@ -1072,10 +1072,12 @@ STATIC inline void feedMilFg( const unsigned int socket,
    if( !cbRead( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
                 &g_shared.oSaftLib.oFg.aRegs[0], channel, &pset ) )
    {
+   #ifdef CONFIG_HANDLE_FG_FIFO_EMPTY_AS_ERROR
       if( fgIsStarted( channel ) )
          lm32Log( LM32_LOG_ERROR, ESC_ERROR
                  "ERROR: Buffer of fg-%u-%u is empty! Channel: %u\n"
                  ESC_NORMAL, socket, devNum, channel );
+   #endif
       return;
    }
 
