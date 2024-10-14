@@ -226,7 +226,7 @@ void dbgPrintValue( const uint32_t v )
  * @ingroup INTERRUPT
  * @ingroup SCU_LM32_TIMER
  * @brief The timer interrupt function!
- * @param intNum Interrupt number of this interrupt (not used in this case)
+ * @param intNum Interrupt number of this interrupt.
  * @param pContext User tunnel  (start address of timer registers but
  *                 not used in this case)
  */
