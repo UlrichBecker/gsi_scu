@@ -357,16 +357,16 @@ void daqDevicePresetTimeStampCounter( register DAQ_DEVICE_T* pThis,
    STATIC_ASSERT( TS_COUNTER_WD1+2 == TS_COUNTER_WD3 );
    STATIC_ASSERT( TS_COUNTER_WD1+3 == TS_COUNTER_WD4 );
 
-#if 0
-   mprintf( "Time-Offset: 0x%08X\n", timeOffset );
-#endif
+
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u %u )" ESC_NORMAL,
+           __func__, pThis->slot, timeOffset );
 
    /*
     * CAUTION!
     * Because of a compiler bug it's necessary using the keyword "volatile" for
     * this 64-bit variable.
     */
-   volatile const uint64_t futureTime = timeOffset * 1000000L + getWrSysTime();
+   volatile const uint64_t futureTime = timeOffset * 1000000L + getWrSysTimeSafe();
 
    for( unsigned int i = 0; i < (sizeof(uint64_t)/sizeof(uint16_t)); i++ )
    {
@@ -415,6 +415,9 @@ void daqDeviceSetTimeStampCounterEcaTag( register DAQ_DEVICE_T* pThis, const uin
    DAQ_ASSERT( pThis != NULL );
    DAQ_ASSERT( pThis->pReg != NULL );
    STATIC_ASSERT( TS_CNTR_TAG_LW+1 == TS_CNTR_TAG_HW );
+
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u %04X )" ESC_NORMAL,
+           __func__, pThis->slot, tsTag );
 
    for( unsigned int i = 0; i < (sizeof(uint32_t)/sizeof(uint16_t)); i++ )
    {
