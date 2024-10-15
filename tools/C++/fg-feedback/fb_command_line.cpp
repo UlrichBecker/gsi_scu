@@ -847,9 +847,10 @@ vector<OPTION> CommandLine::c_optList =
 */
 bool CommandLine::readInteger( uint& rValue, const string& roStr )
 {
+   const int base = (roStr[1] == 'x')? 16 : 10;
    try
    {
-      rValue = stoi( roStr );
+      rValue = stol( roStr, nullptr, base );
    }
    catch( std::exception& e )
    {

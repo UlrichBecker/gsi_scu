@@ -416,7 +416,7 @@ void daqDeviceSetTimeStampCounterEcaTag( register DAQ_DEVICE_T* pThis, const uin
    DAQ_ASSERT( pThis->pReg != NULL );
    STATIC_ASSERT( TS_CNTR_TAG_LW+1 == TS_CNTR_TAG_HW );
 
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u %04X )" ESC_NORMAL,
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u 0x%04X )" ESC_NORMAL,
            __func__, pThis->slot, tsTag );
 
    for( unsigned int i = 0; i < (sizeof(uint32_t)/sizeof(uint16_t)); i++ )

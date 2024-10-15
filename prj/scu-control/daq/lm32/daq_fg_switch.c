@@ -71,7 +71,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
       pSetChannel->sequenceContinuous = 0;
       pActChannel->sequenceContinuous = 0;
    #endif
-#if 1 //!! TODO! It could be a hardware bug....!
+#if 0 //!! TODO! It could be a hardware bug....!
       if( daqDeviceGetTimeStampTag( pDaqDevice ) != tag )
       {
          daqDeviceSetTimeStampCounterEcaTag( pDaqDevice, tag );
