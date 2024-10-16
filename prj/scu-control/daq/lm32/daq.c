@@ -348,6 +348,31 @@ unsigned int daqDeviceGetUsedChannels( register DAQ_DEVICE_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */
+void daqDevicePresetTimeStampCounterTime( DAQ_DEVICE_T* pThis, volatile const uint64_t futureTime )
+{
+   DAQ_ASSERT( pThis != NULL );
+   DAQ_ASSERT( pThis->pReg != NULL );
+   STATIC_ASSERT( TS_COUNTER_WD1+1 == TS_COUNTER_WD2 );
+   STATIC_ASSERT( TS_COUNTER_WD1+2 == TS_COUNTER_WD3 );
+   STATIC_ASSERT( TS_COUNTER_WD1+3 == TS_COUNTER_WD4 );
+
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u 0x%08X%08X )" ESC_NORMAL,
+           __func__, pThis->slot, (uint32_t)GET_UPPER_HALF(futureTime),
+                                  (uint32_t)GET_LOWER_HALF(futureTime) );
+
+   for( unsigned int i = 0; i < (sizeof(uint64_t)/sizeof(uint16_t)); i++ )
+   {
+    #if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+      pThis->pReg->i[TS_COUNTER_WD1+i] = ((uint16_t*)&futureTime)[((sizeof(uint64_t)/sizeof(uint16_t))-1) - i];
+    #else
+      pThis->pReg->i[TS_COUNTER_WD1+i] = ((uint16_t*)&futureTime)[i];
+    #endif
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see daq.h
+ */
 void daqDevicePresetTimeStampCounter( register DAQ_DEVICE_T* pThis,
                                       volatile const uint32_t timeOffset )
 {
@@ -361,6 +386,7 @@ void daqDevicePresetTimeStampCounter( register DAQ_DEVICE_T* pThis,
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u %u )" ESC_NORMAL,
            __func__, pThis->slot, timeOffset );
 
+#if 0
    /*
     * CAUTION!
     * Because of a compiler bug it's necessary using the keyword "volatile" for
@@ -376,7 +402,12 @@ void daqDevicePresetTimeStampCounter( register DAQ_DEVICE_T* pThis,
       pThis->pReg->i[TS_COUNTER_WD1+i] = ((uint16_t*)&futureTime)[i];
     #endif
    }
+#else
+   daqDevicePresetTimeStampCounterTime( pThis, timeOffset * 1000000L + getWrSysTimeSafe() );
+#endif
 }
+
+
 
 /*! ---------------------------------------------------------------------------
  * @see daq.h
@@ -771,8 +802,8 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
       daqDeviceClearDaqChannelInterrupts( pCurrentDaqDevice );
       daqDeviceClearHiResChannelInterrupts( pCurrentDaqDevice );
 
-      daqDeviceSetTimeStampCounterEcaTag( pCurrentDaqDevice, DAQ_DEFAULT_ECA_SYNC_TAG );
-      daqDevicePresetTimeStampCounter( pCurrentDaqDevice, DAQ_DEFAULT_SYNC_TIMEOFFSET );
+     //!! daqDeviceSetTimeStampCounterEcaTag( pCurrentDaqDevice, DAQ_DEFAULT_ECA_SYNC_TAG );
+     //!! daqDevicePresetTimeStampCounter( pCurrentDaqDevice, DAQ_DEFAULT_SYNC_TIMEOFFSET );
 
 #if 0
       uint64_t ts = daqDeviceGetTimeStampCounter( pCurrentDaqDevice );
@@ -786,6 +817,9 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
 #endif
    }
 
+   const uint64_t tSCounterStartTime = DAQ_DEFAULT_SYNC_TIMEOFFSET * 1000000L + getWrSysTimeSafe();
+   daqBusPresetAllTimeStampCountersTimeAndEca( pThis, tSCounterStartTime, DAQ_DEFAULT_ECA_SYNC_TAG );
+   //! @todo send ECA-tag here!
    /*
     * In the case of re-initializing respectively warm-start a
     * reset for all DAQ devices becomes necessary.
@@ -912,6 +946,22 @@ void daqBusClearAllPendingInterrupts( register DAQ_BUS_T* pThis )
       DAQ_DEVICE_T* pDaqSlave = daqBusGetDeviceObject( pThis, i );
       daqDeviceClearDaqChannelInterrupts( pDaqSlave );
       daqDeviceClearHiResChannelInterrupts( pDaqSlave );
+   }
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see daq.h
+ */
+void daqBusPresetAllTimeStampCountersTimeAndEca( DAQ_BUS_T* pThis,
+                                                 const uint64_t futureTime,
+                                                 const uint32_t ecaTag )
+{
+   DAQ_ASSERT( pThis != NULL );
+   for( int i = daqBusGetFoundDevices( pThis )-1; i >= 0; i-- )
+   {
+      DAQ_DEVICE_T* pDaqSlave = daqBusGetDeviceObject( pThis, i );
+      daqDevicePresetTimeStampCounterTime( pDaqSlave, futureTime );
+      daqDeviceSetTimeStampCounterEcaTag( pDaqSlave, ecaTag );
    }
 }
 

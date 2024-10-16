@@ -1652,10 +1652,15 @@ DAQ_CANNEL_T* daqDeviceGetChannelObject( register DAQ_DEVICE_T* pThis,
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
- * @brief Becomes invoked from the interrupt routine.
- * @param pThis Pointer to the DAQ-device objects
+ * @brief Presets the time stamp counter of this DAQ device
+ * @see daqDeviceGetTimeStampCounter
+ * @see daqDeviceSetTimeStampCounterEcaTag
+ * @param pThis Pointer to the DAQ-device object
+ * @param futureTime Time a bit in the future of the actual white rabbit time.
+ *                   That means the time of the expected receive of the
+ *                   ECA time-set event.
  */
-//void daqDeviceOnInterrupt( register DAQ_DEVICE_T* pThis );
+void daqDevicePresetTimeStampCounterTime( DAQ_DEVICE_T* pThis, volatile const uint64_t futureTime );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_DEVICE
@@ -1693,6 +1698,7 @@ void daqDeviceSetTimeStampCounterEcaTag( register DAQ_DEVICE_T* pThis,
  * @ingroup DAQ_DEVICE
  * @brief Gets the adjusted time stamp tag for this device.
  * @see daqDeviceSetTimeStampTag
+ * @see daqDevicePresetTimeStampCounterTime
  * @param pThis Pointer to the DAQ-device object
  * @return Value of time stamp tag.
  */
@@ -1861,6 +1867,20 @@ void daqBusDisablSlaveInterrupts( register DAQ_BUS_T* pThis );
  * @param pThis Pointer to the DAQ bus object.
  */
 void daqBusClearAllPendingInterrupts( register DAQ_BUS_T* pThis );
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup DAQ_DEVICE
+ * @brief Presets the time stamp counter of all found DAQ devices.
+ * @see daqDeviceGetTimeStampCounter
+ * @param pThis Pointer to the DAQ-device object
+ * @param futureTime Time a bit in the future of the actual white rabbit time.
+ *                   That means the time of the expected receive of the
+ *                   ECA time-set event.
+ * @param ecaTag     ECA-time- set tag.
+ */
+void daqBusPresetAllTimeStampCountersTimeAndEca( DAQ_BUS_T* pThis,
+                                                 const uint64_t futureTime,
+                                                 const uint32_t ecaTag );
 
 /*! ---------------------------------------------------------------------------
  * @ingroup DAQ_SCU_BUS
