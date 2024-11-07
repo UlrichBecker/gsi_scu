@@ -10,6 +10,7 @@
   #error This module is for LM32 only!
 #endif
 
+#include <lm32Interrupts.h>
 #include <eca_queue_type.h>
 
 #ifndef ECAQMAX
@@ -58,6 +59,25 @@ unsigned int ecaClearQueue( ECA_QUEUE_ITEM_T* pThis, const unsigned int cnt )
    }
 
    return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ECA
+ * @see eca_queue_type.h
+ */
+void ecaSendEvent( volatile uint32_t* const pSendReg,
+                   uint64_t eventId, uint64_t param, uint64_t wbTime )
+{
+   wbZycleEnter();
+   *pSendReg = (volatile uint32_t)GET_UPPER_HALF( eventId );
+   *pSendReg = (volatile uint32_t)GET_LOWER_HALF( eventId );
+   *pSendReg = (volatile uint32_t)GET_UPPER_HALF( param );
+   *pSendReg = (volatile uint32_t)GET_LOWER_HALF( param );
+   *pSendReg = 0;
+   *pSendReg = 0;
+   *pSendReg = (volatile uint32_t)GET_UPPER_HALF( wbTime );
+   *pSendReg = (volatile uint32_t)GET_LOWER_HALF( wbTime );
+   wbZycleExit();
 }
 
 /*================================== EOF ====================================*/

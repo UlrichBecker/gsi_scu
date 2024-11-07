@@ -175,6 +175,7 @@ STATIC_ASSERT( offsetof( SDB_RECORD_T, sdbComponent.product.recordType ) ==
 
 /*============== End of construction of type SDB_RECORD_T ===================*/
 
+volatile uint32_t* g_pWbZycleAtomic;
 volatile uint32_t* g_pCpuIrqSlave;
 volatile uint32_t* g_pCpuSysTime;
 volatile uint32_t* g_pCpuMsiBox;
@@ -524,6 +525,27 @@ uint8_t* find_device( WB_DEVICE_ID_T devid )
 
 /*!----------------------------------------------------------------------------
  */
+void wbZycleEnterBase( void )
+{
+   *g_pWbZycleAtomic = 1;
+}
+
+/*!----------------------------------------------------------------------------
+ */
+void wbZycleExitBase( void )
+{
+   *g_pWbZycleAtomic = 0;
+}
+
+/*!----------------------------------------------------------------------------
+ */
+bool isInWbZycle( void )
+{
+   return *g_pWbZycleAtomic != 0;
+}
+
+/*!----------------------------------------------------------------------------
+ */
 void discoverPeriphery( void )
 {
    SDB_LOCATION_T    foundSdb[1];
@@ -531,6 +553,9 @@ void discoverPeriphery( void )
    g_pCpuSysTime     = find_device_adr( GSI, CPU_SYSTEM_TIME );
    g_pCpuIrqSlave    = find_device_adr( GSI, CPU_MSI_CTRL_IF );
    g_pCpuId          = find_device_adr( GSI, CPU_INFO_ROM );
+   g_pWbZycleAtomic  = find_device_adr( GSI, CPU_ATOM_ACC );
+
+   *g_pWbZycleAtomic = 0;
 
    g_pCpuMsiBox      = NULL;
    g_pMyMsi          = NULL;

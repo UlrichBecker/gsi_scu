@@ -4,7 +4,7 @@
  *
  * @see https://www-acc.gsi.de/wiki/Timing/TimingSystemHowSoftCPUHandleECAMSIs
  * @copyright 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
- * @date 09.04.2020
+ * @date 07.11.2024
  * @author Ulrich Becker <u.becker@gsi.de>
  *
  * This example demonstrates handling of message-signaled interrupts (MSI)
@@ -32,13 +32,14 @@
  * @endcode
  *
  */
-#include "eb_console_helper.h"
-#include "lm32signal.h"
-#include "scu_msi.h"
-#include "eca_queue_type.h"
-#include "scu_lm32Timer.h"
-#include "FreeRTOS.h"
-#include "queue.h"
+#include <eb_console_helper.h>
+#include <lm32signal.h>
+#include <scu_msi.h>
+#include <scu_wr_time.h>
+#include <eca_queue_type.h>
+#include <scu_lm32Timer.h>
+#include <FreeRTOS.h>
+#include <queue.h>
 
 #ifndef CONFIG_RTOS
    #error "This project provides FreeRTOS"
@@ -205,6 +206,35 @@ STATIC inline void ecaHandler( void )
 }
 
 /*! ---------------------------------------------------------------------------
+ * @brief The task ECA send!
+ */
+STATIC void taskEcaSend( void* pTaskData UNUSED )
+{
+   mprintf( ESC_BOLD ESC_FG_CYAN "Function \"%s()\" of task \"%s\" started\n"
+            ESC_NORMAL,
+            __func__, pcTaskGetName( NULL ) );
+
+   TickType_t xLastWakeTime = xTaskGetTickCount();
+
+   uint32_t* const pEcaSend = ecaGetSendEventRegister();
+   if( pEcaSend == NULL )
+   {
+      mprintf( ESC_ERROR "Error sdb-address EVENTS_IN not found!\n" ESC_NORMAL );
+      vTaskEndScheduler();
+   }
+
+   mprintf( "SDB address of pEcaSend: 0x%p\n", pEcaSend );
+   unsigned int count = 0;
+   while( true )
+   {
+      vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 1000 * 4 ));
+      mprintf( " Sending MSI in one second...: %u", ++count );
+      ecaSendEvent( pEcaSend, 0x1122334455667788ll, 0x8877887766556642ll,
+                    getWrSysTimeSafe() + 1000000000 );
+   }
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief The task main function!
  */
 STATIC void vTaskEcaMain( void* pvParameters UNUSED )
@@ -246,9 +276,19 @@ STATIC void vTaskEcaMain( void* pvParameters UNUSED )
    irqRegisterISR( ECA_INTERRUPT_NUMBER, xMsiQueue, onIrqEcaEvent );
    mprintf( "Installing of ECA interrupt is done.\n" );
 
+   xTaskCreate( taskEcaSend,
+                "taskEcaSend",
+                configMINIMAL_STACK_SIZE * 2,
+                NULL,
+                tskIDLE_PRIORITY + 1,
+                NULL
+              );
    unsigned int i = 0;
    const char fan[] = { '|', '/', '-', '\\' };
-   mprintf( ESC_BOLD "Entering task main loop and waiting for MSI ...\n" ESC_NORMAL );
+   mprintf( ESC_FG_GREEN ESC_BOLD
+           "\n *** Initialization done, %u tasks running, entering main-loop of task \"%s\" ***\n\n"
+           ESC_NORMAL, uxTaskGetNumberOfTasks(), pcTaskGetName( NULL ) );
+
    while( true )
    {
       MSI_ITEM_T m;

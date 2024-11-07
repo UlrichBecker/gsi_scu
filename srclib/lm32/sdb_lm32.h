@@ -29,6 +29,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <sdb_ids.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,6 +108,54 @@ uint32_t getSdbAdr( SDB_LOCATION_T* pLoc );
  * @ingroup SDB
  */
 uint8_t* find_device( WB_DEVICE_ID_T devid ) GSI_DEPRECATED; /* USE find_device_adr INSTEAD! */
+
+/*!----------------------------------------------------------------------------
+ * @brief Function shall be invoked when more consecutive accesses on the
+ *        WB-bus will made.
+ * @see wbZycleExitBase
+ * @see isInWbZycle
+ */
+void wbZycleEnterBase( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Macro shall be invoked when more consecutive accesses on the
+ *        WB-bus will made. The interrupts will be locked as well.
+ * @see wbZycleExit
+ * @see isInWbZycle
+ */
+#define wbZycleEnter()     \
+{                          \
+   criticalSectionEnter(); \
+   wbZycleEnterBase();     \
+}
+
+/*!----------------------------------------------------------------------------
+ * @brief Function shall be invoked when the series of consecutive WB- accesses
+ *        will be finished. Counterpart of wbZycleEnterBase().
+ * @see wbZycleEnterBase
+ * @see isInWbZycle
+ */
+void wbZycleExitBase( void );
+
+/*!----------------------------------------------------------------------------
+ * @brief Macro shall be invoked when the series of consecutive WB- accesses
+ *        will be finished. The interrupts will be unlocked as well.
+ *        Counterpart of macro wbZycleEnter().
+ * @see wbZycleEnter
+ * @see isInWbZycle
+ */
+#define wbZycleExit()      \
+{                          \
+   wbZycleExitBase();      \
+   criticalSectionExit();  \
+}
+
+/*!----------------------------------------------------------------------------
+ * @brief Returns true within a atomic WB-zycle.
+ * @see wbZycleEnterBase
+ * @see wbZycleExitBase
+ */
+bool isInWbZycle( void );
 
 /*!----------------------------------------------------------------------------
  * @ingroup SDB

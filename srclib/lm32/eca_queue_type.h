@@ -750,6 +750,33 @@ ECA_CONTROL_T* ecaControlGetRegisters( void )
    return ret;
 }
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup ECA
+ * @brief Returns the pointer to the hardware ECA send register.
+ * @retval !=NULL Valid pointer.
+ * @retval ==NULL Error.
+ */
+STATIC inline
+uint32_t* ecaGetSendEventRegister( void )
+{
+   uint32_t* pReg = (uint32_t*) find_device_adr( ECA_SDB_VENDOR_ID,
+                                                 0x8752BF45 );
+   if( pReg == (uint32_t*) ERROR_NOT_FOUND )
+      return NULL;
+   return pReg;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @ingroup ECA
+ * @brief Initiates the sending of an ECA event.
+ * @param pSendReg Pointer to the ECA send register (@see ecaGetSendEventRegister)
+ * @param eventId The ECA event ID.
+ * @param param Additional parameter to send.
+ * @param wbTime WB-Time for sending.
+ */
+void ecaSendEvent( volatile uint32_t* const pSendReg,
+                   uint64_t eventId, uint64_t param, uint64_t wbTime );
+
 #ifdef __cplusplus
 }
 #endif
