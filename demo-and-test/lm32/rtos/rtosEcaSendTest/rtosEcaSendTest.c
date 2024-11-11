@@ -228,9 +228,10 @@ STATIC void taskEcaSend( void* pTaskData UNUSED )
    while( true )
    {
       vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 1000 * 4 ));
-      mprintf( " Sending MSI in one second...: %u", ++count );
-      ecaSendEvent( pEcaSend, 0x1122334455667788ll, 0x8877887766556642ll,
+      mprintf( " Sending MSI in one second...: %u, 0x%X", count, count );
+      ecaSendEvent( pEcaSend, 0x1122334455667788ll, count,
                     getWrSysTimeSafe() + 1000000000 );
+      count++;
    }
 }
 

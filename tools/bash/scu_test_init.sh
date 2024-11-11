@@ -125,6 +125,7 @@ fi
 
 EB_FWLOAD=/usr/bin/eb-fwload
 EB_RESET=/usr/bin/eb-reset
+SAFT_SCU_CTL=/usr/bin/saft-scu-ctl
 
 LM32_LOG_TARGET=/var/log/lm32.log
 
@@ -140,6 +141,13 @@ then
    fi
    if [ -x "$EB_FWLOAD" ]
    then
+      if [ -x "$SAFT_SCU_CTL" ]
+      then
+         log "Creating ECA-condition for synchronizing the DAQ timestamp-counter."
+         $SAFT_SCU_CTL tr0 -d -c 0xDADADADABABABABA 0xFFFFFFFFFFFFFFFF 0 0xCAFEAFFE
+      else
+         log_error "\"saft-scu-ctl\" not found!"
+      fi
       log "Upload and starting LM32-application: \"$LM32_APP\""
       $EB_FWLOAD dev/wbm0 u0 0 ${LM32_APP_DIR}${LM32_APP} 2>>$ERROR_LOG
       sleep 3

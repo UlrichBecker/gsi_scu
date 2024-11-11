@@ -75,15 +75,23 @@ namespace daq
 {
 #endif
 
-#define __DAQ_DEFAULT_ECA_SYNC_TAG__ 0xDEADBEEF
+
+
+#define __DAQ_DEFAULT_ECA_SYNC_ID__  0xDADADADABABABABA
+#ifdef __cplusplus
+   constexpr uint64_t DAQ_DEFAULT_ECA_SYNC_ID = __DAQ_DEFAULT_ECA_SYNC_ID__;
+#else
+   #define DAQ_DEFAULT_ECA_SYNC_ID __DAQ_DEFAULT_ECA_SYNC_ID__
+#endif
+
+#define __DAQ_DEFAULT_ECA_SYNC_TAG__ 0xCAFEAFFE
 #ifdef __cplusplus
    constexpr uint32_t DEFAULT_ECA_SYNC_TAG = __DAQ_DEFAULT_ECA_SYNC_TAG__;
 #else
    #define DAQ_DEFAULT_ECA_SYNC_TAG ((uint32_t)__DAQ_DEFAULT_ECA_SYNC_TAG__)
 #endif
 
-
-#define __DAQ_DEFAULT_SYNC_TIMEOFFSET__  10000
+#define __DAQ_DEFAULT_SYNC_TIMEOFFSET__  1
 #ifdef __cplusplus
    constexpr uint32_t DEFAULT_SYNC_TIMEOFFSET = __DAQ_DEFAULT_SYNC_TIMEOFFSET__;
 #else

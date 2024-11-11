@@ -32,6 +32,7 @@
 #include <sdb_lm32.h> // necessary for ERROR_NOT_FOUND
 #include <dbg.h>
 #include <scu_wr_time.h>
+#include <eca_queue_type.h>
 #ifndef CONFIG_DAQ_SINGLE_APP
  #include <lm32Interrupts.h>
  #include <daq_command_interface.h>
@@ -661,6 +662,35 @@ SCUBUS_SLAVE_FLAGS_T findAllAddacDevices( const void* pScuBusBase )
 #warning DIOB-DAQ not compleatly implemented yet!
 #endif
 
+/*!----------------------------------------------------------------------------
+ * @brief Sending a ECA-event to all found DAQs for synchronizing its
+ *        timestamp-counters.
+ * @note CAUTION: It is currently assumed that the following command
+ *                is executed in the starter script before this application
+ *                is started:
+ * @code
+ * saft-scu-ctl tr0 -d -c 0xDADADADABABABABA 0xFFFFFFFFFFFFFFFF 0 0xCAFEAFFE
+ * @endcode
+ *
+ * @todo Reconstruct the shell command above for this LM32-application
+ *       so that this shell command will not longer used.
+ */
+ONE_TIME_CALL
+void daqSynchonizeTimestampCounters( DAQ_BUS_T* pThis )
+{
+   uint32_t* const pEcaSend = ecaGetSendEventRegister();
+   if( pEcaSend == NULL )
+   {
+      scuLog( LM32_LOG_ERROR, ESC_ERROR "ECA send event register not found!\n" ESC_NORMAL );
+      return;
+   }
+   const uint64_t tSCounterStartTime = 100000000ll + getWrSysTimeSafe();
+   daqBusPresetAllTimeStampCountersTimeAndEca( pThis, tSCounterStartTime, DAQ_DEFAULT_ECA_SYNC_TAG );
+   ecaSendEvent( pEcaSend, DAQ_DEFAULT_ECA_SYNC_ID, 0, tSCounterStartTime );
+   scuLog( LM32_LOG_INFO, "ECA with ID: " TO_STRING(DAQ_DEFAULT_ECA_SYNC_ID)
+                          " for tag: 0x%08X sent.\n", DAQ_DEFAULT_ECA_SYNC_TAG );
+}
+
 /*! ---------------------------------------------------------------------------
  * @see daq.h
  */
@@ -817,18 +847,20 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
 #endif
    }
 
-   const uint64_t tSCounterStartTime = DAQ_DEFAULT_SYNC_TIMEOFFSET * 1000000L + getWrSysTimeSafe();
-   daqBusPresetAllTimeStampCountersTimeAndEca( pThis, tSCounterStartTime, DAQ_DEFAULT_ECA_SYNC_TAG );
-   //! @todo send ECA-tag here!
+   if( pThis->foundDevices == 0 )
+   {
+      return 0;
+   }
+
    /*
     * In the case of re-initializing respectively warm-start a
     * reset for all DAQ devices becomes necessary.
     * Because a new start of the software doesn't concern
     * the hardware registers of the SCU bus slaves.
     */
+   daqBusReset( pThis );
 
-   if( pThis->foundDevices > 0 )
-      daqBusReset( pThis );
+   daqSynchonizeTimestampCounters( pThis );
 
    return pThis->foundDevices;
 }

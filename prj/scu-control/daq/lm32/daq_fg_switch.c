@@ -71,13 +71,6 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
       pSetChannel->sequenceContinuous = 0;
       pActChannel->sequenceContinuous = 0;
    #endif
-#if 0 //!! TODO! It could be a hardware bug....!
-      if( daqDeviceGetTimeStampTag( pDaqDevice ) != tag )
-      {
-         daqDeviceSetTimeStampCounterEcaTag( pDaqDevice, tag );
-         daqDevicePresetTimeStampCounter( pDaqDevice, DAQ_DEFAULT_SYNC_TIMEOFFSET );
-      }
-#endif
       daqChannelSetTriggerCondition( pSetChannel, tag );
       daqChannelSetTriggerCondition( pActChannel, tag );
       daqChannelSetTriggerDelay( pSetChannel, 10000 );
