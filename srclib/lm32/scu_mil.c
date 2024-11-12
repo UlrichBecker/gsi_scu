@@ -27,6 +27,7 @@
  #include <task.h>
 #endif
 #include <scu_bus.h>
+#include <sdb_lm32.h>
 #include "scu_mil.h"
 
 //#define CALC_OFFS(SLOT)   (((SLOT) * (1 << 16))) // from slot 1 to slot 12
@@ -66,7 +67,7 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
+//OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
 int scub_write_mil_blk( void* pBase,
                         const unsigned int slot,
                         const uint16_t* pData,
@@ -74,14 +75,14 @@ int scub_write_mil_blk( void* pBase,
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   criticalSectionEnter();
+   wbZycleEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[0] );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[i] );
    }
-   criticalSectionExit();
+   wbZycleExit();
 
    return OKAY;
 }
@@ -93,10 +94,10 @@ int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int dat
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   criticalSectionEnter();
+   wbZycleEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, data );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   criticalSectionExit();
+   wbZycleExit();
 
    return OKAY;
 }
@@ -106,14 +107,14 @@ int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int dat
  */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
 {
-   criticalSectionEnter();
+   wbZycleEnter();
    base[MIL_SIO3_TX_DATA] = data[0];
    base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       base[MIL_SIO3_TX_DATA] = data[i];
    }
-   criticalSectionExit();
+   wbZycleExit();
    return OKAY;
 }
 
@@ -149,10 +150,10 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
  */
 int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr)
 {
-   criticalSectionEnter();
+   wbZycleEnter();
    milPiggySet( base, MIL_SIO3_TX_DATA, data );
    milPiggySet( base, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   criticalSectionExit();
+   wbZycleExit();
    return OKAY;
 }
 

@@ -56,10 +56,12 @@ DDR3_T mg_oDdr3 =
  STATIC inline ALWAYS_INLINE void ddr3Lock( void )
  {
     osMutexLock( &mg_oDdr3.oMutex );
+   //!! wbZycleEnterBase();
  }
 
  STATIC inline ALWAYS_INLINE void ddr3Unlock( void )
  {
+   //!! wbZycleExitBase();
     osMutexUnlock( &mg_oDdr3.oMutex );
  }
 #endif
