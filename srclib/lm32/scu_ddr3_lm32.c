@@ -31,6 +31,7 @@
 #include <sdb_lm32.h>
 #include <dbg.h>
 #include <scu_lm32_macros.h>
+#include <lm32Interrupts.h>
 
 #ifndef CONFIG_SCU_USE_DDR3
    #error CONFIG_SCU_USE_DDR3 has to be defined!
@@ -48,29 +49,28 @@ DDR3_T mg_oDdr3 =
 };
 
 #if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
-#if 0
-  #include <lm32Interrupts.h>
-  #define ddr3Lock()   criticalSectionEnter()
-  #define ddr3Unlock() criticalSectionExit()
-#else
- STATIC inline ALWAYS_INLINE void ddr3Lock( void )
- {
-    osMutexLock( &mg_oDdr3.oMutex );
-   //!! wbZycleEnterBase();
- }
+ #if 1
+  #define ddr3Lock()   wbZycleEnter()
+  #define ddr3Unlock() wbZycleExit()
+ #else
+  STATIC inline ALWAYS_INLINE void ddr3Lock( void )
+  {
+     osMutexLock( &mg_oDdr3.oMutex );
+    //!! wbZycleEnterBase();
+  }
 
- STATIC inline ALWAYS_INLINE void ddr3Unlock( void )
- {
-   //!! wbZycleExitBase();
-    osMutexUnlock( &mg_oDdr3.oMutex );
- }
-#endif
+  STATIC inline ALWAYS_INLINE void ddr3Unlock( void )
+  {
+    //!! wbZycleExitBase();
+     osMutexUnlock( &mg_oDdr3.oMutex );
+  }
+ #endif
 #else
  /*
   * Dummy functions when FreeRTOS will not used.
   */
- #define ddr3Lock()
- #define ddr3Unlock()
+ #define ddr3Lock()    wbZycleEnter()
+ #define ddr3Unlock()  wbZycleExit()
 #endif
 
 

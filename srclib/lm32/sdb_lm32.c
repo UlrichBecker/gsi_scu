@@ -428,7 +428,7 @@ uint32_t getSdbAdr( SDB_LOCATION_T* pLoc )
 /*!----------------------------------------------------------------------------
  * @ingroup SDB
  */
-OPTIMIZE( "-O0"  )
+//OPTIMIZE( "-O0"  )
 SDB_LOCATION_T* find_device_multi( SDB_LOCATION_T* pFoundSdb,
                                    uint32_t* pIdx,
                                    const uint32_t qty,

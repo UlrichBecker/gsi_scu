@@ -68,15 +68,33 @@ unsigned int ecaClearQueue( ECA_QUEUE_ITEM_T* pThis, const unsigned int cnt )
 void ecaSendEvent( volatile uint32_t* const pSendReg,
                    uint64_t eventId, uint64_t param, uint64_t wbTime )
 {
+
    wbZycleEnter();
+
+   /*
+    * CAUTION: Don't change the order of the following code lines!
+    */
+
    *pSendReg = (volatile uint32_t)GET_UPPER_HALF( eventId );
+   BARRIER();
    *pSendReg = (volatile uint32_t)GET_LOWER_HALF( eventId );
+   BARRIER();
+
    *pSendReg = (volatile uint32_t)GET_UPPER_HALF( param );
+   BARRIER();
    *pSendReg = (volatile uint32_t)GET_LOWER_HALF( param );
+   BARRIER();
+
    *pSendReg = 0;
+   BARRIER();
    *pSendReg = 0;
+   BARRIER();
+
    *pSendReg = (volatile uint32_t)GET_UPPER_HALF( wbTime );
+   BARRIER();
    *pSendReg = (volatile uint32_t)GET_LOWER_HALF( wbTime );
+   BARRIER();
+
    wbZycleExit();
 }
 
