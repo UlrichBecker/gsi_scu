@@ -1,7 +1,7 @@
 /*!
  *  @file scu_lm32_common.c
  *  @brief Common defines module of SCU function generators in LM32.
- *
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  *  @date 19.08.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

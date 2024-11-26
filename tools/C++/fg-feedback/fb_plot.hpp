@@ -3,6 +3,7 @@
  *  @brief Specialization of class PlotStream for plotting set and actual
  *         values of ADDAC/ACU- and MIL- DAQs
  *
+ *  @see https://github.com/UlrichBecker/gnu-plotstream
  *  @date 09.10.2020
  *  @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

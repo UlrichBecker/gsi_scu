@@ -3,6 +3,8 @@
  *  @brief SCU- circular buffer resp. ring buffer administration in
  *         shared memory of LM32.
  *
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
+ *
  *  @date 21.10.2019
  *  @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

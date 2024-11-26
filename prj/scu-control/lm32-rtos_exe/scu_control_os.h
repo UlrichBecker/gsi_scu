@@ -2,6 +2,8 @@
  * @file scu_control_os.h
  * @brief Main module of SCU control including the main-thread FreeRTOS.
  *
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
+ *
  * @date 22.08.2022
  * @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

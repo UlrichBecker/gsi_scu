@@ -1,7 +1,7 @@
 /*!
  * @file scu_task_fg.c
  * @brief FreeRTOS task for ADDAC function generators
- *
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @date 22.08.2022
  * @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

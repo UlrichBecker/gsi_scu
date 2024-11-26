@@ -8,6 +8,7 @@
  *
  *  @date 18.08.2022
  *
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  *  @see https://www-acc.gsi.de/wiki/Hardware/Intern/ScuFgDoc
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

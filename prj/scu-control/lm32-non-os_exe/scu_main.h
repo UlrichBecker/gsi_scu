@@ -2,6 +2,8 @@
  *  @file scu_main.h
  *  @brief Main module of SCU function generators in LM32.
  *
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
+ *
  *  @date 31.01.2020
  *  @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

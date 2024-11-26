@@ -2,6 +2,7 @@
  * @file lm32_syslog.h
  * @brief LM32 version of syslog.
  * >>> PvdS <<<
+ * @see https://www-acc.gsi.de/wiki/Frontend/LM32Developments#Handling_of_diagnostic_and_logging_messages_created_by_a_LM32_45Application_via_the_linux_45_application_34lm32_45logd_34
  * @see       lm32_syslog.c
  * @see       lm32_syslog_common.h
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH

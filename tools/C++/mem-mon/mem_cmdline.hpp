@@ -1,7 +1,9 @@
 /*!
  *  @file mem_cmdline.hpp
  *  @brief Command-line interpreter of memory monitor.
- *
+ *  @see https://github.com/UlrichBecker/command_line_option_parser_cpp11
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Memory_Management_On_SCU
+ *  @see https://github.com/UlrichBecker/command_line_option_parser_cpp11
  *  @date 12.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

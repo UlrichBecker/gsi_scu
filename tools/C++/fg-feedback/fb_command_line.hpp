@@ -2,6 +2,7 @@
  *  @file fb_command_line.hpp
  *  @brief Command line parser of MIL-DAQ-Test
  *
+ *  @see https://github.com/UlrichBecker/command_line_option_parser_cpp11
  *  @date 09.10.2020
  *  @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

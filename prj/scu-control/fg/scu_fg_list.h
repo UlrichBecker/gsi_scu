@@ -3,6 +3,7 @@
  * @brief Module for scanning the SCU for function generators and initializing
  *        the function generator list in the shared memory.
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/ScuFgDoc
  * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/ScuFgDoc
  * @author Ulrich Becker <u.becker@gsi.de>

@@ -1,6 +1,7 @@
 /*!
  * @file scu_eca_handler.c
  * @brief Handler of Event Conditioned Action for SCU function-generators
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @date 31.01.2020
  * @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>

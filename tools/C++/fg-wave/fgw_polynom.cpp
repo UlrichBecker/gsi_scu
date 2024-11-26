@@ -2,6 +2,7 @@
  *  @file fgw_polynom.cpp
  *  @brief Calculates the polymoms of a given polynominal vector.
  *
+ *  @see https://github.com/UlrichBecker/gnu-plotstream
  *  @date 10.12.2020
  *  @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

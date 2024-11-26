@@ -1,7 +1,7 @@
 /*!
  * @file scu_task_temperature.h
  * @brief FreeRTOS task for watching some temperature sensors via one wire bus.
- *
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @see       scu_task_temperature.c
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>

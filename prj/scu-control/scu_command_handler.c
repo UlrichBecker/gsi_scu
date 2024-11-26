@@ -1,6 +1,7 @@
 /*!
  * @file scu_command_handler.c
  * @brief  Module for receiving of commands from SAFT-LIB
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>
  * @date 03.02.2020

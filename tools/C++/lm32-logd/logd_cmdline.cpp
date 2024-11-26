@@ -2,6 +2,8 @@
  *  @file logd_cmdline.cpp
  *  @brief Commandline parser for the LM32 log daemon.
  *  >>> PvdS <<<
+ *  @see https://www-acc.gsi.de/wiki/Frontend/LM32Developments#Handling_of_diagnostic_and_logging_messages_created_by_a_LM32_45Application_via_the_linux_45_application_34lm32_45logd_34
+ *  @see https://github.com/UlrichBecker/command_line_option_parser_cpp11
  *  @date 21.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

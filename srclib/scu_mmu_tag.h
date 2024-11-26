@@ -9,6 +9,7 @@
  * @note Header only
  * @note This source code is suitable for LM32 and Linux.
  * 
+ * @see https://www-acc.gsi.de/wiki/Frontend/Memory_Management_On_SCU
  * @see       scu_mmu.h
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>

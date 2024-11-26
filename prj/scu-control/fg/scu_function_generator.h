@@ -1,6 +1,7 @@
 /*!
  * @file scu_function_generator.h
  * @brief SCU-Function generator module for LM32.
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @note Header only
  * @date 21.10.2019
  * @copyright (C) 2019 GSI Helmholtz Centre for Heavy Ion Research GmbH

@@ -2,6 +2,7 @@
  *  @file fgw_commandline.hpp
  *  @brief Commandline parser for program fg-wave
  *
+ *  @see https://github.com/UlrichBecker/command_line_option_parser_cpp11
  *  @date 10.12.2020
  *  @copyright (C) 2020 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

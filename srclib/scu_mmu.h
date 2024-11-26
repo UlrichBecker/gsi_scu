@@ -5,6 +5,7 @@
  * Administration of the shared memory (for SCU3 using DDR3) between 
  * Linux host and LM32 application.
  * 
+ * @see https://www-acc.gsi.de/wiki/Frontend/Memory_Management_On_SCU
  * @note This source code is suitable for LM32 and Linux.
  * 
  * @see       scu_mmu.c

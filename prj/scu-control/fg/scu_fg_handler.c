@@ -2,6 +2,7 @@
  * @file scu_fg_handler.c
  * @brief  Module for handling all SCU-BUS function generators
  *         (non MIL ADAC function generators)
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>
  * @date 04.02.2020

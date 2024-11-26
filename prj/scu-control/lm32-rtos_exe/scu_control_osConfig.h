@@ -1,6 +1,7 @@
 /*!
  * @file scu_controlConfig_os.h
  * @brief FreeRTOS configuration file for test program rtosEcaMsiTest
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author    Ulrich Becker <u.becker@gsi.de>
  * @date      30.06.2022

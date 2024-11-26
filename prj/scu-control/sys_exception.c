@@ -1,7 +1,7 @@
 /*!
  * @file sys_exception.c
  * @brief Handling of non IRQ- LM32-exceptions.
- *
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @date 19.08.2022
  * @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

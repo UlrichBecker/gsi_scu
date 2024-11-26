@@ -1,6 +1,7 @@
 /*!
  * @file scu_mil_fg_handler.h
  * @brief Module for handling all MIL function generators and MIL DAQs
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH
  * @author Ulrich Becker <u.becker@gsi.de>
  * @date 04.02.2020

@@ -1,7 +1,7 @@
 /*!
  *  @file mem-mon.cpp
  *  @brief Main module for the SCU memory monitor.
- *
+ *  @see https://www-acc.gsi.de/wiki/Frontend/Memory_Management_On_SCU
  *  @date 12.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

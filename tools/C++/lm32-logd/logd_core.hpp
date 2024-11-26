@@ -2,6 +2,7 @@
  *  @file logd_core.hpp
  *  @brief Main functionality of LM32 log daemon.
  *  >>> PvdS <<<
+ *  @see https://www-acc.gsi.de/wiki/Frontend/LM32Developments#Handling_of_diagnostic_and_logging_messages_created_by_a_LM32_45Application_via_the_linux_45_application_34lm32_45logd_34
  *  @date 21.04.2022
  *  @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *

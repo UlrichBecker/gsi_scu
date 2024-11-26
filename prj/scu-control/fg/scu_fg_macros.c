@@ -2,6 +2,7 @@
  * @file scu_fg_macros.c
  * @brief Module for handling MIL and non MIL
  *        function generator macros
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @see https://www-acc.gsi.de/wiki/Hardware/Intern/ScuFgDoc
  * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/ScuFgDoc
  * @copyright GSI Helmholtz Centre for Heavy Ion Research GmbH

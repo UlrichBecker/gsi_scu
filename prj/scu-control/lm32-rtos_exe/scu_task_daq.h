@@ -1,7 +1,7 @@
 /*!
  * @file scu_task_daq.h
  * @brief FreeRTOS task for ADDAC-DAQs.
- *
+ * @see https://www-acc.gsi.de/wiki/Frontend/Firmware_SCU_Control
  * @date 22.08.2022
  * @copyright (C) 2022 GSI Helmholtz Centre for Heavy Ion Research GmbH
  *
