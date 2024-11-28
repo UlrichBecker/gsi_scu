@@ -14,7 +14,7 @@ TARGET  := scu3_control
 DEFINES += CONFIG_SCU3
 SCU3    := 1 
 
-# MIL_DAQ_USE_RAM := 1
+MIL_DAQ_USE_RAM := 1
 
 BASE_DIR = $(shell pwd)/..
 
@@ -30,9 +30,9 @@ BASE_DIR = $(shell pwd)/..
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+SCU_URL = scuxl0249   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
-SCU_URL = scuxl0692
+#SCU_URL = scuxl0692
 
  # ACU-test
 

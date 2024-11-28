@@ -209,8 +209,14 @@ uint DaqBaseInterface::getNumberOfNewData( void )
  */
 uint DaqBaseInterface::getFiFoLevelPerTenThousand( void )
 {
+#ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE
+   if( getRamCapacity() > 0 )
+      return (getCurrentNumberOfData() * 10000) / getRamCapacity();
+   return DAQ_RING_SIZE;
+#else
    assert( getRamCapacity() > 0 );
    return (getCurrentNumberOfData() * 10000) / getRamCapacity();
+#endif
 }
 
 /*! --------------------------------------------------------------------------

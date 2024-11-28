@@ -291,8 +291,14 @@ public:
     */
    uint getRamCapacity( void )
    {
+   #ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE
+      if( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr )
+         return m_poRingAdmin->indexes.capacity;
+      return DAQ_RING_SIZE;
+   #else
       assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );
       return m_poRingAdmin->indexes.capacity;
+   #endif
    }
 
    /*!
@@ -301,8 +307,14 @@ public:
     */
    uint getRamOffset( void )
    {
+   #ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE
+      if( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr )
+         return m_poRingAdmin->indexes.offset;
+      return 0;
+   #else
       assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );
       return m_poRingAdmin->indexes.offset;
+   #endif
    }
 
    /*!

@@ -183,6 +183,8 @@ STATIC_ASSERT( IFK_MAX_ADR < 0xFF );
  */
 void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
 {
+   scuLog( LM32_LOG_INFO, "Scanning for MIL-devices via SIO...\n" );
+
    const SCUBUS_SLAVE_FLAGS_T slotFlags =
                scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO2 )
              | scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO3 );
@@ -191,8 +193,12 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
     * No SOI-slaves found on SCU-bus?
     */
    if( slotFlags == 0 )
+   {
+      scuLog( LM32_LOG_INFO, "No SIO slave found.\n" );
       return;
+   }
 
+   bool found = false;
    /*
     * At least one SIO- slave was found.
     */
@@ -237,6 +243,7 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
          /*
           * All three proves has been passed, so it can add it to the FG-list.
           */
+         found = true;
       #ifdef CONFIG_TASK_RAM_TAB
          const int c = fgListAdd( DEV_SIO | slot, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList ) - 1;
          FG_ASSERT( c >= 0 );
@@ -248,6 +255,8 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
          //scub_write_mil(pScuBus, slot, 0x100, 0x12 << 8 | dev); // clear PUR
       }
    } /* SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags ) */
+   if( !found )
+      scuLog( LM32_LOG_INFO, "No MIL-FGs on SIO found.\n" );
 }
 
 #ifdef CONFIG_MIL_PIGGY
@@ -256,6 +265,7 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
  */
 void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
 {
+   scuLog( LM32_LOG_INFO, "Scanning for MIL-devices via PIGGY...\n" );
   /*
    * Check only for "ifks", if there is a macro found and a mil extension
    * attached to the baseboard.
@@ -263,7 +273,10 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
    * + mil extension has a 1wire temp sensor with family if 0x42
    */
    if( !(((int)pMilBus != ERROR_NOT_FOUND) && (((int)*pExtId & 0xff) == 0x42)) )
+   {
+      scuLog( LM32_LOG_INFO, "No MIL-PIGGY-WB-device found.\n" );
       return;
+   }
 
    /*
     * reset all task-slots by reading value back
@@ -272,13 +285,13 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
 #ifdef CONFIG_TASK_RAM_TAB
    unsigned int taskId = TASK_RAM_FG_OFFSET + TASKMIN;
 #endif
+   bool found = false;
    /*
     * Probing of all potential MIL-function-generatirs.
     */
    for( uint32_t dev = 0; dev < IFK_MAX_ADR; dev++ )
    {
       uint16_t ifa_id, ifa_vers, fg_vers;
-
       if( read_mil( pMilBus, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
          continue;
       if( ifa_id != IFA_ID_VAL )
@@ -294,6 +307,7 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
       if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
          continue;
 
+      found = true;
       /*
        * All three proves has been passed, so it can add it to the FG-list.
        */
@@ -306,6 +320,8 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
       fgListAdd( DEV_MIL_EXT, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
    #endif
    }
+   if( !found )
+      scuLog( LM32_LOG_INFO, "No FGs on MIL-PIGGY found.\n" );
 }
 #endif /* ifdef CONFIG_MIL_PIGGY */
 

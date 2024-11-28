@@ -12,6 +12,8 @@ BASE_VERSION = 4
 SUB_VERSION  = 6.9
 
 DEFINES += CONFIG_HANDLE_UNUSED_ECAS
+DEFINES += CONFIG_STOP_ON_LM32_EXCEPTION
+
 
 #------------------------------------------------------------------------------
  SCU_MIL := 1
@@ -40,6 +42,7 @@ STACK_SIZE  =  512
 
 # SCU_URL = scuxl0118
 # SCU_URL = scuxl0192
+
 # SCU_URL = scuxl0212
 # SCU_URL = scuxl0331
 # SCU_URL = scuxl0025
@@ -47,9 +50,9 @@ STACK_SIZE  =  512
 # SCU_URL = scuxl0202
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
-# SCU_URL = scuxl0162   # with MIL and ADDAC
+SCU_URL = scuxl0249   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
-SCU_URL = scuxl0692
+#SCU_URL = scuxl0692
  # ACU-test
 
 include $(BASE_DIR)/scu_control_os.mk

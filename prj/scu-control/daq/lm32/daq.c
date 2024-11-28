@@ -701,6 +701,7 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
                             #endif
                               )
 {
+   scuLog( LM32_LOG_INFO, "Scanning for ADDAC-DAQ compatible slaves...\n" );
    /*
     * Paranoia... ;-)
     */
@@ -738,7 +739,7 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
    #endif
       if( pThis->slotDaqUsedFlags == 0 )
       {
-         DBPRINT( "DBG: Neither ADDAC nor ACU slaves found!\n" );
+         scuLog( LM32_LOG_INFO, "No ADDAC-DAQ compatible slaves found.\n" );
          return 0;
       }
    }
@@ -766,6 +767,7 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
          if( currentType == ACU )
          {
             pCurrentDaqDevice->type = currentType;
+
           #ifndef CONFIG_DAQ_SINGLE_APP
             addAcuToFgList( pScuBusBase, slot, pFgList );
           #endif
