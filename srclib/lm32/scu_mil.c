@@ -54,6 +54,14 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
 #endif
 }
 
+#if 0
+  #define milAtomicEnter() criticalSectionEnter()
+  #define milAtomicExit()  criticalSectionExit()
+#else
+  #define milAtomicEnter() wbZycleEnter()
+  #define milAtomicExit()  wbZycleExit()
+#endif
+
 /*!
  * @see https://www-acc.gsi.de/wiki/bin/viewauth/Hardware/Intern/PerfOpt
  */
@@ -75,14 +83,14 @@ int scub_write_mil_blk( void* pBase,
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   wbZycleEnter();
+   milAtomicEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[0] );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[i] );
    }
-   wbZycleExit();
+   milAtomicExit();
 
    return OKAY;
 }
@@ -94,10 +102,10 @@ int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int dat
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   wbZycleEnter();
+   milAtomicEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, data );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   wbZycleExit();
+   milAtomicExit();
 
    return OKAY;
 }
@@ -107,14 +115,14 @@ int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int dat
  */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
 {
-   wbZycleEnter();
+   milAtomicEnter();
    base[MIL_SIO3_TX_DATA] = data[0];
    base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       base[MIL_SIO3_TX_DATA] = data[i];
    }
-   wbZycleExit();
+   milAtomicExit();
    return OKAY;
 }
 
@@ -150,10 +158,10 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
  */
 int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr)
 {
-   wbZycleEnter();
+   milAtomicEnter();
    milPiggySet( base, MIL_SIO3_TX_DATA, data );
    milPiggySet( base, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   wbZycleExit();
+   milAtomicExit();
    return OKAY;
 }
 

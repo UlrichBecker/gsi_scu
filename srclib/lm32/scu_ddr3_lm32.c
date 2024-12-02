@@ -50,8 +50,8 @@ DDR3_T mg_oDdr3 =
 
 #if defined( CONFIG_RTOS ) && defined( CONFIG_DDR3_MULTIPLE_USE )
  #if 1
-  #define ddr3Lock()   wbZycleEnter()
-  #define ddr3Unlock() wbZycleExit()
+  #define ddr3Lock()   criticalSectionEnter()
+  #define ddr3Unlock() criticalSectionExit()
  #else
   STATIC inline ALWAYS_INLINE void ddr3Lock( void )
   {
@@ -69,8 +69,8 @@ DDR3_T mg_oDdr3 =
  /*
   * Dummy functions when FreeRTOS will not used.
   */
- #define ddr3Lock()    wbZycleEnter()
- #define ddr3Unlock()  wbZycleExit()
+ #define ddr3Lock()    criticalSectionEnter()
+ #define ddr3Unlock()  criticalSectionExit()
 #endif
 
 
