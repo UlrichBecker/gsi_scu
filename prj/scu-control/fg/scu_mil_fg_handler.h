@@ -296,7 +296,7 @@ unsigned int milGetNumberOfFg( void );
  * @retval true leave the function fgEnableChannel
  * @retval false continue the function fgEnableChannel
  */
-bool milHandleClearHandlerState( const void* pScuBus, const void* pMilBus,
+bool milHandleClearHandlerState( const void* pScuBus, //const void* pMilBus,
                                  const unsigned int socket );
 
 /*! ---------------------------------------------------------------------------
@@ -313,7 +313,7 @@ bool milHandleClearHandlerState( const void* pScuBus, const void* pMilBus,
  * @retval OKAY Action was successful
  */
 void milFgPrepare( void* pScuBus,
-                   void* pMilBus,
+                   //void* pMilBus,
                    const unsigned int socket,
                    const unsigned int dev );
 
@@ -329,7 +329,7 @@ void milFgPrepare( void* pScuBus,
  * @retval OKAY Action was successful.
  */
 void milFgStart( void* pScuBus,
-                 void* pMilBus,
+                 //void* pMilBus,
                  const FG_PARAM_SET_T* pPset,
                  const unsigned int socket,
                  const unsigned int dev,
@@ -344,14 +344,14 @@ void milFgStart( void* pScuBus,
  * @param dev Device number
  */
 void milFgDisableIrq( void* pScuBus,
-                      void* pMilBus,
+                      //void* pMilBus,
                       const unsigned int socket,
                       const unsigned int dev );
 
 /*! ---------------------------------------------------------------------------
  */
 int milFgDisable( void* pScuBus,
-                  void* pMilBus,
+                 // void* pMilBus,
                   unsigned int socket,
                   unsigned int dev );
 

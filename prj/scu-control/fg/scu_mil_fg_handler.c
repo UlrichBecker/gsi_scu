@@ -347,7 +347,7 @@ STATIC inline void setMilFgRegs( FG_MIL_REGISTER_T* pFgRegs,
  * @see scu_fg_macros.h
  */
 inline bool milHandleClearHandlerState( const void* pScuBus,
-                                        const void* pMilBus,
+                                       // const void* pMilBus,
                                         const unsigned int socket )
 {
    uint16_t dreq_status = 0;
@@ -404,7 +404,7 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
  * @see scu_fg_macros.h
  */
 inline void milFgPrepare( void* pScuBus,
-                          void* pMilBus,
+                         // void* pMilBus,
                           const unsigned int socket,
                           const unsigned int dev )
 {
@@ -445,12 +445,12 @@ inline void milFgPrepare( void* pScuBus,
   /*
    * Enable data request
    */
-   write_mil( pMilBus, 1 << 13, FC_IRQ_MSK | dev );
+   write_mil( g_pScu_mil_base, 1 << 13, FC_IRQ_MSK | dev );
 
    /*
     * Set MIL-DAC in FG mode
     */
-   write_mil( pMilBus, 0x1, FC_IFAMODE_WR | dev);
+   write_mil( g_pScu_mil_base, 0x1, FC_IFAMODE_WR | dev );
 #endif
 }
 
@@ -458,7 +458,7 @@ inline void milFgPrepare( void* pScuBus,
  * @see scu_fg_macros.h
  */
 inline void milFgStart( void* pScuBus,
-                        void* pMilBus,
+                        //void* pMilBus,
                         const FG_PARAM_SET_T* pPset,
                         const unsigned int socket,
                         const unsigned int dev,
@@ -509,16 +509,16 @@ inline void milFgStart( void* pScuBus,
 
    FG_ASSERT( isMilExtentionFg( socket ) );
 
-   write_mil_blk( pMilBus,
+   write_mil_blk( g_pScu_mil_base,
                   (short*)&milFgRegs,
                   FC_BLK_WR | dev );
 
    /*
     * Still in block mode !
     */
-   write_mil( pMilBus, cntrl_reg_wr, FC_CNTRL_WR | dev );
+   write_mil( g_pScu_mil_base, cntrl_reg_wr, FC_CNTRL_WR | dev );
 
-   write_mil( pMilBus, cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
+   write_mil( g_pScu_mil_base, cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
 #endif
    #if __GNUC__ >= 9
      #pragma GCC diagnostic pop
@@ -529,7 +529,7 @@ inline void milFgStart( void* pScuBus,
  * @see scu_fg_macros.h
  */
 inline void milFgDisableIrq( void* pScuBus,
-                             void* pMilBus,
+                            // void* pMilBus,
                              const unsigned int socket,
                              const unsigned int dev )
 {
@@ -548,8 +548,8 @@ inline void milFgDisableIrq( void* pScuBus,
    }
    else
    {
-      //write_mil((volatile unsigned int* )pMilBus, 0x0, FC_COEFF_A_WR | dev);  //ack drq
-      write_mil( pMilBus, 0x0, FC_IRQ_MSK | dev);
+      //write_mil((volatile unsigned int* )g_pScu_mil_base, 0x0, FC_COEFF_A_WR | dev);  //ack drq
+      write_mil( g_pScu_mil_base, 0x0, FC_IRQ_MSK | dev);
    }
 #endif
 }
@@ -558,7 +558,7 @@ inline void milFgDisableIrq( void* pScuBus,
  * scu_fg_macros.h
  */
 inline int milFgDisable( void* pScuBus,
-                         void* pMilBus,
+                       //  void* pMilBus,
                          unsigned int socket,
                          unsigned int dev )
 {
@@ -590,14 +590,14 @@ inline int milFgDisable( void* pScuBus,
 
    FG_ASSERT( isMilExtentionFg( socket ) );
 
-   if( (status = read_mil( pMilBus, &data,
+   if( (status = read_mil( g_pScu_mil_base, &data,
                            FC_CNTRL_RD | dev)) != OKAY )
    {
       milPrintDeviceError( status, 0, __func__ );
       return status;
    }
 
-   write_mil( pMilBus, data & ~(0x2), FC_CNTRL_WR | dev );
+   write_mil( g_pScu_mil_base, data & ~(0x2), FC_CNTRL_WR | dev );
 
    return status;
 #endif

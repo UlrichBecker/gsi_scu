@@ -43,14 +43,6 @@
 extern "C" {
 #endif
 
-#define CONFIG_MIL_PIGGY
-
-/*!
- * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
- * @see MIL_BLOCK_SIZE
- */
-
-
 /*!
  * @defgroup MIL_INTERFACE Functions and constants for MIL-bus.
  * @{
@@ -80,6 +72,10 @@ int read_mil( void* pBase, uint16_t* pData, const unsigned int fc_ifk_addr);
 
 int status_mil(volatile unsigned int *base, unsigned short *status);
 
+/*!
+ * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
+ * @see MIL_BLOCK_SIZE
+ */
 int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
 
 int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr );

@@ -320,10 +320,14 @@ void fgEnableChannel( const unsigned int channel )
    }
    else
    {
-      if( milHandleClearHandlerState( g_pScub_base, g_pScu_mil_base, socket ) )
+      if( milHandleClearHandlerState( g_pScub_base,
+                                      //g_pScu_mil_base,
+                                      socket ) )
          return;
 
-      milFgPrepare( g_pScub_base, g_pScu_mil_base, socket, dev );
+      milFgPrepare( g_pScub_base,
+                    //g_pScu_mil_base,
+                    socket, dev );
    }
 #endif
 
@@ -343,7 +347,7 @@ void fgEnableChannel( const unsigned int channel )
       else
       {
          milFgStart( g_pScub_base,
-                     g_pScu_mil_base,
+                    // g_pScu_mil_base,
                      &pset,
                      socket, dev, channel );
       }
@@ -394,7 +398,7 @@ void fgDisableChannel( const unsigned int channel )
    else
    {
       status = milFgDisable( g_pScub_base,
-                             g_pScu_mil_base,
+                           //  g_pScu_mil_base,
                              socket, dev );
       if( status != OKAY )
          return;
@@ -448,7 +452,9 @@ STATIC inline void fgDisableInterrupt( const unsigned int channel )
       return;
    }
 
-   milFgDisableIrq( g_pScub_base, g_pScu_mil_base, socket, dev );
+   milFgDisableIrq( g_pScub_base,
+                    //g_pScu_mil_base,
+                    socket, dev );
 #endif
 }
 

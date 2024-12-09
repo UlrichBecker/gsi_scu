@@ -25,6 +25,10 @@
 #ifndef _SCU_MSI_H
 #define _SCU_MSI_H
 
+#ifndef __lm32__
+   #error This header is for LM32 only!
+#endif
+
 #include <sdb_lm32.h>
 #include <lm32Interrupts.h>
 
@@ -91,12 +95,10 @@ typedef struct HW_IMAGE
    uint32_t pop;
 } MSI_CONTROL_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( MSI_CONTROL_T, reset )  == IRQ_REG_RST );
 STATIC_ASSERT( offsetof( MSI_CONTROL_T, status ) == IRQ_REG_STAT );
 STATIC_ASSERT( offsetof( MSI_CONTROL_T, pop )    == IRQ_REG_POP );
 STATIC_ASSERT( sizeof( MSI_CONTROL_T ) == 3 * sizeof( uint32_t ) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
@@ -110,12 +112,10 @@ typedef struct HW_IMAGE
    uint32_t  sel;
 } MSI_ITEM_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( MSI_ITEM_T, msg ) == IRQ_OFFS_MSG );
 STATIC_ASSERT( offsetof( MSI_ITEM_T, adr ) == IRQ_OFFS_ADR );
 STATIC_ASSERT( offsetof( MSI_ITEM_T, sel ) == IRQ_OFFS_SEL );
 STATIC_ASSERT( sizeof( MSI_ITEM_T ) == 3 * sizeof( uint32_t ) );
-#endif
 
 /*! --------------------------------------------------------------------------
  * @ingroup INTERRUPT
@@ -128,10 +128,8 @@ typedef struct HW_IMAGE
    uint32_t   _RFU_;
 } MSI_LIST_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( MSI_LIST_T, item ) == 0 );
 STATIC_ASSERT( sizeof( MSI_LIST_T ) == 4 * sizeof(uint32_t) );
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
@@ -163,11 +161,9 @@ typedef struct HW_IMAGE
    const volatile MSI_LIST_T queue[MAX_LM32_INTERRUPTS];
 } IRQ_MSI_T;
 
-#ifndef __DOXYGEN__
 STATIC_ASSERT( offsetof( IRQ_MSI_T, control ) == 0 );
 STATIC_ASSERT( offsetof( IRQ_MSI_T, queue ) == IRQ_OFFS_QUE );
 STATIC_ASSERT( sizeof( IRQ_MSI_T ) == IRQ_OFFS_QUE + MAX_LM32_INTERRUPTS * sizeof( MSI_LIST_T ) );
-#endif
 
 #if 1
 /*! --------------------------------------------------------------------------

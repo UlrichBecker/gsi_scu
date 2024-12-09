@@ -83,14 +83,16 @@ int scub_write_mil_blk( void* pBase,
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   milAtomicEnter();
+   criticalSectionEnter();
+   //milAtomicEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[0] );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[i] );
    }
-   milAtomicExit();
+   //milAtomicExit();
+   criticalSectionExit();
 
    return OKAY;
 }
@@ -98,42 +100,21 @@ int scub_write_mil_blk( void* pBase,
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int scub_write_mil( void* pBase, const unsigned int slot, const unsigned int data, const unsigned int fc_ifc_addr)
+int scub_write_mil( void* pBase, const unsigned int slot,
+                    const unsigned int data, const unsigned int fc_ifc_addr)
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   milAtomicEnter();
+   criticalSectionEnter();
+   //milAtomicEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, data );
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   milAtomicExit();
+   //milAtomicExit();
+   criticalSectionExit();
 
    return OKAY;
 }
 
-/*! ---------------------------------------------------------------------------
- * @see scu_mil.h
- */
-int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
-{
-   milAtomicEnter();
-   base[MIL_SIO3_TX_DATA] = data[0];
-   base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
-   for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
-   {
-      base[MIL_SIO3_TX_DATA] = data[i];
-   }
-   milAtomicExit();
-   return OKAY;
-}
-
-/*! ---------------------------------------------------------------------------
- * @see scu_mil.h
- */
-int status_mil(volatile unsigned int *base, unsigned short *status )
-{
-   *status = base[MIL_SIO3_STAT];
-   return OKAY;
-}
 
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
@@ -154,6 +135,22 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
 #ifdef CONFIG_MIL_PIGGY
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
+ */
+int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
+{
+   milAtomicEnter();
+   base[MIL_SIO3_TX_DATA] = data[0];
+   base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
+   for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
+   {
+      base[MIL_SIO3_TX_DATA] = data[i];
+   }
+   milAtomicExit();
+   return OKAY;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_mil.h
  * non blocking write; uses the tx fifo
  */
 int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr)
@@ -162,6 +159,15 @@ int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_ad
    milPiggySet( base, MIL_SIO3_TX_DATA, data );
    milPiggySet( base, MIL_SIO3_TX_CMD, fc_ifc_addr );
    milAtomicExit();
+   return OKAY;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see scu_mil.h
+ */
+int status_mil(volatile unsigned int *base, unsigned short *status )
+{
+   *status = base[MIL_SIO3_STAT];
    return OKAY;
 }
 

@@ -57,6 +57,28 @@
  * @todo Introducing a additional warning for low temperature.
  */
 
+#ifdef CONFIG_MIL_PIGGY
+   //#define CONFIG_QUERY_FUNCTION
+   //extern void* g_pScu_mil_base;
+#endif
+
+#ifdef CONFIG_QUERY_FUNCTION
+   STATIC bool alwaysTrue( void )
+   {
+      return true;
+   }
+
+   #ifdef CONFIG_MIL_PIGGY
+      #error TODO
+      STATIC bool isMilPiggyPresent( void )
+      {
+         return ();
+      }
+   #else
+      #define isMilPiggyPresent alwaysTrue
+   #endif
+#endif
+
 /*! --------------------------------------------------------------------------
  * @ingroup TEMPERATURE
  * @brief Calculates the temperature in degree without decimal places.
@@ -130,6 +152,10 @@ typedef struct
     * @brief Keeps the current state of the FSM.
     */
    STATE_T state;
+
+#ifdef CONFIG_QUERY_FUNCTION
+   bool (*canDo)( void );
+#endif
 } TEMP_WATCH_T;
 
 #define BOARD_TEMP      g_shared.oSaftLib.oTemperatures.board_temp
@@ -148,7 +174,9 @@ void printTemperatures( void )
    criticalSectionEnter();
    volatile const uint32_t boardTemp     = BOARD_TEMP;
    volatile const uint32_t backplaneTemp = BACKPLANE_TEMP;
+#ifdef CONFIG_MIL_PIGGY
    volatile const uint32_t externTemp    = EXTERN_TEMP;
+#endif
    criticalSectionExit();
 
    if( boardTemp != INVALID_TEMPERATURE )
@@ -156,9 +184,10 @@ void printTemperatures( void )
    
    if( backplaneTemp != INVALID_TEMPERATURE )
       lm32Log( LM32_LOG_INFO, "Backplane temperature: %d.%u °C", TEMP_FORMAT( backplaneTemp ) );
-
+#ifdef CONFIG_MIL_PIGGY
    if( externTemp != INVALID_TEMPERATURE )
       lm32Log( LM32_LOG_INFO, "Extern temperature:    %d.%u °C", TEMP_FORMAT( externTemp ) );
+#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -179,7 +208,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
 
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
-   TEMP_WATCH_T watchObject[3] =
+   TEMP_WATCH_T watchObject[] =
    {
       {
          .pCurrentTemp = &BOARD_TEMP,
@@ -188,6 +217,9 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          .errorMsgPeriod = 0,
       #endif
          FSM_INIT_FSM( ST_START, color = blue )
+      #ifdef CONFIG_QUERY_FUNCTION
+         , .canDo = alwaysTrue
+      #endif
       },
       {
          .pCurrentTemp = &BACKPLANE_TEMP,
@@ -196,15 +228,23 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
          .errorMsgPeriod = 0,
       #endif
          .state = ST_START
-      },
-      {
+      #ifdef CONFIG_QUERY_FUNCTION
+         , .canDo = alwaysTrue
+      #endif
+      }
+   #ifdef CONFIG_MIL_PIGGY
+      ,{
          .pCurrentTemp = &EXTERN_TEMP,
          .name = "extern",
       #ifdef CONFIG_TMPERATURE_ERROR_MSG
          .errorMsgPeriod = 0,
       #endif
          .state = ST_START
+      #ifdef CONFIG_QUERY_FUNCTION
+         , .canDo = isMilPiggyPresent
+      #endif
       }
+   #endif
    };
    #pragma GCC diagnostic pop
 
@@ -239,6 +279,10 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       for( unsigned int i = 0; i < ARRAY_SIZE( watchObject ); i++ )
       {
          TEMP_WATCH_T* const pWatchTemp = &watchObject[i];
+      #ifdef CONFIG_QUERY_FUNCTION
+         if( !pWatchTemp->canDo() )
+            continue;
+      #endif
       #ifdef CONFIG_TMPERATURE_ERROR_MSG
          if( pWatchTemp->errorMsgPeriod > 0 )
              pWatchTemp->errorMsgPeriod--;
