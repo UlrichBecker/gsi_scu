@@ -701,6 +701,7 @@ void dbgPrintMilTaskData( void )
 void fgMilClearHandlerState( const unsigned int socket )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u )\n" ESC_NORMAL, __func__, socket );
+#if 0
 #ifdef CONFIG_MIL_PIGGY
    if( isMilScuBusFg( socket ) )
    {
@@ -746,6 +747,31 @@ void fgMilClearHandlerState( const unsigned int socket )
       }
    }
 #endif /* CONFIG_MIL_PIGGY */
+#else
+   const MIL_QEUE_T milMsg =
+   {
+   #ifdef CONFIG_MIL_PIGGY
+      /*
+       * In the case of MIL-piggy the slot number is per convention always zero.
+       * In this way the MIL handler function becomes to know that.
+       */
+      .slot = isMilExtentionFg( socket )? 0 : getFgSlotNumber( socket ),
+   #else
+      .slot = getFgSlotNumber( socket ),
+   #endif
+      .time = getWrSysTimeSafe()
+   };
+   /*
+    * Triggering of a software pseudo interrupt for the MIL- handler.
+    */
+   ATOMIC_SECTION()
+   {
+      queuePushWatched( &g_queueMilFg, &milMsg );
+   #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+      taskWakeupMil();
+   #endif
+   }
+#endif
 }
 
 #if defined( CONFIG_READ_MIL_TIME_GAP ) && !defined(__DOCFSM__)
