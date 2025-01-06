@@ -239,41 +239,29 @@ void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 /*! ---------------------------------------------------------------------------
  * @see scu_function_generator.h
  */
-void fgListFindAll( void* scub_adr,
-               #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                   void* mil_addr,
-               #endif
-                   FG_MACRO_T* pFgList,
-                  uint64_t *ext_id )
+void fgListFindAll( FG_MACRO_T* pFgList, uint64_t* pExtId )
 {
    fgListReset( pFgList );
-   scanScuBusFgs( scub_adr, pFgList );
+   scanScuBusFgs( g_pScub_base, pFgList );
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-   scanExtMilFgs( mil_addr, pFgList, ext_id );
+   scanExtMilFgs( g_pScu_mil_base, pFgList, pExtId );
 #endif
 }
 
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_list.h
  */
-void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
-                     const unsigned int channel,
-                     FG_MACRO_T* pFgList,
-                     const void* pScuBus
-                   #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                   , const void* pMilBus
-                   #endif
-                   )
+void fgResetAndInit( const unsigned int channel )
 {
-   if( channel > MAX_FG_CHANNELS )
+   if( channel >= ARRAY_SIZE(g_shared.oSaftLib.oFg.aRegs) )
       return;
 
-   pChannelRegisters[channel].wr_ptr = 0;
-   pChannelRegisters[channel].rd_ptr = 0;
-   pChannelRegisters[channel].state = STATE_STOPPED;
-   pChannelRegisters[channel].ramp_count = 0;
+   g_shared.oSaftLib.oFg.aRegs[channel].wr_ptr = 0;
+   g_shared.oSaftLib.oFg.aRegs[channel].rd_ptr = 0;
+   g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_STOPPED;
+   g_shared.oSaftLib.oFg.aRegs[channel].ramp_count = 0;
 
-   const int32_t macroNumber = pChannelRegisters[channel].macro_number;
+   const int32_t macroNumber = g_shared.oSaftLib.oFg.aRegs[channel].macro_number;
 
    /*
     *  Is a macro assigned to that channel by SAFTLIB?
@@ -282,15 +270,15 @@ void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
    if( macroNumber < 0 )
       return; /* No */
 
-
-   const unsigned int socket = pFgList[macroNumber].socket;
-   const unsigned int dev    = pFgList[macroNumber].device;
+   const unsigned int socket = g_shared.oSaftLib.oFg.aMacros[macroNumber].socket;
+   const unsigned int dev    = g_shared.oSaftLib.oFg.aMacros[macroNumber].device;
 
 #ifdef CONFIG_MIL_FG
    if( isAddacFg( socket ) )
    {
 #endif
-      getFgRegisterPtr( pScuBus, socket, dev )->cntrl_reg.i16 = FG_RESET;
+      getFgRegisterPtr( g_pScub_base, socket, dev )->cntrl_reg.i16 = FG_RESET;
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Reset ADDAC fg-%u-%u" ESC_NORMAL, socket, dev );
 #ifdef CONFIG_MIL_FG
       return;
    }
@@ -300,16 +288,24 @@ void fgResetAndInit( FG_CHANNEL_REG_T* pChannelRegisters,
    {
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
-      scub_reset_mil( (unsigned short*)pScuBus, slot );
-      scub_write_mil( (unsigned short*)pScuBus, slot, FG_RESET, FC_CNTRL_WR | dev );
+      scub_reset_mil( g_pScub_base, slot );
+     // scub_reset_mil( (unsigned short*)g_pScub_base, slot );
+    //  scub_write_mil( (unsigned short*)g_pScub_base, slot, FG_RESET, FC_CNTRL_WR | dev );
+      scub_write_mil( g_pScub_base, slot, FG_RESET, FC_CNTRL_WR | dev );
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Reset MIL-SIO fg-%u-%u" ESC_NORMAL, socket, dev );
       return;
 #ifdef CONFIG_MIL_PIGGY
    }
 
-   /* MIL- extension */
+   /*
+    * MIL- extension (PIGGY)
+    */
    FG_ASSERT( isMilExtentionFg( socket ) );
-   reset_mil( (unsigned int*)pMilBus );
-   write_mil( (unsigned int*)pMilBus, FG_RESET, FC_CNTRL_WR | dev );
+   //reset_mil( (unsigned int*)g_pScu_mil_base );
+   //write_mil( (unsigned int*)g_pScu_mil_base, FG_RESET, FC_CNTRL_WR | dev );
+   reset_mil( g_pScu_mil_base );
+   write_mil( g_pScu_mil_base, FG_RESET, FC_CNTRL_WR | dev );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Reset MIL-PIGGY fg-%u-%u" ESC_NORMAL, socket, dev );
 #endif /* ifdef CONFIG_MIL_PIGGY */
 #endif /* ifdef CONFIG_MIL_FG */
 }

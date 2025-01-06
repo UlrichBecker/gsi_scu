@@ -520,7 +520,12 @@ void main( void )
              g_pMyMsi,
              sizeof( SCU_SHARED_DATA_T )
           );
+
   MMU_STATUS_T status;
+  /*
+   * Initializing of the LM32-log-system for the Linux log-daemon "lm32logd" with a buffer
+   * of a maximum of 1000 log-items in DDR3-RAM for SCU3 respectively SRAM for SCU4.
+   */
   status = lm32LogInit( 1000 );
   mprintf( "\nMMU- status: %s\n", mmuStatus2String( status ) );
   if( !mmuIsOkay( status ) )

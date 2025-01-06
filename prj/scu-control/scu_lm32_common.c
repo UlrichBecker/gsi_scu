@@ -141,12 +141,8 @@ void scanFgs( void )
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 #endif
-   fgListFindAll( g_pScub_base,
-              #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                 g_pScu_mil_base,
-              #endif
-                 g_shared.oSaftLib.oFg.aMacros,
-                 &g_shared.oSaftLib.oTemperatures.ext_id );
+   fgListFindAll( g_shared.oSaftLib.oFg.aMacros,
+                  &g_shared.oSaftLib.oTemperatures.ext_id );
 #if __GNUC__ >= 9
   #pragma GCC diagnostic pop
 #endif

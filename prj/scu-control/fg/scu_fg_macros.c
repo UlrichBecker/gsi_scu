@@ -188,6 +188,9 @@ void wdtPoll( void )
        */
       makeStop( channel );
       fgDisableChannel( channel );
+#if 1
+      fgResetAndInit( channel );
+#endif
    }
 }
 #endif /* ifdef CONFIG_USE_FG_MSI_TIMEOUT */

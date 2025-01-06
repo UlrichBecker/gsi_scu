@@ -149,14 +149,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
    {
       case FG_OP_RESET_CHANNEL:
       {
-         fgResetAndInit( g_shared.oSaftLib.oFg.aRegs,
-                         value,
-                         g_shared.oSaftLib.oFg.aMacros,
-                         g_pScub_base
-                        #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                         ,g_pScu_mil_base
-                        #endif
-                       );
+         fgResetAndInit( value );
          resetActiveBySaftLib( value );
        #ifdef CONFIG_USE_SENT_COUNTER
          g_aFgChannels[value].param_sent = 0;

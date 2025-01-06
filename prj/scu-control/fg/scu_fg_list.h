@@ -77,6 +77,7 @@ int fgListAdd( const uint8_t socked,
 /*! ---------------------------------------------------------------------------
  * @brief Adds a found function generator receiding in ADDAC-device
  *        to the function generator list.
+ * @todo Remove the argument pScuBusBase and use a global pointer instead.
  */
 void addAddacToFgList( const void* pScuBusBase,
                        const unsigned int slot,
@@ -94,6 +95,7 @@ ALWAYS_INLINE STATIC inline void addAcuToFgList( const void* pScuBusBase,
 /*! ---------------------------------------------------------------------------
  * @brief Adds a found function generator receiding in DIOB-device
  *        to the function generator list.
+ * @todo Remove the argument pScuBusBase and use a global pointer instead.
  */
 void addDiobToFgList( const void* pScuBusBase,
                       const unsigned int slot,
@@ -105,28 +107,12 @@ void addDiobToFgList( const void* pScuBusBase,
  * @brief Finding of all kinds of function generators connected to
  *        this SCU.
  */
-void fgListFindAll( void* base_adr,
-                  #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                    void* mil_base,
-                  #endif
-                    FG_MACRO_T* fglist,
-                    uint64_t *ext_id );
+void fgListFindAll( FG_MACRO_T* pFgList, uint64_t* pExtId );
 
 /*! ---------------------------------------------------------------------------
  * @brief  init the buffers for MAX_FG_CHANNELS
  */
-void fgResetAndInit( FG_CHANNEL_REG_T* cr,
-                     const unsigned int channel,
-                     FG_MACRO_T* macro,
-                     const void* scub_base
-                   #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-                   , const void* devb_base
-                   #endif
-                   );
-
-#ifdef CONFIG_MIL_FG
-
-#endif
+void fgResetAndInit( const unsigned int channel );
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the index number of a FG-macro in the FG-list by the
