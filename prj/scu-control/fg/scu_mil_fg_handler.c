@@ -1347,34 +1347,35 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 
 #define CONFIG_DEBUG_MIL_FSM
 
-#ifdef CONFIG_DEBUG_MIL_FSM
-#warning MIL-FSM-debuging ist active!
-STATIC char* dbgMilFsm( const FG_STATE_T state )
-{
-   #define FSM_CASE_ITEM( s )  case s: return #s;
-   switch( state )
+#if defined( CONFIG_DEBUG_MIL_FSM ) && !defined(__DOCFSM__)
+   #warning MIL-FSM-debuging ist active! Use this only for debug purposes!
+   STATIC char* dbgMilFsm( const FG_STATE_T state )
    {
-      FSM_CASE_ITEM( ST_WAIT )
-    #ifdef CONFIG_MIL_WAIT
-      FSM_CASE_ITEM( ST_PREPARE )
-    #endif
-      FSM_CASE_ITEM( ST_FETCH_STATUS )
-      FSM_CASE_ITEM( ST_HANDLE_IRQS )
-      FSM_CASE_ITEM( ST_FETCH_DATA )
-      default: break;
+      #define FSM_CASE_ITEM( s )  case s: return #s;
+      switch( state )
+      {
+         FSM_CASE_ITEM( ST_WAIT )
+       #ifdef CONFIG_MIL_WAIT
+         FSM_CASE_ITEM( ST_PREPARE )
+       #endif
+         FSM_CASE_ITEM( ST_FETCH_STATUS )
+         FSM_CASE_ITEM( ST_HANDLE_IRQS )
+         FSM_CASE_ITEM( ST_FETCH_DATA )
+         default: break;
+      }
+      #undef FSM_CASE_ITEM
+      return "unknown";
    }
-   return "unknown";
-}
 
-STATIC void dbgShowState( const FG_STATE_T state )
-{
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "FSM-state: %s" ESC_NORMAL, dbgMilFsm( state ) );
-}
+   STATIC void dbgShowState( const FG_STATE_T oldState, const FG_STATE_T newState )
+   {
+      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "FSM-state: %s->%s" ESC_NORMAL,
+               dbgMilFsm( oldState ), dbgMilFsm( newState ));
+   }
 
-#define DEBUG_FSM( state ) dbgShowState( state );
-
+   #define DEBUG_FSM( oldState, newState ) dbgShowState( oldState, newState );
 #else
-#define DEBUG_FSM( state )
+   #define DEBUG_FSM( oldState, newState )
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -1386,7 +1387,7 @@ STATIC void dbgShowState( const FG_STATE_T state )
  */
 #define FSM_TRANSITION( newState, attr... ) \
 {                                           \
-   DEBUG_FSM( newState )                    \
+   DEBUG_FSM( pMilData->state, newState )   \
    pMilData->state = newState;              \
    break;                                   \
 }
@@ -1401,7 +1402,7 @@ STATIC void dbgShowState( const FG_STATE_T state )
  */
 #define FSM_TRANSITION_NEXT( newState, attr... ) \
 {                                                \
-   DEBUG_FSM( newState )                         \
+   DEBUG_FSM( pMilData->state, newState )                         \
    pMilData->state = newState;                   \
    next = true;                                  \
    break;                                        \
