@@ -83,17 +83,7 @@ void print_regs( void )
  */
 inline void fgListReset( FG_MACRO_T* pFgList )
 {
-#if 0
-   for( unsigned int i = 0; i < MAX_FG_MACROS; i++ )
-   {
-      pFgList[i].socket     = 0;
-      pFgList[i].device     = 0;
-      pFgList[i].version    = 0;
-      pFgList[i].outputBits = 0;
-   }
-#else
    memset( pFgList, 0, sizeof( FG_MACRO_T ) * MAX_FG_MACROS );
-#endif
 }
 
 /*! ---------------------------------------------------------------------------
@@ -236,6 +226,14 @@ void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
 #endif
 }
 
+void fgListResetAllFoundFg( void )
+{
+   for( unsigned int channel = 0; channel < ARRAY_SIZE(g_shared.oSaftLib.oFg.aRegs); channel++ )
+   {
+      fgResetAndInit( channel );
+   }
+}
+
 /*! ---------------------------------------------------------------------------
  * @see scu_function_generator.h
  */
@@ -246,7 +244,9 @@ void fgListFindAll( FG_MACRO_T* pFgList, uint64_t* pExtId )
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
    scanExtMilFgs( g_pScu_mil_base, pFgList, pExtId );
 #endif
+  // fgListResetAllFoundFg();
 }
+
 
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_list.h
@@ -254,8 +254,10 @@ void fgListFindAll( FG_MACRO_T* pFgList, uint64_t* pExtId )
 void fgResetAndInit( const unsigned int channel )
 {
    if( channel >= ARRAY_SIZE(g_shared.oSaftLib.oFg.aRegs) )
+   {
+      // lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "function: %s(), line: %u" ESC_NORMAL, __func__, __LINE__ );
       return;
-
+   }
    g_shared.oSaftLib.oFg.aRegs[channel].wr_ptr = 0;
    g_shared.oSaftLib.oFg.aRegs[channel].rd_ptr = 0;
    g_shared.oSaftLib.oFg.aRegs[channel].state = STATE_STOPPED;
@@ -268,8 +270,10 @@ void fgResetAndInit( const unsigned int channel )
     *  FunctionGeneratorImpl::acquireChannel
     */
    if( macroNumber < 0 )
+   {
+     // lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "function: %s(), line: %u" ESC_NORMAL, __func__, __LINE__ );
       return; /* No */
-
+   }
    const unsigned int socket = g_shared.oSaftLib.oFg.aMacros[macroNumber].socket;
    const unsigned int dev    = g_shared.oSaftLib.oFg.aMacros[macroNumber].device;
 

@@ -267,6 +267,19 @@ typedef struct
 } MIL_TASK_DATA_T;
 
 /*! ---------------------------------------------------------------------------
+ * @brief Returns true if the task is processing a SCU-BUS device respectively
+ *        a SIO-slace device, otherwise it is processing a MIL-PIGGY device.
+ */
+STATIC inline ALWAYS_INLINE
+bool milIsScuBus( MIL_TASK_DATA_T* pMilTaskData )
+{  /*
+    * In the case of MIL-extention respectively MIL-PIGGY is the slot-number
+    * per convention always zerro, because the SCU-bus is not involved.
+    */
+   return pMilTaskData->lastMessage.slot != 0;
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Scanns the SCU- bus for SIO-slaves with commected MIL- function
  *        generators, and put all found FGs in the function- generator list. 
  * @param pScuBus Baseaddress of SCU- bus.

@@ -23,7 +23,7 @@
 /*
  * Minimal stack size is the stack size of the idle-task in 32-bit words as well.
  */
-#define configMINIMAL_STACK_SIZE                96 //64
+#define configMINIMAL_STACK_SIZE                128 //64
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0

@@ -252,7 +252,12 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
       #else
          fgListAdd( DEV_SIO | slot, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
       #endif
-         //scub_write_mil(pScuBus, slot, 0x100, 0x12 << 8 | dev); // clear PUR
+
+         /*
+          * Reset SIO-MIL FG
+          */
+         scub_write_mil( pScuBus, slot, FG_RESET, FC_CNTRL_WR | dev );
+         scub_write_mil(pScuBus, slot, 0x100, (0x12 << 8) | dev); // clear PUR
       }
    } /* SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags ) */
    if( !found )
@@ -319,6 +324,10 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
    #else
       fgListAdd( DEV_MIL_EXT, dev, SYS_CSCO, GRP_IFA8, fg_vers, pFgList );
    #endif
+      /*
+       * Reset MIL-PIGGY FG
+       */
+       write_mil( pMilBus, FG_RESET, FC_CNTRL_WR | dev );
    }
    if( !found )
       scuLog( LM32_LOG_INFO, "No FGs on MIL-PIGGY found.\n" );
@@ -418,14 +427,19 @@ inline void milFgPrepare( void* pScuBus,
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
       FG_ASSERT( slot > 0 );
-    #ifdef _CONFIG_IRQ_ENABLE_IN_START_FG
-      scuBusEnableSlaveInterrupt( pScuBus, slot );
-    #endif
+
      /*
       * Enable receiving of data request.
       */
-      *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) |= DREQ;
-
+     ATOMIC_SECTION()
+     {
+       #ifdef _CONFIG_IRQ_ENABLE_IN_START_FG
+        scuBusEnableSlaveInterrupt( pScuBus, slot );
+       #endif
+        *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) = DREQ;
+        *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) |= DREQ;
+     }
+   //  DEBUG_TRACE_POINT();
      /*
       * Enable sending of data request.
       */
@@ -443,7 +457,7 @@ inline void milFgPrepare( void* pScuBus,
    FG_ASSERT( isMilExtentionFg( socket ) );
 
   /*
-   * Enable data request
+   * Enable sending of data request.
    */
    write_mil( g_pScu_mil_base, 1 << 13, FC_IRQ_MSK | dev );
 
@@ -821,9 +835,7 @@ inline STATIC
 unsigned int getMilTaskNumber( const MIL_TASK_DATA_T* pMilTaskData,
                                 const unsigned int channel )
 {
-#ifndef __DOXYGEN__
    STATIC_ASSERT( (TASKMIN + ARRAY_SIZE( mg_aMilTaskData ) * ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels )) <= TASKMAX );
-#endif
 #ifdef CONFIG_TASK_RAM_TAB
    FG_ASSERT( channel < ARRAY_SIZE( mg_taskRamIdTab ));
    return mg_taskRamIdTab[channel]; // + getMilTaskId( pMilTaskData ) * ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels );
@@ -960,11 +972,11 @@ STATIC inline void pushDaqData( FG_MACRO_T fgMacro,
  * @ingroup MIL_FSM
  * @brief Helper function printing a timeout message.
  */
-STATIC void printTimeoutMessage( register MIL_TASK_DATA_T* pMilTaskData )
+STATIC void printTimeoutMessage( MIL_TASK_DATA_T* pMilTaskData )
 {
    lm32Log( LM32_LOG_ERROR, ESC_ERROR
             "ERROR: Timeout %s: state %s, taskid %d index %d" ESC_NORMAL"\n",
-            (pMilTaskData->lastMessage.slot != 0)? "dev_sio_handler" : "dev_bus_handler",
+            (milIsScuBus( pMilTaskData ))? "dev_sio_handler" : "dev_bus_handler",
             state2string( pMilTaskData->state ),
             getMilTaskId( pMilTaskData ),
             pMilTaskData->lastChannel );
@@ -990,8 +1002,7 @@ STATIC_ASSERT( MAX_FG_CHANNELS == ARRAY_SIZE( g_aFgChannels ));
  * @see milReqestStatus milGetStatus
  */
 ALWAYS_INLINE STATIC inline
-bool isNoIrqPending( register const MIL_TASK_DATA_T* pMilTaskData,
-                                                 const unsigned int channel )
+bool isNoIrqPending( const MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
    return
    (pMilTaskData->aFgChannels[channel].irqFlags & (DEV_STATE_IRQ | DEV_DRQ)) == 0;
@@ -1007,8 +1018,7 @@ bool isNoIrqPending( register const MIL_TASK_DATA_T* pMilTaskData,
  * @see milDeviceHandler
  */
 STATIC inline
-int milReqestStatus( register MIL_TASK_DATA_T* pMilTaskData,
-                     const unsigned int channel )
+int milReqestStatus( MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
    const unsigned int socket     = getSocket( channel );
@@ -1019,10 +1029,10 @@ int milReqestStatus( register MIL_TASK_DATA_T* pMilTaskData,
     * Is trades as a SIO device? 
     */
 #ifdef CONFIG_MIL_PIGGY
-   if( pMilTaskData->lastMessage.slot != 0 )
+   if( milIsScuBus( pMilTaskData ) )
    {
 #else
-      FG_ASSERT( pMilTaskData->lastMessage.slot != 0 );
+      FG_ASSERT( milIsScuBus( pMilTaskData ) );
 #endif
       if( getFgSlotNumber( socket ) != pMilTaskData->lastMessage.slot )
          return OKAY;
@@ -1052,8 +1062,7 @@ int milReqestStatus( register MIL_TASK_DATA_T* pMilTaskData,
  * @see milDeviceHandler
  */
 STATIC inline
-int milGetStatus( register MIL_TASK_DATA_T* pMilTaskData,
-                                                  const unsigned int channel )
+int milGetStatus( MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
 
@@ -1073,10 +1082,10 @@ int milGetStatus( register MIL_TASK_DATA_T* pMilTaskData,
     * Is trades as a SIO device? 
     */
 #ifdef CONFIG_MIL_PIGGY
-   if( pMilTaskData->lastMessage.slot != 0 )
+   if( milIsScuBus( pMilTaskData ) )
    {
 #else
-      FG_ASSERT( pMilTaskData->lastMessage.slot != 0 );
+      FG_ASSERT( milIsScuBus( pMilTaskData ) );
 #endif
       if( getFgSlotNumber( socket ) != pMilTaskData->lastMessage.slot )
          return OKAY;
@@ -1099,14 +1108,15 @@ int milGetStatus( register MIL_TASK_DATA_T* pMilTaskData,
  * @brief Supplies the by "devNum" and "socket" addressed MIL function
  *        generator with new polynomial data.
  */
-STATIC inline void feedMilFg( const unsigned int socket,
-                              const unsigned int devNum,
-                              const FG_CTRL_RG_T cntrl_reg,
-                              signed int* pSetvalue )
+STATIC inline
+void feedMilFg( const unsigned int channel,
+                const FG_CTRL_RG_T cntrl_reg,
+                signed int* pSetvalue )
 {
-   const unsigned int channel = cntrl_reg.bv.number;
+   FG_ASSERT( channel == cntrl_reg.bv.number );
 
-   FG_ASSERT( channel < ARRAY_SIZE( g_aFgChannels ) );
+   const unsigned int socket = getSocket( channel );
+   const unsigned int devNum = getDevice( channel );
 
    FG_PARAM_SET_T pset;
    /*
@@ -1179,20 +1189,8 @@ STATIC inline void feedMilFg( const unsigned int socket,
  * @see handleAdacFg
  */
 STATIC inline
-void handleMilFg( const unsigned int socket,
-                  const unsigned int devNum,
-                  const uint16_t irqFlags,
-                  signed int* pSetvalue )
+void handleMilFg( MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
-   FG_ASSERT( !isAddacFg( socket ) );
-
-   const FG_CTRL_RG_T ctrlReg = { .i16 = irqFlags };
-   const unsigned int channel = ctrlReg.bv.number;
-
-   //mprintf( "%02b\n", irqFlags );
-   FG_ASSERT( ctrlReg.bv.devStateIrq || ctrlReg.bv.devDrq );
-  // FG_ASSERT( ctrlReg.bv.devStateIrq == ctrlReg.bv.devDrq );
-
    if( channel >= ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) )
    {
       lm32Log( LM32_LOG_ERROR, ESC_ERROR
@@ -1200,6 +1198,11 @@ void handleMilFg( const unsigned int socket,
                __func__, channel );
       return;
    }
+
+   const FG_CTRL_RG_T ctrlReg = { .i16 = pMilTaskData->aFgChannels[channel].irqFlags };
+
+   //mprintf( "%02b\n", irqFlags );
+   FG_ASSERT( ctrlReg.bv.devStateIrq || ctrlReg.bv.devDrq );
 
    if( !ctrlReg.bv.isRunning )
    { /*
@@ -1238,7 +1241,7 @@ void handleMilFg( const unsigned int socket,
     * and fetches the C- coefficient which will used as set-data
     * of the MIL-DAQ.
     */
-   feedMilFg( socket, devNum, ctrlReg, pSetvalue );
+   feedMilFg( channel, ctrlReg, &(pMilTaskData->aFgChannels[channel].setvalue) );
 }
 
 /*! ---------------------------------------------------------------------------
@@ -1250,30 +1253,25 @@ void handleMilFg( const unsigned int socket,
  * @see milDeviceHandler
  */
 STATIC inline
-void milHandleAndWrite( register MIL_TASK_DATA_T* pMilTaskData,
-                       const unsigned int channel )
+void milHandleAndWrite( MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
-
-   const unsigned int dev = getDevice( channel );
 
    /*
     * Writes the next polynomial data set to the concerning
     * function generator.
     */
-   handleMilFg( getSocket( channel ),
-                dev,
-                pMilTaskData->aFgChannels[channel].irqFlags,
-                &(pMilTaskData->aFgChannels[channel].setvalue) );
+   handleMilFg( pMilTaskData, channel );
 
+   const unsigned int dev = getDevice( channel );
    /*
     * Clear IRQ pending and end block transfer.
     */
 #ifdef CONFIG_MIL_PIGGY
-   if( pMilTaskData->lastMessage.slot != 0 )
+   if( milIsScuBus( pMilTaskData ) )
    {
 #else
-      FG_ASSERT( pMilTaskData->lastMessage.slot != 0 );
+      FG_ASSERT( milIsScuBus( pMilTaskData ) );
 #endif
       scub_write_mil( g_pScub_base, pMilTaskData->lastMessage.slot,
                                     0,  dev | FC_IRQ_ACT_WR );
@@ -1294,17 +1292,16 @@ void milHandleAndWrite( register MIL_TASK_DATA_T* pMilTaskData,
  * @see milDeviceHandler
  */
 STATIC inline
-int milSetTask( register MIL_TASK_DATA_T* pMilTaskData,
-                const unsigned int channel )
+int milSetTask( MIL_TASK_DATA_T* pMilTaskData, const unsigned int channel )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
    const unsigned int  devAndMode = getDevice( channel ) | FC_ACT_RD;
    const unsigned char milTaskNo  = getMilTaskNumber( pMilTaskData, channel );
 #ifdef CONFIG_MIL_PIGGY
-   if( pMilTaskData->lastMessage.slot != 0 )
+   if( milIsScuBus( pMilTaskData ) )
    {
 #else
-      FG_ASSERT( pMilTaskData->lastMessage.slot != 0 );
+      FG_ASSERT( milIsScuBus( pMilTaskData ) );
 #endif
       return scub_set_task_mil( g_pScub_base, pMilTaskData->lastMessage.slot,
                                                       milTaskNo, devAndMode );
@@ -1329,16 +1326,16 @@ STATIC_ASSERT( sizeof(short) == sizeof(int16_t) );
  * @see milDeviceHandler
  */
 STATIC inline
-int milGetTask( register MIL_TASK_DATA_T* pMilTaskData,
+int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
                 const unsigned int channel, int16_t* pActAdcValue )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
    const unsigned char milTaskNo = getMilTaskNumber( pMilTaskData, channel );
 #ifdef CONFIG_MIL_PIGGY
-   if( pMilTaskData->lastMessage.slot != 0 )
+   if( milIsScuBus( pMilTaskData ) )
    {
 #else
-      FG_ASSERT( pMilTaskData->lastMessage.slot != 0 );
+      FG_ASSERT( milIsScuBus( pMilTaskData ) );
 #endif
       return scub_get_task_mil( g_pScub_base, pMilTaskData->lastMessage.slot,
                                                    milTaskNo, pActAdcValue );
@@ -1347,6 +1344,38 @@ int milGetTask( register MIL_TASK_DATA_T* pMilTaskData,
    return get_task_mil( g_pScu_mil_base, milTaskNo, pActAdcValue );
 #endif
 }
+
+#define CONFIG_DEBUG_MIL_FSM
+
+#ifdef CONFIG_DEBUG_MIL_FSM
+#warning MIL-FSM-debuging ist active!
+STATIC char* dbgMilFsm( const FG_STATE_T state )
+{
+   #define FSM_CASE_ITEM( s )  case s: return #s;
+   switch( state )
+   {
+      FSM_CASE_ITEM( ST_WAIT )
+    #ifdef CONFIG_MIL_WAIT
+      FSM_CASE_ITEM( ST_PREPARE )
+    #endif
+      FSM_CASE_ITEM( ST_FETCH_STATUS )
+      FSM_CASE_ITEM( ST_HANDLE_IRQS )
+      FSM_CASE_ITEM( ST_FETCH_DATA )
+      default: break;
+   }
+   return "unknown";
+}
+
+STATIC void dbgShowState( const FG_STATE_T state )
+{
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "FSM-state: %s" ESC_NORMAL, dbgMilFsm( state ) );
+}
+
+#define DEBUG_FSM( state ) dbgShowState( state );
+
+#else
+#define DEBUG_FSM( state )
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup MIL_FSM
@@ -1357,6 +1386,7 @@ int milGetTask( register MIL_TASK_DATA_T* pMilTaskData,
  */
 #define FSM_TRANSITION( newState, attr... ) \
 {                                           \
+   DEBUG_FSM( newState )                    \
    pMilData->state = newState;              \
    break;                                   \
 }
@@ -1371,6 +1401,7 @@ int milGetTask( register MIL_TASK_DATA_T* pMilTaskData,
  */
 #define FSM_TRANSITION_NEXT( newState, attr... ) \
 {                                                \
+   DEBUG_FSM( newState )                         \
    pMilData->state = newState;                   \
    next = true;                                  \
    break;                                        \
@@ -1565,6 +1596,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          { /*
             * if timeout reached, proceed with next task
             */
+            //DEBUG_TRACE_POINT();
             if( pMilData->timeoutCounter > TASK_TIMEOUT )
             {
                printTimeoutMessage( pMilData );
@@ -1605,8 +1637,10 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                */
                pMilData->lastChannel = channel;
                pMilData->timeoutCounter++;
+              // DEBUG_TRACE_POINT();
                FSM_TRANSITION_SELF( label='Receiving busy', color=blue );
             }
+            DEBUG_TRACE_POINT();
             FSM_TRANSITION_NEXT( ST_HANDLE_IRQS, color=green );
          } /* end case ST_FETCH_STATUS*/
 
@@ -1634,11 +1668,13 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
             }
             if( active == 0 )
             {
+              // DEBUG_TRACE_POINT();
                FSM_TRANSITION( ST_WAIT, color=blue, label='no IRQ pending' );
             }
             if( channel == 0 )
                milPrintDeviceError( OKAY, pMilData->lastMessage.slot, "No interrupt pending!" );
             //FSM_TRANSITION( ST_DATA_AQUISITION, color=green );
+          //  DEBUG_TRACE_POINT();
             FSM_TRANSITION_NEXT( ST_FETCH_DATA, color=green );
          } /* end case ST_HANDLE_IRQS */
    #if 0
@@ -1711,8 +1747,10 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                */
                pMilData->lastChannel = channel;
                pMilData->timeoutCounter++;
+               DEBUG_TRACE_POINT();
                FSM_TRANSITION_SELF( label='Receiving busy', color=blue );
             }
+            DEBUG_TRACE_POINT();
             FSM_TRANSITION( ST_WAIT, color=green );
          } /* end case ST_FETCH_DATA */
 

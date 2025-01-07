@@ -14,6 +14,7 @@ SUB_VERSION  = 6.10
 DEFINES += CONFIG_HANDLE_UNUSED_ECAS
 DEFINES += CONFIG_STOP_ON_LM32_EXCEPTION
 
+#DEFINES += CONFIG_ENABLE_DEBUG_TRACE_POINT
 
 
 #------------------------------------------------------------------------------

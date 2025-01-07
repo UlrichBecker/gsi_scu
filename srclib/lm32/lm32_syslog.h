@@ -97,5 +97,15 @@ void vLm32log( const unsigned int filter, const char* format, va_list ap );
 #ifdef __cplusplus
 }
 #endif
+
+#define __DEBUG_TRACE_POINT__ \
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "trace: %s: %d" ESC_NORMAL, __func__, __LINE__ )
+
+#ifdef CONFIG_ENABLE_DEBUG_TRACE_POINT
+   #define DEBUG_TRACE_POINT() __DEBUG_TRACE_POINT__
+#else
+   #define DEBUG_TRACE_POINT()
+#endif
+
 #endif /* ifndef _LM32_SYSLOG_H */
 /*================================== EOF ====================================*/
