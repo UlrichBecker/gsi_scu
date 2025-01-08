@@ -323,14 +323,10 @@ void fgEnableChannel( const unsigned int channel )
    }
    else
    {
-      if( milHandleClearHandlerState( g_pScub_base,
-                                      //g_pScu_mil_base,
-                                      socket ) )
+      if( milHandleClearHandlerState( socket ) )
          return;
 
-      milFgPrepare( g_pScub_base,
-                    //g_pScu_mil_base,
-                    socket, dev );
+      milFgPrepare( socket, dev );
    }
 #endif
 
@@ -349,14 +345,14 @@ void fgEnableChannel( const unsigned int channel )
       }
       else
       {
-         milFgStart( g_pScub_base,
-                    // g_pScu_mil_base,
-                     &pset,
-                     socket, dev, channel );
+         milFgStart( &pset, socket, dev, channel );
       }
    #endif /* CONFIG_MIL_FG */
    #ifdef CONFIG_USE_SENT_COUNTER
       g_aFgChannels[channel].param_sent++;
+   #endif
+   #ifdef CONFIG_USE_FG_MSI_TIMEOUT
+      wdtReset( channel );
    #endif
    } /* if( cbRead( ... ) != 0 ) */
 
@@ -400,9 +396,7 @@ void fgDisableChannel( const unsigned int channel )
    }
    else
    {
-      status = milFgDisable( g_pScub_base,
-                           //  g_pScu_mil_base,
-                             socket, dev );
+      status = milFgDisable( socket, dev );
       if( status != OKAY )
          return;
 
@@ -455,9 +449,7 @@ STATIC inline void fgDisableInterrupt( const unsigned int channel )
       return;
    }
 
-   milFgDisableIrq( g_pScub_base,
-                    //g_pScu_mil_base,
-                    socket, dev );
+   milFgDisableIrq( socket, dev );
 #endif
 }
 

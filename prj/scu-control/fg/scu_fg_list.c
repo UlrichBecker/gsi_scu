@@ -199,13 +199,13 @@ void addDiobToFgList( const void* pScuBusBase,
  * @brief Scans the whole SCU-bus for all kinds of function generators.
  */
 ONE_TIME_CALL
-void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
+void scanScuBusFgs( FG_MACRO_T* pFgList )
 {
 #ifdef CONFIG_SCU_DAQ_INTEGRATION
    resetAllActiveBySaftlib();
    scuDaqInitialize( &g_scuDaqAdmin, pFgList );
 #else
-   scanScuBusFgsDirect( (void*)scub_adr, pFgList );
+   scanScuBusFgsDirect( g_pScub_base, pFgList );
 #endif
 #if defined( CONFIG_MIL_FG ) || defined( CONFIG_NON_DAQ_FG_SUPPORT )
  #ifdef CONFIG_SCU_DAQ_INTEGRATION
@@ -218,10 +218,10 @@ void scanScuBusFgs( uint16_t* scub_adr, FG_MACRO_T* pFgList )
    }
  #endif
  #ifdef CONFIG_NON_DAQ_FG_SUPPORT
-   scanScuBusFgsWithoutDaq( scub_adr, pFgList );
+   scanScuBusFgsWithoutDaq( g_pScub_base, pFgList );
  #endif
  #ifdef CONFIG_MIL_FG
-   scanScuBusFgsViaMil( scub_adr, pFgList );
+   scanScuBusFgsViaMil( pFgList );
  #endif
 #endif
 }
@@ -240,9 +240,9 @@ void fgListResetAllFoundFg( void )
 void fgListFindAll( FG_MACRO_T* pFgList, uint64_t* pExtId )
 {
    fgListReset( pFgList );
-   scanScuBusFgs( g_pScub_base, pFgList );
+   scanScuBusFgs( pFgList );
 #if defined( CONFIG_MIL_FG ) && defined( CONFIG_MIL_PIGGY )
-   scanExtMilFgs( g_pScu_mil_base, pFgList, pExtId );
+   scanExtMilFgs( pFgList, pExtId );
 #endif
   // fgListResetAllFoundFg();
 }

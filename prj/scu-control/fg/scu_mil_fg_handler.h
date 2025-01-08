@@ -19,6 +19,7 @@
 #endif
 
 //#define CONFIG_MIL_WAIT
+//#define CONFIG_ST_DATA_AQUISITION
 
 #ifdef __cplusplus
 extern "C" {
@@ -147,11 +148,13 @@ typedef enum
 {
    FSM_DECLARE_STATE( ST_WAIT,            label='Wait for message', color=blue ),
 #ifdef CONFIG_MIL_WAIT
-   FSM_DECLARE_STATE( ST_PREPARE,         label='Request MIL-IRQ-flags\nclear old IRQ-flags', color=cyan ),
+   FSM_DECLARE_STATE( ST_PREPARE,         label='Wait for IRQ-flags', color=cyan ),
 #endif
    FSM_DECLARE_STATE( ST_FETCH_STATUS,    label='Read MIL-IRQ-flags', color=green ),
    FSM_DECLARE_STATE( ST_HANDLE_IRQS,     label='Send data to\nfunction generator\nif IRQ-flag set', color=red ),
-  // FSM_DECLARE_STATE( ST_DATA_AQUISITION, label='Request MIL-DAQ data\nif IRQ-flag set', color=cyan ),
+#ifdef CONFIG_ST_DATA_AQUISITION
+   FSM_DECLARE_STATE( ST_DATA_AQUISITION, label='Request MIL-DAQ data\nif IRQ-flag set', color=cyan ),
+#endif
    FSM_DECLARE_STATE( ST_FETCH_DATA,      label='Read MIL-DAQ data\nif IRQ-flag set',color=green )
 } FG_STATE_T;
 
@@ -282,16 +285,17 @@ bool milIsScuBus( MIL_TASK_DATA_T* pMilTaskData )
 /*! ---------------------------------------------------------------------------
  * @brief Scanns the SCU- bus for SIO-slaves with commected MIL- function
  *        generators, and put all found FGs in the function- generator list. 
- * @param pScuBus Baseaddress of SCU- bus.
  * @param pFgList Pointer to function generator list.
  */
-void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList );
+void scanScuBusFgsViaMil( FG_MACRO_T* pFgList );
 
+#ifdef CONFIG_MIL_PIGGY
 /*! ---------------------------------------------------------------------------
  * @brief Scans the MIL extension (MIL-PIGGY) for function generators 
  *        and put all found FGs in the function- generator list. 
  */
-void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId );
+void scanExtMilFgs( FG_MACRO_T* pFgList, uint64_t* pExtId );
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of all found MIL- function generators after
@@ -303,14 +307,11 @@ unsigned int milGetNumberOfFg( void );
  * @brief Helper function of fgEnableChannel handles the handler state
  *        of MIL devices.
  * @see fgEnableChannel
- * @param pScuBus Base address of SCU-bus.
- * @param pMilBus Base address of MIL-bus.
  * @param socket Socket number containing location information and FG-typ
  * @retval true leave the function fgEnableChannel
  * @retval false continue the function fgEnableChannel
  */
-bool milHandleClearHandlerState( const void* pScuBus, //const void* pMilBus,
-                                 const unsigned int socket );
+bool milHandleClearHandlerState( const unsigned int socket );
 
 /*! ---------------------------------------------------------------------------
  * @brief Prepares the selected MIL- function generator.
@@ -319,31 +320,22 @@ bool milHandleClearHandlerState( const void* pScuBus, //const void* pMilBus,
  * 2) Starts both belonging DAQ channels for feedback set- and actual- values. \n
  * 3) Sets the digital to analog converter in the function generator mode. \n
  *
- * @param pScuBus Base address of SCU-bus.
- * @param pMilBus Base address of MIL-bus.
  * @param socket Socket number containing location information and FG-typ
  * @param dev Device number of the concerning FG-device
  * @retval OKAY Action was successful
  */
-void milFgPrepare( void* pScuBus,
-                   //void* pMilBus,
-                   const unsigned int socket,
-                   const unsigned int dev );
+void milFgPrepare( const unsigned int socket, const unsigned int dev );
 
 /*! ---------------------------------------------------------------------------
  * @brief Loads the selected ADDAC/ACU-function generator with the first
  *        polynomial data set and enable it.
- * @param pScuBus Base address of SCU-bus.
- * @param pMilBus Base address of MIL-bus.
  * @param pPset Pointer to the polynomial data set.
  * @param socket Socket number containing location and device type
  * @param dev Device number
  * @param channel Channel number of the concerned function generator.
  * @retval OKAY Action was successful.
  */
-void milFgStart( void* pScuBus,
-                 //void* pMilBus,
-                 const FG_PARAM_SET_T* pPset,
+void milFgStart( const FG_PARAM_SET_T* pPset,
                  const unsigned int socket,
                  const unsigned int dev,
                  const unsigned int channel );
@@ -351,22 +343,14 @@ void milFgStart( void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @ingroup INTERRUPT
  * @brief Disables the interrupts of a specific MIL- function generator.
- * @param pScuBus Base address of SCU-bus.
- * @param pMilBus Base address of MIL-bus.
  * @param socket Socket number containing location and device type
  * @param dev Device number
  */
-void milFgDisableIrq( void* pScuBus,
-                      //void* pMilBus,
-                      const unsigned int socket,
-                      const unsigned int dev );
+void milFgDisableIrq( const unsigned int socket, const unsigned int dev );
 
 /*! ---------------------------------------------------------------------------
  */
-int milFgDisable( void* pScuBus,
-                 // void* pMilBus,
-                  unsigned int socket,
-                  unsigned int dev );
+int milFgDisable( unsigned int socket, unsigned int dev );
 
 
 #if defined( CONFIG_READ_MIL_TIME_GAP ) && !defined(__DOCFSM__)

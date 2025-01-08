@@ -76,7 +76,7 @@ int status_mil(volatile unsigned int *base, unsigned short *status);
  * @brief Writes a data-block of 16-bit words to the MIL device via SCU bus.
  * @see MIL_BLOCK_SIZE
  */
-int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr);
+int write_mil_blk(volatile unsigned int *base, uint16_t* data, short fc_ifc_addr);
 
 int set_task_mil( void* pBase, const unsigned int task, const unsigned int fc_ifc_addr );
 int get_task_mil( void *pBase, const unsigned int task, int16_t* pData);

@@ -136,7 +136,7 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-int write_mil_blk(volatile unsigned int *base, short *data, short fc_ifc_addr)
+int write_mil_blk(volatile unsigned int *base, uint16_t* data, short fc_ifc_addr)
 {
    milAtomicEnter();
    base[MIL_SIO3_TX_DATA] = data[0];

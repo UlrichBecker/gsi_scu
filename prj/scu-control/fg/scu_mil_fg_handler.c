@@ -181,13 +181,13 @@ STATIC_ASSERT( IFK_MAX_ADR < 0xFF );
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
+void scanScuBusFgsViaMil( FG_MACRO_T* pFgList )
 {
    scuLog( LM32_LOG_INFO, "Scanning for MIL-devices via SIO...\n" );
 
    const SCUBUS_SLAVE_FLAGS_T slotFlags =
-               scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO2 )
-             | scuBusFindSpecificSlaves( pScuBus, SYS_CSCO, GRP_SIO3 );
+               scuBusFindSpecificSlaves( g_pScub_base, SYS_CSCO, GRP_SIO2 )
+             | scuBusFindSpecificSlaves( g_pScub_base, SYS_CSCO, GRP_SIO3 );
 
    /*
     * No SOI-slaves found on SCU-bus?
@@ -205,7 +205,7 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
    SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags )
    {
    #ifndef _CONFIG_IRQ_ENABLE_IN_START_FG
-      scuBusEnableSlaveInterrupt( pScuBus, slot );
+      scuBusEnableSlaveInterrupt( g_pScub_base, slot );
    #endif
 
       /*
@@ -216,7 +216,7 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
       /*
        * Resetting all task-slots of this SCU-bus slave.
        */
-      scub_reset_mil( pScuBus, slot );
+      scub_reset_mil( g_pScub_base, slot );
 
    #ifdef CONFIG_TASK_RAM_TAB
       unsigned int taskId = TASK_RAM_FG_OFFSET + TASKMIN;
@@ -225,17 +225,17 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
       {
          uint16_t ifa_id, ifa_vers, fg_vers;
 
-         if( scub_read_mil( pScuBus, slot, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
+         if( scub_read_mil( g_pScub_base, slot, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
             continue;
          if( ifa_id != IFA_ID_VAL )
             continue;
 
-         if( scub_read_mil( pScuBus, slot, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
+         if( scub_read_mil( g_pScub_base, slot, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
             continue;
          if( ifa_vers < IFA_MIN_VERSION )
             continue;
 
-         if( scub_read_mil( pScuBus, slot, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
+         if( scub_read_mil( g_pScub_base, slot, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
             continue;
          if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
             continue;
@@ -256,8 +256,8 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
          /*
           * Reset SIO-MIL FG
           */
-         scub_write_mil( pScuBus, slot, FG_RESET, FC_CNTRL_WR | dev );
-         scub_write_mil(pScuBus, slot, 0x100, (0x12 << 8) | dev); // clear PUR
+         scub_write_mil( g_pScub_base, slot, FG_RESET, FC_CNTRL_WR | dev );
+         scub_write_mil( g_pScub_base, slot, 0x100, (0x12 << 8) | dev); // clear PUR
       }
    } /* SCU_BUS_FOR_EACH_SLAVE( slot, slotFlags ) */
    if( !found )
@@ -268,7 +268,7 @@ void scanScuBusFgsViaMil( void* pScuBus, FG_MACRO_T* pFgList )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
+void scanExtMilFgs( FG_MACRO_T* pFgList, uint64_t* pExtId )
 {
    scuLog( LM32_LOG_INFO, "Scanning for MIL-devices via PIGGY...\n" );
   /*
@@ -277,7 +277,7 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
    * + mil extension is recognized by a valid 1wire id
    * + mil extension has a 1wire temp sensor with family if 0x42
    */
-   if( !(((int)pMilBus != ERROR_NOT_FOUND) && (((int)*pExtId & 0xff) == 0x42)) )
+   if( !(((int)g_pScu_mil_base != ERROR_NOT_FOUND) && (((int)*pExtId & 0xff) == 0x42)) )
    {
       scuLog( LM32_LOG_INFO, "No MIL-PIGGY-WB-device found.\n" );
       return;
@@ -286,7 +286,7 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
    /*
     * reset all task-slots by reading value back
     */
-   reset_mil( pMilBus );
+   reset_mil( g_pScu_mil_base );
 #ifdef CONFIG_TASK_RAM_TAB
    unsigned int taskId = TASK_RAM_FG_OFFSET + TASKMIN;
 #endif
@@ -297,17 +297,17 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
    for( uint32_t dev = 0; dev < IFK_MAX_ADR; dev++ )
    {
       uint16_t ifa_id, ifa_vers, fg_vers;
-      if( read_mil( pMilBus, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
+      if( read_mil( g_pScu_mil_base, &ifa_id, IFA_ID << 8 | dev ) != OKAY )
          continue;
       if( ifa_id != IFA_ID_VAL )
          continue;
 
-      if( read_mil( pMilBus, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
+      if( read_mil( g_pScu_mil_base, &ifa_vers, IFA_VERS << 8 | dev ) != OKAY )
          continue;
       if( ifa_vers < IFA_MIN_VERSION )
          continue;
 
-      if( read_mil( pMilBus, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
+      if( read_mil( g_pScu_mil_base, &fg_vers, 0xA6 << 8 | dev ) != OKAY )
          continue;
       if( (fg_vers < FG_MIN_VERSION) || (fg_vers > 0x00FF) )
          continue;
@@ -327,7 +327,7 @@ void scanExtMilFgs( void* pMilBus, FG_MACRO_T* pFgList, uint64_t* pExtId )
       /*
        * Reset MIL-PIGGY FG
        */
-       write_mil( pMilBus, FG_RESET, FC_CNTRL_WR | dev );
+       write_mil( g_pScu_mil_base, FG_RESET, FC_CNTRL_WR | dev );
    }
    if( !found )
       scuLog( LM32_LOG_INFO, "No FGs on MIL-PIGGY found.\n" );
@@ -355,9 +355,7 @@ STATIC inline void setMilFgRegs( FG_MIL_REGISTER_T* pFgRegs,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline bool milHandleClearHandlerState( const void* pScuBus,
-                                       // const void* pMilBus,
-                                        const unsigned int socket )
+inline bool milHandleClearHandlerState( const unsigned int socket )
 {
    uint16_t dreq_status = 0;
    SCUBUS_SLAVE_FLAGS_T slaveFlags = 0;
@@ -373,7 +371,7 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
    {
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
-      scub_status_mil( pScuBus, slot, &dreq_status );
+      scub_status_mil( g_pScub_base, slot, &dreq_status );
       slaveFlags = scuBusGetSlaveFlag( slot );
 #ifdef CONFIG_MIL_PIGGY
    }
@@ -412,10 +410,8 @@ inline bool milHandleClearHandlerState( const void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgPrepare( void* pScuBus,
-                         // void* pMilBus,
-                          const unsigned int socket,
-                          const unsigned int dev )
+inline
+void milFgPrepare( const unsigned int socket, const unsigned int dev )
 {
    FG_ASSERT( !isAddacFg( socket ) );
 
@@ -434,21 +430,21 @@ inline void milFgPrepare( void* pScuBus,
      ATOMIC_SECTION()
      {
        #ifdef _CONFIG_IRQ_ENABLE_IN_START_FG
-        scuBusEnableSlaveInterrupt( pScuBus, slot );
+        scuBusEnableSlaveInterrupt( g_pScub_base, slot );
        #endif
-        *scuBusGetInterruptActiveFlagRegPtr( pScuBus, slot ) = DREQ;
-        *scuBusGetInterruptEnableFlagRegPtr( pScuBus, slot ) |= DREQ;
+        *scuBusGetInterruptActiveFlagRegPtr( g_pScub_base, slot ) = DREQ;
+        *scuBusGetInterruptEnableFlagRegPtr( g_pScub_base, slot ) |= DREQ;
      }
    //  DEBUG_TRACE_POINT();
      /*
       * Enable sending of data request.
       */
-      scub_write_mil( pScuBus, slot, 1 << 13, FC_IRQ_MSK | dev );
+      scub_write_mil( g_pScub_base, slot, 1 << 13, FC_IRQ_MSK | dev );
 
      /*
       * Set MIL-DAC in FG mode
       */
-      scub_write_mil( pScuBus, slot, 0x1, FC_IFAMODE_WR | dev );
+      scub_write_mil( g_pScub_base, slot, 0x1, FC_IFAMODE_WR | dev );
 
       return;
 #ifdef CONFIG_MIL_PIGGY
@@ -471,9 +467,7 @@ inline void milFgPrepare( void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgStart( void* pScuBus,
-                        //void* pMilBus,
-                        const FG_PARAM_SET_T* pPset,
+inline void milFgStart( const FG_PARAM_SET_T* pPset,
                         const unsigned int socket,
                         const unsigned int dev,
                         const unsigned int channel )
@@ -501,7 +495,7 @@ inline void milFgStart( void* pScuBus,
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
 
-      scub_write_mil_blk( pScuBus,
+      scub_write_mil_blk( g_pScub_base,
                           slot,
                           (uint16_t*)&milFgRegs,
                           FC_BLK_WR | dev );
@@ -509,11 +503,11 @@ inline void milFgStart( void* pScuBus,
      /*
       * Still in block mode !
       */
-      scub_write_mil( pScuBus,
+      scub_write_mil( g_pScub_base,
                       slot,
                       cntrl_reg_wr, FC_CNTRL_WR | dev);
 
-      scub_write_mil( pScuBus,
+      scub_write_mil( g_pScub_base,
                       slot,
                       cntrl_reg_wr | FG_ENABLED, FC_CNTRL_WR | dev );
 
@@ -524,7 +518,7 @@ inline void milFgStart( void* pScuBus,
    FG_ASSERT( isMilExtentionFg( socket ) );
 
    write_mil_blk( g_pScu_mil_base,
-                  (short*)&milFgRegs,
+                  (uint16_t*)&milFgRegs,
                   FC_BLK_WR | dev );
 
    /*
@@ -542,10 +536,7 @@ inline void milFgStart( void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * @see scu_fg_macros.h
  */
-inline void milFgDisableIrq( void* pScuBus,
-                            // void* pMilBus,
-                             const unsigned int socket,
-                             const unsigned int dev )
+inline void milFgDisableIrq( const unsigned int socket, const unsigned int dev )
 {
    FG_ASSERT( !isAddacFg( socket ) );
 
@@ -555,9 +546,18 @@ inline void milFgDisableIrq( void* pScuBus,
 #else
       FG_ASSERT( isMilScuBusFg( socket ) );
 #endif
-      scub_write_mil( pScuBus,
-                      getFgSlotNumber( socket ),
+
+      const unsigned int slot = getFgSlotNumber( socket );
+      scub_write_mil( g_pScub_base,
+                      slot,
                       0x0, FC_IRQ_MSK | dev);
+   #if 0
+      ATOMIC_SECTION()
+      {
+         *scuBusGetInterruptEnableFlagRegPtr( g_pScub_base, slot ) &= ~DREQ;
+         *scuBusGetInterruptActiveFlagRegPtr( g_pScub_base, slot ) = DREQ;
+      }
+   #endif
 #ifdef CONFIG_MIL_PIGGY
    }
    else
@@ -571,10 +571,7 @@ inline void milFgDisableIrq( void* pScuBus,
 /*! ---------------------------------------------------------------------------
  * scu_fg_macros.h
  */
-inline int milFgDisable( void* pScuBus,
-                       //  void* pMilBus,
-                         unsigned int socket,
-                         unsigned int dev )
+inline int milFgDisable( unsigned int socket, unsigned int dev )
 {
    FG_ASSERT( !isAddacFg( socket ) );
 
@@ -589,14 +586,14 @@ inline int milFgDisable( void* pScuBus,
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
 
-      if( (status = scub_read_mil( pScuBus, slot,
+      if( (status = scub_read_mil( g_pScub_base, slot,
            &data, FC_CNTRL_RD | dev)) != OKAY )
       {
          milPrintDeviceError( status, slot, __func__ );
          return status;
       }
 
-      scub_write_mil(  pScuBus, slot,
+      scub_write_mil(  g_pScub_base, slot,
                        data & ~(0x2), FC_CNTRL_WR | dev);
       return status;
 #ifdef CONFIG_MIL_PIGGY
@@ -670,7 +667,9 @@ STATIC const char* state2string( const FG_STATE_T state )
    #endif
       __CASE_RETURN( ST_FETCH_STATUS );
       __CASE_RETURN( ST_HANDLE_IRQS );
-      //__CASE_RETURN( ST_DATA_AQUISITION );
+   #ifdef CONFIG_ST_DATA_AQUISITION
+      __CASE_RETURN( ST_DATA_AQUISITION );
+   #endif
       __CASE_RETURN( ST_FETCH_DATA );
    }
    return "unknown";
@@ -715,64 +714,18 @@ void dbgPrintMilTaskData( void )
 void fgMilClearHandlerState( const unsigned int socket )
 {
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "%s( %u )\n" ESC_NORMAL, __func__, socket );
-#if 0
-#ifdef CONFIG_MIL_PIGGY
-   if( isMilScuBusFg( socket ) )
-   {
-#else
-      FG_ASSERT( isMilScuBusFg( socket ) );
-#endif
-      FG_ASSERT( getFgSlotNumber( socket ) > 0 );
-      const MIL_QEUE_T milMsg = 
-      {
-         .slot = getFgSlotNumber( socket ),
-         .time = getWrSysTimeSafe()
-      };
-     /*
-      * Triggering of a software pseudo interrupt.
-      */
-      ATOMIC_SECTION()
-      {
-         queuePushWatched( &g_queueMilFg, &milMsg );
-      #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
-         taskWakeupMil();
-      #endif
-      }
-      return;
-#ifdef CONFIG_MIL_PIGGY
-   }
 
-   if( isMilExtentionFg( socket ) )
-   {
-      const MIL_QEUE_T milMsg =
-      {
-         .slot = 0,
-         .time = getWrSysTimeSafe()
-      };
-     /*
-      * Triggering of a software pseudo interrupt.
-      */
-      ATOMIC_SECTION()
-      {
-         queuePushWatched( &g_queueMilFg, &milMsg );
-      #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
-         taskWakeupMil();
-      #endif
-      }
-   }
-#endif /* CONFIG_MIL_PIGGY */
-#else
    const MIL_QEUE_T milMsg =
    {
-   #ifdef CONFIG_MIL_PIGGY
+    #ifdef CONFIG_MIL_PIGGY
       /*
        * In the case of MIL-piggy the slot number is per convention always zero.
        * In this way the MIL handler function becomes to know that.
        */
       .slot = isMilExtentionFg( socket )? 0 : getFgSlotNumber( socket ),
-   #else
+    #else
       .slot = getFgSlotNumber( socket ),
-   #endif
+    #endif
       .time = getWrSysTimeSafe()
    };
    /*
@@ -781,11 +734,10 @@ void fgMilClearHandlerState( const unsigned int socket )
    ATOMIC_SECTION()
    {
       queuePushWatched( &g_queueMilFg, &milMsg );
-   #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
+    #if defined( CONFIG_RTOS ) && (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
       taskWakeupMil();
-   #endif
+    #endif
    }
-#endif
 }
 
 #if defined( CONFIG_READ_MIL_TIME_GAP ) && !defined(__DOCFSM__)
@@ -1143,10 +1095,10 @@ void feedMilFg( const unsigned int channel,
    /*
     * clear freq, step select, fg_running and fg_enabled
     */
-  // setMilFgRegs( &milFgRegs, &pset, (cntrl_reg.i16 & ~(0xfc07)) |
-  //                                  (pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) ;
-   setMilFgRegs( &milFgRegs, &pset, (cntrl_reg.i16 & FG_NUMBER) |
-                                    ((pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) );
+   setMilFgRegs( &milFgRegs, &pset, (cntrl_reg.i16 & ~(0xfc07)) |
+                                    (pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) ;
+  // setMilFgRegs( &milFgRegs, &pset, (cntrl_reg.i16 & FG_NUMBER) |
+  //                                  ((pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) );
  #if __GNUC__ >= 9
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
@@ -1157,7 +1109,7 @@ void feedMilFg( const unsigned int channel,
      /*
       * Send FG-data via MIL-extention adapter.
       */
-       write_mil_blk( g_pScu_mil_base, (short*)&milFgRegs,
+      write_mil_blk( g_pScu_mil_base, (uint16_t*)&milFgRegs,
                               FC_BLK_WR | devNum );
    }
    else
@@ -1345,38 +1297,27 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 #endif
 }
 
-#define CONFIG_DEBUG_MIL_FSM
+/*---------------------- Debug FSM ------------------------------------------*/
+//#define CONFIG_DEBUG_MIL_FSM
 
 #if defined( CONFIG_DEBUG_MIL_FSM ) && !defined(__DOCFSM__)
    #warning MIL-FSM-debuging ist active! Use this only for debug purposes!
-   STATIC char* dbgMilFsm( const FG_STATE_T state )
+
+   STATIC void dbgLogFsmTransition( const MIL_TASK_DATA_T* pMilData,
+                                    const FG_STATE_T newState )
    {
-      #define FSM_CASE_ITEM( s )  case s: return #s;
-      switch( state )
-      {
-         FSM_CASE_ITEM( ST_WAIT )
-       #ifdef CONFIG_MIL_WAIT
-         FSM_CASE_ITEM( ST_PREPARE )
-       #endif
-         FSM_CASE_ITEM( ST_FETCH_STATUS )
-         FSM_CASE_ITEM( ST_HANDLE_IRQS )
-         FSM_CASE_ITEM( ST_FETCH_DATA )
-         default: break;
-      }
-      #undef FSM_CASE_ITEM
-      return "unknown";
+      lm32Log( LM32_LOG_DEBUG,
+               ESC_DEBUG "TID: %u, FSM-state: %s->%s" ESC_NORMAL,
+               getMilTaskId( pMilData ),
+               state2string( pMilData->state ),
+               state2string( newState ));
    }
 
-   STATIC void dbgShowState( const FG_STATE_T oldState, const FG_STATE_T newState )
-   {
-      lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "FSM-state: %s->%s" ESC_NORMAL,
-               dbgMilFsm( oldState ), dbgMilFsm( newState ));
-   }
-
-   #define DEBUG_FSM( oldState, newState ) dbgShowState( oldState, newState );
+   #define DEBUG_FSM( pMilData, newState ) dbgLogFsmTransition( pMilData, newState );
 #else
-   #define DEBUG_FSM( oldState, newState )
+   #define DEBUG_FSM( pMilData, newState )
 #endif
+/*---------------------- End debug FSM --------------------------------------*/
 
 /*! ---------------------------------------------------------------------------
  * @ingroup MIL_FSM
@@ -1387,7 +1328,7 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
  */
 #define FSM_TRANSITION( newState, attr... ) \
 {                                           \
-   DEBUG_FSM( pMilData->state, newState )   \
+   DEBUG_FSM( pMilData, newState )          \
    pMilData->state = newState;              \
    break;                                   \
 }
@@ -1402,7 +1343,7 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
  */
 #define FSM_TRANSITION_NEXT( newState, attr... ) \
 {                                                \
-   DEBUG_FSM( pMilData->state, newState )                         \
+   DEBUG_FSM( pMilData, newState )               \
    pMilData->state = newState;                   \
    next = true;                                  \
    break;                                        \
@@ -1461,8 +1402,8 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 #define FOR_EACH_FG( channel ) FOR_EACH_FG_CONTINUING( channel, 0 )
 
 
-//#define IRQ_WAITING_TIME INTERVAL_100US
-#define IRQ_WAITING_TIME 200000ULL
+#define IRQ_WAITING_TIME INTERVAL_100US
+//#define IRQ_WAITING_TIME 200000ULL
 
 /*! ---------------------------------------------------------------------------
  * @ingroup TASK
@@ -1674,16 +1615,20 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
             }
             if( channel == 0 )
                milPrintDeviceError( OKAY, pMilData->lastMessage.slot, "No interrupt pending!" );
-            //FSM_TRANSITION( ST_DATA_AQUISITION, color=green );
-          //  DEBUG_TRACE_POINT();
+       #ifdef CONFIG_ST_DATA_AQUISITION
+            FSM_TRANSITION( ST_DATA_AQUISITION, color=green );
+       #else
             FSM_TRANSITION_NEXT( ST_FETCH_DATA, color=green );
+       #endif
          } /* end case ST_HANDLE_IRQS */
-   #if 0
+
+       #ifdef CONFIG_ST_DATA_AQUISITION
          case ST_DATA_AQUISITION:
          {
             FSM_TRANSITION( ST_FETCH_DATA, color=green );
          } /* end case ST_DATA_AQUISITION */
-   #endif
+       #endif
+
          case ST_FETCH_DATA:
          { /*
             * if timeout reached, proceed with next task
