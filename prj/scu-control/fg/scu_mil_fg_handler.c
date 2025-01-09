@@ -1279,7 +1279,8 @@ STATIC_ASSERT( sizeof(short) == sizeof(int16_t) );
  */
 STATIC inline
 int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
-                const unsigned int channel, int16_t* pActAdcValue )
+                const unsigned int channel,
+                int16_t* pActAdcValue )
 {
    FG_ASSERT( pMilTaskData->lastMessage.slot != INVALID_SLAVE_NR );
    const unsigned char milTaskNo = getMilTaskNumber( pMilTaskData, channel );
@@ -1297,10 +1298,10 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 #endif
 }
 
-/*---------------------- Debug FSM ------------------------------------------*/
+/******************************** Debug FSM **********************************/
 //#define CONFIG_DEBUG_MIL_FSM
 
-#if defined( CONFIG_DEBUG_MIL_FSM ) && !defined(__DOCFSM__)
+#ifdef CONFIG_DEBUG_MIL_FSM
    #warning MIL-FSM-debuging ist active! Use this only for debug purposes!
 
    STATIC void dbgLogFsmTransition( const MIL_TASK_DATA_T* pMilData,
@@ -1317,7 +1318,7 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 #else
    #define DEBUG_FSM( pMilData, newState )
 #endif
-/*---------------------- End debug FSM --------------------------------------*/
+/******************************* End debug FSM *******************************/
 
 /*! ---------------------------------------------------------------------------
  * @ingroup MIL_FSM
@@ -1423,6 +1424,8 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
    return queuePopSave( &g_queueMilFg, &pMilData->lastMessage );
 #endif
 }
+
+#define MIL_FSM_TIMEOUT 1000
 
 /*! ---------------------------------------------------------------------------
  * @ingroup TASK
@@ -1539,7 +1542,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
             * if timeout reached, proceed with next task
             */
             //DEBUG_TRACE_POINT();
-            if( pMilData->timeoutCounter > TASK_TIMEOUT )
+            if( pMilData->timeoutCounter > MIL_FSM_TIMEOUT )
             {
                printTimeoutMessage( pMilData );
             #ifdef CONFIG_GOTO_STWAIT_WHEN_TIMEOUT
@@ -1633,7 +1636,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          { /*
             * if timeout reached, proceed with next task
             */
-            if( pMilData->timeoutCounter > TASK_TIMEOUT )
+            if( pMilData->timeoutCounter > MIL_FSM_TIMEOUT )
             {
                printTimeoutMessage( pMilData );
             #ifdef CONFIG_GOTO_STWAIT_WHEN_TIMEOUT

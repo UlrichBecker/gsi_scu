@@ -101,7 +101,6 @@ STATIC inline void* scuBusGetBroadcastAddr( const void* pScuBusBase )
    return &(((uint8_t*)pScuBusBase)[SCUBUS_SLAVE_ADDR_SPACE * (MAX_SCU_SLAVES + 1)]);
 }
 
-
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS
  * @brief Returns a pointer of a 16 bit slave device register by index.
@@ -210,9 +209,7 @@ uint16_t* volatile scuBusGetMasterInterruptEnableRegPtr( const void* pScuBusBase
 STATIC inline void scuBusEnableSlaveInterrupt( const void* pScuBusBase,
                                                const unsigned int slot )
 {
-   SCUBUS_ASSERT( slot > 0 );
-   SCUBUS_ASSERT( slot <= MAX_SCU_SLAVES );
-   *scuBusGetMasterInterruptEnableRegPtr( pScuBusBase ) |= (1 << (slot-1));
+   *scuBusGetMasterInterruptEnableRegPtr( pScuBusBase ) |= scuBusGetSlaveFlag(slot);
 }
 
 /*! ---------------------------------------------------------------------------
@@ -224,11 +221,8 @@ STATIC inline void scuBusEnableSlaveInterrupt( const void* pScuBusBase,
 STATIC inline void scuBusDisableSlaveInterrupt( const void* pScuBusBase,
                                                const unsigned int slot )
 {
-   SCUBUS_ASSERT( slot > 0 );
-   SCUBUS_ASSERT( slot <= MAX_SCU_SLAVES );
-   *scuBusGetMasterInterruptEnableRegPtr( pScuBusBase ) &= ~(1 << (slot-1));
+   *scuBusGetMasterInterruptEnableRegPtr( pScuBusBase ) &= ~scuBusGetSlaveFlag(slot);
 }
-
 
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS INTERRUPT

@@ -54,12 +54,20 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
 #endif
 }
 
-#if 0
-  #define milAtomicEnter() criticalSectionEnter()
-  #define milAtomicExit()  criticalSectionExit()
+#if 1
+  #define milScuBusAtomicEnter() criticalSectionEnter()
+  #define milScuBusAtomicExit()  criticalSectionExit()
 #else
-  #define milAtomicEnter() wbZycleEnter()
-  #define milAtomicExit()  wbZycleExit()
+  #define milScuBusAtomicEnter() wbZycleEnter()
+  #define milScuBusAtomicExit()  wbZycleExit()
+#endif
+
+#if 0
+  #define milPiggyAtomicEnter() criticalSectionEnter()
+  #define milPiggyAtomicExit()  criticalSectionExit()
+#else
+  #define milPiggyAtomicEnter() wbZycleEnter()
+  #define milPiggyAtomicExit()  wbZycleExit()
 #endif
 
 /*!
@@ -75,7 +83,7 @@ STATIC inline ALWAYS_INLINE void milWait( const unsigned int delay )
 /*! ---------------------------------------------------------------------------
  * @see scu_mil.h
  */
-//OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated I don't know why yet!
+//OPTIMIZE( "-O1"  ) //TODO Necessary if LTO activated. I don't know why yet!
 int scub_write_mil_blk( void* pBase,
                         const unsigned int slot,
                         const uint16_t* pData,
@@ -83,17 +91,18 @@ int scub_write_mil_blk( void* pBase,
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   criticalSectionEnter();
-   //milAtomicEnter();
+   milScuBusAtomicEnter();
+
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[0] );
+   BARRIER(); /* CAUTION: Don't remove this macro it's really necessary! */
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
+
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, pData[i] );
    }
-   //milAtomicExit();
-   criticalSectionExit();
 
+   milScuBusAtomicExit();
    return OKAY;
 }
 
@@ -105,12 +114,11 @@ int scub_write_mil( void* pBase, const unsigned int slot,
 {
    void* pSlave = scuBusGetAbsSlaveAddr( pBase, slot );
 
-   criticalSectionEnter();
-   //milAtomicEnter();
+   milScuBusAtomicEnter();
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_DATA, data );
+   BARRIER(); /* CAUTION: Don't remove this macro it's really necessary! */
    scuBusSetSlaveValue16( pSlave, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   //milAtomicExit();
-   criticalSectionExit();
+   milScuBusAtomicExit();
 
    return OKAY;
 }
@@ -138,14 +146,15 @@ int scub_status_mil( const void* pBase, const unsigned int slot, uint16_t* pStat
  */
 int write_mil_blk(volatile unsigned int *base, uint16_t* data, short fc_ifc_addr)
 {
-   milAtomicEnter();
+   milPiggyAtomicEnter();
    base[MIL_SIO3_TX_DATA] = data[0];
+   BARRIER();
    base[MIL_SIO3_TX_CMD]  = fc_ifc_addr;
    for( unsigned int i = 1; i < MIL_BLOCK_SIZE; i++ )
    {
       base[MIL_SIO3_TX_DATA] = data[i];
    }
-   milAtomicExit();
+   milPiggyAtomicExit();
    return OKAY;
 }
 
@@ -155,10 +164,11 @@ int write_mil_blk(volatile unsigned int *base, uint16_t* data, short fc_ifc_addr
  */
 int write_mil( void* base, const unsigned int data, const unsigned int fc_ifc_addr)
 {
-   milAtomicEnter();
+   milPiggyAtomicEnter();
    milPiggySet( base, MIL_SIO3_TX_DATA, data );
+   BARRIER();
    milPiggySet( base, MIL_SIO3_TX_CMD, fc_ifc_addr );
-   milAtomicExit();
+   milPiggyAtomicExit();
    return OKAY;
 }
 
