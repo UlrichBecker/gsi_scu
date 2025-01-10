@@ -1425,7 +1425,7 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
 #endif
 }
 
-#define MIL_FSM_TIMEOUT 1000
+#define MIL_FSM_TIMEOUT 10000
 
 /*! ---------------------------------------------------------------------------
  * @ingroup TASK
