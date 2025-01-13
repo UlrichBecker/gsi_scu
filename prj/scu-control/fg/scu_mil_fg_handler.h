@@ -18,7 +18,7 @@
   #include <scu_fg_macros.h>
 #endif
 
-//#define CONFIG_MIL_WAIT
+#define CONFIG_MIL_WAIT
 //#define CONFIG_ST_DATA_AQUISITION
 
 #ifdef __cplusplus

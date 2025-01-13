@@ -1402,9 +1402,14 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
  */
 #define FOR_EACH_FG( channel ) FOR_EACH_FG_CONTINUING( channel, 0 )
 
-
-#define IRQ_WAITING_TIME INTERVAL_100US
-//#define IRQ_WAITING_TIME 200000ULL
+/*!
+ * @brief Duration of state ST_PREPARE.
+ */
+#ifdef CONFIG_RTOS
+   #define IRQ_WAITING_TIME (configTICK_RATE_HZ / 500)
+#else
+   #define IRQ_WAITING_TIME INTERVAL_200US
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @ingroup TASK
@@ -1418,13 +1423,16 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 ALWAYS_INLINE STATIC inline
 bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
 {
-#ifdef  CONFIG_MIL_IN_TIMER_INTERRUPT
+#if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && !defined( CONFIG_RTOS )
    return queuePop( &g_queueMilFg, &pMilData->lastMessage );
 #else
    return queuePopSave( &g_queueMilFg, &pMilData->lastMessage );
 #endif
 }
 
+/*!
+ * @brief Timeout for MIL-response: RCV_TASK_BSY
+ */
 #define MIL_FSM_TIMEOUT 10000
 
 /*! ---------------------------------------------------------------------------
@@ -1513,10 +1521,13 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                }
                if( isInGap )
                {
-                 // FSM_TRANSITION( ST_DATA_AQUISITION, label='Gap reading time\nexpired',
-                 //                                  color=magenta );
-                 FSM_TRANSITION( ST_FETCH_DATA, label='Gap reading time\nexpired',
-                                                color=magenta );
+                #ifdef CONFIG_ST_DATA_AQUISITION
+                  FSM_TRANSITION( ST_DATA_AQUISITION, label='Gap reading time\nexpired',
+                                                      color=magenta );
+                #else
+                  FSM_TRANSITION( ST_FETCH_DATA, label='Gap reading time\nexpired',
+                                                 color=magenta );
+                #endif
                }
             }
          #endif /* ifdef CONFIG_READ_MIL_TIME_GAP */
@@ -1524,6 +1535,12 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          } /* end case ST_WAIT */
 
       #ifdef CONFIG_MIL_WAIT
+         /*
+          * This state could be unfortunatelly necessary in the case
+          * of using more than one MIL-targets. This is because some other
+          * interrupts may be asynchronous and delayed the longer the systen runs.
+          * For more details ask Stefan Rauch.
+          */
          case ST_PREPARE:
          { /*
             * wait for IRQ_WAITING_TIME
