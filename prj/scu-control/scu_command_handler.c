@@ -89,7 +89,7 @@ ONE_TIME_CALL void saftLibCommandHandler( void )
   /*
    * Is a message from SATF-LIB for FG present?
    */
-   if( !queuePopSave( &g_queueSaftCmd, &cmd ) )
+   if( !queuePopSafe( &g_queueSaftCmd, &cmd ) )
    { /*
       * No, leave this function.
       */

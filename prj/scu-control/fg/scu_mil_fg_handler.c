@@ -36,9 +36,6 @@ extern void*  g_pScub_base;
 extern void*  g_pScu_mil_base;
 #endif
 
-#ifdef _CONFIG_VARIABLE_MIL_GAP_READING
-   unsigned int g_gapReadingTime = DEFAULT_GAP_READING_INTERVAL;
-#endif
 
 /*!
  * @brief Slot-value when no slave selected yet.
@@ -46,6 +43,11 @@ extern void*  g_pScu_mil_base;
 #define INVALID_SLAVE_NR ((unsigned int)~0)
 
 #ifdef CONFIG_READ_MIL_TIME_GAP
+ #warning Reading MIL-gaps is activated. This is only experimental and does not work with the FESA class powerSupply!
+ #ifdef _CONFIG_VARIABLE_MIL_GAP_READING
+   unsigned int g_gapReadingTime = DEFAULT_GAP_READING_INTERVAL;
+ #endif
+
   typedef struct
   {
      uint64_t         timeInterval;
@@ -55,6 +57,9 @@ extern void*  g_pScu_mil_base;
   MIL_GAP_READ_T mg_aReadGap[ ARRAY_SIZE( mg_aMilTaskData[0].aFgChannels ) ];
 #endif
 
+/*
+ * This macro implements the interrupt message queue for MIL-FGs and MIL-DAQs.
+ */
 QUEUE_CREATE_STATIC( g_queueMilFg,  MAX_FG_CHANNELS, MIL_QEUE_T );
 
 #ifdef CONFIG_TASK_RAM_TAB
@@ -1426,7 +1431,7 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
 #if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && !defined( CONFIG_RTOS )
    return queuePop( &g_queueMilFg, &pMilData->lastMessage );
 #else
-   return queuePopSave( &g_queueMilFg, &pMilData->lastMessage );
+   return queuePopSafe( &g_queueMilFg, &pMilData->lastMessage );
 #endif
 }
 

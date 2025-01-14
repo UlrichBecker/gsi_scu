@@ -50,7 +50,7 @@ typedef struct
 
    /*!
     * @brief Pointer to the reserved memory area in bytes for this object.
-    * @note CAUTION! Be sure that the reserved memory area are big enough!
+    * @note CAUTION! Be sure that the reserved memory area is big enough!
     */
    uint8_t*           pBuffer;
 } SW_QUEUE_T;
@@ -279,7 +279,7 @@ void queueReset( SW_QUEUE_T* pThis )
  * @brief Clears the queue within a atomic section.
  * @param pThis Pointer to the concerned queue object. 
  */
-void queueResetSave(  SW_QUEUE_T* pThis );
+void queueResetSafe(  SW_QUEUE_T* pThis );
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -304,7 +304,7 @@ bool queuePush( SW_QUEUE_T* pThis, const void* pItem );
  * @retval true Action was successful.
  * @retval false Queue already full, item discarded.
  */
-bool queuePushSave( SW_QUEUE_T* pThis, const void* pItem );
+bool queuePushSafe( SW_QUEUE_T* pThis, const void* pItem );
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -328,7 +328,7 @@ bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem );
  * @retval true Action was successful, olsest item was not removed.
  * @retval false Queue already full, the oldest item has been removed.
  */
-bool queueForcePushSave( SW_QUEUE_T* pThis, const void* pItem );
+bool queueForcePushSafe( SW_QUEUE_T* pThis, const void* pItem );
 #endif
 
 
@@ -354,7 +354,7 @@ bool queuePop( SW_QUEUE_T* pThis, void* pItem );
  * @retval true Data valid, at least one item was in queue.
  * @retval false Date invalid, queue was empty.
  */
-bool queuePopSave( SW_QUEUE_T* pThis, void* pItem );
+bool queuePopSafe( SW_QUEUE_T* pThis, void* pItem );
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -398,7 +398,7 @@ bool queueIsEmpty( SW_QUEUE_T* pThis )
  * @retval true Queue is empty.
  * @retval false Queue is not empty. 
  */
-bool queueIsEmptySave( SW_QUEUE_T* pThis );
+bool queueIsEmptySafe( SW_QUEUE_T* pThis );
 #endif
 
 /*! ---------------------------------------------------------------------------

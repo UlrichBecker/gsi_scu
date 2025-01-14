@@ -106,7 +106,7 @@ bool evPush( EVENT_T* pEvent );
  * @retval true Action was successful.
  * @retval false Queue already full, no additional event stored.
  */
-bool evPushSave( EVENT_T* pEvent );
+bool evPushSafe( EVENT_T* pEvent );
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ bool evPop( EVENT_T* pEvent );
  * @retval true At least one event was in queue and has been removed.
  * @retval false No event in the queue.
  */
-bool evPopSave( EVENT_T* pEvent );
+bool evPopSafe( EVENT_T* pEvent );
 #endif
 
 /*! ---------------------------------------------------------------------------

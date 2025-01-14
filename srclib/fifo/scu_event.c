@@ -51,7 +51,7 @@ bool evPush( EVENT_T* pEvent )
 /*! ---------------------------------------------------------------------------
  * @see scu_event.h
  */
-bool evPushSave( EVENT_T* pEvent )
+bool evPushSafe( EVENT_T* pEvent )
 {
    criticalSectionEnter();
    const bool ret = evPush( pEvent );
@@ -76,7 +76,7 @@ bool evPop( EVENT_T* pEvent )
 /*! ---------------------------------------------------------------------------
  * @see scu_event.h
  */
-bool evPopSave( EVENT_T* pEvent )
+bool evPopSafe( EVENT_T* pEvent )
 {
    criticalSectionEnter();
    const bool ret = evPop( pEvent );

@@ -39,7 +39,7 @@ QUEUE_CREATE_STATIC( g_queueFg, MAX_FG_CHANNELS, SCU_BUS_IRQ_QUEUE_T );
 STATIC void taskFg( void* pTaskData UNUSED )
 {
    taskInfoLog();
-   queueResetSave( &g_queueFg );
+   queueResetSafe( &g_queueFg );
 
    /*
     *     *** Main loop of ADDAC- function generators ***
@@ -57,7 +57,7 @@ STATIC void taskFg( void* pTaskData UNUSED )
    #endif
       SCU_BUS_IRQ_QUEUE_T queueFgItem;
 
-      while( queuePopSave( &g_queueFg, &queueFgItem ) )
+      while( queuePopSafe( &g_queueFg, &queueFgItem ) )
       {
       #if (configUSE_TASK_NOTIFICATIONS != 1) || !defined( CONFIG_SLEEP_FG_TASK )
          if( !daqSuspended )

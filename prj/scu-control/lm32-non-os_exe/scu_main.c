@@ -392,7 +392,7 @@ ONE_TIME_CALL void schedule( void )
    ecaHandler();
  #else
   #ifdef _CONFIG_MIL_EV_QUEUE
-   if( evPopSave( &g_ecaEvent ) )
+   if( evPopSafe( &g_ecaEvent ) )
    {
       ecaHandler();
       //lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "ECA received\n" ESC_NORMAL );

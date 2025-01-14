@@ -51,7 +51,7 @@ void queueCreateOffset( SW_QUEUE_T* pThis,
  * @retval true Queue is empty.
  * @retval false Queue is not empty.
  */
-inline bool queueIsEmptySave( SW_QUEUE_T* pThis )
+inline bool queueIsEmptySafe( SW_QUEUE_T* pThis )
 {
    bool ret;
 
@@ -84,7 +84,7 @@ bool queuePush( SW_QUEUE_T* pThis, const void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-bool queuePushSave( SW_QUEUE_T* pThis, const void* pItem )
+bool queuePushSafe( SW_QUEUE_T* pThis, const void* pItem )
 {
    bool ret;
 
@@ -121,7 +121,7 @@ bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-bool queueForcePushSave( SW_QUEUE_T* pThis, const void* pItem )
+bool queueForcePushSafe( SW_QUEUE_T* pThis, const void* pItem )
 {
    bool ret;
 
@@ -153,7 +153,7 @@ bool queuePop( SW_QUEUE_T* pThis, void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-void queueResetSave( SW_QUEUE_T* pThis )
+void queueResetSafe( SW_QUEUE_T* pThis )
 {
    criticalSectionEnter();
    queueReset( pThis );
@@ -163,7 +163,7 @@ void queueResetSave( SW_QUEUE_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-bool queuePopSave( SW_QUEUE_T* pThis, void* pItem )
+bool queuePopSafe( SW_QUEUE_T* pThis, void* pItem )
 {
    bool ret;
 
@@ -177,7 +177,7 @@ bool queuePopSave( SW_QUEUE_T* pThis, void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-unsigned int queueGetSizeSave( SW_QUEUE_T* pThis )
+unsigned int queueGetSizeSafe( SW_QUEUE_T* pThis )
 {
    unsigned int ret;
 
@@ -191,7 +191,7 @@ unsigned int queueGetSizeSave( SW_QUEUE_T* pThis )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
-unsigned int queueGetRemainingCapacitySave( SW_QUEUE_T* pThis )
+unsigned int queueGetRemainingCapacitySafe( SW_QUEUE_T* pThis )
 {
    unsigned int ret;
 

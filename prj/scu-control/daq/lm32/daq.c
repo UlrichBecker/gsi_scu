@@ -46,6 +46,7 @@
  #include <FreeRTOS.h>
  #include <scu_task_daq.h>
 #endif
+#include <scu_logutil.h>
 #include "daq.h"
 #if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)
 //! @brief For debug purposes only

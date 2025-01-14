@@ -53,6 +53,7 @@ STACK_SIZE  =  512
 # SCU_URL = scuxl0305
 # SCU_URL = scuxl0331
  SCU_URL = scuxl0249   # with MIL and ADDAC
+# SCU_URL = scuxl0163 #INT-system
 # SCU_URL = scuxl0336  # DIOB-test
 #SCU_URL = scuxl0692
  # ACU-test

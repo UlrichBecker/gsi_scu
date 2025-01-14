@@ -209,7 +209,7 @@ void forEachScuDaqDevice( void )
 ALWAYS_INLINE STATIC inline
 bool addacDaqQueuePop( SCU_BUS_IRQ_QUEUE_T* pQueueScuBusIrq )
 {
-   return queuePopSave( &g_queueAddacDaq, pQueueScuBusIrq );
+   return queuePopSafe( &g_queueAddacDaq, pQueueScuBusIrq );
 }
 
 /*! ---------------------------------------------------------------------------

@@ -46,7 +46,7 @@ STATIC void taskMil( void* pTaskData UNUSED )
 {
    taskInfoLog();
 
-   queueResetSave( &g_queueMilFg );
+   queueResetSafe( &g_queueMilFg );
    evDelete( &g_ecaEvent );
 
    while( true )
@@ -71,7 +71,7 @@ STATIC void taskMil( void* pTaskData UNUSED )
          xTaskNotifyWait( pdFALSE, 0, NULL, MIL_TASK_WAITING_TIME );
       }
    #endif
-      if( evPopSave( &g_ecaEvent ) )
+      if( evPopSafe( &g_ecaEvent ) )
       {
          ecaHandler();
       }

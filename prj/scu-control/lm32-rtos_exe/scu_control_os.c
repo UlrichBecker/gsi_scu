@@ -456,7 +456,7 @@ STATIC void taskMain( void* pTaskData UNUSED )
    #if defined( CONFIG_MIL_FG ) && defined( CONFIG_HANDLE_UNUSED_ECAS )
       if( !taskIsMilTaskRunning() )
       {
-         if( evPopSave( &g_ecaEvent ) )
+         if( evPopSafe( &g_ecaEvent ) )
          {
             ecaTestTagAndPop( g_eca.pQueue, g_eca.tag );
             lm32Log( LM32_LOG_WARNING, ESC_WARNING

@@ -62,7 +62,7 @@ void queuePollAlarm( void )
 {
    void* pOverflowedQueue;
 
-   if( queuePopSave( &g_queueAlarm, &pOverflowedQueue ) )
+   if( queuePopSafe( &g_queueAlarm, &pOverflowedQueue ) )
    {
 
       const char* str = "unknown";
@@ -99,7 +99,7 @@ void queuePollAlarm( void )
    }
 #ifdef CONFIG_HANDLE_UNKNOWN_MSI
    MSI_ITEM_T m;
-   if( queuePopSave( &g_queueUnknownMsi, &m ) )
+   if( queuePopSafe( &g_queueUnknownMsi, &m ) )
    {
       lm32Log( LM32_LOG_WARNING, ESC_WARNING
                "WARNING: Unknown MSI received. msg: %04X, addr: %04X, sel: %04X"

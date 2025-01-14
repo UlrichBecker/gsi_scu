@@ -103,7 +103,7 @@ STATIC inline void daqHandlePostMortem( void )
 STATIC void taskDaq( void* pTaskData UNUSED )
 {
    taskInfoLog();
-   queueResetSave( &g_queueAddacDaq );
+   queueResetSafe( &g_queueAddacDaq );
 
    /*
     *         *** Main loop of ADDAC- DAQs ***
@@ -127,7 +127,7 @@ STATIC void taskDaq( void* pTaskData UNUSED )
       daqHandlePostMortem();
 
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
-      if( !queuePopSave( &g_queueAddacDaq, &queueScuBusIrq ) )
+      if( !queuePopSafe( &g_queueAddacDaq, &queueScuBusIrq ) )
       {
       #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
         /*

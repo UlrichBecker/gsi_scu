@@ -8,6 +8,11 @@
  *
  *  @author Ulrich Becker <u.becker@gsi.de>
  *
+ *  @todo Coloring the log messages depending on the filter-value,
+ *        so the ESC-sequences in the LM32-application can be saved.
+ *
+ *  @todo Ability to send a command to the LM32 application at to enable
+ *        or disable extended log messages by additional commandline option.
  ******************************************************************************
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
