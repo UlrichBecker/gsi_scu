@@ -39,7 +39,7 @@ then
    exit 0
 fi
 
-if [ "${HOSTNAME:0:5}" = "asl74" ]
+if [ "${HOSTNAME:0:5}" = "asl75" ]
 then
    #
    # Script is running on ASL-cluster
@@ -68,7 +68,7 @@ else
    fi
    if [ ! -n "$ASL_NO" ]
    then
-      ASL_NO=744
+      ASL_NO=755
    fi
    ASL_URL=asl${ASL_NO}.acc.gsi.de
    echo "Recursive call on asl${ASL_NO}:"

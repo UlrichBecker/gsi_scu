@@ -11,6 +11,11 @@
  *  @todo Coloring the log messages depending on the filter-value,
  *        so the ESC-sequences in the LM32-application can be saved.
  *
+ *  @todo Internal calculation for TAI/UTC to local-time by automatically
+ *        determination of normal-time or summer-time, if it runs on SCU,
+ *        so that the externel calculation of the local timeoffset becomes
+ *        unnecessery.
+ *
  *  @todo Ability to send a command to the LM32 application at to enable
  *        or disable extended log messages by additional commandline option.
  ******************************************************************************

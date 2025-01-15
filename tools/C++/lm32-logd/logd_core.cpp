@@ -1069,6 +1069,10 @@ void Lm32Logd::operator()( const bool& rExit )
    }
 
    uint intervalTime = 0;
+   /*
+    * Main loop.
+    */
+   DEBUG_MESSAGE( "Entering main-loop..." );
    while( !rExit && (readKey() != '\e') )
    {
       const uint it = daq::getSysMicrosecs();
@@ -1077,6 +1081,9 @@ void Lm32Logd::operator()( const bool& rExit )
          intervalTime = it + m_rCmdLine.getPollInterwalTime() * 1000;
          readItems();
       }
+      /*!
+       * @todo Improve the CPU-load maybe at this point.
+       */
       ::usleep( 1000 );
    }
    DEBUG_MESSAGE( "Loop left by " << (rExit? "SIGTERM":"Esc") );
