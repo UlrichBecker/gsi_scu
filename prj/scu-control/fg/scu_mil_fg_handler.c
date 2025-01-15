@@ -1435,6 +1435,23 @@ bool milQueuePop( MIL_TASK_DATA_T* pMilData  )
 #endif
 }
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup TASK
+ * @ingroup MIL_FSM
+ * @brief Wrapper for getWrSysTime function, depends on using timer-interrupt
+ *        or FreeRTOS or neither nor...
+ * @return White rabbit time.
+ */
+ALWAYS_INLINE STATIC inline
+uint64_t milGetTime( void )
+{
+#if defined( CONFIG_MIL_IN_TIMER_INTERRUPT ) && !defined( CONFIG_RTOS )
+   return getWrSysTime();
+#else
+   return getWrSysTimeSafe();
+#endif
+}
+
 /*!
  * @brief Timeout for MIL-response: RCV_TASK_BSY
  */
@@ -1507,7 +1524,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                 ( pMilData->lastMessage.slot != INVALID_SLAVE_NR )
               )
             {
-               const uint64_t time = getWrSysTimeSafe();
+               const uint64_t time = milGetTime();
                bool isInGap = false;
                unsigned int channel;
                FOR_EACH_FG( channel )
@@ -1550,7 +1567,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          { /*
             * wait for IRQ_WAITING_TIME
             */
-            if( getWrSysTimeSafe() < pMilData->waitingTime )
+            if( milGetTime() < pMilData->waitingTime )
                FSM_TRANSITION_SELF( label='IRQ_WAITING_TIME not expired', color=blue );
             #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
              //  pMilData->irqDurationTime = irqGetTimeSinceLastInterrupt();
@@ -1781,7 +1798,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
       #ifdef CONFIG_MIL_WAIT
          case ST_PREPARE:
          {
-            pMilData->waitingTime = getWrSysTimeSafe() + IRQ_WAITING_TIME;
+            pMilData->waitingTime = milGetTime() + IRQ_WAITING_TIME;
              //pMilData->waitingTime = pMilData->lastMessage.time + IRQ_WAITING_TIME;
             break;
          }
@@ -1826,7 +1843,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                 */
             #ifdef CONFIG_READ_MIL_TIME_GAP
                if( mg_aReadGap[channel].pTask == pMilData )
-                  pMilData->aFgChannels[channel].daqTimestamp = getWrSysTimeSafe();
+                  pMilData->aFgChannels[channel].daqTimestamp = milGetTime();
                else
             #endif
                   pMilData->aFgChannels[channel].daqTimestamp = pMilData->lastMessage.time;
