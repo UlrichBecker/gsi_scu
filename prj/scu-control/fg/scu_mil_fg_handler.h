@@ -18,7 +18,7 @@
   #include <scu_fg_macros.h>
 #endif
 
-#define CONFIG_MIL_WAIT
+#define CONFIG_ST_POST_IRQ_WAITING
 //#define CONFIG_ST_DATA_AQUISITION
 
 #ifdef __cplusplus
@@ -146,16 +146,16 @@ STATIC_ASSERT( sizeof( FG_MIL_REGISTER_T ) == MIL_BLOCK_SIZE * sizeof(short) );
  */
 typedef enum
 {
-   FSM_DECLARE_STATE( ST_WAIT,            label='Wait for message', color=blue ),
-#ifdef CONFIG_MIL_WAIT
-   FSM_DECLARE_STATE( ST_PREPARE,         label='Wait for IRQ-flags', color=cyan ),
+   FSM_DECLARE_STATE( ST_WAIT,             label='Wait for message', color=blue ),
+#ifdef CONFIG_ST_POST_IRQ_WAITING
+   FSM_DECLARE_STATE( ST_POST_IRQ_WAITING, label='Wait for IRQ-flags', color=cyan ),
 #endif
-   FSM_DECLARE_STATE( ST_FETCH_STATUS,    label='Read MIL-IRQ-flags', color=green ),
-   FSM_DECLARE_STATE( ST_HANDLE_IRQS,     label='Send data to\nfunction generator\nif IRQ-flag set', color=red ),
+   FSM_DECLARE_STATE( ST_FETCH_STATUS,     label='Read MIL-IRQ-flags', color=green ),
+   FSM_DECLARE_STATE( ST_HANDLE_IRQS,      label='Send data to\nfunction generator\nif IRQ-flag set', color=red ),
 #ifdef CONFIG_ST_DATA_AQUISITION
-   FSM_DECLARE_STATE( ST_DATA_AQUISITION, label='Request MIL-DAQ data\nif IRQ-flag set', color=cyan ),
+   FSM_DECLARE_STATE( ST_DATA_AQUISITION,  label='Request MIL-DAQ data\nif IRQ-flag set', color=cyan ),
 #endif
-   FSM_DECLARE_STATE( ST_FETCH_DATA,      label='Read MIL-DAQ data\nif IRQ-flag set',color=green )
+   FSM_DECLARE_STATE( ST_FETCH_DATA,       label='Read MIL-DAQ data\nif IRQ-flag set',color=green )
 } FG_STATE_T;
 
 /*! ---------------------------------------------------------------------------
@@ -212,7 +212,7 @@ typedef struct
 typedef struct
 { /*!
    * @brief Slave number respectively slot number of the controlling SIO-card
-   *        when value > 0. When 0 then the the MIL extention is concerned.
+   *        when value > 0. If 0 then the the MIL extention (PIGGY) is concerned.
    */
    unsigned int  slot;
 
@@ -248,11 +248,11 @@ typedef struct
     * @brief timeout counter
     */
    unsigned int      timeoutCounter;
-#ifdef CONFIG_MIL_WAIT
+#ifdef CONFIG_ST_POST_IRQ_WAITING
    /*!
     * @brief Waiting time after interrupt.
     */
-   uint64_t          waitingTime;
+   uint64_t          postIrqWaitingTime;
 #endif
 #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
    /*!

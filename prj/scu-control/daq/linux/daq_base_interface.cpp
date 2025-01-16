@@ -210,11 +210,11 @@ uint DaqBaseInterface::getNumberOfNewData( void )
 uint DaqBaseInterface::getFiFoLevelPerTenThousand( void )
 {
 #ifdef CONFIG_MILDAQ_BACKWARD_COMPATIBLE
-   if( getRamCapacity() > 0 )
+   if( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr )
       return (getCurrentNumberOfData() * 10000) / getRamCapacity();
-   return DAQ_RING_SIZE;
+   return 0; //! @todo calculate size of FiFo in LM32 RAM.
 #else
-   assert( getRamCapacity() > 0 );
+   assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );
    return (getCurrentNumberOfData() * 10000) / getRamCapacity();
 #endif
 }

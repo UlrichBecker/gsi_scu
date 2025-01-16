@@ -79,8 +79,8 @@ QUEUE_CREATE_STATIC( g_queueMilFg,  MAX_FG_CHANNELS, MIL_QEUE_T );
 STATIC uint8_t mg_taskRamIdTab[MAX_FG_CHANNELS];
 #endif /* ifdef CONFIG_TASK_RAM_TAB */
 
-#ifdef CONFIG_MIL_WAIT
-   #define INIT_WAITING_TIME .waitingTime      = 0LL,
+#ifdef CONFIG_ST_POST_IRQ_WAITING
+   #define INIT_WAITING_TIME .postIrqWaitingTime      = 0LL,
 #else
    #define INIT_WAITING_TIME
 #endif
@@ -631,8 +631,8 @@ void milInitTasks( void )
       mg_aMilTaskData[i].lastMessage.time  = 0LL;
       mg_aMilTaskData[i].lastChannel       = 0;
       mg_aMilTaskData[i].timeoutCounter    = 0;
-   #ifdef CONFIG_MIL_WAIT
-      mg_aMilTaskData[i].waitingTime       = 0LL;
+   #ifdef CONFIG_ST_POST_IRQ_WAITING
+      mg_aMilTaskData[i].postIrqWaitingTime       = 0LL;
    #endif
    #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
       mg_aMilTaskData[i].irqDurationTime   = 0LL;
@@ -667,8 +667,8 @@ STATIC const char* state2string( const FG_STATE_T state )
    switch( state )
    {
       __CASE_RETURN( ST_WAIT );
-   #ifdef CONFIG_MIL_WAIT
-      __CASE_RETURN( ST_PREPARE );
+   #ifdef CONFIG_ST_POST_IRQ_WAITING
+      __CASE_RETURN( ST_POST_IRQ_WAITING );
    #endif
       __CASE_RETURN( ST_FETCH_STATUS );
       __CASE_RETURN( ST_HANDLE_IRQS );
@@ -694,8 +694,8 @@ void dbgPrintMilTaskData( void )
       mprintf( "slave_nr[%u]: 0x%08X\n",       i, mg_aMilTaskData[i].slave_nr );
       mprintf( "lastChannel[%u]: %u\n",        i, mg_aMilTaskData[i].lastChannel );
       mprintf( "timeoutCounter[%u]: %u\n",   i, mg_aMilTaskData[i].timeoutCounter );
-      mprintf( "waitingTime[%u]: 0x%08X%08X\n", i, (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].waitingTime),
-                                                  (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].waitingTime) );
+      mprintf( "postIrqWaitingTime[%u]: 0x%08X%08X\n", i, (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].postIrqWaitingTime),
+                                                  (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].postIrqWaitingTime) );
    #ifdef CONFIG_READ_MIL_TIME_GAP
       mprintf( "gapReadingTime[%u]: %08X%08X\n", i, (uint32_t)GET_UPPER_HALF(mg_aMilTaskData[i].gapReadingTime),
                                                     (uint32_t)GET_LOWER_HALF(mg_aMilTaskData[i].gapReadingTime) );
@@ -1408,12 +1408,12 @@ int milGetTask( MIL_TASK_DATA_T* pMilTaskData,
 #define FOR_EACH_FG( channel ) FOR_EACH_FG_CONTINUING( channel, 0 )
 
 /*!
- * @brief Duration of state ST_PREPARE.
+ * @brief Duration of state ST_POST_IRQ_WAITING.
  */
 #ifdef CONFIG_RTOS
-   #define IRQ_WAITING_TIME (configTICK_RATE_HZ / 500)
+   #define POST_IRQ_WAITING_TIME INTERVAL_200US //(configTICK_RATE_HZ / 500)
 #else
-   #define IRQ_WAITING_TIME INTERVAL_200US
+   #define POST_IRQ_WAITING_TIME INTERVAL_200US
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -1506,8 +1506,8 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
             #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
                pMilData->irqDurationTime = irqGetTimeSinceLastInterrupt();
             #endif
-            #ifdef CONFIG_MIL_WAIT
-               FSM_TRANSITION( ST_PREPARE, label='Message received', color=green );
+            #ifdef CONFIG_ST_POST_IRQ_WAITING
+               FSM_TRANSITION_NEXT( ST_POST_IRQ_WAITING, label='Message received', color=green );
             #else
                FSM_TRANSITION_NEXT( ST_FETCH_STATUS, label='Message received', color=green );
             #endif
@@ -1556,23 +1556,22 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
             FSM_TRANSITION_SELF( label='No message', color=blue );
          } /* end case ST_WAIT */
 
-      #ifdef CONFIG_MIL_WAIT
+      #ifdef CONFIG_ST_POST_IRQ_WAITING
          /*
           * This state could be unfortunatelly necessary in the case
           * of using more than one MIL-targets. This is because some other
-          * interrupts may be asynchronous and delayed the longer the systen runs.
+          * interrupts may be asynchronous and delayed the longer the system runs.
           * For more details ask Stefan Rauch.
           */
-         case ST_PREPARE:
+         case ST_POST_IRQ_WAITING:
          { /*
-            * wait for IRQ_WAITING_TIME
+            * Wait for POST_IRQ_WAITING_TIME.
+            * Value of "postIrqWaitingTime" has been initialized in the state-entry part
+            * of this function, see below.
             */
-            if( milGetTime() < pMilData->waitingTime )
-               FSM_TRANSITION_SELF( label='IRQ_WAITING_TIME not expired', color=blue );
-            #ifdef CONFIG_USE_INTERRUPT_TIMESTAMP
-             //  pMilData->irqDurationTime = irqGetTimeSinceLastInterrupt();
-            #endif
-            FSM_TRANSITION( ST_FETCH_STATUS, color=green );
+            if( milGetTime() < pMilData->postIrqWaitingTime )
+               FSM_TRANSITION_SELF( color=blue );
+            FSM_TRANSITION( ST_FETCH_STATUS, label='POST_IRQ_WAITING_TIME expired', color=green );
          }
       #endif
 
@@ -1795,11 +1794,14 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          }
       #endif /* ifdef CONFIG_READ_MIL_TIME_GAP */
 
-      #ifdef CONFIG_MIL_WAIT
-         case ST_PREPARE:
+      #ifdef CONFIG_ST_POST_IRQ_WAITING
+         case ST_POST_IRQ_WAITING:
          {
-            pMilData->waitingTime = milGetTime() + IRQ_WAITING_TIME;
-             //pMilData->waitingTime = pMilData->lastMessage.time + IRQ_WAITING_TIME;
+            //pMilData->postIrqWaitingTime = milGetTime() + POST_IRQ_WAITING_TIME;
+            /*
+             * Value of "lastMessage.time" has been fetched in interrupt routine.
+             */
+            pMilData->postIrqWaitingTime = pMilData->lastMessage.time + POST_IRQ_WAITING_TIME;
             break;
          }
       #endif

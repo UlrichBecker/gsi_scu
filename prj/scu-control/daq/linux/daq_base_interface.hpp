@@ -399,6 +399,7 @@ public:
     */
    uint getCurrentNumberOfData( void )
    {
+      assert( dynamic_cast<RAM_RING_SHARED_INDEXES_T*>(m_poRingAdmin) != nullptr );
       return ramRingSharedGetSize( m_poRingAdmin );
    }
 

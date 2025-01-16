@@ -101,8 +101,8 @@ LIBS += stdc++
 
 # CALL_ARGS         = "tcp/scuxl0192.acc.gsi.de"
 # CALL_ARGS         = "tcp/scuxl0212.acc.gsi.de"
- CALL_ARGS         = "tcp/scuxl0692.acc.gsi.de"
-# CALL_ARGS = "tcp/scuxl0118.acc.gsi.de"
+# CALL_ARGS         = "tcp/scuxl0692.acc.gsi.de"
+ CALL_ARGS = "tcp/scuxl0249.acc.gsi.de"
 REMOTE_CALL_ARGS  ?= "dev/wbm0"
 
 DEBUG = 1
