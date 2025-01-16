@@ -1567,7 +1567,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
          { /*
             * Wait for POST_IRQ_WAITING_TIME.
             * Value of "postIrqWaitingTime" has been initialized in the state-entry part
-            * of this function, see below.
+            * of this state in this function, see below.
             */
             if( milGetTime() < pMilData->postIrqWaitingTime )
                FSM_TRANSITION_SELF( color=blue );
@@ -1577,9 +1577,10 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 
          case ST_FETCH_STATUS:
          { /*
-            * if timeout reached, proceed with next task
+            * If timeout reached, proceed with next task
+            * The "timeoutCounter" becomes initialized by zero the state-entry part
+            * of this state in this function, see below.
             */
-            //DEBUG_TRACE_POINT();
             if( pMilData->timeoutCounter > MIL_FSM_TIMEOUT )
             {
                printTimeoutMessage( pMilData );
@@ -1620,7 +1621,6 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
                */
                pMilData->lastChannel = channel;
                pMilData->timeoutCounter++;
-              // DEBUG_TRACE_POINT();
                FSM_TRANSITION_SELF( label='Receiving busy', color=blue );
             }
             DEBUG_TRACE_POINT();
@@ -1672,7 +1672,9 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 
          case ST_FETCH_DATA:
          { /*
-            * if timeout reached, proceed with next task
+            * If timeout reached, proceed with next task.
+            * The "timeoutCounter" becomes initialized by zero the state-entry part
+            * of this state in this function, see below.
             */
             if( pMilData->timeoutCounter > MIL_FSM_TIMEOUT )
             {
@@ -1796,9 +1798,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 
       #ifdef CONFIG_ST_POST_IRQ_WAITING
          case ST_POST_IRQ_WAITING:
-         {
-            //pMilData->postIrqWaitingTime = milGetTime() + POST_IRQ_WAITING_TIME;
-            /*
+         {  /*
              * Value of "lastMessage.time" has been fetched in interrupt routine.
              */
             pMilData->postIrqWaitingTime = pMilData->lastMessage.time + POST_IRQ_WAITING_TIME;

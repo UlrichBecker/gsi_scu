@@ -367,7 +367,6 @@ void fgDisableChannel( const unsigned int channel )
 {
    FG_ASSERT( channel < ARRAY_SIZE( g_shared.oSaftLib.oFg.aRegs ) );
 
-
    FG_CHANNEL_REG_T* pFgRegs = &g_shared.oSaftLib.oFg.aRegs[channel];
 
    if( pFgRegs->macro_number == SCU_INVALID_VALUE )
