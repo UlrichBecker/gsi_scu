@@ -788,6 +788,11 @@ void Lm32Logd::evaluateItem( std::string& rOutput, const SYSLOG_FIFO_ITEM_T& ite
    uint64_t timestamp = item.timestamp;
    if( m_rCmdLine.isUtc() || (m_rCmdLine.getLocalTimeOffset() != 0) )
       timestamp -= m_taiToUtcOffset;
+
+   /*!
+    * @todo Implement here the code of automatically local time offset
+    *       if this application runs on SCU
+    */
    timestamp += m_rCmdLine.getLocalTimeOffset();
 
 
