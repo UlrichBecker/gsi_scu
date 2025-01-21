@@ -105,7 +105,21 @@ void taskStopMilIfRunning( void )
 void taskWakeupMilFromISR( void )
 {
    if( mg_taskMilHandle != NULL )
+   {
+   #ifdef CONFIG_MIL_TASK_SHOULD_RUN_IMMEDIATELY
+      /*
+       * Task will run immediately after the ISR has returned.
+       */
+      BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+      vTaskNotifyGiveFromISR( mg_taskMilHandle, &xHigherPriorityTaskWoken );
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   #else
+      /*
+       * Task will run by the next regular task-change-tick.
+       */
       xTaskNotifyFromISR( mg_taskMilHandle, 0, 0, NULL );
+   #endif
+   }
 }
 
 /*! ---------------------------------------------------------------------------

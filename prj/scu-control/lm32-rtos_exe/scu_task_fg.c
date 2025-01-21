@@ -77,8 +77,6 @@ STATIC void taskFg( void* pTaskData UNUSED )
       if( daqSuspended )
          daqTaskResume();
    #endif
-
-     // TASK_YIELD();
    }
 }
 
@@ -90,7 +88,19 @@ void taskWakeupFgFromISR( void )
 {
    if( mg_taskFgHandle != NULL )
    {
+   #ifdef CONFIG_ADDAC_FG_TASK_SHOULD_RUN_IMMEDIATELY
+      /*
+       * Task will run immediately after the ISR has returned.
+       */
+      BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+      vTaskNotifyGiveFromISR( mg_taskFgHandle, &xHigherPriorityTaskWoken );
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   #else
+      /*
+       * Task will run by the next regular task-change-tick.
+       */
       xTaskNotifyFromISR( mg_taskFgHandle, 0, 0, NULL );
+   #endif
    }
 }
 #endif

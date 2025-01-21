@@ -260,7 +260,17 @@ void vStartFirstTask( void );
  */
 void vPortYieldLm32( void );
 
-
+/*! ---------------------------------------------------------------------------
+ * @brief Macro makes a context switching from a interrupt routine if
+ *        the argument is not pdFALSE.
+ * @note  After the interrupt routine has returned a new task will run
+ *        rather than the interrupted task.
+ */
+#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) \
+    if( xHigherPriorityTaskWoken != pdFALSE )          \
+    {                                                  \
+        vTaskSwitchContext();                          \
+    }
 
 #if 0
 #ifdef CONFIG_CHECK_YIELD_PEDANTIC

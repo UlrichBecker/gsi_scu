@@ -27,6 +27,21 @@
   #include <lm32Interrupts.h>
 #endif
 
+#if defined(__lm32__) || defined(__DOXYGEN__)
+STATIC inline ALWAYS_INLINE void _queueCriticalSectionEnter( void )
+{
+   criticalSectionEnter();
+}
+
+STATIC inline ALWAYS_INLINE void _queueCriticalSectionExit( void )
+{
+   criticalSectionExit();
+}
+#else
+  #define _queueCriticalSectionEnter()
+  #define _queueCriticalSectionExit()
+  #warning Using dummys for _queueCriticalSectionEnter() and _queueCriticalSectionExit()
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
@@ -44,7 +59,6 @@ void queueCreateOffset( SW_QUEUE_T* pThis,
    queueReset( pThis );
 }
 
-#if defined(__lm32__) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
  * @brief Returns true when the queue is empty within a atomic section.
  * @param pThis Pointer to the concerned queue object.
@@ -53,17 +67,12 @@ void queueCreateOffset( SW_QUEUE_T* pThis,
  */
 inline bool queueIsEmptySafe( SW_QUEUE_T* pThis )
 {
-   bool ret;
-
-   criticalSectionEnter();
-   ret = queueIsEmpty( pThis );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const bool ret = queueIsEmpty( pThis );
+   _queueCriticalSectionExit();
 
    return ret;
-   //return queueGetSizeSave( pThis ) == 0;
 }
-#endif
-
 
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
@@ -75,26 +84,23 @@ bool queuePush( SW_QUEUE_T* pThis, const void* pItem )
 
    memcpy( &pThis->pBuffer[ramRingGetWriteIndex(&pThis->indexes) * pThis->itemSize],
            pItem, pThis->itemSize );
+
    ramRingIncWriteIndex( &pThis->indexes );
 
    return true;
 }
 
-#if defined(__lm32__) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
 bool queuePushSafe( SW_QUEUE_T* pThis, const void* pItem )
 {
-   bool ret;
-
-   criticalSectionEnter();
-   ret = queuePush( pThis, pItem );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const bool ret = queuePush( pThis, pItem );
+   _queueCriticalSectionExit();
 
    return ret;
 }
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
@@ -112,26 +118,23 @@ bool queueForcePush( SW_QUEUE_T* pThis, const void* pItem )
 
    memcpy( &pThis->pBuffer[ramRingGetWriteIndex(&pThis->indexes) * pThis->itemSize],
            pItem, pThis->itemSize );
+
    ramRingIncWriteIndex( &pThis->indexes );
 
    return !isFull;
 }
 
-#if defined(__lm32__) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
 bool queueForcePushSafe( SW_QUEUE_T* pThis, const void* pItem )
 {
-   bool ret;
-
-   criticalSectionEnter();
-   ret = queueForcePush( pThis, pItem );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const bool ret = queueForcePush( pThis, pItem );
+   _queueCriticalSectionExit();
 
    return ret;
 }
-#endif
 
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
@@ -144,20 +147,20 @@ bool queuePop( SW_QUEUE_T* pThis, void* pItem )
    memcpy( pItem, 
            &pThis->pBuffer[ramRingGetReadIndex(&pThis->indexes) * pThis->itemSize],
            pThis->itemSize );
+
    ramRingIncReadIndex( &pThis->indexes );
 
    return true;
 }
 
-#if defined(__lm32__) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
 void queueResetSafe( SW_QUEUE_T* pThis )
 {
-   criticalSectionEnter();
+   _queueCriticalSectionEnter();
    queueReset( pThis );
-   criticalSectionExit();
+   _queueCriticalSectionExit();
 }
 
 /*! ---------------------------------------------------------------------------
@@ -165,11 +168,9 @@ void queueResetSafe( SW_QUEUE_T* pThis )
  */
 bool queuePopSafe( SW_QUEUE_T* pThis, void* pItem )
 {
-   bool ret;
-
-   criticalSectionEnter();
-   ret = queuePop( pThis, pItem );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const bool ret = queuePop( pThis, pItem );
+   _queueCriticalSectionExit();
 
    return ret;
 }
@@ -179,11 +180,9 @@ bool queuePopSafe( SW_QUEUE_T* pThis, void* pItem )
  */
 unsigned int queueGetSizeSafe( SW_QUEUE_T* pThis )
 {
-   unsigned int ret;
-
-   criticalSectionEnter();
-   ret = queueGetSize( pThis );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const unsigned int ret = queueGetSize( pThis );
+   _queueCriticalSectionExit();
 
    return ret;
 }
@@ -193,15 +192,11 @@ unsigned int queueGetSizeSafe( SW_QUEUE_T* pThis )
  */
 unsigned int queueGetRemainingCapacitySafe( SW_QUEUE_T* pThis )
 {
-   unsigned int ret;
-
-   criticalSectionEnter();
-   ret = queueGetRemainingCapacity( pThis );
-   criticalSectionExit();
+   _queueCriticalSectionEnter();
+   const unsigned int ret = queueGetRemainingCapacity( pThis );
+   _queueCriticalSectionExit();
 
    return ret;
 }
-
-#endif /* ifdef __lm32__ */
 
 /*================================== EOF ====================================*/
