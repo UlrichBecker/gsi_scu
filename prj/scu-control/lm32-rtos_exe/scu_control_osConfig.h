@@ -14,6 +14,8 @@
 #define CONFIG_STILL_ALIVE_SIGNAL
 #define CONFIG_TASK_YIELD_WHEN_UART_WAITING
 
+#define CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+
 /*
  * Here is a good place to include header files that are required across
  * your application.

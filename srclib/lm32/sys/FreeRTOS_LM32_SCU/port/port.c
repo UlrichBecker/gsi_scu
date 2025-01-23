@@ -81,6 +81,13 @@ STATIC_ASSERT( OS_STACK_DWORD_SIZE <= configMINIMAL_STACK_SIZE );
   uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif
 
+#ifdef CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+  #if configUSE_PREEMPTION == 0
+     #warning Omiting of first tick- task change immediately after task change by ISR is only meaningful in preemption mode!
+  #endif
+  bool __taskHasChangedByLastIsr__ = false;
+#endif
+
 /* ----------------------------------------------------------------------------
  * See header file for description. 
  */
@@ -243,7 +250,15 @@ STATIC void onTimerInterrupt( const unsigned int intNum,
 #endif
    xTaskIncrementTick();
 #if configUSE_PREEMPTION == 1
+ #ifdef CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+   if( !__taskHasChangedByLastIsr__ )
+   {
+      vTaskSwitchContext();
+   }
+   __taskHasChangedByLastIsr__ = false;
+ #else
    vTaskSwitchContext();
+ #endif
 #endif
 }
 
@@ -307,7 +322,9 @@ portBASE_TYPE xPortStartScheduler( void )
     */
    prvSetupTimer();
 #endif
-
+#ifdef CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+   __taskHasChangedByLastIsr__ = false;
+#endif
    /*
     * Kick off the first task, resets the critical section nesting counter
     * and enables the global interrupt.

@@ -191,6 +191,10 @@ typedef uint32_t       UBaseType_t;
 
 #define GET_CURRENT_TCB_STACK() ((portSTACK_TYPE*)*((portSTACK_TYPE*)xTaskGetCurrentTaskHandle()))
 
+#ifdef CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+extern bool __taskHasChangedByLastIsr__;
+#endif
+
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
@@ -266,11 +270,21 @@ void vPortYieldLm32( void );
  * @note  After the interrupt routine has returned a new task will run
  *        rather than the interrupted task.
  */
-#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) \
-    if( xHigherPriorityTaskWoken != pdFALSE )          \
-    {                                                  \
-        vTaskSwitchContext();                          \
-    }
+#ifdef CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+   #define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) \
+      if( xHigherPriorityTaskWoken != pdFALSE )           \
+      {                                                   \
+          vTaskSwitchContext();                           \
+          __taskHasChangedByLastIsr__ = true;             \
+      }
+#else
+   #define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) \
+      if( xHigherPriorityTaskWoken != pdFALSE )           \
+      {                                                   \
+          vTaskSwitchContext();                           \
+      }
+#endif
+
 
 #if 0
 #ifdef CONFIG_CHECK_YIELD_PEDANTIC
