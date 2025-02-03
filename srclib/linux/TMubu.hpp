@@ -29,8 +29,8 @@
 
 #include <boost/circular_buffer.hpp>
 #include <list>
+#include <vector>
 #include <mutex>
-#include <string>
 #include <exception>
 
 namespace mubu
@@ -41,38 +41,43 @@ namespace mubu
  *        which has one data source but could have one or more data sinks.
  *        Based on boost::circular_buffer.
  * @param PL_T Payload type.
+ * @param ID_T Buffer-Identification type.
  */
-template <typename PL_T>
+template <typename PL_T, typename ID_T=uint>
 class TMultiBuffer
 {
 public:
+   using CB_T     = boost::circular_buffer<PL_T>;
+   using VECTOR_T = std::vector<PL_T>;
+   using MUTEX_T  = std::lock_guard<std::mutex>;
+
    /*!
     * @brief Class for a single circular buffer of multi- buffer.
     */
-   class Buffer: public boost::circular_buffer<PL_T>
+   class Buffer: public CB_T
    {
       TMultiBuffer* m_pParent;
       std::mutex    m_mutex;
-      const uint    m_id;
+      const ID_T    m_id;
 
    public:
-      Buffer( TMultiBuffer* pParent, uint id, std::size_t size ):
-         boost::circular_buffer<PL_T>( size ),
+      Buffer( TMultiBuffer* pParent, ID_T id, std::size_t size ):
+         CB_T( size ),
          m_pParent( pParent ),
          m_id( id )
       {}
 
       void push( const PL_T& rPl )
       {
-         std::lock_guard<std::mutex> lock(m_mutex);
-         boost::circular_buffer<PL_T>::push_back( rPl );
+         MUTEX_T lock(m_mutex);
+         CB_T::push_back( rPl );
       }
 
       std::size_t copy( PL_T* pPl, const std::size_t max )
       {
-         std::lock_guard<std::mutex> lock(m_mutex);
+         MUTEX_T lock(m_mutex);
 
-         auto array1 = boost::circular_buffer<PL_T>::array_one();
+         auto array1 = CB_T::array_one();
          std::size_t toCopy = std::min( array1.second, max );
          if( toCopy > 0 )
             std::copy( array1.first, array1.first + toCopy, pPl );
@@ -80,8 +85,8 @@ public:
          if( toCopy == max )
             return max;
 
-         std::size_t copied = toCopy;
-         auto array2 = boost::circular_buffer<PL_T>::array_two();
+         const std::size_t copied = toCopy;
+         auto array2 = CB_T::array_two();
          toCopy = std::min( array2.second, max - copied );
          if( toCopy > 0 )
             std::copy( array2.first, array2.first + toCopy, pPl + copied );
@@ -89,14 +94,35 @@ public:
          return copied + toCopy;
       }
 
+      std::size_t copy( VECTOR_T& rvPl, const std::size_t max )
+      {
+         rvPl.reserve( max );
+
+         MUTEX_T lock(m_mutex);
+
+         auto array1 = CB_T::array_one();
+         std::size_t toCopy = std::min( array1.second, max );
+         if( toCopy > 0 )
+            rvPl.insert( rvPl.end(), array1.first, array1.first + toCopy );
+
+         if( toCopy == max )
+            return max;
+
+         const std::size_t copied = toCopy;
+         auto array2 = CB_T::array_two();
+         toCopy = std::min( array2.second, max - copied );
+         if( toCopy > 0 )
+            rvPl.insert( rvPl.end(), array2.first, array2.first + toCopy );
+
+         return copied + toCopy;
+      }
+
       std::size_t erase( std::size_t max )
       {
-         std::lock_guard<std::mutex> lock(m_mutex);
+         MUTEX_T lock(m_mutex);
 
-         max = std::min( boost::circular_buffer<PL_T>::size(), max );
-
-         boost::circular_buffer<PL_T>::erase( boost::circular_buffer<PL_T>::begin(),
-                                              boost::circular_buffer<PL_T>::begin() + max );
+         max = std::min( CB_T::size(), max );
+         CB_T::erase( CB_T::begin(), CB_T::begin() + max );
 
          return max;
       }
@@ -106,7 +132,12 @@ public:
          return erase( copy( pPl, max ) );
       }
 
-      uint getId()
+      std::size_t pull( VECTOR_T& rvPl, const std::size_t max )
+      {
+         return erase( copy( rvPl, max ) );
+      }
+
+      ID_T getId()
       {
          return m_id;
       }
@@ -131,7 +162,7 @@ public:
 
    ~TMultiBuffer()
    {
-      std::lock_guard<std::mutex> lock(m_mutex);
+      MUTEX_T lock(m_mutex);
       for( auto& pLe: m_bufferList )
       {
          delete pLe;
@@ -141,7 +172,7 @@ public:
    uint push( const PL_T& rPl )
    {
       uint ret = 0;
-      std::lock_guard<std::mutex> lock(m_mutex);
+      MUTEX_T lock(m_mutex);
       for( auto& pLe: m_bufferList )
       {
          pLe->push( rPl );
@@ -150,9 +181,9 @@ public:
       return ret;
    }
 
-   Buffer* findBuffer( uint id )
+   Buffer* findBuffer( ID_T id )
    {
-      std::lock_guard<std::mutex> lock(m_mutex);
+      MUTEX_T lock(m_mutex);
       for( auto& pLe: m_bufferList )
       {
          if( pLe->getId() == id )
@@ -161,7 +192,7 @@ public:
       return nullptr;
    }
 
-   Buffer* getBuffer( uint id )
+   Buffer* getBuffer( ID_T id )
    {
       Buffer* pBuffer = findBuffer( id );
       if( pBuffer == nullptr )
@@ -171,16 +202,44 @@ public:
       return pBuffer;
    }
 
-   Buffer* createBuffer( uint id, std::size_t capacity = 0 )
+   Buffer* createBuffer( ID_T id, std::size_t capacity = 0 )
    {
       Buffer* pBuffer = findBuffer( id );
       if( pBuffer == nullptr )
       {
-         std::lock_guard<std::mutex> lock(m_mutex);
+         MUTEX_T lock(m_mutex);
          pBuffer = new Buffer( this, id, (capacity==0)? m_capacity : capacity );
          m_bufferList.push_front( pBuffer );
       }
       return pBuffer;
+   }
+
+   bool deleteBuffer( ID_T id )
+   {
+      MUTEX_T lock(m_mutex);
+      for( auto it = m_bufferList.begin(); it != m_bufferList.end(); it++ )
+      {
+         if( (*it)->getId() == id )
+         {
+            m_bufferList.erase( it );
+            delete *(it);
+            return true;
+         }
+      }
+      return false;
+   }
+
+   bool deleteAllBuffers()
+   {
+      MUTEX_T lock(m_mutex);
+      if( m_bufferList.empty() )
+         return false;
+      for( auto& pLe: m_bufferList )
+      {
+         delete pLe;
+      }
+      m_bufferList.clear();
+      return true;
    }
 
    std::size_t getCapacity()
@@ -188,7 +247,7 @@ public:
       return m_capacity;
    }
 
-   std::size_t getCapacity( uint id )
+   std::size_t getCapacity( ID_T id )
    {
       return getBuffer( id )->capacity();
    }
@@ -203,24 +262,34 @@ public:
       return size;
    }
 
-   std::size_t getSize( uint id )
+   std::size_t getSize( ID_T id )
    {
       return getBuffer( id )->size();
    }
 
-   std::size_t copy( uint id, PL_T* pPl, const std::size_t max )
+   std::size_t copy( ID_T id, PL_T* pPl, const std::size_t max )
    {
       return getBuffer( id )->copy( pPl, max );
    }
 
-   std::size_t erase( uint id, const std::size_t max )
+   std::size_t copy( ID_T id, VECTOR_T& rvPl, const std::size_t max )
+   {
+      return getBuffer( id )->copy( rvPl, max );
+   }
+
+   std::size_t erase( ID_T id, const std::size_t max )
    {
       return getBuffer( id )->erase( max );
    }
 
-   std::size_t pull( uint id, PL_T* pPl, const std::size_t max )
+   std::size_t pull( ID_T id, PL_T* pPl, const std::size_t max )
    {
       return getBuffer( id )->pull( pPl, max );
+   }
+
+   std::size_t pull( ID_T id, VECTOR_T& rvPl, const std::size_t max )
+   {
+      return getBuffer( id )->pull( rvPl, max );
    }
 
 }; /* class TMultiBuffer */
