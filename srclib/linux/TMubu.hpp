@@ -73,6 +73,17 @@ public:
          CB_T::push_back( rPl );
       }
 
+      void push( const VECTOR_T& rvPl )
+      {
+         MUTEX_T lock(m_mutex);
+         if( rvPl.size() > CB_T::capacity() )
+         {
+            CB_T::assign( rvPl.end() - CB_T::capacity(), rvPl.end() );
+            return;
+         }
+         CB_T::assign( rvPl.begin(), rvPl.end() );
+      }
+
       std::size_t copy( PL_T* pPl, const std::size_t max )
       {
          MUTEX_T lock(m_mutex);
@@ -127,6 +138,12 @@ public:
          return max;
       }
 
+      void clear()
+      {
+         MUTEX_T lock(m_mutex);
+         CB_T::clear();
+      }
+
       std::size_t pull( PL_T* pPl, const std::size_t max )
       {
          return erase( copy( pPl, max ) );
@@ -176,6 +193,18 @@ public:
       for( auto& pLe: m_bufferList )
       {
          pLe->push( rPl );
+         ret++;
+      }
+      return ret;
+   }
+
+   uint push( const VECTOR_T& rvPl )
+   {
+      uint ret = 0;
+      MUTEX_T lock(m_mutex);
+      for( auto& pLe: m_bufferList )
+      {
+         pLe->push( rvPl );
          ret++;
       }
       return ret;
@@ -240,6 +269,20 @@ public:
       }
       m_bufferList.clear();
       return true;
+   }
+
+   void clear()
+   {
+      MUTEX_T lock(m_mutex);
+      for( auto& pLe: m_bufferList )
+      {
+         pLe->clear();
+      }
+   }
+
+   void clear( ID_T id )
+   {
+      getBuffer( id )->clear();
    }
 
    std::size_t getCapacity()
