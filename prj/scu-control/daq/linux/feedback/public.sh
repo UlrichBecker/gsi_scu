@@ -81,6 +81,9 @@ fi
 
 COPY_LIST=$(make ldep | grep "\.h" | grep -v EtherboneConnection\.hpp | grep -v "/etherbone\.h"  | grep -v Constants\.hpp | grep  -v BusException\.hpp)
 
+COPY_LIST="${COPY_LIST}  ${SOURCE_BASE_DIR}srclib/linux/TMubu.hpp"
+
+
 if [ ! -f "$LIB_FILE" ]
 then
    die "Library file: \"$LIB_FILE\" not found!"
@@ -95,6 +98,8 @@ if [ ! -f "$EXAMPLE_FILE" ]
 then
    die "Example file \"$EXAMPLE_FILE\" not found"
 fi
+
+
 
 for i in $COPY_LIST
 do
