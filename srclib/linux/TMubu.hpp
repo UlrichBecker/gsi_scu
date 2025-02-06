@@ -67,6 +67,16 @@ public:
          m_id( id )
       {}
 
+      std::size_t erase( std::size_t max )
+      {
+         MUTEX_T lock(m_mutex);
+
+         max = std::min( CB_T::size(), max );
+         CB_T::erase( CB_T::begin(), CB_T::begin() + max );
+
+         return max;
+      }
+
       void push( const PL_T& rPl )
       {
          MUTEX_T lock(m_mutex);
@@ -76,12 +86,31 @@ public:
       void push( const VECTOR_T& rvPl )
       {
          MUTEX_T lock(m_mutex);
+#if 0
          if( rvPl.size() > CB_T::capacity() )
          {
             CB_T::assign( rvPl.end() - CB_T::capacity(), rvPl.end() );
             return;
          }
+         std::size_t remaining = (CB_T::capacity() - CB_T::size());
+         if( rvPl.size() > remaining )
+            CB_T::erase( CB_T::begin(), CB_T::begin() + rvPl.size() - remaining );
+
          CB_T::assign( rvPl.begin(), rvPl.end() );
+#else
+         /*!
+          * @todo Workaround, find a cheaper algorithm.
+          */
+         for( const auto& rPl: rvPl )
+         {
+            CB_T::push_back( rPl );
+         }
+#endif
+      }
+
+      std::size_t getCapacity()
+      {
+         return CB_T::capacity();
       }
 
       std::size_t copy( PL_T* pPl, const std::size_t max )
@@ -128,15 +157,6 @@ public:
          return copied + toCopy;
       }
 
-      std::size_t erase( std::size_t max )
-      {
-         MUTEX_T lock(m_mutex);
-
-         max = std::min( CB_T::size(), max );
-         CB_T::erase( CB_T::begin(), CB_T::begin() + max );
-
-         return max;
-      }
 
       void clear()
       {
