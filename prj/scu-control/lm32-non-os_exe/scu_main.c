@@ -116,7 +116,11 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    uint16_t pendingIrqs;
 
    TRACE_MIL_DRQ( "2\n" );
+#ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+   if( (pendingIrqs = scuBusGetInterruptPendingFlags( g_pScub_base, slot )) != 0)
+#else
    while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
+#endif
    {
       if( (pendingIrqs & FG1_IRQ) != 0 )
       {
@@ -127,7 +131,6 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
       {
          handleAdacFg( slot, FG2_BASE );
       }
-
    #ifdef CONFIG_MIL_FG
       if( (pendingIrqs & DREQ ) != 0 )
       { /*
@@ -150,7 +153,6 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          queuePushWatched( &g_queueMilFg, &milMsg );
       }
    #endif
-
    #ifdef CONFIG_SCU_DAQ_INTEGRATION
       if( (pendingIrqs & ((1 << DAQ_IRQ_DAQ_FIFO_FULL) | (1 << DAQ_IRQ_HIRES_FINISHED))) != 0 )
       {
@@ -161,6 +163,9 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          };
          queuePushWatched( &g_queueAddacDaq, &queueScuBusIrq );
       }
+   #endif
+   #ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+      scuBusResetInterruptPendingFlags( g_pScub_base, slot, pendingIrqs );
    #endif
    }
 }

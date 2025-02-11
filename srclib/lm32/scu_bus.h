@@ -238,6 +238,13 @@ uint16_t* volatile scuBusGetInterruptActiveFlagRegPtr( const void* pScuBusBase,
    return &((uint16_t*)scuBusGetAbsSlaveAddr( pScuBusBase, slot ))[Intr_Active];
 }
 
+STATIC inline
+uint16_t scuBusGetInterruptPendingFlags( const void* pScuBusBase,
+                                         const unsigned int slot )
+{
+   return *scuBusGetInterruptActiveFlagRegPtr( pScuBusBase, slot );
+}
+
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS INTERRUPT
  * @brief Saves the current interrupt pending bits from the slaves interrupt

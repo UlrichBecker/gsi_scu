@@ -246,14 +246,20 @@ void addacDaqTask( void )
    static DAQ_REGISTER_T s_continuousPending;
    static DAQ_REGISTER_T s_highResPending;
    static unsigned int s_channelNumber;
+#ifdef CONFIG_SCUBUS_INT_RESET_AFTER__
+   static unsigned int s_slot;
+#endif
+   SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
    if( s_pDaqDevice == NULL )
    {
-      SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( addacDaqQueuePop( &queueScuBusIrq ) )
       {
          s_channelNumber = 0;
          s_continuousPending = 0;
          s_highResPending = 0;
+      #ifdef CONFIG_SCUBUS_INT_RESET_AFTER__
+         s_slot = queueScuBusIrq.slot;
+      #endif
          s_pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
 
          if( (queueScuBusIrq.pendingIrqs & (1 << DAQ_IRQ_DAQ_FIFO_FULL)) != 0 )
@@ -300,7 +306,16 @@ void addacDaqTask( void )
 
       s_channelNumber++;
       if( s_channelNumber >= daqDeviceGetMaxChannels( s_pDaqDevice ) )
+      {
          s_pDaqDevice = NULL;
+      #ifdef CONFIG_SCUBUS_INT_RESET_AFTER__
+         if( s_continuousPending != 0 )
+            scuBusResetInterruptPendingFlags( g_pScub_base, s_slot, (1 << DAQ_IRQ_DAQ_FIFO_FULL) );
+
+         if( s_highResPending != 0 )
+            scuBusResetInterruptPendingFlags( g_pScub_base, s_slot, (1 << DAQ_IRQ_HIRES_FINISHED) );
+      #endif
+      }
    }
 }
 
