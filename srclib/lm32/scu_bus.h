@@ -139,7 +139,6 @@ uint16_t* scuBusGetSlaveRegisterPtr16BySlot( const void* pScuBusBase,
    return scuBusGetSlaveRegisterPtr16( scuBusGetAbsSlaveAddr( pScuBusBase, slot ), index );
 }
 
-
 /*! ---------------------------------------------------------------------------
  * @ingroup SCU_BUS
  * @brief Reads a 16 bit register value from a SCU bus slave
@@ -219,7 +218,7 @@ STATIC inline void scuBusEnableSlaveInterrupt( const void* pScuBusBase,
  * @param slot Slot number of the slave.
  */
 STATIC inline void scuBusDisableSlaveInterrupt( const void* pScuBusBase,
-                                               const unsigned int slot )
+                                                const unsigned int slot )
 {
    *scuBusGetMasterInterruptEnableRegPtr( pScuBusBase ) &= ~scuBusGetSlaveFlag(slot);
 }
@@ -233,11 +232,19 @@ STATIC inline void scuBusDisableSlaveInterrupt( const void* pScuBusBase,
  */
 STATIC inline
 uint16_t* volatile scuBusGetInterruptActiveFlagRegPtr( const void* pScuBusBase,
-                                                     const unsigned int slot )
+                                                       const unsigned int slot )
 {
    return &((uint16_t*)scuBusGetAbsSlaveAddr( pScuBusBase, slot ))[Intr_Active];
 }
 
+/*! ---------------------------------------------------------------------------
+ * @ingroup SCU_BUS INTERRUPT
+ * @brief Returns the content of the interrupt active register of the given
+ *        SCU-bus slave.
+ * @param pScuBusBase Base-address of SU-bus.
+ * @param slot Slave- respectively slot- number of slave.
+ * @return Flags of the interrupt active register.
+ */
 STATIC inline
 uint16_t scuBusGetInterruptPendingFlags( const void* pScuBusBase,
                                          const unsigned int slot )
