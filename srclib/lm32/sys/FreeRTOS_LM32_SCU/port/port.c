@@ -63,13 +63,13 @@
  #include <string.h>
 #endif
 
-#ifdef CONFIG_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
  #if ( portCRITICAL_NESTING_IN_TCB == 1 )
-   #error portCRITICAL_NESTING_IN_TCB shall not be defined with 1 when CONFIG_SAVE_ASNC defined!
+   #error portCRITICAL_NESTING_IN_TCB shall not be defined with 1 when CONFIG_SAFE_ASNC defined!
  #endif
 #else
  #if ( portCRITICAL_NESTING_IN_TCB == 0 )
-   #error portCRITICAL_NESTING_IN_TCB has to be defined with 1 when CONFIG_SAVE_ASNC is not defined!
+   #error portCRITICAL_NESTING_IN_TCB has to be defined with 1 when CONFIG_SAFE_ASNC is not defined!
  #endif
 #endif
 
@@ -176,7 +176,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
    CHECK_STACK_POSITION( STK_CSCF );
    PUSH_STACK( 0 );
 
-#ifdef CONFIG_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
    /*
     * ================= __asnc ===================
     * Stack position for saving the atomic section nesting counter
@@ -188,7 +188,7 @@ portSTACK_TYPE* pxPortInitialiseStack( portSTACK_TYPE* pxTopOfStack,
     */
    CHECK_STACK_POSITION( STK_ASNC );
    PUSH_STACK( 0 );
-#endif /* ifdef CONFIG_SAVE_ASNC */
+#endif /* ifdef CONFIG_SAFE_ASNC */
 
    CHECK_STACK_POSITION( OS_STACK_DWORD_SIZE );
 

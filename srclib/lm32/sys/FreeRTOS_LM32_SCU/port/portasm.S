@@ -86,7 +86,7 @@ void vPortInterruptHandler( void );
  */
 #define __cscf (sp + (ALIGN * (1 + CSCF_POS)))
 
-#ifdef CONFIG_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
 /*! --------------------------------------------------------------------------
  * @brief Defining of memory place for saving of the atomic section nesting
  *        counter __atomic_section_nesting_count in each thread.
@@ -94,7 +94,7 @@ void vPortInterruptHandler( void );
  */
 #define __asnc (sp + (ALIGN * (1 + ASNC_POS)))
 
-#endif /* ifdef CONFIG_SAVE_ASNC */
+#endif /* ifdef CONFIG_SAFE_ASNC */
 
 /*!
  * @brief Stack size in bytes for saving all registers and system variables. 
@@ -109,19 +109,19 @@ void vPortInterruptHandler( void );
 #define OS_OFS_R(n)   (sp + (ALIGN * (OS_STACK_DWORD_SIZE - n)))
 
 
-#define OS_SAVE_R( n )    sw OS_OFS_R( n ), r##n
+#define OS_SAFE_R( n )    sw OS_OFS_R( n ), r##n
 #define OS_RESTORE_R( n ) lw r##n, OS_OFS_R( n )
 
-#define OS_SAVE_RA     sw OS_OFS_R(STK_RA), ra
-#define OS_SAVE_EA     sw OS_OFS_R(STK_EA), ea
-#define OS_SAVE_BA     sw OS_OFS_R(STK_BA), ba
+#define OS_SAFE_RA     sw OS_OFS_R(STK_RA), ra
+#define OS_SAFE_EA     sw OS_OFS_R(STK_EA), ea
+#define OS_SAFE_BA     sw OS_OFS_R(STK_BA), ba
 
 #define OS_RESTORE_RA  lw ra, OS_OFS_R(STK_RA)
 #define OS_RESTORE_EA  lw ea, OS_OFS_R(STK_EA)
 #define OS_RESTORE_BA  lw ba, OS_OFS_R(STK_BA)
 
-#ifdef CONFIG_SAVE_ASNC
-.macro OS_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
+.macro OS_SAFE_ASNC
    LOAD_VAR   r1, __atomic_section_nesting_count
    sw __asnc, r1
 .endm
@@ -132,51 +132,51 @@ void vPortInterruptHandler( void );
    sw         (r1+0), r2
 .endm
 #else
-  #define OS_SAVE_ASNC
+  #define OS_SAFE_ASNC
   #define OS_RESTORE_ASNC
-#endif /* /ifdef CONFIG_SAVE_ASNC */
+#endif /* /ifdef CONFIG_SAFE_ASNC */
 
 /*! ---------------------------------------------------------------------------
  * @brief Function saves all registers and the atomic nesting counter
  *        except SP and RA which needs a special handling.
  */
 #ifdef __DOXYGEN__
-STATIC void _saveRegisters( void ) {}
+STATIC void _safeRegisters( void ) {}
 #else
-.type   _saveRegisters, @function
-_saveRegisters:
-   OS_SAVE_R(1)
-   OS_SAVE_R(2)
-   OS_SAVE_R(3)
-   OS_SAVE_R(4)
-   OS_SAVE_R(5)
-   OS_SAVE_R(6)
-   OS_SAVE_R(7)
-   OS_SAVE_R(8)
-   OS_SAVE_R(9)
-   OS_SAVE_R(10)
-   OS_SAVE_R(11)
-   OS_SAVE_R(12)
-   OS_SAVE_R(13)
-   OS_SAVE_R(14)
-   OS_SAVE_R(15)
-   OS_SAVE_R(16)
-   OS_SAVE_R(17)
-   OS_SAVE_R(18)
-   OS_SAVE_R(19)
-   OS_SAVE_R(20)
-   OS_SAVE_R(21)
-   OS_SAVE_R(22)
-   OS_SAVE_R(23)
-   OS_SAVE_R(24)
-   OS_SAVE_R(25)
-   OS_SAVE_R(26)
-   OS_SAVE_R(27)
-   OS_SAVE_EA
-   OS_SAVE_BA
-   OS_SAVE_ASNC
+.type   _safeRegisters, @function
+_safeRegisters:
+   OS_SAFE_R(1)
+   OS_SAFE_R(2)
+   OS_SAFE_R(3)
+   OS_SAFE_R(4)
+   OS_SAFE_R(5)
+   OS_SAFE_R(6)
+   OS_SAFE_R(7)
+   OS_SAFE_R(8)
+   OS_SAFE_R(9)
+   OS_SAFE_R(10)
+   OS_SAFE_R(11)
+   OS_SAFE_R(12)
+   OS_SAFE_R(13)
+   OS_SAFE_R(14)
+   OS_SAFE_R(15)
+   OS_SAFE_R(16)
+   OS_SAFE_R(17)
+   OS_SAFE_R(18)
+   OS_SAFE_R(19)
+   OS_SAFE_R(20)
+   OS_SAFE_R(21)
+   OS_SAFE_R(22)
+   OS_SAFE_R(23)
+   OS_SAFE_R(24)
+   OS_SAFE_R(25)
+   OS_SAFE_R(26)
+   OS_SAFE_R(27)
+   OS_SAFE_EA
+   OS_SAFE_BA
+   OS_SAFE_ASNC
    ret
-.size _saveRegisters, .-_saveRegisters
+.size _safeRegisters, .-_safeRegisters
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -277,16 +277,16 @@ L_INT_SAVE:
  * @brief Macro to save registers on the stack.
  */
 #ifdef __DOXYGEN__
-#define SAVE_CONTEXT
+#define SAFE_CONTEXT
 #else
-.macro SAVE_CONTEXT
+.macro SAFE_CONTEXT
    /*
     * Making space for the context on the stack.
     */
    addi      sp,  sp, -OS_STACK_BYTE_SIZE   /* r28 */
 
-   OS_SAVE_RA
-   calli _saveRegisters
+   OS_SAFE_RA
+   calli _safeRegisters
 
    /*
     * Save the top of stack value to the Task Control Block (TCB).
@@ -349,7 +349,7 @@ _initStackWithTCB:
 void vStartFirstTask( void ) {}
 #else
 vStartFirstTask:
- #ifndef CONFIG_SAVE_ASNC
+ #ifndef CONFIG_SAFE_ASNC
    LOAD_ADDR r1, __atomic_section_nesting_count
    sw        (r1+0), r0          /* __atomic_section_nesting_count = 0; */
  #endif
@@ -375,7 +375,7 @@ void vPortYieldLm32( void ) { vTaskSwitchContext(); }
 #else
 vPortYieldLm32:
    DISABLE_INTERRUPTS
-   SAVE_CONTEXT                 /* Save all registers */
+   SAFE_CONTEXT                 /* Save all registers */
 
    /*
     * __atomic_section_nesting_count++;
@@ -388,10 +388,10 @@ vPortYieldLm32:
    sw        __cscf, r0         /* Set the context switch cause flag to zero */
    calli     vTaskSwitchContext /* Call this C-function implemented in task.c */
 
-#ifndef CONFIG_SAVE_ASNC
+#ifndef CONFIG_SAFE_ASNC
    /*
     * __atomic_section_nesting_count--;
-    * When the nesting counter becomes restored (CONFIG_SAVE_ASNC is defined)
+    * When the nesting counter becomes restored (CONFIG_SAFE_ASNC is defined)
     * then it's not necessary to decrement it here.
     */
    LOAD_ADDR r1, __atomic_section_nesting_count
@@ -420,7 +420,7 @@ vPortInterruptHandler:
  #if defined( CONFIG_PATCH_LM32_BUG ) && !defined( CONFIG_DEBUG_BY_LOGIK_ANALYSATOR )
    wcsr      ie, r0
  #endif
-   SAVE_CONTEXT                 /* Save all registers */
+   SAFE_CONTEXT                 /* Save all registers */
    mvi       r1, 1              /* Set the context switch cause flag to one */
    sw        __cscf, r1         /* and store it in stack. */
    mvi       r1, SIGINT         /* Argument for C-function _irq_entry (will ignored)*/

@@ -14,7 +14,7 @@
 #ifndef _LM32_PORT_COMMON_H
 #define _LM32_PORT_COMMON_H
 
-#define CONFIG_SAVE_ASNC
+#define CONFIG_SAFE_ASNC
 
 /*
  * 31 registers will saved by context switch
@@ -33,7 +33,7 @@
 #define CSCF_POS 0
 #define STK_CSCF  (TO_SAVE_REGS + CSCF_POS)
 
-#ifdef CONFIG_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
  #define ASNC_POS 1
  #define STK_ASNC (TO_SAVE_REGS + ASNC_POS)
 #endif
@@ -44,7 +44,7 @@
  *       therefore the storage offset for register saving will be one.
  * @see __cscf
  */
-#ifdef CONFIG_SAVE_ASNC
+#ifdef CONFIG_SAFE_ASNC
  #define ST_OFS 2
 #else
  #define ST_OFS 1
