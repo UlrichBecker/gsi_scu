@@ -137,7 +137,7 @@ void vPortInterruptHandler( void );
 #endif /* /ifdef CONFIG_SAFE_ASNC */
 
 /*! ---------------------------------------------------------------------------
- * @brief Function saves all registers and the atomic nesting counter
+ * @brief Function safes all registers and the atomic nesting counter
  *        except SP and RA which needs a special handling.
  */
 #ifdef __DOXYGEN__
@@ -180,7 +180,7 @@ _safeRegisters:
 #endif
 
 /*! ---------------------------------------------------------------------------
- * @brief function restores all registers and the atomic nesting counter 
+ * @brief Function restores all registers and the atomic nesting counter
  *        except R1, R2, RA and SP.
  * @note  R1, R2 and SP will restored in function _restoreRemainingRegistersAndERET.
  *        Return-address RA needs a special handling.
@@ -235,9 +235,9 @@ STATIC void _restoreRemainingRegistersAndERET( void )
 .type _restoreRemainingRegistersAndERET, @function
 _restoreRemainingRegistersAndERET:
    lw  r1, __cscf         /* Load context change cause flag in r1 */
-   bne r0, r1, L_INT_SAVE /* Jump if context switch was caused by LM32 exception  */
+   bne r0, r1, L_INT_SAFE /* Jump if context switch was caused by LM32 exception  */
    mv  ea, ra             /* Converts "eret" into "ret". Return-Address is stored in RA */
-L_INT_SAVE:
+L_INT_SAFE:
    OS_RESTORE_R(1)
    OS_RESTORE_R(2)
    addi sp, sp, OS_STACK_BYTE_SIZE
@@ -281,7 +281,7 @@ L_INT_SAVE:
 #else
 .macro SAFE_CONTEXT
    /*
-    * Making space for the context on the stack.
+    * Makes space for the context on the stack.
     */
    addi      sp,  sp, -OS_STACK_BYTE_SIZE   /* r28 */
 
@@ -289,7 +289,7 @@ L_INT_SAVE:
    calli _safeRegisters
 
    /*
-    * Save the top of stack value to the Task Control Block (TCB).
+    * Safe the top of stack value to the Task Control Block (TCB).
     */
    LOAD_VAR  r1, pxCurrentTCB
    sw        (r1+0), sp
@@ -375,7 +375,7 @@ void vPortYieldLm32( void ) { vTaskSwitchContext(); }
 #else
 vPortYieldLm32:
    DISABLE_INTERRUPTS
-   SAFE_CONTEXT                 /* Save all registers */
+   SAFE_CONTEXT                 /* Safe all registers */
 
    /*
     * __atomic_section_nesting_count++;
@@ -420,7 +420,7 @@ vPortInterruptHandler:
  #if defined( CONFIG_PATCH_LM32_BUG ) && !defined( CONFIG_DEBUG_BY_LOGIK_ANALYSATOR )
    wcsr      ie, r0
  #endif
-   SAFE_CONTEXT                 /* Save all registers */
+   SAFE_CONTEXT                 /* Safe all registers */
    mvi       r1, 1              /* Set the context switch cause flag to one */
    sw        __cscf, r1         /* and store it in stack. */
    mvi       r1, SIGINT         /* Argument for C-function _irq_entry (will ignored)*/
