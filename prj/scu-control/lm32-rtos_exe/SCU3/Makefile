@@ -15,7 +15,7 @@ DEFINES += CONFIG_HANDLE_UNUSED_ECAS
 DEFINES += CONFIG_STOP_ON_LM32_EXCEPTION
 
 #DEFINES += CONFIG_ENABLE_DEBUG_TRACE_POINT
-
+#DEFINES += CONFIG_SCUBUS_INT_RESET_AFTER
 
 #------------------------------------------------------------------------------
  SCU_MIL := 1

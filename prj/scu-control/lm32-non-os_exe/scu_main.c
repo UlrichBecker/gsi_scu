@@ -117,6 +117,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
 
    TRACE_MIL_DRQ( "2\n" );
 #ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+   #warning SCU-bus IRQ flags becomes not immediately reseted.
    if( (pendingIrqs = scuBusGetInterruptPendingFlags( g_pScub_base, slot )) != 0)
 #else
    while( (pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)

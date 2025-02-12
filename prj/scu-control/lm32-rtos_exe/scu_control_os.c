@@ -172,7 +172,12 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
    SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
 
    queueScuBusIrq.slot = slot;
+#ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+   #warning SCU-bus IRQ flags becomes not immediately reseted.
+   if( (queueScuBusIrq.pendingIrqs = scuBusGetInterruptPendingFlags( g_pScub_base, slot )) != 0)
+#else
    while( (queueScuBusIrq.pendingIrqs = scuBusGetAndResetIterruptPendingFlags( g_pScub_base, slot )) != 0)
+#endif
    {
    #ifdef CONFIG_USE_ADDAC_FG_TASK
       /*
@@ -241,6 +246,13 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
          taskWakeupDaqFromISR();
       #endif
       }
+   #endif
+   #ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+    #ifdef CONFIG_USE_ADDAC_FG_TASK
+      scuBusResetInterruptPendingFlags( g_pScub_base, slot, queueScuBusIrq.pendingIrqs & ~(FG1_IRQ | FG2_IRQ) );
+    #else
+      scuBusResetInterruptPendingFlags( g_pScub_base, slot, queueScuBusIrq.pendingIrqs );
+    #endif
    #endif
    }
 }

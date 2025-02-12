@@ -71,6 +71,12 @@ STATIC void taskFg( void* pTaskData UNUSED )
 
          if( (queueFgItem.pendingIrqs & FG2_IRQ) != 0 )
             handleAdacFg( queueFgItem.slot, FG2_BASE );
+
+      #ifdef CONFIG_SCUBUS_INT_RESET_AFTER
+         #warning SCU-bus IRQ flags becomes not immediately reseted.
+         scuBusResetInterruptPendingFlags( g_pScub_base, queueFgItem.slot,
+                                           queueFgItem.pendingIrqs & (FG1_IRQ | FG2_IRQ) );
+      #endif
       }
 
    #if (configUSE_TASK_NOTIFICATIONS != 1) || !defined( CONFIG_SLEEP_FG_TASK )
