@@ -334,7 +334,7 @@ void fgEnableChannel( const unsigned int channel )
   /*
    * Fetch first parameter set from buffer
    */
-   if( cbReadSave( &g_shared.oSaftLib.oFg.aChannelBuffers[0], &g_shared.oSaftLib.oFg.aRegs[0], channel, &pset ) != 0 )
+   if( cbReadSafe( &g_shared.oSaftLib.oFg.aChannelBuffers[0], &g_shared.oSaftLib.oFg.aRegs[0], channel, &pset ) != 0 )
    {
    #ifdef CONFIG_MIL_FG
       if( pAddagFgRegs != NULL )
@@ -503,7 +503,7 @@ void makeStop( const unsigned int channel )
  */
 void sendRefillSignalIfThreshold( const unsigned int channel )
 {
-   if( cbgetCountSave( &g_shared.oSaftLib.oFg.aRegs[0], channel ) == FG_REFILL_THRESHOLD )
+   if( cbgetCountSafe( &g_shared.oSaftLib.oFg.aRegs[0], channel ) == FG_REFILL_THRESHOLD )
    {
      // mprintf( "*" ); //!!
       sendSignal( IRQ_DAT_REFILL, channel );

@@ -40,6 +40,14 @@
   #include <scu_wr_time.h>
  #endif
 #endif
+
+#if 1
+   #define DAQ_ATOMIC_ENTER()  criticalSectionEnter()
+   #define DAQ_ATOMIC_EXIT()   criticalSectionExit()
+#else
+   #define DAQ_ATOMIC_ENTER()
+   #define DAQ_ATOMIC_EXIT()
+#endif
 //////////////////////////////////////////////////////////////////////////////
 
 /*! ---------------------------------------------------------------------------
@@ -348,7 +356,9 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
     * The data word which includes the CRC isn't a part of the fifo content,
     * therefore we have to add it here.
     */
+   DAQ_ATOMIC_ENTER();
    remainingDataWords = getRemaining( pDaqChannel ) + 1;
+   DAQ_ATOMIC_EXIT();
    if( remainingDataWords != expectedWords )
    {
       DBPRINT1( ESC_BOLD ESC_FG_RED
@@ -367,13 +377,14 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
    dataWordCounter = 0;
    do
    {
+      DAQ_ATOMIC_ENTER();
    #ifdef CONFIG_DAQ_DECREMENT
       remainingDataWords = getRemaining( pDaqChannel );
    #else
       remainingDataWords--;
    #endif
       DAQ_DATA_T data = pop( pDaqChannel );
-
+      DAQ_ATOMIC_EXIT();
       if( dataWordCounter < ARRAY_SIZE( firstData ) )
       { /*
          * The first two received data words will stored in a temporary buffer.
@@ -547,6 +558,25 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
    daqDescriptorPrintInfo( &oDescriptor );
 } /* ramWriteDaqData() */
 
+
+STATIC inline
+DAQ_REGISTER_T daqChannelGetDaqFifoWordsSafe( DAQ_CANNEL_T* pThis )
+{
+   criticalSectionEnter();
+   DAQ_REGISTER_T ret = daqChannelGetDaqFifoWords( pThis );
+   criticalSectionExit();
+   return ret;
+}
+
+STATIC inline
+DAQ_REGISTER_T daqChannelGetPmFifoWordsSafe( DAQ_CANNEL_T* pThis )
+{
+   criticalSectionEnter();
+   DAQ_REGISTER_T ret = daqChannelGetPmFifoWords( pThis );
+   criticalSectionExit();
+   return ret;
+}
+
 /*! ---------------------------------------------------------------------------
  * @see scu_ramBuffer.h
  */
@@ -565,7 +595,7 @@ int ramPushDaqDataBlock( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
     */
    if( isShort )
    {
-      if( daqChannelGetDaqFifoWords( pDaqChannel ) < DAQ_DESCRIPTOR_WORD_SIZE )
+      if( daqChannelGetDaqFifoWordsSafe( pDaqChannel ) < DAQ_DESCRIPTOR_WORD_SIZE )
       {
          DBPRINT1( ESC_BOLD ESC_FG_RED
                    "DBG ERROR: Short block < descriptor size!\n"
@@ -581,7 +611,7 @@ int ramPushDaqDataBlock( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
    }
    else
    {
-      if( daqChannelGetPmFifoWords( pDaqChannel ) < DAQ_DESCRIPTOR_WORD_SIZE )
+      if( daqChannelGetPmFifoWordsSafe( pDaqChannel ) < DAQ_DESCRIPTOR_WORD_SIZE )
       {
          DBPRINT1( ESC_BOLD ESC_FG_RED
                    "DBG ERROR: Long block < descriptor size!\n"

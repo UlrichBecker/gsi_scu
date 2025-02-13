@@ -292,17 +292,25 @@ void addacFgDisable( const void* pScuBus,
    const ADDAC_DEV_T* pAddacObj = &mg_devTab[dev];
    const void* pAbsSlaveAddr    = scuBusGetAbsSlaveAddr( pScuBus, slot );
 
-   /*
-    * Disarm hardware
-    */
-   *scuBusGetSlaveRegisterPtr16( pAbsSlaveAddr, pAddacObj->fgBaseAddr + FG_CNTRL ) &= ~FG_ENABLED;
+   ATOMIC_SECTION()
+   {
+      /*
+       * Disarm hardware
+       */
+      *scuBusGetSlaveRegisterPtr16( pAbsSlaveAddr, pAddacObj->fgBaseAddr + FG_CNTRL ) &= ~FG_ENABLED;
 
-   /*
-    * Unset FG mode in ADC
-    */
-   *scuBusGetSlaveRegisterPtr16( pAbsSlaveAddr, pAddacObj->dacControl ) &= ~DAC_FG_MODE;
+      /*
+       * Unset FG mode in ADC
+       */
+      *scuBusGetSlaveRegisterPtr16( pAbsSlaveAddr, pAddacObj->dacControl ) &= ~DAC_FG_MODE;
+   }
 }
 
+#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
+   #define FG_ATOMIC_SECTION() ATOMIC_SECTION()
+#else
+   #define FG_ATOMIC_SECTION()
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @brief Supplies an  ADAC- function generator with data.
@@ -319,7 +327,7 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
    /*!
     * @todo Move the FG-buffer into the DDR3-RAM!
     */
-   if( !cbReadSave( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
+   if( !cbReadSafe( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
                     &g_shared.oSaftLib.oFg.aRegs[0],
                     pThis->cntrl_reg.bv.number, &pset ) )
    {
@@ -338,13 +346,16 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
       return false;
    }
 
-   /*
-    * Clear all except the function generator number.
-    */
-   setAdacFgRegs( pThis,
-                  &pset,
-                  (pThis->cntrl_reg.i16 & FG_NUMBER) |
-                  ((pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) );
+ //  FG_ATOMIC_SECTION()
+   {
+      /*
+       * Clear all except the function generator number.
+       */
+      setAdacFgRegs( pThis,
+                     &pset,
+                     (pThis->cntrl_reg.i16 & FG_NUMBER) |
+                     ((pset.control.i32 & (PSET_STEP | PSET_FREQU)) << 10) );
+   }
 
  #ifdef CONFIG_USE_FG_MSI_TIMEOUT
    wdtReset( pThis->cntrl_reg.bv.number );

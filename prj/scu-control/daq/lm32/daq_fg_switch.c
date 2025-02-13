@@ -79,7 +79,7 @@ void daqEnableFgFeedback( const unsigned int slot, const unsigned int fgNum,
       daqChannelSample1msOn( pActChannel );
    }
 #else
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not enabled!" ESC_NORMAL );
+   lm32Log( LM32_LOG_WARNING, ESC_WARNING "CAUTION: DAQ-channels will not enabled!" ESC_NORMAL );
 #endif
 }
 
@@ -112,7 +112,7 @@ void daqDisableFgFeedback( const unsigned int slot, const unsigned int fgNum )
       daqChannelSample1msOff( pActChannel );
    }
 #else
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "CAUTION: DAQ-channels will not disabled!" ESC_NORMAL );
+   lm32Log( LM32_LOG_WARNING, ESC_WARNING "CAUTION: DAQ-channels will not disabled!" ESC_NORMAL );
 #endif
 }
 

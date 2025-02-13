@@ -50,7 +50,7 @@
  #error "Error: TEMP_HIGH has to be smaller than TEMP_CRITICAL!"
 #endif
 
-#define CONFIG_TMPERATURE_ERROR_MSG
+//#define CONFIG_TMPERATURE_ERROR_MSG
 
 /*!
  * @ingroup TEMPERATURE

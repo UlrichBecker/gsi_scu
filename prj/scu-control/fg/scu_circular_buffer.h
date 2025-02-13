@@ -98,7 +98,7 @@ RING_POS_T cbgetCount(volatile FG_CHANNEL_REG_T* cr, const unsigned int channel 
  * @see cbgetCount
  */
 STATIC inline
-RING_POS_T cbgetCountSave( volatile FG_CHANNEL_REG_T* pCr, const unsigned int channel )
+RING_POS_T cbgetCountSafe( volatile FG_CHANNEL_REG_T* pCr, const unsigned int channel )
 {
    criticalSectionEnter();
    const RING_POS_T ret = cbgetCount( pCr, channel );
@@ -155,7 +155,7 @@ bool cbRead( volatile FG_CHANNEL_BUFFER_T* pCb, volatile FG_CHANNEL_REG_T* pCr,
  * @see cbRead
  */
 STATIC inline
-bool cbReadSave( volatile FG_CHANNEL_BUFFER_T* pCb,
+bool cbReadSafe( volatile FG_CHANNEL_BUFFER_T* pCb,
                  volatile FG_CHANNEL_REG_T* pCr,
                  const unsigned int channel, FG_PARAM_SET_T* pPset )
 {
