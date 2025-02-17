@@ -252,8 +252,11 @@ void enableMeassageSignaledInterrupts( const unsigned int socket )
       {
          scuBusSetSlaveValue16( scuBusGetSysAddr( g_pScub_base ), GLOBAL_IRQ_ENA, 0x20 );
          SET_REG32( g_pScub_irq_base, MSI_CHANNEL_SELECT, slot );
+         BARRIER();
          SET_REG32( g_pScub_irq_base, MSI_SOCKET_NUMBER, slot );
+         BARRIER();
          SET_REG32( g_pScub_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)g_pMyMsi)[0] );
+         BARRIER();
          SET_REG32( g_pScub_irq_base, MSI_ENABLE, 1 << slot );
       }
 #ifdef CONFIG_MIL_FG
@@ -266,8 +269,11 @@ void enableMeassageSignaledInterrupts( const unsigned int socket )
    ATOMIC_SECTION()
    {
       SET_REG32( g_pMil_irq_base, MSI_CHANNEL_SELECT, MIL_DRQ );
+      BARRIER();
       SET_REG32( g_pMil_irq_base, MSI_SOCKET_NUMBER,  MIL_DRQ );
+      BARRIER();
       SET_REG32( g_pMil_irq_base, MSI_DEST_ADDR, (uint32_t)&((MSI_LIST_T*)g_pMyMsi)[2] );
+      BARRIER();
       SET_REG32( g_pMil_irq_base, MSI_ENABLE, 1 << MIL_DRQ );
    }
 #endif /* ifdef CONFIG_MIL_PIGGY */
@@ -336,18 +342,21 @@ void fgEnableChannel( const unsigned int channel )
    */
    if( cbReadSafe( &g_shared.oSaftLib.oFg.aChannelBuffers[0], &g_shared.oSaftLib.oFg.aRegs[0], channel, &pset ) != 0 )
    {
-   #ifdef CONFIG_MIL_FG
-      if( pAddagFgRegs != NULL )
+      ATOMIC_SECTION()
       {
-   #endif
-         addacFgStart( pAddagFgRegs, &pset, channel );
-   #ifdef CONFIG_MIL_FG
+      #ifdef CONFIG_MIL_FG
+         if( pAddagFgRegs != NULL )
+         {
+      #endif
+           addacFgStart( pAddagFgRegs, &pset, channel );
+      #ifdef CONFIG_MIL_FG
+         }
+         else
+         {
+            milFgStart( &pset, socket, dev, channel );
+         }
+      #endif /* CONFIG_MIL_FG */
       }
-      else
-      {
-         milFgStart( &pset, socket, dev, channel );
-      }
-   #endif /* CONFIG_MIL_FG */
    #ifdef CONFIG_USE_SENT_COUNTER
       g_aFgChannels[channel].param_sent++;
    #endif

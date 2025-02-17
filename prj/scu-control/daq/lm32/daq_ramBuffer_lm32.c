@@ -41,10 +41,13 @@
  #endif
 #endif
 
-#if 1
+#define CONFIG_DAQ_THREAD_SAFE_ACCESS
+
+#ifdef CONFIG_DAQ_THREAD_SAFE_ACCESS
    #define DAQ_ATOMIC_ENTER()  criticalSectionEnter()
    #define DAQ_ATOMIC_EXIT()   criticalSectionExit()
 #else
+   #warning DAQ accesses are not thread-save!
    #define DAQ_ATOMIC_ENTER()
    #define DAQ_ATOMIC_EXIT()
 #endif
@@ -558,7 +561,10 @@ void ramWriteDaqData( register RAM_SCU_T* pThis, DAQ_CANNEL_T* pDaqChannel,
    daqDescriptorPrintInfo( &oDescriptor );
 } /* ramWriteDaqData() */
 
-
+#ifdef CONFIG_DAQ_THREAD_SAFE_ACCESS
+/*!----------------------------------------------------------------------------
+ * @brief Thread-safe version of daqChannelGetDaqFifoWords
+ */
 STATIC inline
 DAQ_REGISTER_T daqChannelGetDaqFifoWordsSafe( DAQ_CANNEL_T* pThis )
 {
@@ -568,6 +574,9 @@ DAQ_REGISTER_T daqChannelGetDaqFifoWordsSafe( DAQ_CANNEL_T* pThis )
    return ret;
 }
 
+/*!----------------------------------------------------------------------------
+ * @brief Thread-safe version of daqChannelGetPmFifoWordsSafe
+ */
 STATIC inline
 DAQ_REGISTER_T daqChannelGetPmFifoWordsSafe( DAQ_CANNEL_T* pThis )
 {
@@ -576,6 +585,10 @@ DAQ_REGISTER_T daqChannelGetPmFifoWordsSafe( DAQ_CANNEL_T* pThis )
    criticalSectionExit();
    return ret;
 }
+#else
+ #define daqChannelGetDaqFifoWordsSafe daqChannelGetDaqFifoWords
+ #define daqChannelGetPmFifoWordsSafe  daqChannelGetPmFifoWords
+#endif
 
 /*! ---------------------------------------------------------------------------
  * @see scu_ramBuffer.h

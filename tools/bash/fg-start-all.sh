@@ -131,8 +131,8 @@ then
    die "Program saft-ctl not found!"
 fi
 
-FG_FEEEDBACK=$(which fg-feedback)
-if [ ! -x "$FG_FEEEDBACK" ]
+FG_FEEDBACK=$(which fg-feedback)
+if [ ! -x "$FG_FEEDBACK" ]
 then
    die "Program fg-feedback not found!"
 fi
@@ -282,7 +282,7 @@ fi
 #
 if $USE_FG_FEEDBACK
 then
-   FG_LIST=$( $FG_FEEEDBACK -L )
+   FG_LIST=$( $FG_FEEDBACK -L )
 else
    FG_LIST=$( $FG_CTL -si 2>/dev/null | egrep 'fg-[0-9]{1,3}-[0-9]{1,3}' | awk '{printf $1; printf "\n"}')
 fi

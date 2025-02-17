@@ -58,6 +58,13 @@
   #error CONFIG_SCU3 or CONFIG_SCU4 has to be defined!
 #endif
 
+#if configTICK_RATE_HZ < 10000
+  #warning Tick- frequency is lower than 10 kHz!
+#endif
+#if configTICK_RATE_HZ > 20000
+  #warning Tick- frequency is greater than 20 kHz!
+#endif
+
 #ifdef CONFIG_COUNT_MSI_PER_IRQ
 extern unsigned int g_msiCnt;
 #endif
@@ -91,6 +98,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask UNUSED, char* pcTaskName 
 #endif
 }
 #endif /* #if ( configCHECK_FOR_STACK_OVERFLOW != 0 ) */
+
 #if ( configUSE_MALLOC_FAILED_HOOK != 0 )
 /*! ---------------------------------------------------------------------------
  * @ingroup OVERWRITABLE

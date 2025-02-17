@@ -18,7 +18,7 @@ SCU3    := 1
 
 BASE_DIR = $(shell pwd)/..
 
-DEFINES += CONFIG_SCUBUS_INT_RESET_AFTER
+#DEFINES += CONFIG_SCUBUS_INT_RESET_AFTER
 
 # SCU_URL = scuxl0118
 ### SCU_URL = scuxl0107
@@ -33,6 +33,7 @@ DEFINES += CONFIG_SCUBUS_INT_RESET_AFTER
 # SCU_URL = scuxl0331
 #SCU_URL = scuxl0249   # with MIL and ADDAC
 # SCU_URL = scuxl0336  # DIOB-test
+#SCU_URL = scuxl0352 #INT test
 SCU_URL = scuxl0692
 #SCU_URL = scuxl0128
 

@@ -147,6 +147,7 @@ void scanScuBusFgsWithoutDaq( volatile uint16_t *scub_adr, FG_MACRO_T* pFgList )
 
 /*! ---------------------------------------------------------------------------
  * @brief Sets the registers of a ADAC function generator.
+ * @todo Check whether memory-barriers are really necessary.
  */
 STATIC inline void setAdacFgRegs( FG_REGISTER_T* pFgRegs,
                                   const FG_PARAM_SET_T* pPset,
@@ -156,10 +157,15 @@ STATIC inline void setAdacFgRegs( FG_REGISTER_T* pFgRegs,
    STATIC_ASSERT( sizeof( pFgRegs->start_h ) * 2 == sizeof( pPset->coeff_c ));
 
    ADDAC_FG_ACCESS( pFgRegs, cntrl_reg.i16 ) = controlReg;
+   BARRIER();
    ADDAC_FG_ACCESS( pFgRegs, coeff_a_reg )   = pPset->coeff_a;
+   BARRIER();
    ADDAC_FG_ACCESS( pFgRegs, coeff_b_reg )   = pPset->coeff_b;
+   BARRIER();
    ADDAC_FG_ACCESS( pFgRegs, shift_reg )     = getFgShiftRegValue( pPset );
+   BARRIER();
    ADDAC_FG_ACCESS( pFgRegs, start_l )       = GET_LOWER_HALF( pPset->coeff_c );
+   BARRIER();
    ADDAC_FG_ACCESS( pFgRegs, start_h )       = GET_UPPER_HALF( pPset->coeff_c );
 }
 
@@ -308,8 +314,12 @@ void addacFgDisable( const void* pScuBus,
 
 #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
    #define FG_ATOMIC_SECTION() ATOMIC_SECTION()
+   #define FG_ATOMIC_ENTER()   criticalSectionEnter()
+   #define FG_ATOMIC_EXIT()    criticalSectionExit()
 #else
    #define FG_ATOMIC_SECTION()
+   #define FG_ATOMIC_ENTER()
+   #define FG_ATOMIC_EXIT()
 #endif
 
 /*! ---------------------------------------------------------------------------
@@ -346,7 +356,7 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
       return false;
    }
 
- //  FG_ATOMIC_SECTION()
+   FG_ATOMIC_SECTION()
    {
       /*
        * Clear all except the function generator number.
@@ -389,14 +399,17 @@ void handleAdacFg( const unsigned int slot,
    STATIC_ASSERT( sizeof( pFgRegs->ramp_cnt_high ) == sizeof( pFgRegs->ramp_cnt_low ) );
    STATIC_ASSERT( sizeof( g_shared.oSaftLib.oFg.aRegs[0].ramp_count ) >= 2 * sizeof( pFgRegs->ramp_cnt_low ) );
 
-   /*
-    * Read the hardware ramp counter respectively polynomial counter
-    * from the concerning function generator.
-    */
-   g_shared.oSaftLib.oFg.aRegs[channel].ramp_count = MERGE_HIGH_LOW( ADDAC_FG_ACCESS( pFgRegs, ramp_cnt_high ),
-                                                                     ADDAC_FG_ACCESS( pFgRegs, ramp_cnt_low ));
+   FG_ATOMIC_ENTER();
+      /*
+       * Read the hardware ramp counter respectively polynomial counter
+       * from the concerning function generator.
+       */
+      g_shared.oSaftLib.oFg.aRegs[channel].ramp_count = MERGE_HIGH_LOW( ADDAC_FG_ACCESS( pFgRegs, ramp_cnt_high ),
+                                                                        ADDAC_FG_ACCESS( pFgRegs, ramp_cnt_low ));
 
-   const uint16_t controlReg = ADDAC_FG_ACCESS( pFgRegs, cntrl_reg.i16 );
+      const uint16_t controlReg = ADDAC_FG_ACCESS( pFgRegs, cntrl_reg.i16 );
+   FG_ATOMIC_EXIT();
+
    /*
     * Is function generator running?
     */
