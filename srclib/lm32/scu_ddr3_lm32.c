@@ -66,9 +66,6 @@ DDR3_T mg_oDdr3 =
   }
  #endif
 #else
- /*
-  * Dummy functions when FreeRTOS will not used.
-  */
  #define ddr3Lock()    criticalSectionEnter()
  #define ddr3Unlock()  criticalSectionExit()
 #endif
