@@ -85,8 +85,15 @@ void queuePollAlarm( void )
       {
    #endif
          scuLog( LM32_LOG_ERROR, ESC_ERROR
-                 "ERROR: Queue \"%s\" has overflowed! Capacity: %d\n"
-                 ESC_NORMAL, str, queueGetMaxCapacity( pOverflowedQueue ) );
+                 "ERROR: Queue \"%s\" has overflowed! Capacity: %d"
+               #ifdef CONFIG_RESET_QUEUE_IF_OVERFLOW
+                 "   erasing queue!"
+               #endif
+                 "\n" ESC_NORMAL,
+                 str, queueGetMaxCapacity( pOverflowedQueue ) );
+      #ifdef CONFIG_RESET_QUEUE_IF_OVERFLOW
+         queueResetSafe( pOverflowedQueue );
+      #endif
    #if (defined( _CONFIG_MIL_EV_QUEUE ) || defined(CONFIG_RTOS) ) && defined( CONFIG_MIL_FG )
       }
       else

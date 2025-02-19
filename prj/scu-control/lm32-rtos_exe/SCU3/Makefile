@@ -9,7 +9,7 @@
 ## Date:    12.10.2023                                                       ##
 ###############################################################################
 BASE_VERSION = 4
-SUB_VERSION  = 6.11
+SUB_VERSION  = 6.12
 
 DEFINES += CONFIG_HANDLE_UNUSED_ECAS
 DEFINES += CONFIG_STOP_ON_LM32_EXCEPTION
