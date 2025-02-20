@@ -15,7 +15,6 @@
  SCU_MIL := 1
 # MIL_GAP := 1
 
-# MIL_DAQ_USE_RAM := 1
 
 ifdef SCU_MIL
  # MIL_IN_TIMER_INTERRUPT := 1

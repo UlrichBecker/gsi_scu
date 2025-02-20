@@ -11,9 +11,24 @@
 
 
 //#define CONFIG_TASKS_SHOULD_YIELD
+
+/*!
+ * @brief Shows a software fan on eb-console.
+ */
 #define CONFIG_STILL_ALIVE_SIGNAL
+
+/*!
+ * @brief That is the UART for the function mprintf()
+ *        The task will changed within the UARTs polling- loop.
+ */
 #define CONFIG_TASK_YIELD_WHEN_UART_WAITING
 
+/*!
+ * @brief The first task change by the timer interrupt after a taskchange
+ *        in the ISR resp. MSI routine will omitted so the new high priorisized
+ *        task becomes not interrupted by the operating system. This concerns
+ *        the ADDAC-FG task.
+ */
 #define CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
 
 /*
@@ -31,7 +46,7 @@
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
 #define configTICK_RATE_HZ                      10000 //20000
-#define configMAX_PRIORITIES                    2
+#define configMAX_PRIORITIES                    4
 #define configMAX_TASK_NAME_LEN                 16
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
@@ -125,6 +140,9 @@
 #else
  #define TASK_PRIO_ADDAC_DAQ   TASK_PRIO_STD
 #endif
+#if TASK_PRIO_ADDAC_DAQ >= configMAX_PRIORITIES
+ #error TASK_PRIO_ADDAC_DAQ >= configMAX_PRIORITIES
+#endif
 
 #ifdef CONFIG_USE_ADDAC_FG_TASK
  #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
@@ -133,6 +151,9 @@
  #else
   #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
  #endif
+ #if TASK_PRIO_ADDAC_FG >= configMAX_PRIORITIES
+  #error TASK_PRIO_ADDAC_FG >= configMAX_PRIORITIES
+ #endif
 #endif
 
 #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
@@ -140,6 +161,9 @@
  #define TASK_PRIO_MIL_FG      TASK_PRIO_STD + 1
 #else
  #define TASK_PRIO_MIL_FG      TASK_PRIO_STD
+#endif
+#if TASK_PRIO_MIL_FG >= configMAX_PRIORITIES
+ #error TASK_PRIO_MIL_FG >= configMAX_PRIORITIES
 #endif
 
 #endif /* ifndef _SCU_CONTROLCONFIG_H */

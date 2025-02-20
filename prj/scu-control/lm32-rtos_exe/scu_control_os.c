@@ -119,8 +119,8 @@ void vApplicationMallocFailedHook( void )
  */
 void taskInfoLog( void )
 {
-   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Task: \"%s\" started.\n" ESC_NORMAL,
-            pcTaskGetName( NULL ) );
+   lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Task: \"%s\" with priority %u started.\n" ESC_NORMAL,
+            pcTaskGetName( NULL ), uxTaskPriorityGet( xTaskGetCurrentTaskHandle() ) );
 }
 
 /*!----------------------------------------------------------------------------

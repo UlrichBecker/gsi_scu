@@ -151,7 +151,7 @@ bool cbRead( volatile FG_CHANNEL_BUFFER_T* pCb, volatile FG_CHANNEL_REG_T* pCr,
 }
 
 /*! ---------------------------------------------------------------------------
- * @brief Thread save version of cbRead
+ * @brief Thread safe version of cbRead
  * @see cbRead
  */
 STATIC inline

@@ -323,6 +323,38 @@ void addacFgDisable( const void* pScuBus,
 #endif
 
 /*! ---------------------------------------------------------------------------
+ * @brief Pseudo function read a parameter set from a channel buffer
+ *
+ * Depending on the compiler switches CONFIG_RTOS and CONFIG_USE_ADDAC_FG_TASK
+ * which determines whether this function becommes called in the
+ * interrupt context or not, will invoked cbRead() or cbReadSafe().
+ *
+ * @param pCb Pointer to the first channel buffer
+ * @param pCr Pointer to the first channel register
+ * @param channel number of the channel
+ * @param pPset The data from the buffer is written to this address
+ * @retval false Buffer is empty no data read.
+ * @retval true Date successful read.
+ */
+STATIC inline ALWAYS_INLINE
+bool cbReadPolynom( volatile FG_CHANNEL_BUFFER_T* pCb,
+                    volatile FG_CHANNEL_REG_T* pCr,
+                    const unsigned int channel, FG_PARAM_SET_T* pPset )
+{
+#if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
+   /*
+    * Function runs outside of the interrupt context.
+    */
+   return cbReadSafe( pCb, pCr, channel, pPset );
+#else
+   /*
+    * Function runs in the interrupt context.
+    */
+   return cbRead( pCb, pCr, channel, pPset );
+#endif
+}
+
+/*! ---------------------------------------------------------------------------
  * @brief Supplies an  ADAC- function generator with data.
  * @param pThis Pointer to the concerning FG-macro register set.
  * @todo Replace this hideous bit-masking and bit-shifting by bit fields
@@ -337,9 +369,9 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
    /*!
     * @todo Move the FG-buffer into the DDR3-RAM!
     */
-   if( !cbReadSafe( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
-                    &g_shared.oSaftLib.oFg.aRegs[0],
-                    pThis->cntrl_reg.bv.number, &pset ) )
+   if( !cbReadPolynom( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
+                       &g_shared.oSaftLib.oFg.aRegs[0],
+                       pThis->cntrl_reg.bv.number, &pset ) )
    {
    #ifdef CONFIG_HANDLE_FG_FIFO_EMPTY_AS_ERROR
       if( fgIsStarted( pThis->cntrl_reg.bv.number ) )
