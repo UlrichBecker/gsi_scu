@@ -29,7 +29,7 @@
  *        task becomes not interrupted by the operating system. This concerns
  *        the ADDAC-FG task.
  */
-#define CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
+//#define CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
 
 /*
  * Here is a good place to include header files that are required across

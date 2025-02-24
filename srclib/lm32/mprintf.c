@@ -256,14 +256,14 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
       bool     signum = false;
       switch( currentChar = *format++ )
       {
-         case 'S': /* No break here! */
+         case 'S': FALL_THROUGH
          case 's':
             ptr = (unsigned char*)va_arg( ap, char* );
             while( *ptr != '\0' )
                __PUT_CHAR( *ptr++ );
             continue;
 
-         case 'i': /* No break here! */
+         case 'i': FALL_THROUGH
          case 'd':
             signum = true;
             base = 10;
@@ -311,7 +311,7 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
                paddingWidth = sizeof( void* ) * 2;
                paddingChar = '0';
             }
-            /* No break here! */
+            FALL_THROUGH
          case 'X':
             base = 16;
             hexOffset = 'A' - '9' - 1;
@@ -319,7 +319,7 @@ STATIC int vprintfBase( PRINTF_T* pPrintfObj, const char* format, va_list ap )
 
          case 'c':
             currentChar = va_arg( ap, int );
-            /* No break here! */
+            FALL_THROUGH
          default:
             __PUT_CHAR( currentChar );
             continue;

@@ -372,7 +372,9 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
    if( !cbReadPolynom( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
                        &g_shared.oSaftLib.oFg.aRegs[0],
                        pThis->cntrl_reg.bv.number, &pset ) )
-   {
+   {  /*
+       * FG starves.
+       */
    #ifdef CONFIG_HANDLE_FG_FIFO_EMPTY_AS_ERROR
       if( fgIsStarted( pThis->cntrl_reg.bv.number ) )
       {

@@ -293,8 +293,6 @@ void fgResetAndInit( const unsigned int channel )
 #endif
       const unsigned int slot = getFgSlotNumber( socket );
       scub_reset_mil( g_pScub_base, slot );
-     // scub_reset_mil( (unsigned short*)g_pScub_base, slot );
-    //  scub_write_mil( (unsigned short*)g_pScub_base, slot, FG_RESET, FC_CNTRL_WR | dev );
       scub_write_mil( g_pScub_base, slot, FG_RESET, FC_CNTRL_WR | dev );
       lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Reset MIL-SIO fg-%u-%u" ESC_NORMAL, socket, dev );
       return;
@@ -305,8 +303,6 @@ void fgResetAndInit( const unsigned int channel )
     * MIL- extension (PIGGY)
     */
    FG_ASSERT( isMilExtentionFg( socket ) );
-   //reset_mil( (unsigned int*)g_pScu_mil_base );
-   //write_mil( (unsigned int*)g_pScu_mil_base, FG_RESET, FC_CNTRL_WR | dev );
    reset_mil( g_pScu_mil_base );
    write_mil( g_pScu_mil_base, FG_RESET, FC_CNTRL_WR | dev );
    lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "Reset MIL-PIGGY fg-%u-%u" ESC_NORMAL, socket, dev );

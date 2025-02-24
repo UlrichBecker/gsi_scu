@@ -49,7 +49,8 @@ extern "C" {
  * @ingroup LM32_LOG
  * @brief Initializes the LM32 logging system.
  * @see SCU_MMU
- * @param numOfItems Number of log items which shall be reserved in DDR3-RAM.
+ * @param numOfItems Number of log items which shall be reserved in
+ *                   DDR3-RAM on SCU3 respectively SRAM on SCU4.
  * @retval OK Success
  * @retval ALREADY_PRESENT Memory for log items has already be reserved,
  *                         therefore the value of argument numOfItems remains
