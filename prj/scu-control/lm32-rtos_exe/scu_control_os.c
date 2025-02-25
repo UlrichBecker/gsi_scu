@@ -203,7 +203,7 @@ ONE_TIME_CALL void onScuBusEvent( const unsigned int slot )
        * ADDAC function generators running in this interrupt context.
        */
       /*!
-       * @todo CAUTION: By this configuration sometimes a race condition will hurt when
+       * @todo CAUTION: By this configuration sometimes a race condition will happen when
        *       "saft-fg-ctl" becomes terminated. The main thread seems to be blocked and the
        *       application restarts.
        *       The more FGs are running in parallel the more often this effect happens! :-(
