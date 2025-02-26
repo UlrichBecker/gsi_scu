@@ -128,18 +128,20 @@ STATIC void taskDaq( void* pTaskData UNUSED )
 
       SCU_BUS_IRQ_QUEUE_T queueScuBusIrq;
       if( !queuePopSafe( &g_queueAddacDaq, &queueScuBusIrq ) )
-      {
-      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
-        /*
-         * Sleep till wake up when queue is empty.
+      { /*
+         * Queue is empty, no message from ISR.
          */
+      #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_DAQ_TASK )
+         /*
+          * Sleep till wake up by ISR when queue is empty.
+          */
          xTaskNotifyWait( pdFALSE, 0, NULL, portMAX_DELAY );
       #endif
          continue;
       }
 
       /*
-       * Queue has at least one valid message.
+       * Queue has at least one valid message sent by ISR.
        */
       DAQ_DEVICE_T* pDaqDevice = daqBusGetDeviceBySlotNumber( &g_scuDaqAdmin.oDaqDevs, queueScuBusIrq.slot );
       
@@ -182,9 +184,8 @@ STATIC void taskDaq( void* pTaskData UNUSED )
          #endif
             ramPushDaqDataBlock( &g_scuDaqAdmin.oRam, pChannel, false );
          }
-      }
-      //TASK_YIELD();
-   }
+      } /* for() */
+   } /* while() */
 }
 
 /*! ---------------------------------------------------------------------------

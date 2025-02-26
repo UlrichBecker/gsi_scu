@@ -827,22 +827,12 @@ int daqBusFindAndInitializeAll( register DAQ_BUS_T* pThis,
                    daqChannelGetMaxCannels( &pCurrentDaqDevice->aChannel[0] ) );
       DAQ_ASSERT( DAQ_DEVICE_GET_PARENT_OF( pCurrentDaqDevice ) == pThis );
 
-    // daqDeviceDisableScuSlaveInterrupt( pCurrentDaqDevice );
-      daqDeviceEnableScuSlaveInterrupt( pCurrentDaqDevice ); //!!
+      daqDeviceEnableScuSlaveInterrupt( pCurrentDaqDevice );
       daqDeviceTestAndClearDaqInt( pCurrentDaqDevice );
       daqDeviceTestAndClearHiResInt( pCurrentDaqDevice );
 
       daqDeviceClearDaqChannelInterrupts( pCurrentDaqDevice );
       daqDeviceClearHiResChannelInterrupts( pCurrentDaqDevice );
-
-     //!! daqDeviceSetTimeStampCounterEcaTag( pCurrentDaqDevice, DAQ_DEFAULT_ECA_SYNC_TAG );
-     //!! daqDevicePresetTimeStampCounter( pCurrentDaqDevice, DAQ_DEFAULT_SYNC_TIMEOFFSET );
-
-#if 0
-      uint64_t ts = daqDeviceGetTimeStampCounter( pCurrentDaqDevice );
-      mprintf( "ts: 0x%08X%08X\n", ((uint32_t*)&ts)[0], ((uint32_t*)&ts)[1] );
-#endif
-
 
 #if DAQ_MAX < MAX_SCU_SLAVES
       if( pThis->foundDevices == ARRAY_SIZE( pThis->aDaq ) )
@@ -1036,24 +1026,6 @@ void daqBusReset( register DAQ_BUS_T* pThis )
    for( int i = daqBusGetFoundDevices( pThis )-1; i >= 0; i-- )
       daqDeviceReset( daqBusGetDeviceObject( pThis, i ) );
 }
-
-#if !defined( CONFIG_DAQ_SINGLE_APP ) && !defined( CONFIG_RTOS )
-#if 0
-/*! ---------------------------------------------------------------------------
- * @see daq.h
- */
-void daqBusDoFeedbackTask( register DAQ_BUS_T* pThis )
-{
-   DAQ_ASSERT( daqBusGetFoundDevices( pThis ) != 0 );
-   static unsigned int currentDevNum = 0;
-   if( daqDeviceDoFeedbackSwitchOnOffFSM( daqBusGetDeviceObject( pThis, currentDevNum ) ))
-   {
-      currentDevNum++;
-      currentDevNum %= daqBusGetFoundDevices( pThis );
-   }
-}
-#endif
-#endif /* ifndef CONFIG_DAQ_SINGLE_APP */
 
 #if defined( CONFIG_DAQ_DEBUG ) || defined(__DOXYGEN__)
 /*! ---------------------------------------------------------------------------

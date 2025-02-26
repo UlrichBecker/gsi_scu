@@ -33,6 +33,9 @@ STATIC TaskHandle_t mg_taskMilHandle = NULL;
 
 EV_CREATE_STATIC( g_ecaEvent, MAX_FG_CHANNELS );
 
+/*! ---------------------------------------------------------------------------
+ * @see scu_task_mil.h
+ */
 bool taskIsMilTaskRunning( void )
 {
    return mg_taskMilHandle != NULL;
@@ -49,6 +52,9 @@ STATIC void taskMil( void* pTaskData UNUSED )
    queueResetSafe( &g_queueMilFg );
    evDelete( &g_ecaEvent );
 
+   /*
+    * Main loop of MIL-FG handling.
+    */
    while( true )
    {
    #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_MIL_TASK )
@@ -76,7 +82,7 @@ STATIC void taskMil( void* pTaskData UNUSED )
          ecaHandler();
       }
       milExecuteTasks();
-   }
+   } /* while() */
 }
 
 /*! ---------------------------------------------------------------------------

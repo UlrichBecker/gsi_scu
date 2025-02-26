@@ -23,14 +23,6 @@
  */
 #define CONFIG_TASK_YIELD_WHEN_UART_WAITING
 
-/*!
- * @brief The first task change by the timer interrupt after a taskchange
- *        in the ISR resp. MSI routine will omitted so the new high priorisized
- *        task becomes not interrupted by the operating system. This concerns
- *        the ADDAC-FG task.
- */
-//#define CONFIG_OMIT_FIRST_TICK_TASKCHANGE_IMMEDIATELY_AFTER_TASKCHANGE_BY_ISR
-
 /*
  * Here is a good place to include header files that are required across
  * your application.
@@ -147,7 +139,7 @@
 #ifdef CONFIG_USE_ADDAC_FG_TASK
  #if (configUSE_TASK_NOTIFICATIONS == 1) && defined( CONFIG_SLEEP_FG_TASK )
   #define CONFIG_ADDAC_FG_TASK_SHOULD_RUN_IMMEDIATELY
-  #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 2 //1
+  #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD + 2
  #else
   #define TASK_PRIO_ADDAC_FG    TASK_PRIO_STD
  #endif

@@ -258,7 +258,6 @@ void publishWrittenData( register RAM_SCU_T* pThis,
                          RAM_RING_INDEXES_T* poIndexes )
 {
    pThis->pSharedObj->indexes.end = poIndexes->end;
-   //pThis->pSharedObj->serverHasWritten = 1;
    DBG_RAM_INFO( "DBG: RAM-items: %d\n",
                  ramRingSharedGetSize( &pThis->pSharedObj->ringAdmin ) );
 }

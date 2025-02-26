@@ -220,8 +220,9 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       #ifdef CONFIG_QUERY_FUNCTION
          , .canDo = alwaysTrue
       #endif
-      },
-      {
+      }
+ #ifndef __DOCFSM__
+      ,{
          .pCurrentTemp = &BACKPLANE_TEMP,
          .name = "backplane",
       #ifdef CONFIG_TMPERATURE_ERROR_MSG
@@ -245,6 +246,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
       #endif
       }
    #endif
+ #endif
    };
    #pragma GCC diagnostic pop
 

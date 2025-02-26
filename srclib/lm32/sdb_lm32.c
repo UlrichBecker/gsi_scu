@@ -414,7 +414,8 @@ uint32_t getSdbAdr( SDB_LOCATION_T* pLoc )
 {
    switch( getRecordType( getSdbRecord( pLoc ) ) )
    {
-      case SDB_DEVICE: case SDB_BRIDGE:
+      case SDB_DEVICE: FALL_THROUGH
+      case SDB_BRIDGE:
       {
          return pLoc->adr + getSdbRecord( pLoc )->sdbComponent.addrFirst.low;
       }

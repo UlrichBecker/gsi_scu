@@ -339,7 +339,8 @@ void addacFgDisable( const void* pScuBus,
 STATIC inline ALWAYS_INLINE
 bool cbReadPolynom( volatile FG_CHANNEL_BUFFER_T* pCb,
                     volatile FG_CHANNEL_REG_T* pCr,
-                    const unsigned int channel, FG_PARAM_SET_T* pPset )
+                    const unsigned int channel,
+                    FG_PARAM_SET_T* pPset )
 {
 #if defined( CONFIG_RTOS ) && defined( CONFIG_USE_ADDAC_FG_TASK )
    /*
@@ -371,7 +372,8 @@ ONE_TIME_CALL bool feedAdacFg( FG_REGISTER_T* pThis )
     */
    if( !cbReadPolynom( &g_shared.oSaftLib.oFg.aChannelBuffers[0],
                        &g_shared.oSaftLib.oFg.aRegs[0],
-                       pThis->cntrl_reg.bv.number, &pset ) )
+                       pThis->cntrl_reg.bv.number,
+                       &pset ) )
    {  /*
        * FG starves.
        */
