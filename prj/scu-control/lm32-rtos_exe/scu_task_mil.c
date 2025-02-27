@@ -70,7 +70,7 @@ STATIC void taskMil( void* pTaskData UNUSED )
       /*
        * All MIL-FSMs in state ST_WAIT ?
        */
-      if( milAllInWateState() )
+      if( milAllInWaitState() )
       { /*
          * Sleep till wake up by interrupt or waiting time expired.
          */

@@ -1871,7 +1871,7 @@ STATIC inline ALWAYS_INLINE void milTask( MIL_TASK_DATA_T* pMilData  )
 /*!----------------------------------------------------------------------------
  * @see scu_mil_fg_handler.h
  */
-bool milAllInWateState( void )
+bool milAllInWaitState( void )
 {
    for( unsigned int i = 0; i < ARRAY_SIZE(mg_aMilTaskData); i++ )
    {
