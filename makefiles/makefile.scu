@@ -27,7 +27,7 @@ LINKER_SCRIPT ?= $(TARGET).ld
 
 MAKEFILE_DIR ?= $(REPOSITORY_DIR)/makefiles
 
-INCLUDED_TOOLCHAIN_DIR = $(REPOSITORY_DIR)/toolchain/bin/
+#INCLUDED_TOOLCHAIN_DIR = $(REPOSITORY_DIR)/toolchain/bin/
 
 # If the variable TOOLCHAIN_DIR not defined and a installed toolchain can be
 # found in the environment variable $PATH, then this toolchain will preferred,

@@ -46,9 +46,11 @@ void readTemperatureFromDevices( const int bus, uint64_t* pId, uint32_t* pTemper
    wrpc_w1_bus.detail = bus;
    if( w1_scan_bus( &wrpc_w1_bus ) <= 0 )
    {
+    #ifdef CONFIG_ENABLE_W1_WARNING
       lm32Log( LM32_LOG_WARNING, 
                ESC_WARNING "WARNING: No devices found on w1-bus: %d" ESC_NORMAL,
                wrpc_w1_bus.detail );
+    #endif
       return;
    }
 

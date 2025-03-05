@@ -131,11 +131,12 @@ typedef struct
     */
    int       lastTemperature;
 
+#ifdef CONFIG_ENABLE_W1_WARNING
    /*!
     * @brief Flag prevents an multiple warning log message.
     */
    bool      wasGradientError;
-
+#endif
 #ifdef CONFIG_TMPERATURE_ERROR_MSG
    /*!
     * @brief Sensor error detected.
@@ -323,6 +324,7 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
             * Impossible temperature gradient, perhaps a measurement error.
             * Jump to the next temperature sensor.
             */
+         #ifdef CONFIG_ENABLE_W1_WARNING
             if( !pWatchTemp->wasGradientError )
             {
                pWatchTemp->wasGradientError = true;
@@ -331,10 +333,12 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
                         TO_STRING(TEMPERATURE_UPDATE_PERIOD) "sec) from sensor: \"%s\"!"
                         ESC_NORMAL, gradient, pWatchTemp->name );
             }
+         #endif
             continue;
          }
+     #ifdef CONFIG_ENABLE_W1_WARNING
          pWatchTemp->wasGradientError = false;
-
+     #endif
          /*
           * Executing the FSM-do function
           */
