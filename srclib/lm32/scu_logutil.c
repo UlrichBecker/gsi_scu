@@ -55,7 +55,7 @@ void die( const char* pErrorMessage )
    irqDisable();
    while( true );
 #else
-   scuLog( "...continued...\n" );
+   scuLog( LM32_LOG_ERROR, ESC_ERROR "...continued...\n" ESC_NORMAL );
 #endif
 }
 
