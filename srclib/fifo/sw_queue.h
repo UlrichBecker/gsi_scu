@@ -44,12 +44,12 @@ typedef struct
    RAM_RING_INDEXES_T indexes;
 
    /*!
-    * @brief Size in bytes of a single element in the queue.
+    * @brief Size in bytes of a single payload-element in the queue.
     */
    size_t             itemSize;
 
    /*!
-    * @brief Pointer to the reserved memory area in bytes for this object.
+    * @brief Pointer on the reserved payload-memory area in bytes for this object.
     * @note CAUTION! Be sure that the reserved memory area is big enough!
     */
    uint8_t*           pBuffer;

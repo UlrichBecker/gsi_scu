@@ -99,7 +99,6 @@ STATIC inline void daqHandlePostMortem( void )
  * @ingroup RTOS_TASK
  * @brief RTOS- task for ADDAC-DAQs respectively SCU-bus DAQs.
  */
-//OPTIMIZE( "-O1"  ) //!@todo Necessary if LTO activated I don't know why yet!
 STATIC void taskDaq( void* pTaskData UNUSED )
 {
    taskInfoLog();
@@ -114,10 +113,10 @@ STATIC void taskDaq( void* pTaskData UNUSED )
        * Removing old data which has been possibly read and evaluated by the
        * Linux client
        * NOTE: This has to be made in any cases here independently whether one or more
-       *       MIL FG are active or not.
+       *       DAQs are active or not.
        *       Because only in this way it becomes possible to continuing the
        *       handshake transfer at reading the possible remaining data from
-       *       the DDR3 memory by the Linux client.
+       *       the DDR3- resp. SRAM- memory by the Linux client.
        * See daq_base_interface.cpp  function: DaqBaseInterface::getNumberOfNewData
        * See daq_base_interface.cpp  function: DaqBaseInterface::sendWasRead
        * See daq_administration.cpp  function: DaqAdministration::distributeData
