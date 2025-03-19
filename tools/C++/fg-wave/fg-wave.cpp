@@ -197,9 +197,15 @@ int main( int argc, char** ppArgv )
       ERROR_MESSAGE( "Exception occurred: \"" << e.what() << '"' );
       return EXIT_FAILURE;
    }
+   catch( gpstr::Exception& e )
+   {
+      ERROR_MESSAGE( "Exception of GNUPLOT occurred: \"" << e.what() << '"' );
+      return EXIT_FAILURE;
+   }
    catch( ... )
    {
       ERROR_MESSAGE( "Undefined exception occurred!" );
+      return EXIT_FAILURE;
    }
 
    return EXIT_SUCCESS;

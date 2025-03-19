@@ -8,7 +8,7 @@
 ## Company:  GSI Helmholtz Centre for Heavy Ion Research GmbH                ##
 ## Date:     07.12.2020                                                      ##
 ###############################################################################
-DEFINES += VERSION=1.4
+DEFINES += VERSION=1.5
 
 MIAN_MODULE := fg-wave.cpp
 

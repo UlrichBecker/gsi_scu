@@ -736,6 +736,11 @@ int main( int argc, char** ppArgv )
    {
       ERROR_MESSAGE( "Exception occurred: \"" << e.what() << '"' );
    }
+   catch( gpstr::Exception& e )
+   {
+      ERROR_MESSAGE( "Exception of GNUPLOT occurred: \"" << e.what() << '"' );
+      return EXIT_FAILURE;
+   }
    catch( std::exception& e )
    {
       ERROR_MESSAGE( "std::exception occurred: \"" << e.what() << '"' );
