@@ -32,6 +32,8 @@ ifndef CPP
   $(error No C-PreProcessor defined in variable CPP !)
 endif
 
+SHELL := bash
+
 GCC_VERSION := $(shell $(CC) --version | head -n1 | sed 's/^.* //g' | tr -d . | tr - ' ' | awk '{print $$1}' )
 
 GCC_LEGACY := $(shell [ "$(GCC_VERSION)" -le "485" ] && echo "1" )
