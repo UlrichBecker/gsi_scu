@@ -424,7 +424,13 @@ STATIC void taskTempWatch( void* pTaskData UNUSED )
             }
 
             case ST_CRITICAL:
-            {
+            {  /*!
+                * @todo This code snippet will reached if the temperature
+                *       has exceeded a critical threshold.
+                *       Triggering en interlock?
+                *       Is it possible that the LM32-application can trigger
+                *       an interlock? If yes, how?
+                */
                lm32Log( LM32_LOG_ERROR, ESC_ERROR
                         "ERROR: Temperature of \"%s\" is critical: %d.%u °C" ESC_NORMAL,
                         pWatchTemp->name, 
