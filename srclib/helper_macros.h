@@ -111,6 +111,15 @@
  #endif
 #endif
 
+#ifndef IS_ARRAY
+/*!
+ * @brief Makes an compiler-error if the argument is not a array.
+ */
+#define IS_ARRAY( arr ) \
+    (void) sizeof(char[1 - 2 * __builtin_types_compatible_p(typeof(arr), typeof(&arr[0]))])
+
+#endif
+
 /*!
  * @brief Returns the size in bits of the given data type,
  * in contrast to sizeof() which returns the size in bytes.
