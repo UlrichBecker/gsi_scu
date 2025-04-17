@@ -23,8 +23,18 @@
 #ifndef _HELPER_MACROS_H
 #define _HELPER_MACROS_H
 
-#include <stddef.h> // Necessary for the macro "offsetof()"
-#include <limits.h> // Necessary for constant "CHAR_BIT" (in the most cases always 8)
+#include <stddef.h> /* Necessary for the macro "offsetof()" */
+#ifndef __KERNEL__
+  #include <limits.h> /* Necessary for constant "CHAR_BIT" (in the most cases always 8) */
+#else
+  #ifndef CHAR_BIT
+     #define CHAR_BIT 8
+  #endif
+#endif
+
+#ifdef __KERNEL__
+  #include <linux/build_bug.h>
+#endif
 
 #ifdef typeof
    #define TYPEOF typeof
@@ -375,8 +385,8 @@
  * doesn't supported this yet.
  */
 #ifndef STATIC_ASSERT
-#if ((__cplusplus > 199711L) || (COMPILER_VERSION_NUMBER >= 40600))
-  #ifndef __cplusplus
+#if ((defined(__cplusplus) && (__cplusplus > 199711L)) || (COMPILER_VERSION_NUMBER >= 40600))
+  #if !defined( __cplusplus ) && !defined(__KERNEL__)
      #define static_assert _Static_assert
   #endif
   #define STATIC_ASSERT( condition ) static_assert( condition, "C-Macro: STATIC_ASSERT" )

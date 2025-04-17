@@ -246,10 +246,10 @@ inline bool DaqInterface::permitCommand( DAQ_OPERATION_CODE_T cmd )
    switch( cmd )
    {
       //case DAQ_OP_GET_ERROR_STATUS:
-      case DAQ_OP_SYNC_TIMESTAMP:      /* No break here */
-      case DAQ_OP_GET_MACRO_VERSION:   /* No break here */
-      case DAQ_OP_GET_SLOTS:           /* No break here */
-      case DAQ_OP_GET_CHANNELS:        /* No break here */
+      case DAQ_OP_SYNC_TIMESTAMP:      FALL_THROUGH
+      case DAQ_OP_GET_MACRO_VERSION:   FALL_THROUGH
+      case DAQ_OP_GET_SLOTS:           FALL_THROUGH
+      case DAQ_OP_GET_CHANNELS:        FALL_THROUGH
       case DAQ_OP_GET_DEVICE_TYPE:
       {
          return true;
@@ -268,17 +268,9 @@ DaqInterface::sendCommand( DAQ_OPERATION_CODE_T cmd )
 {
    checkAddacSupport();
 
-#if 0
-   if( !m_doSendCommand )
-   {
-      DEBUG_MESSAGE( "LM32 command: " << command2String( cmd ) << " disabled!" );
-      return DAQ_RET_OK;
-   }
-#else
-
    if( !permitCommand( cmd ) )
       return DAQ_RET_OK;
-#endif
+
    DEBUG_MESSAGE( "Send command: " << command2String( cmd ) << " to LM32." );
 
    m_oSharedData.operation.code = cmd;
