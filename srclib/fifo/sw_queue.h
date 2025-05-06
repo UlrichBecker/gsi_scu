@@ -357,6 +357,45 @@ bool queuePop( SW_QUEUE_T* pThis, void* pItem );
 bool queuePopSafe( SW_QUEUE_T* pThis, void* pItem );
 #endif
 
+/*!----------------------------------------------------------------------------
+ * @brief Copies the oldest item of the queue without removing it.
+ * @param pThis Pointer to the concerned queue object.
+ * @param pItem Destination pointer in which will copied.
+ * @retval true Data valid, at least one item was in queue.
+ * @retval false Date invalid, queue was empty.
+ */
+bool queuePeek( SW_QUEUE_T* pThis, void* pItem );
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*!----------------------------------------------------------------------------
+ * @brief Copies the oldest item of the queue without removing it within a
+ *        atomic section.
+ * @param pThis Pointer to the concerned queue object.
+ * @param pItem Destination pointer in which will copied.
+ * @retval true Data valid, at least one item was in queue.
+ * @retval false Date invalid, queue was empty.
+ */
+bool queuePeekSafe( SW_QUEUE_T* pThis, void* pItem );
+#endif
+
+/*!----------------------------------------------------------------------------
+ * @brief Removes the oldest item in the queue.
+ * @param pThis Pointer to the concerned queue object.
+ * @retval true Queue was not empty
+ * @retval false Queue is empty
+ */
+bool queueSkip( SW_QUEUE_T* pThis );
+
+#if defined(__lm32__) || defined(__DOXYGEN__)
+/*!----------------------------------------------------------------------------
+ * @brief Removes the oldest item in the queue within a atomic section.
+ * @param pThis Pointer to the concerned queue object.
+ * @retval true Queue was not empty
+ * @retval false Queue is empty
+ */
+bool queueSkipSafe( SW_QUEUE_T* pThis );
+#endif
+
 /*! ---------------------------------------------------------------------------
  * @brief Returns the number of items which are currently in the queue.
  * @param pThis Pointer to the concerned queue object.

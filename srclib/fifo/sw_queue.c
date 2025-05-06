@@ -156,6 +156,56 @@ bool queuePop( SW_QUEUE_T* pThis, void* pItem )
 /*! ---------------------------------------------------------------------------
  * @see sw_queue.h
  */
+bool queuePeek( SW_QUEUE_T* pThis, void* pItem )
+{
+   if( queueIsEmpty( pThis ) )
+      return false;
+
+   memcpy( pItem,
+           &pThis->pBuffer[ramRingGetReadIndex(&pThis->indexes) * pThis->itemSize],
+           pThis->itemSize );
+
+   return true;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
+bool queuePeekSafe( SW_QUEUE_T* pThis, void* pItem )
+{
+   _queueCriticalSectionEnter();
+   const bool ret = queuePeek( pThis, pItem );
+   _queueCriticalSectionExit();
+   return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
+bool queueSkip( SW_QUEUE_T* pThis )
+{
+   if( queueIsEmpty( pThis ) )
+      return false;
+
+   ramRingIncReadIndex( &pThis->indexes );
+
+   return true;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
+bool queueSkipSafe( SW_QUEUE_T* pThis )
+{
+   _queueCriticalSectionEnter();
+   const bool ret = queueSkip( pThis );
+   _queueCriticalSectionExit();
+   return ret;
+}
+
+/*! ---------------------------------------------------------------------------
+ * @see sw_queue.h
+ */
 void queueResetSafe( SW_QUEUE_T* pThis )
 {
    _queueCriticalSectionEnter();

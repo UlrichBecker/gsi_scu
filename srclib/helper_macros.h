@@ -23,8 +23,8 @@
 #ifndef _HELPER_MACROS_H
 #define _HELPER_MACROS_H
 
-#include <stddef.h> /* Necessary for the macro "offsetof()" */
 #ifndef __KERNEL__
+  #include <stddef.h> /* Necessary for the macro "offsetof()" */
   #include <limits.h> /* Necessary for constant "CHAR_BIT" (in the most cases always 8) */
 #else
   #ifndef CHAR_BIT
