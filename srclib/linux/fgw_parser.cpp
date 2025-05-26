@@ -203,7 +203,7 @@ int parseInStream( POLYMOM_VECT_T& rVect, istream& rInput )
 
       for( const auto& c: oLine )
       {
-         if( c != ' ' )
+         if( (c != ' ') && (c != '\r') )
          {
             string errorMessage = "Extra characters found in line ";
             errorMessage += to_string( i );
