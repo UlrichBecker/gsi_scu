@@ -380,6 +380,48 @@
  */
 #define OPTIMIZE( O ... ) __attribute__((optimize( O )))
 
+/*!
+ * @brief Macro will used for optimizing the branch prediction behaviour.
+ * @note A incorrect use has the opposite effect!
+ * @code
+ * if( unlikely( x < 0 ) )
+ * {
+ *   // entering slow, e.g.: error-handling
+ * }
+ * else
+ * {
+ *   // entering fast
+ * }
+ * @endcode
+ * @see likely
+ */
+#if !defined( unlikely ) && defined( __GNUC__ )
+   #define unlikely( x ) (__branch_check__( x, 0, __builtin_constant_p(x) ))
+#else
+   #define unlikely( x ) x
+#endif
+
+/*!
+ * @brief Macro will used for optimizing the branch prediction behaviour.
+ * @note A incorrect use has the opposite effect!
+ * @code
+ * if( likely( x < 0 ) )
+ * {
+ *   // entering fast
+ * }
+ * else
+ * {
+ *   // entering slow, e.g.: error-handling
+ * }
+ * @endcode
+ * @see unlikely
+ */
+#if !defined( likely ) && defined( __GNUC__ )
+   #define likely( x ) (__branch_check__( x, 1, __builtin_constant_p(x) ))
+#else
+   #define likely( x ) x
+#endif
+
 /*
  * Helper macro for STATIC_ASSERT making this available for old compilers which
  * doesn't supported this yet.
