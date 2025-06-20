@@ -396,7 +396,7 @@
  * @see likely
  */
 #if !defined( unlikely ) && defined( __GNUC__ )
-   #define unlikely( x ) (__branch_check__( x, 0, __builtin_constant_p(x) ))
+   #define unlikely( x ) __builtin_expect( !!(x), 0 )
 #else
    #define unlikely( x ) x
 #endif
@@ -417,7 +417,7 @@
  * @see unlikely
  */
 #if !defined( likely ) && defined( __GNUC__ )
-   #define likely( x ) (__branch_check__( x, 1, __builtin_constant_p(x) ))
+   #define likely( x ) __builtin_expect( !!(x), 1 )
 #else
    #define likely( x ) x
 #endif
