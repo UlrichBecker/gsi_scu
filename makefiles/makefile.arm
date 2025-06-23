@@ -1,0 +1,117 @@
+###############################################################################
+##                                                                           ##
+##           Common include makefile for ARM- CPUs with Linux                ##
+##                                                                           ##
+##---------------------------------------------------------------------------##
+## File:    makefile.arm                                                     ##
+## (c):     GSI Helmholtz Centre for Heavy Ion Research GmbH                 ##
+## Author:  Ulrich Becker                                                    ##
+## Date:    17.12.2025                                                       ##
+###############################################################################
+ifndef CROSS_COMPILE
+   $(error Variable CROSS_COMPILE is not defined! E.g.: call . env-setup.sh)
+endif
+ifndef MAKEFILE_DIR
+   $(error Variable MAKEFILE_DIR is not defined!)
+endif
+
+CPU := arm
+GNUC_STD ?= gnu17
+
+OPT_CPPCHECK_C   = --std=c17
+OPT_CPPCHECK_CXX = --std=c++17
+
+DOX_INPUT += $(MAKEFILE_DIR)/makefile.arm
+DOX_OUTPUT_DIRECTORY ?= $(HOME)/Documents/$(TARGET)
+
+CC      = $(CROSS_COMPILE)gcc -std=$(GNUC_STD)
+CXX     = $(CROSS_COMPILE)g++
+LD      = $(CROSS_COMPILE)gcc
+OBJCPY  = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdump
+SIZE    = $(CROSS_COMPILE)size
+AS      = $(CROSS_COMPILE)gcc
+AR      = $(CROSS_COMPILE)gcc-ar rcs
+CPP     = $(CC) -E
+NM      = $(CROSS_COMPILE)nm
+STRIP   = $(CROSS_COMPILE)strip
+STRINGS = $(CROSS_COMPILE)strings
+GDB     = $(CROSS_COMPILE)gdb
+
+TARGET  ?= $(notdir $(basename $(MIAN_MODULE)))
+
+BIN_FILE    = $(TARGET_DIR)/$(TARGET)
+
+ifdef SHARED_OBJECT
+  ifdef STATIC_LIBRARY
+    $(error Define SHARED_OBJECT or STATIC_LIBRARY but not both! )
+  endif
+  IS_LIBRARY = 1
+  BIN_SUFFIX = .so.$(VERSION)
+endif
+ifdef STATIC_LIBRARY
+  IS_LIBRARY = 1
+  BIN_SUFFIX = .a
+endif
+ifdef IS_LIBRARY
+   BIN_PREFIX = lib
+endif
+
+TARGET   ?= $(notdir $(basename $(MIAN_MODULE)))
+BIN_FILE ?= $(TARGET_DIR)/$(BIN_PREFIX)$(TARGET)$(BIN_SUFFIX)
+
+include $(MAKEFILE_DIR)/makefile.gsi
+
+ifndef IS_LIBRARY
+$(BIN_FILE): $(OBJ_FILES) $(ADDITIONAL_LD_DEPENDENCES)
+	$(LD_F) -o $@ $(OBJ_FILES) $(ADDITIONAL_OBJECTS) $(LD_FLAGS)
+
+
+ifdef LIB_DIRS
+   ADDITIONAL_LIB_PATH = $(addsuffix :,$(LIB_DIRS))
+endif
+
+endif #ifndef IS_LIBRARY
+
+TARGET_DEVICE_USER ?= root
+TARGET_DEVICE_IP   ?= 10.0.0.1
+TRAGET_DEVICE_DIR  ?= /root
+
+ifeq ($(DEBUG), 1)
+
+DEBUG_GUI ?= kdbg
+REMOTE_DEBUG_PORT ?= 4711
+
+ifdef CALL_ARGS
+DBG_ARGS = -a "$(CALL_ARGS)"
+endif
+
+dbg: $(BIN_FILE)
+	$(QUIET) echo -e '[ debugging ]\t$(BIN_FILE) $(CALL_ARGS)';
+#	scp $(BIN_FILE) $(TARGET_DEVICE_USER)@$(TARGET_DEVICE_IP):$(TRAGET_DEVICE_DIR)
+	ssh $(TARGET_DEVICE_USER)@$(TARGET_DEVICE_IP) "gdbserver :$(REMOTE_DEBUG_PORT) ./$(TARGET) $(CALL_ARGS) &"
+	$(DEBUG_GUI) -r $(TARGET_DEVICE_IP):$(REMOTE_DEBUG_PORT) $(BIN_FILE) $(DBG_ARGS)
+
+else # ifeq ($(DEBUG), 1)
+dbg:
+	$(QUIET)echo -e $(ESC_ERROR)"Error: Project wasn't compiled in debug mode! " \
+			"Set variable DEBUG = 1 and rebuild." $(ESC_NORMAL) 1>&2
+endif # else ifeq ($(DEBUG), 1)
+
+.PHONY: size
+size: $(BIN_FILE)
+	$(QUIET)$(SIZE) $(BIN_FILE)
+
+#========== Following code sequence is for developing purposes only ===========
+
+
+.PHONY: scp
+scp: $(BIN_FILE)
+	scp $(BIN_FILE) $(TARGET_DEVICE_USER)@$(TARGET_DEVICE_IP):$(TRAGET_DEVICE_DIR)
+
+.PHONY: send
+send: scp
+
+.PHONY: load
+load: scp
+#=================================== EOF ======================================
