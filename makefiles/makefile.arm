@@ -38,10 +38,6 @@ STRIP   = $(CROSS_COMPILE)strip
 STRINGS = $(CROSS_COMPILE)strings
 GDB     = $(CROSS_COMPILE)gdb
 
-TARGET  ?= $(notdir $(basename $(MIAN_MODULE)))
-
-BIN_FILE    = $(TARGET_DIR)/$(TARGET)
-
 ifdef SHARED_OBJECT
   ifdef STATIC_LIBRARY
     $(error Define SHARED_OBJECT or STATIC_LIBRARY but not both! )
@@ -59,6 +55,8 @@ endif
 
 TARGET   ?= $(notdir $(basename $(MIAN_MODULE)))
 BIN_FILE ?= $(TARGET_DIR)/$(BIN_PREFIX)$(TARGET)$(BIN_SUFFIX)
+
+LD_FLAGS += $(ARG_LIBS)
 
 include $(MAKEFILE_DIR)/makefile.gsi
 
