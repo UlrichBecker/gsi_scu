@@ -8,6 +8,7 @@
 ## Author:  Ulrich Becker                                                    ##
 ## Date:    14.01.2020                                                       ##
 ###############################################################################
+# >>> PvdS <<<
 ifndef REPOSITORY_DIR
    $(error Variable REPOSITORY_DIR is not defined! )
 endif

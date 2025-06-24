@@ -8,6 +8,7 @@
 ## Author:  Ulrich Becker                                                    ##
 ## Date:    17.12.2018                                                       ##
 ###############################################################################
+# >>> PvdS <<<
 ifndef MIAN_MODULE
    $(error Variable MAIN_MODULE is not defined, it includes \
 the source-filename which contains the function "main"! )
