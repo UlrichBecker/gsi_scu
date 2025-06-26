@@ -773,7 +773,7 @@ bool executeIfRequested( DAQ_ADMIN_T* pDaqAdmin )
    /*
     * Requests the Linux host an operation?
     */
-   if( GET_SHARED().operation.code == DAQ_OP_IDLE )
+   if( likely( GET_SHARED().operation.code == DAQ_OP_IDLE ) )
    { /*
       * No, there is nothing to do...
       */
@@ -807,7 +807,7 @@ bool executeIfRequested( DAQ_ADMIN_T* pDaqAdmin )
    /*
     * Was the requested operation known?
     */
-   if( g_operationTab[i].operation == NULL )
+   if( unlikely( g_operationTab[i].operation == NULL ) )
    { /*
       * No, making known this for the Linux host.
       */
@@ -820,7 +820,7 @@ bool executeIfRequested( DAQ_ADMIN_T* pDaqAdmin )
    }
 
    bool ret;
-   if( GET_SHARED().operation.retCode == DAQ_RET_RESCAN )
+   if( unlikely( GET_SHARED().operation.retCode == DAQ_RET_RESCAN ) )
    {
       GET_SHARED().operation.retCode = DAQ_RET_OK;
       ret = true;

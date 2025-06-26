@@ -284,7 +284,7 @@ STATIC void onScuMSInterrupt( const unsigned int intNum,
          {
          #ifdef CONFIG_MIL_FG
             STATIC_ASSERT( ADDR_SCUBUS == 0 );
-            if( (m.msg & ECA_VALID_ACTION) != 0 )
+            if( unlikely( (m.msg & ECA_VALID_ACTION) != 0 ) )
             { /*
                * ECA event received
                */

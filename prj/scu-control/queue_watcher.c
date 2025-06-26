@@ -62,7 +62,7 @@ void queuePollAlarm( void )
 {
    void* pOverflowedQueue;
 
-   if( queuePopSafe( &g_queueAlarm, &pOverflowedQueue ) )
+   if( unlikely( queuePopSafe( &g_queueAlarm, &pOverflowedQueue ) ) )
    {
 
       const char* str = "unknown";

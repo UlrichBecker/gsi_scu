@@ -383,6 +383,7 @@
 /*!
  * @brief Macro will used for optimizing the branch prediction behaviour.
  * @note A incorrect use has the opposite effect!
+ *
  * @code
  * if( unlikely( x < 0 ) )
  * {
@@ -395,15 +396,18 @@
  * @endcode
  * @see likely
  */
-#if !defined( unlikely ) && defined( __GNUC__ )
+#ifndef unlikely
+ #if defined( __GNUC__ ) || defined(__DOXYGEN__)
    #define unlikely( x ) __builtin_expect( !!(x), 0 )
-#else
+ #else
    #define unlikely( x ) x
+ #endif
 #endif
 
 /*!
  * @brief Macro will used for optimizing the branch prediction behaviour.
  * @note A incorrect use has the opposite effect!
+ *
  * @code
  * if( likely( x < 0 ) )
  * {
@@ -416,10 +420,12 @@
  * @endcode
  * @see unlikely
  */
-#if !defined( likely ) && defined( __GNUC__ )
+#ifndef likely
+ #if defined( __GNUC__ ) || defined(__DOXYGEN__)
    #define likely( x ) __builtin_expect( !!(x), 1 )
-#else
+ #else
    #define likely( x ) x
+ #endif
 #endif
 
 /*

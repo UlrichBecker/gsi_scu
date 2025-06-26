@@ -77,7 +77,7 @@ STATIC void taskMil( void* pTaskData UNUSED )
          xTaskNotifyWait( pdFALSE, 0, NULL, MIL_TASK_WAITING_TIME );
       }
    #endif
-      if( evPopSafe( &g_ecaEvent ) )
+      if( unlikely( evPopSafe( &g_ecaEvent ) ) )
       {
          ecaHandler();
       }
@@ -110,7 +110,7 @@ void taskStopMilIfRunning( void )
  */
 void taskWakeupMilFromISR( void )
 {
-   if( mg_taskMilHandle != NULL )
+   if( likely( mg_taskMilHandle != NULL ) )
    {
    #ifdef CONFIG_MIL_TASK_SHOULD_RUN_IMMEDIATELY
       /*
@@ -133,7 +133,7 @@ void taskWakeupMilFromISR( void )
  */
 void taskWakeupMil( void )
 {
-   if( mg_taskMilHandle != NULL )
+   if( likely( mg_taskMilHandle != NULL ) )
       xTaskNotify( mg_taskMilHandle, 0, eNoAction );
 }
 #endif /* if (configUSE_TASK_NOTIFICATIONS == 1) */

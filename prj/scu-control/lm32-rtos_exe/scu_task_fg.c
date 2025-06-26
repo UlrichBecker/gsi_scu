@@ -86,7 +86,7 @@ STATIC void taskFg( void* pTaskData UNUSED )
  */
 void taskWakeupFgFromISR( void )
 {
-   if( mg_taskFgHandle != NULL )
+   if( likely( mg_taskFgHandle != NULL ) )
    {
    #ifdef CONFIG_ADDAC_FG_TASK_SHOULD_RUN_IMMEDIATELY
       /*

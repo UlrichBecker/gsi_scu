@@ -242,7 +242,7 @@ void daqTaskResume( void )
  */
 void taskWakeupDaqFromISR( void )
 {
-   if( mg_taskDaqHandle != NULL )
+   if( likely( mg_taskDaqHandle != NULL ) )
       xTaskNotifyFromISR( mg_taskDaqHandle, 0, 0, NULL );
 }
 
@@ -251,7 +251,7 @@ void taskWakeupDaqFromISR( void )
  */
 void taskWakeupDaq( void )
 {
-   if( mg_taskDaqHandle != NULL )
+   if( likely( mg_taskDaqHandle != NULL ) )
    {
       xTaskNotify( mg_taskDaqHandle, 0, eNoAction );
       lm32Log( LM32_LOG_DEBUG, ESC_DEBUG "taskWakeupDaq" ESC_NORMAL );
