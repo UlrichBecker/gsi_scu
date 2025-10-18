@@ -131,6 +131,22 @@
 #endif
 
 /*!
+ * @brief Macro returns the next greater value that is divisible
+ *        by the size in bytes of the given data type in the case
+ *        the value is not divisible by the bytesize of the data type.
+ * @param val Integer value
+ * @param TYP Data type
+ * @return Next greater value which is divisible by size of(TYPE)
+ *         in the case it is not divisible else the value only.
+ */
+#define GET_NEXT_GREATER_DIVISIBLE_OF( val, TYP )         \
+({                                                        \
+   const TYPEOF(val) __val = (val);                       \
+   (__val % sizeof(TYP))?                                 \
+      __val + sizeof(TYP) - (__val % sizeof(TYP)): __val; \
+})
+
+/*!
  * @brief Returns the size in bits of the given data type,
  * in contrast to sizeof() which returns the size in bytes.
  *
@@ -577,6 +593,36 @@
  * @return Zero terminated ASCII string.
  */
 #define TO_STRING( s ) TO_STRING_LITERAL( s )
+
+/*!
+ * @brief Returns the length of a string during compiletime,
+ *        when the string is a compiltime constant.
+ *
+ */
+#if defined( __GNUC__ ) || defined(__DOXYGEN__)
+   #define BUILTIN_STRLEN( s )  __builtin_strlen( s )
+#endif
+
+/*!
+ * @brief Returns 1 (true) at compile time if the expression exp is
+ *        recognizable as a constant, otherwise 0 (false).
+ */
+#if defined( __GNUC__ ) || defined(__DOXYGEN__)
+  #define BUILTIN_CONSTANT_P( exp ) __builtin_constant_p( exp )
+#endif
+
+/*!
+ * @brief Calculates the length of a string.
+ *
+ * When the string is a for the compiler a recognizable constant so
+ * the length will calculated during the compile time, otherwise
+ * the ANSI-function strlen will placed.
+ */
+#if defined( __GNUC__ ) || defined(__DOXYGEN__)
+  #define SMART_STRLEN( str ) BUILTIN_CONSTANT_P( str )? \
+          BUILTIN_STRLEN( str ) : strlen( str )
+#endif
+
 
 /*!
  * @brief Will used from DECLARE_CONVERT_BYTE_ENDIAN
